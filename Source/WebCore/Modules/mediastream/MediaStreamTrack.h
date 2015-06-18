@@ -45,7 +45,6 @@ namespace WebCore {
 class Dictionary;
 class MediaConstraintsImpl;
 class MediaSourceStates;
-class MediaStreamTrackSourcesCallback;
 class MediaStreamCapabilities;
 class MediaTrackConstraints;
 
@@ -58,7 +57,6 @@ public:
     };
 
     static Ref<MediaStreamTrack> create(ScriptExecutionContext&, MediaStreamTrackPrivate&);
-    static Ref<MediaStreamTrack> create(MediaStreamTrack&);
     virtual ~MediaStreamTrack();
 
     const AtomicString& kind() const;
@@ -71,23 +69,20 @@ public:
     bool muted() const;
     bool readonly() const;
     bool remote() const;
-    bool stopped() const;
 
     const AtomicString& readyState() const;
 
-    static void getSources(ScriptExecutionContext*, PassRefPtr<MediaStreamTrackSourcesCallback>, ExceptionCode&);
+    RefPtr<MediaStreamTrack> clone();
+    void stopProducingData();
 
     RefPtr<MediaTrackConstraints> getConstraints() const;
     RefPtr<MediaSourceStates> states() const;
     RefPtr<MediaStreamCapabilities> getCapabilities() const;
     void applyConstraints(const Dictionary&);
-    void applyConstraints(PassRefPtr<MediaConstraints>);
+    void applyConstraints(const MediaConstraints&);
 
-    RefPtr<MediaStreamTrack> clone();
-    void stopProducingData();
-
-    RealtimeMediaSource* source() const { return m_privateTrack->source(); }
-    MediaStreamTrackPrivate& privateTrack() { return m_privateTrack.get(); }
+    RealtimeMediaSource* source() const { return m_private->source(); }
+    MediaStreamTrackPrivate& privateTrack() { return m_private.get(); }
 
     bool ended() const;
 
@@ -105,11 +100,8 @@ private:
     MediaStreamTrack(ScriptExecutionContext&, MediaStreamTrackPrivate&);
     explicit MediaStreamTrack(MediaStreamTrack&);
 
-    void setSource(PassRefPtr<RealtimeMediaSource>);
-
     void configureTrackRendering();
-    void trackDidEnd();
-    void scheduleEventDispatch(PassRefPtr<Event>);
+    void scheduleEventDispatch(RefPtr<Event>&&);
 
     // ActiveDOMObject API.
     void stop() override final;
@@ -121,21 +113,20 @@ private:
     virtual void derefEventTarget() override final { deref(); }
 
     // MediaStreamTrackPrivateClient
-    void trackReadyStateChanged() override;
-    void trackMutedChanged() override;
-    void trackEnabledChanged() override;
+    void trackEnded();
+    void trackMutedChanged();
 
     Vector<RefPtr<Event>> m_scheduledEvents;
-
-    RefPtr<MediaConstraintsImpl> m_constraints;
+    bool m_eventDispatchScheduled;
     Mutex m_mutex;
 
     Vector<Observer*> m_observers;
+    Ref<MediaStreamTrackPrivate> m_private;
 
-    Ref<MediaStreamTrackPrivate> m_privateTrack;
-    bool m_eventDispatchScheduled;
+    RefPtr<MediaConstraintsImpl> m_constraints;
 
-    bool m_stoppingTrack;
+    bool m_isMuted;
+    bool m_isEnded;
 };
 
 } // namespace WebCore

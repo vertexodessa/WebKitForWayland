@@ -44,8 +44,7 @@ RealtimeMediaSource::RealtimeMediaSource(const String& id, Type type, const Stri
     : m_id(id)
     , m_type(type)
     , m_name(name)
-    , m_readyState(New)
-    , m_enabled(true)
+    , m_stopped(false)
     , m_muted(false)
     , m_readonly(false)
     , m_remote(false)
@@ -54,34 +53,16 @@ RealtimeMediaSource::RealtimeMediaSource(const String& id, Type type, const Stri
         return;
     
     m_id = createCanonicalUUIDString();
+
+    startProducingData();
 }
 
 void RealtimeMediaSource::reset()
 {
-    m_readyState = New;
-    m_enabled = true;
+    m_stopped = false;
     m_muted = false;
     m_readonly = false;
     m_remote = false;
-}
-
-void RealtimeMediaSource::setReadyState(ReadyState readyState)
-{
-    if (m_readyState == Ended || m_readyState == readyState)
-        return;
-
-    m_readyState = readyState;
-    for (auto observer = m_observers.begin(); observer != m_observers.end(); ++observer)
-        (*observer)->sourceReadyStateChanged();
-
-    if (m_readyState == Live) {
-        startProducingData();
-        return;
-    }
-    
-    // There are no more consumers of this source's data, shut it down as appropriate.
-    if (m_readyState == Ended)
-        stopProducingData();
 }
 
 void RealtimeMediaSource::addObserver(RealtimeMediaSource::Observer* observer)
@@ -106,38 +87,11 @@ void RealtimeMediaSource::setMuted(bool muted)
 
     m_muted = muted;
 
-    if (m_readyState == Ended)
+    if (stopped())
         return;
 
-    for (auto observer = m_observers.begin(); observer != m_observers.end(); ++observer)
-        (*observer)->sourceMutedChanged();
-}
-
-void RealtimeMediaSource::setEnabled(bool enabled)
-{
-    if (!enabled) {
-        // Don't disable the source unless all observers are disabled.
-        for (auto observer = m_observers.begin(); observer != m_observers.end(); ++observer) {
-            if ((*observer)->observerIsEnabled())
-                return;
-        }
-    }
-
-    if (m_enabled == enabled)
-        return;
-
-    m_enabled = enabled;
-
-    if (m_readyState == Ended)
-        return;
-
-    if (!enabled)
-        stopProducingData();
-    else
-        startProducingData();
-
-    for (auto observer = m_observers.begin(); observer != m_observers.end(); ++observer)
-        (*observer)->sourceEnabledChanged();
+    for (auto& observer : m_observers)
+        observer->sourceMutedChanged();
 }
 
 bool RealtimeMediaSource::readonly() const
@@ -145,12 +99,32 @@ bool RealtimeMediaSource::readonly() const
     return m_readonly;
 }
 
-void RealtimeMediaSource::stop()
+void RealtimeMediaSource::stop(Observer* callingObserver)
 {
-    // This is called from the track.stop() method, which should "Permanently stop the generation of data
-    // for track's source", so go straight to ended. This will notify any other tracks using this source
-    // that it is no longer available.
-    setReadyState(Ended);
+    if (stopped())
+        return;
+
+    m_stopped = true;
+
+    for (auto observer : m_observers) {
+        if (observer != callingObserver)
+            observer->sourceReadyStateChanged();
+    }
+
+    // There are no more consumers of this source's data, shut it down as appropriate.
+    stopProducingData();
+}
+
+void RealtimeMediaSource::requestStop(Observer* callingObserver)
+{
+    if (stopped())
+        return;
+
+    for (auto observer : m_observers) {
+        if (observer->observerIsEnabled())
+            return;
+    }
+    stop(callingObserver);
 }
 
 } // namespace WebCore
