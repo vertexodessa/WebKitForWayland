@@ -91,12 +91,6 @@ if (ENABLE_MEDIA_STREAM)
     add_definitions(-DUSE_OPENWEBRTC)
 endif ()
 
-if (OPENWEBRTC_FOUND)
-      target_link_libraries( WPENetworkProcess ${OPENWEBRTC_LIBRARIES} )
-      target_link_libraries( WPEWebProcess ${OPENWEBRTC_LIBRARIES} )
-      include_directories( ${OPENWEBRTC_INCLUDE_DIRS} )
-endif ()
-
 if (ENABLE_SUBTLE_CRYPTO)
     find_package(GnuTLS 3.0.0)
     if (NOT GNUTLS_FOUND)
