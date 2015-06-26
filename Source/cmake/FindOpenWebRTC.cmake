@@ -30,19 +30,48 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 find_package(PkgConfig)
-pkg_check_modules(OPENWEBRTC openwebrtc-0.1 openwebrtc-gst-0.1)
+pkg_check_modules(PC_OPENWEBRTC openwebrtc-0.3 openwebrtc-gst-0.3)
 
-set(VERSION_OK TRUE)
-if (OPENWEBRTC_VERSION)
-    if (OPENWEBRTC_FIND_VERSION_EXACT)
-        if (NOT("${OPENWEBRTC_FIND_VERSION}" VERSION_EQUAL "${OPENWEBRTC_VERSION}"))
-            set(VERSION_OK FALSE)
-        endif ()
-    else ()
-        if ("${OPENWEBRTC_VERSION}" VERSION_LESS "${OPENWEBRTC_FIND_VERSION}")
-            set(VERSION_OK FALSE)
+if ("${PC_OPENWEBRTC_FOUND}")
+    set(OPENWEBRTC_FOUND "${PC_OPENWEBRTC_FOUND}")
+
+    # Find Include paths
+    set(OPENWEBRTC_INCLUDE_DIRS "${PC_OPENWEBRTC_INCLUDE_DIRS}")
+    find_path(OWR_INCLUDE_DIR NAMES owr.h
+        HINTS ${PC_OPENWEBRTC_INCLUDE_DIRS}
+        PATH_SUFFIXES owr
+    )
+    list(APPEND OPENWEBRTC_INCLUDE_DIRS "${OWR_INCLUDE_DIR}" )    
+    
+    find_path(OPENWEBRTC_GST_INCLUDE_DIR NAMES gst.h 
+        HINTS ${PC_OPENWEBRTC_INCLUDE_DIRS}
+        PATH_SUFFIXES gst
+    )
+    list(APPEND OPENWEBRTC_INCLUDE_DIRS "${OPENWEBRTC_GST_INCLUDE_DIR}" )
+
+    # Find Libraries
+    find_library(OPENWEBRTC_LIBRARIES NAMES openwebrtc
+        HINTS ${PC_OPENWEBRTC_LIBRARY_DIRS} ${PC_OPENWEBRTC_LIBDIR}
+    )
+
+    find_library(OPENWEBRTC_GST_LIBRARIES NAMES openwebrtc_gst
+        HINTS ${PC_OPENWEBRTC_LIBRARY_DIRS} ${PC_OPENWEBRTC_LIBDIR}
+    )
+    list(APPEND OPENWEBRTC_LIBRARIES "${OPENWEBRTC_GST_LIBRARIES}")   
+
+    set(VERSION_OK TRUE)
+    if (PC_OPENWEBRTC_VERSION)
+        if (PC_OPENWEBRTC_FIND_VERSION_EXACT)
+            if (NOT("${PC_OPENWEBRTC_FIND_VERSION}" VERSION_EQUAL "${PC_OPENWEBRTC_VERSION}"))
+                set(VERSION_OK FALSE)
+            endif ()
+        else ()
+            if ("${PC_OPENWEBRTC_VERSION}" VERSION_LESS "${PC_OPENWEBRTC_FIND_VERSION}")
+                set(VERSION_OK FALSE)
+            endif ()
         endif ()
     endif ()
+
 endif ()
 
 include(FindPackageHandleStandardArgs)

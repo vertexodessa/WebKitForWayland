@@ -37,8 +37,6 @@ if (ENABLE_DXDRM)
     add_definitions(-DUSE_DXDRM=1)
 endif ()
 
-
-
 set(ENABLE_WEBCORE ON)
 set(ENABLE_WEBKIT OFF)
 set(ENABLE_WEBKIT2 ON)
@@ -61,7 +59,6 @@ find_package(ICU REQUIRED)
 find_package(Threads REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(GLIB 2.40.0 REQUIRED COMPONENTS gio gobject gthread gmodule)
-
 find_package(Cairo 1.10.2 REQUIRED)
 find_package(CairoGL 1.10.2 REQUIRED COMPONENTS cairo-egl)
 find_package(Fontconfig 2.8.0 REQUIRED)
@@ -75,12 +72,11 @@ find_package(PNG REQUIRED)
 find_package(Sqlite REQUIRED)
 find_package(Wayland 1.6.0 REQUIRED)
 find_package(WebP REQUIRED)
-
 find_package(OpenGLES2 REQUIRED)
 find_package(EGL REQUIRED)
 find_package(WaylandEGL REQUIRED)
-
 find_package(Athol 0.1)
+
 if (ATHOL_FOUND)
     set(ENABLE_ATHOL_SHELL ON)
 else ()
@@ -93,6 +89,12 @@ endif ()
 if (ENABLE_MEDIA_STREAM)
     find_package(OpenWebRTC REQUIRED)
     add_definitions(-DUSE_OPENWEBRTC)
+endif ()
+
+if (OPENWEBRTC_FOUND)
+      target_link_libraries( WPENetworkProcess ${OPENWEBRTC_LIBRARIES} )
+      target_link_libraries( WPEWebProcess ${OPENWEBRTC_LIBRARIES} )
+      include_directories( ${OPENWEBRTC_INCLUDE_DIRS} )
 endif ()
 
 if (ENABLE_SUBTLE_CRYPTO)
