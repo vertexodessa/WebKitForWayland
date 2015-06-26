@@ -37,6 +37,8 @@ if (ENABLE_DXDRM)
     add_definitions(-DUSE_DXDRM=1)
 endif ()
 
+
+
 set(ENABLE_WEBCORE ON)
 set(ENABLE_WEBKIT OFF)
 set(ENABLE_WEBKIT2 ON)
@@ -86,6 +88,11 @@ else ()
     if (WESTON_FOUND)
         set(ENABLE_WESTON_SHELL ON)
     endif ()
+endif ()
+
+if (ENABLE_MEDIA_STREAM)
+    find_package(OpenWebRTC REQUIRED)
+    add_definitions(-DUSE_OPENWEBRTC)
 endif ()
 
 if (ENABLE_SUBTLE_CRYPTO)
