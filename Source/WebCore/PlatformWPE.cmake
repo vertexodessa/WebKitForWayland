@@ -336,3 +336,12 @@ if (ENABLE_ENCRYPTED_MEDIA OR ENABLE_ENCRYPTED_MEDIA_V2)
         platform/graphics/gstreamer/WebKitMediaAesCtr.c
     )
 endif ()
+
+if (ENABLE_MEDIA_STREAM)
+    list(APPEND WebCore_SYSTEM_INCLUDE_DIRECTORIES
+        ${OPENWEBRTC_INCLUDE_DIRS}
+    )
+    list(APPEND WebCore_LIBRARIES
+        ${OPENWEBRTC_LIBRARIES}
+    )
+endif ()
