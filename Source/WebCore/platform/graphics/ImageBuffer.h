@@ -133,7 +133,7 @@ public:
     static FloatRect clampedRect(const FloatRect&);
 
 #if USE(COORDINATED_GRAPHICS_THREADED)
-    void swapBuffersIfNeeded();
+    void commitChangesIfNeeded();
 #endif
 
 private:
@@ -153,6 +153,7 @@ private:
     friend class GraphicsContext;
     friend class GeneratedImage;
     friend class CrossfadeGeneratedImage;
+    friend class NamedImageGeneratedImage;
     friend class GradientImage;
 
 private:

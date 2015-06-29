@@ -239,6 +239,7 @@ set(WebCore_NON_SVG_IDL_FILES
     Modules/mediastream/CapabilityRange.idl
     Modules/mediastream/DOMURLMediaStream.idl
     Modules/mediastream/HTMLMediaElementMediaStream.idl
+    Modules/mediastream/MediaDeviceInfo.idl
     Modules/mediastream/MediaDevices.idl
     Modules/mediastream/MediaSourceStates.idl
     Modules/mediastream/MediaStream.idl
@@ -899,6 +900,7 @@ set(WebCore_SOURCES
     Modules/mediastream/DOMURLMediaStream.cpp
     Modules/mediastream/HTMLMediaElementMediaStream.cpp
     Modules/mediastream/MediaConstraintsImpl.cpp
+    Modules/mediastream/MediaDeviceInfo.cpp
     Modules/mediastream/MediaDevices.cpp
     Modules/mediastream/MediaSourceStates.cpp
     Modules/mediastream/MediaStream.cpp
@@ -1159,7 +1161,6 @@ set(WebCore_SOURCES
     bindings/js/JSLazyEventListener.cpp
     bindings/js/JSLocationCustom.cpp
     bindings/js/JSMainThreadExecState.cpp
-    bindings/js/JSMediaDevicesCustom.cpp
     bindings/js/JSMediaSourceStatesCustom.cpp
     bindings/js/JSMediaStreamCapabilitiesCustom.cpp
     bindings/js/JSMessageChannelCustom.cpp
@@ -1295,6 +1296,7 @@ set(WebCore_SOURCES
     css/CSSKeyframesRule.cpp
     css/CSSLineBoxContainValue.cpp
     css/CSSMediaRule.cpp
+    css/CSSNamedImageValue.cpp
     css/CSSOMUtils.cpp
     css/CSSPageRule.cpp
     css/CSSParser.cpp
@@ -2171,6 +2173,7 @@ set(WebCore_SOURCES
     platform/graphics/LayoutRect.cpp
     platform/graphics/MaskImageOperation.cpp
     platform/graphics/MediaPlayer.cpp
+    platform/graphics/NamedImageGeneratedImage.cpp
     platform/graphics/Path.cpp
     platform/graphics/PathTraversalState.cpp
     platform/graphics/Pattern.cpp
@@ -2323,7 +2326,6 @@ set(WebCore_SOURCES
     plugins/DOMPlugin.cpp
     plugins/DOMPluginArray.cpp
     plugins/PluginData.cpp
-    plugins/PluginMainThreadScheduler.cpp
 
     rendering/AutoTableLayout.cpp
     rendering/BidiRun.cpp
@@ -3055,8 +3057,6 @@ if (ENABLE_GRAPHICS_CONTEXT_3D)
     endif ()
 
     list(APPEND WebCore_INCLUDE_DIRECTORIES
-        "${THIRDPARTY_DIR}/ANGLE/ForwardingHeaders"
-        "${THIRDPARTY_DIR}/ANGLE/include/KHR"
         "${WEBCORE_DIR}/platform/graphics/gpu"
     )
 
@@ -3155,6 +3155,11 @@ if (ENABLE_GRAPHICS_CONTEXT_3D)
         platform/graphics/GraphicsContext3D.cpp
     )
 endif ()
+
+list(APPEND WebCore_INCLUDE_DIRECTORIES
+    "${THIRDPARTY_DIR}/ANGLE/ForwardingHeaders"
+    "${THIRDPARTY_DIR}/ANGLE/include/KHR"
+)
 
 if (ENABLE_WEB_REPLAY)
     list(APPEND WebCore_INCLUDE_DIRECTORIES
@@ -3590,6 +3595,12 @@ endif ()
 if (ENABLE_GRAPHICS_CONTEXT_3D)
     add_library(ANGLESupport STATIC ${ANGLESupport_SOURCES})
     set_target_properties(ANGLESupport PROPERTIES FOLDER "WebCore")
+
+    # Suppress null conversion warnings for sources in Source/ThirdParty/ANGLE
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        ADD_TARGET_PROPERTIES(ANGLESupport COMPILE_FLAGS "-Wno-null-conversion")
+    endif ()
+
     target_include_directories(ANGLESupport PRIVATE
         "${THIRDPARTY_DIR}/ANGLE/include"
         "${THIRDPARTY_DIR}/ANGLE/src"

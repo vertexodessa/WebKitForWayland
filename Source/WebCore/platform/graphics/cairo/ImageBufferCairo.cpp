@@ -76,7 +76,7 @@ ImageBufferData::ImageBufferData(const IntSize& size)
 #if USE(COORDINATED_GRAPHICS_THREADED)
     , m_platformLayerProxy(adoptRef(new TextureMapperPlatformLayerProxy))
     , m_runLoop(RunLoop::current())
-    , m_swapBuffersTimer(m_runLoop, this, &ImageBufferData::swapBuffers)
+    , m_commitChangesTimer(m_runLoop, this, &ImageBufferData::commitChanges)
 #endif
     , m_texture(0)
 #endif
@@ -84,18 +84,16 @@ ImageBufferData::ImageBufferData(const IntSize& size)
 }
 
 #if USE(COORDINATED_GRAPHICS_THREADED)
-void ImageBufferData::swapBuffersIfNeeded()
+void ImageBufferData::commitChangesIfNeeded()
 {
-    if (m_swapBuffersTimer.isActive())
+    if (m_commitChangesTimer.isActive())
         return;
 
-    m_swapBuffersTimer.startOneShot(0);
+    m_commitChangesTimer.startOneShot(0);
 }
 
-void ImageBufferData::swapBuffers()
+void ImageBufferData::commitChanges()
 {
-    // FIXME: add double buffering to the canvas.
-
     GLContext* previousActiveContext = GLContext::getCurrent();
     cairo_surface_flush(m_surface.get());
     if (previousActiveContext)
@@ -202,8 +200,8 @@ void ImageBuffer::draw(GraphicsContext* destinationContext, ColorSpace styleColo
 void ImageBuffer::drawPattern(GraphicsContext* context, const FloatRect& srcRect, const AffineTransform& patternTransform,
     const FloatPoint& phase, ColorSpace styleColorSpace, CompositeOperator op, const FloatRect& destRect, BlendMode)
 {
-    RefPtr<Image> image = copyImage(DontCopyBackingStore);
-    image->drawPattern(context, srcRect, patternTransform, phase, styleColorSpace, op, destRect);
+    if (RefPtr<Image> image = copyImage(DontCopyBackingStore))
+        image->drawPattern(context, srcRect, patternTransform, phase, styleColorSpace, op, destRect);
 }
 
 void ImageBuffer::platformTransformColorSpace(const Vector<int>& lookUpTable)
@@ -444,13 +442,6 @@ String ImageBuffer::toDataURL(const String& mimeType, const double* quality, Coo
 }
 #endif
 
-#if USE(COORDINATED_GRAPHICS_THREADED)
-void ImageBuffer::swapBuffersIfNeeded()
-{
-    m_data.swapBuffersIfNeeded();
-}
-#endif
-
 #if ENABLE(ACCELERATED_2D_CANVAS)
 #if !USE(COORDINATED_GRAPHICS_THREADED)
 void ImageBufferData::paintToTextureMapper(TextureMapper* textureMapper, const FloatRect& targetRect, const TransformationMatrix& matrix, float opacity)
@@ -477,6 +468,13 @@ PlatformLayer* ImageBuffer::platformLayer() const
 #endif
     return 0;
 }
+
+#if USE(COORDINATED_GRAPHICS_THREADED)
+void ImageBuffer::commitChangesIfNeeded()
+{
+    m_data.commitChangesIfNeeded();
+}
+#endif
 
 } // namespace WebCore
 
