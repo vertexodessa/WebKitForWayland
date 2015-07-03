@@ -344,9 +344,7 @@ if (ENABLE_MEDIA_STREAM)
         ${OPENWEBRTC_LIBRARIES}
     )
     list(APPEND WebCore_SOURCES
-        platform/graphics/MediaPlayer.cpp
         platform/graphics/gstreamer/MediaPlayerPrivateGStreamerOwr.cpp
-        platform/mediastream/MediaEndpoint.cpp
         platform/mediastream/openwebrtc/MediaEndpointOwr.cpp
         platform/mediastream/openwebrtc/OpenWebRTCUtilities.cpp
         platform/mediastream/openwebrtc/RealtimeMediaSourceCenterOwr.cpp
