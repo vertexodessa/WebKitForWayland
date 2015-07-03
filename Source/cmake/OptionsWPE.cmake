@@ -88,6 +88,9 @@ endif ()
 
 if (ENABLE_MEDIA_STREAM)
     find_package(OpenWebRTC REQUIRED)
+    if (NOT OPENWEBRTC_FOUND)
+        message(FATAL_ERROR "OpenWebRTC is needed for ENABLE_MEDIA_STREAM")
+    endif ()
     add_definitions(-DUSE_OPENWEBRTC)
 endif ()
 
