@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Google Inc. All rights reserved.
- * Copyright (C) 2011 Ericsson AB. All rights reserved.
+ * Copyright (C) 2011, 2015 Ericsson AB. All rights reserved.
  * Copyright (C) 2013 Apple Inc. All rights reserved.
  * Copyright (C) 2013 Nokia Corporation and/or its subsidiary(-ies).
  *
@@ -72,6 +72,8 @@ public:
 
     const AtomicString& readyState() const;
 
+    bool ended() const;
+
     RefPtr<MediaStreamTrack> clone();
     void stopProducingData();
 
@@ -83,8 +85,6 @@ public:
 
     RealtimeMediaSource* source() const { return m_private->source(); }
     MediaStreamTrackPrivate& privateTrack() { return m_private.get(); }
-
-    bool ended() const;
 
     void addObserver(Observer*);
     void removeObserver(Observer*);
@@ -101,7 +101,6 @@ private:
     explicit MediaStreamTrack(MediaStreamTrack&);
 
     void configureTrackRendering();
-    void scheduleEventDispatch(RefPtr<Event>&&);
 
     // ActiveDOMObject API.
     void stop() override final;
@@ -113,20 +112,13 @@ private:
     virtual void derefEventTarget() override final { deref(); }
 
     // MediaStreamTrackPrivateClient
-    void trackEnded();
-    void trackMutedChanged();
-
-    Vector<RefPtr<Event>> m_scheduledEvents;
-    bool m_eventDispatchScheduled;
-    Mutex m_mutex;
+    void trackEnded() override;
+    void trackMutedChanged() override;
 
     Vector<Observer*> m_observers;
     Ref<MediaStreamTrackPrivate> m_private;
 
     RefPtr<MediaConstraintsImpl> m_constraints;
-
-    bool m_isMuted;
-    bool m_isEnded;
 };
 
 } // namespace WebCore

@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 2013 Nokia Corporation and/or its subsidiary(-ies).
+ *  Copyright (C) 2015 Ericsson AB. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -62,7 +63,7 @@ public:
     bool readonly() const;
     bool remote() const;
 
-    bool enabled() const { return m_enabled; }
+    bool enabled() const { return m_isEnabled; }
     void setEnabled(bool);
 
     RefPtr<MediaStreamTrackPrivate> clone();
@@ -89,17 +90,16 @@ private:
     MediaStreamTrackPrivateClient* client() const { return m_client; }
 
     // RealtimeMediaSourceObserver
-    virtual void sourceReadyStateChanged() override final;
+    virtual void sourceStopped() override final;
     virtual void sourceMutedChanged() override final;
-    virtual void sourceEnabledChanged() override final;
-    virtual bool observerIsEnabled() override final;
+    virtual bool preventSourceFromStopping() override final;
     
     RefPtr<RealtimeMediaSource> m_source;
     MediaStreamTrackPrivateClient* m_client;
     RefPtr<MediaConstraints> m_constraints;
 
     String m_id;
-    bool m_enabled;
+    bool m_isEnabled;
     bool m_isEnded;
 };
 

@@ -2,6 +2,7 @@
  * Copyright (C) 2012 Google Inc. All rights reserved.
  * Copyright (C) 2013 Apple Inc. All rights reserved.
  * Copyright (C) 2013 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (C) 2015 Ericsson AB. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -108,10 +109,9 @@ void RealtimeMediaSource::stop(Observer* callingObserver)
 
     for (auto observer : m_observers) {
         if (observer != callingObserver)
-            observer->sourceReadyStateChanged();
+            observer->sourceStopped();
     }
 
-    // There are no more consumers of this source's data, shut it down as appropriate.
     stopProducingData();
 }
 
@@ -121,7 +121,7 @@ void RealtimeMediaSource::requestStop(Observer* callingObserver)
         return;
 
     for (auto observer : m_observers) {
-        if (observer->observerIsEnabled())
+        if (observer->preventSourceFromStopping())
             return;
     }
     stop(callingObserver);

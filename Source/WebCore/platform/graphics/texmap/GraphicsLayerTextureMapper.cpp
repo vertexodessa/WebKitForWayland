@@ -26,7 +26,7 @@
 #include "TextureMapperAnimation.h"
 #include <wtf/CurrentTime.h>
 
-#if USE(TEXTURE_MAPPER) && !USE(COORDINATED_GRAPHICS)
+#if USE(TEXTURE_MAPPER)
 
 namespace WebCore {
 
@@ -363,7 +363,7 @@ void GraphicsLayerTextureMapper::setIsScrollable(bool isScrollable)
     notifyChange(IsScrollableChange);
 }
 
-void GraphicsLayerTextureMapper::flushCompositingStateForThisLayerOnly()
+void GraphicsLayerTextureMapper::flushCompositingStateForThisLayerOnly(bool)
 {
     prepareBackingStoreIfNeeded();
     commitLayerChanges();
@@ -409,9 +409,6 @@ void GraphicsLayerTextureMapper::setDebugBorder(const Color& color, float width)
 
 void GraphicsLayerTextureMapper::commitLayerChanges()
 {
-    if (m_animations.hasRunningAnimations())
-        client().notifyFlushBeforeDisplayRefresh(this);
-
     if (m_changeMask == NoChanges)
         return;
 
@@ -500,19 +497,19 @@ void GraphicsLayerTextureMapper::commitLayerChanges()
     m_changeMask = NoChanges;
 }
 
-void GraphicsLayerTextureMapper::flushCompositingState(const FloatRect& rect)
+void GraphicsLayerTextureMapper::flushCompositingState(const FloatRect& rect, bool viewportIsStable)
 {
     if (!m_layer.textureMapper())
         return;
 
-    flushCompositingStateForThisLayerOnly();
+    flushCompositingStateForThisLayerOnly(viewportIsStable);
 
     if (maskLayer())
-        downcast<GraphicsLayerTextureMapper>(maskLayer())->flushCompositingState(rect);
+        downcast<GraphicsLayerTextureMapper>(maskLayer())->flushCompositingState(rect, viewportIsStable);
     if (replicaLayer())
-        downcast<GraphicsLayerTextureMapper>(replicaLayer())->flushCompositingState(rect);
+        downcast<GraphicsLayerTextureMapper>(replicaLayer())->flushCompositingState(rect, viewportIsStable);
     for (auto* child : children())
-        downcast<GraphicsLayerTextureMapper>(child)->flushCompositingState(rect);
+        downcast<GraphicsLayerTextureMapper>(child)->flushCompositingState(rect, viewportIsStable);
 }
 
 void GraphicsLayerTextureMapper::updateBackingStoreIncludingSubLayers()
@@ -605,9 +602,6 @@ void GraphicsLayerTextureMapper::removeAnimation(const String& animationName)
 
 bool GraphicsLayerTextureMapper::setFilters(const FilterOperations& filters)
 {
-    if (m_filters == filters)
-        return true;
-
     TextureMapper* textureMapper = m_layer.textureMapper();
     if (!textureMapper)
         return false;
