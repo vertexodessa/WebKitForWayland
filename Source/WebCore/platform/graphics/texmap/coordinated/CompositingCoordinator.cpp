@@ -98,7 +98,7 @@ bool CompositingCoordinator::flushPendingLayerChanges()
     m_client->didFlushRootLayer(m_visibleContentsRect);
 
     if (m_overlayCompositingLayer)
-        m_overlayCompositingLayer->flushCompositingState(FloatRect(FloatPoint(), m_rootLayer->size()));
+        m_overlayCompositingLayer->flushCompositingState(FloatRect(FloatPoint(), m_rootLayer->size()), m_page->mainFrame().view()->viewportIsStable());
 
     bool didSync = m_page->mainFrame().view()->flushCompositingStateIncludingSubframes();
 
