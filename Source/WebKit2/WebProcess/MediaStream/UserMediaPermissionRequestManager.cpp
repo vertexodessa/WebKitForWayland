@@ -51,13 +51,21 @@ void UserMediaPermissionRequestManager::startRequest(UserMediaRequest& request)
 {
 #if PLATFORM(WPE)
     // The user permission request dialog is not supported by WPE, so 
-    // there for check a environment varible to contol the grant
+    // there for check a environment varible to contol the grant          
+    uint64_t requestID = m_requestToIDMap.take(&request);
+    
+    if (!requestID)
+        return;
+        
+    m_idToRequestMap.remove(requestID);
+    
     bool allowed = false;
     
-    if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION")) { 
-		allowed = true; 
-		}
-    UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(request, allowed);
+    if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION"))
+        allowed = true;
+        
+    UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(requestID, allowed);
+    
 #else
     Document* document = downcast<Document>(request.scriptExecutionContext());
     Frame* frame = document ? document->frame() : nullptr;
