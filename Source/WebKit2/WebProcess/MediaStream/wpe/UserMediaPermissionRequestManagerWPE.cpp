@@ -49,24 +49,16 @@ UserMediaPermissionRequestManager::UserMediaPermissionRequestManager(WebPage& pa
 
 void UserMediaPermissionRequestManager::startRequest(UserMediaRequest& request)
 {
-    Document* document = downcast<Document>(request.scriptExecutionContext());
-    Frame* frame = document ? document->frame() : nullptr;
-
-    if (!frame) {
-        request.userMediaAccessDenied();
-        return;
-    }
-
-    uint64_t requestID = generateRequestID();
-    m_idToRequestMap.add(requestID, &request);
-    m_requestToIDMap.add(&request, requestID);
-
-    WebFrame* webFrame = WebFrame::fromCoreFrame(*frame);
-    ASSERT(webFrame);
-
-    SecurityOrigin* origin = request.securityOrigin();
+    uint64_t requestID = m_requestToIDMap.take(&request);
     
-    m_page.send(Messages::WebPageProxy::RequestUserMediaPermissionForFrame(requestID, webFrame->frameID(), origin->databaseIdentifier(), request.requiresAudio(), request.requiresVideo()));
+    bool allowed = false;
+    
+    // The user permission request dialog is not supported by WPE, so 
+    // there for check a environment varible to contol the grant             
+    if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION"))
+        allowed = true;
+        
+    UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(requestID, allowed);
 }
 
 void UserMediaPermissionRequestManager::cancelRequest(UserMediaRequest& request)
