@@ -35,7 +35,7 @@ public:
     ScrollbarThemeWPE() = default;
     virtual ~ScrollbarThemeWPE() = default;
     
-    virtual bool hasButtons(Scrollbar&) { return true; }
+    virtual bool hasButtons(Scrollbar&);
     virtual bool hasThumb(Scrollbar&);
     
     virtual IntRect backButtonRect(Scrollbar&, ScrollbarPart, bool painting = false);
