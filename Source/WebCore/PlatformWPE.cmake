@@ -355,8 +355,11 @@ if (ENABLE_SUBTLE_CRYPTO)
 endif ()
 
 if (ENABLE_ENCRYPTED_MEDIA)
+    list(APPEND WebCore_INCLUDE_DIRECTORIES
+        ${NETTLE_INCLUDE_DIRS}
+    )
     list(APPEND WebCore_LIBRARIES
-        -lcrypto
+        ${NETTLE_LIBRARIES}
     )
 
     list(APPEND WebCore_SOURCES

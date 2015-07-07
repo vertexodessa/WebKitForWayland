@@ -120,6 +120,10 @@ if (ENABLE_VIDEO OR ENABLE_WEB_AUDIO)
     # FIXME: What about MPEGTS support? USE_GSTREAMER_MPEGTS?
 endif ()
 
+if (ENABLE_ENCRYPTED_MEDIA OR ENABLE_ENCRYPTED_MEDIA_V2)
+    find_package(Nettle REQUIRED)
+endif ()
+
 add_definitions(-DBUILDING_WPE__=1)
 add_definitions(-DDATA_DIR="${CMAKE_INSTALL_DATADIR}")
 
