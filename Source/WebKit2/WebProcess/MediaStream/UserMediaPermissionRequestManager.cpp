@@ -30,6 +30,8 @@
 #include <WebCore/FrameLoader.h>
 #include <WebCore/SecurityOrigin.h>
 
+#include <glib.h>
+
 using namespace WebCore;
 
 namespace WebKit {
@@ -46,7 +48,16 @@ UserMediaPermissionRequestManager::UserMediaPermissionRequestManager(WebPage& pa
 }
 
 void UserMediaPermissionRequestManager::startRequest(UserMediaRequest& request)
-{
+#if PLATFORM(WPE)
+    // The user permission request dialog is not supported by WPE, so 
+    // there for check a environment varible to contol the grant
+    bool allowed = FALSE;
+    
+    if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION")) { 
+		allowed = TRUE; 
+		}
+    UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(request, allowed);
+#else
     Document* document = downcast<Document>(request.scriptExecutionContext());
     Frame* frame = document ? document->frame() : nullptr;
 
@@ -63,7 +74,9 @@ void UserMediaPermissionRequestManager::startRequest(UserMediaRequest& request)
     ASSERT(webFrame);
 
     SecurityOrigin* origin = request.securityOrigin();
+    
     m_page.send(Messages::WebPageProxy::RequestUserMediaPermissionForFrame(requestID, webFrame->frameID(), origin->databaseIdentifier(), request.requiresAudio(), request.requiresVideo()));
+#endif
 }
 
 void UserMediaPermissionRequestManager::cancelRequest(UserMediaRequest& request)
