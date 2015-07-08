@@ -31,6 +31,7 @@
 #include <WebCore/SecurityOrigin.h>
 
 #include <glib.h>
+#include "NotImplemented.h"
 
 using namespace WebCore;
 
@@ -49,17 +50,16 @@ UserMediaPermissionRequestManager::UserMediaPermissionRequestManager(WebPage& pa
 
 void UserMediaPermissionRequestManager::startRequest(UserMediaRequest& request)
 {
-    uint64_t requestID = m_requestToIDMap.take(&request);
-    
-    bool allowed = false;
-    
     // The user permission request dialog is not supported by WPE, so 
     // there for check a environment variable to contol the grant             
-    if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION")){
-        allowed = true;
-    }    
-    
-    UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(requestID, allowed);
+    if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION"))
+    {
+        request.userMediaAccessGranted();
+    } 
+    else 
+    {
+        request.userMediaAccessDenied();
+    } 
 }
 
 void UserMediaPermissionRequestManager::cancelRequest(UserMediaRequest& request)
@@ -72,15 +72,7 @@ void UserMediaPermissionRequestManager::cancelRequest(UserMediaRequest& request)
 
 void UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(uint64_t requestID, bool allowed)
 {
-    RefPtr<UserMediaRequest> request = m_idToRequestMap.take(requestID);
-    if (!request)
-        return;
-    m_requestToIDMap.remove(request);
-
-    if (allowed)
-        request->userMediaAccessGranted();
-    else
-        request->userMediaAccessDenied();
+    notImplemented();
 }
 
 } // namespace WebKit
