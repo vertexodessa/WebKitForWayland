@@ -54,10 +54,11 @@ void UserMediaPermissionRequestManager::startRequest(UserMediaRequest& request)
     bool allowed = false;
     
     // The user permission request dialog is not supported by WPE, so 
-    // there for check a environment varible to contol the grant             
-    if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION"))
+    // there for check a environment variable to contol the grant             
+    if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION")){
         allowed = true;
-        
+    }    
+    
     UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(requestID, allowed);
 }
 
