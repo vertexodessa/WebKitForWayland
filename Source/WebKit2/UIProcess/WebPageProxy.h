@@ -333,6 +333,9 @@ public:
 #endif
 #if PLATFORM(IOS)
     RefPtr<WebVideoFullscreenManagerProxy> videoFullscreenManager();
+
+    bool allowsMediaDocumentInlinePlayback() const;
+    void setAllowsMediaDocumentInlinePlayback(bool);
 #endif
 
 #if ENABLE(CONTEXT_MENUS)
@@ -363,7 +366,7 @@ public:
     bool tryClose();
     bool isClosed() const { return m_isClosed; }
 
-    RefPtr<API::Navigation> loadRequest(const WebCore::ResourceRequest&, WebCore::ShouldOpenExternalURLsPolicy = WebCore::ShouldOpenExternalURLsPolicy::ShouldNotAllow, API::Object* userData = nullptr);
+    RefPtr<API::Navigation> loadRequest(const WebCore::ResourceRequest&, WebCore::ShouldOpenExternalURLsPolicy = WebCore::ShouldOpenExternalURLsPolicy::ShouldAllowExternalSchemes, API::Object* userData = nullptr);
     RefPtr<API::Navigation> loadFile(const String& fileURL, const String& resourceDirectoryURL, API::Object* userData = nullptr);
     RefPtr<API::Navigation> loadData(API::Data*, const String& MIMEType, const String& encoding, const String& baseURL, API::Object* userData = nullptr);
     RefPtr<API::Navigation> loadHTMLString(const String& htmlString, const String& baseURL, API::Object* userData = nullptr);
@@ -418,7 +421,7 @@ public:
     void displayView();
     bool canScrollView();
     void scrollView(const WebCore::IntRect& scrollRect, const WebCore::IntSize& scrollOffset); // FIXME: CoordinatedGraphics should use requestScroll().
-    void requestScroll(const WebCore::FloatPoint& scrollPosition, bool isProgrammaticScroll);
+    void requestScroll(const WebCore::FloatPoint& scrollPosition, const WebCore::IntPoint& scrollOrigin, bool isProgrammaticScroll);
     
     void setDelegatesScrolling(bool delegatesScrolling) { m_delegatesScrolling = delegatesScrolling; }
     bool delegatesScrolling() const { return m_delegatesScrolling; }
@@ -437,7 +440,7 @@ public:
 
     void addMIMETypeWithCustomContentProvider(const String& mimeType);
 
-    void executeEditCommand(const String& commandName);
+    void executeEditCommand(const String& commandName, const String& argument = String());
     void validateCommand(const String& commandName, std::function<void (const String&, bool, int32_t, CallbackBase::Error)>);
 
     const EditorState& editorState() const { return m_editorState; }
@@ -488,6 +491,7 @@ public:
     void moveSelectionAtBoundaryWithDirection(WebCore::TextGranularity, WebCore::SelectionDirection, std::function<void(CallbackBase::Error)>);
     void beginSelectionInDirection(WebCore::SelectionDirection, std::function<void (uint64_t, CallbackBase::Error)>);
     void updateSelectionWithExtentPoint(const WebCore::IntPoint, std::function<void (uint64_t, CallbackBase::Error)>);
+    void updateSelectionWithExtentPointAndBoundary(const WebCore::IntPoint, WebCore::TextGranularity, std::function<void(uint64_t, CallbackBase::Error)>);
     void requestAutocorrectionData(const String& textForAutocorrection, std::function<void (const Vector<WebCore::FloatRect>&, const String&, double, uint64_t, CallbackBase::Error)>);
     void applyAutocorrection(const String& correction, const String& originalText, std::function<void (const String&, CallbackBase::Error)>);
     bool applyAutocorrection(const String& correction, const String& originalText);
@@ -525,6 +529,7 @@ public:
 
 #if USE(COORDINATED_GRAPHICS_MULTIPROCESS)
     void didRenderFrame(const WebCore::IntSize& contentsSize, const WebCore::IntRect& coveredRect);
+    void commitPageTransitionViewport();
 #endif
 #if PLATFORM(EFL)
     void setThemePath(const String&);
@@ -604,10 +609,6 @@ public:
     PlatformWidget viewWidget();
     const WebCore::Color& backgroundColor() const { return m_backgroundColor; }
     void setBackgroundColor(const WebCore::Color& color) { m_backgroundColor = color; }
-#endif
-
-#if USE(COORDINATED_GRAPHICS_MULTIPROCESS)
-    void commitPageTransitionViewport();
 #endif
 
     void handleMouseEvent(const NativeWebMouseEvent&);
@@ -729,7 +730,7 @@ public:
     void registerUIProcessAccessibilityTokens(const IPC::DataReference& elemenToken, const IPC::DataReference& windowToken);
     bool readSelectionFromPasteboard(const String& pasteboardName);
     String stringSelectionForPasteboard();
-    PassRefPtr<WebCore::SharedBuffer> dataSelectionForPasteboard(const String& pasteboardType);
+    RefPtr<WebCore::SharedBuffer> dataSelectionForPasteboard(const String& pasteboardType);
     void makeFirstResponder();
 
     ColorSpaceData colorSpace();
@@ -876,7 +877,7 @@ public:
 
     WebPageCreationParameters creationParameters();
 
-#if USE(COORDINATED_GRAPHICS)
+#if USE(COORDINATED_GRAPHICS_MULTIPROCESS)
     void findZoomableAreaForPoint(const WebCore::IntPoint&, const WebCore::IntSize&);
 #endif
 
@@ -940,7 +941,9 @@ public:
     bool mayStartMediaWhenInWindow() const { return m_mayStartMediaWhenInWindow; }
         
 #if ENABLE(MEDIA_SESSION)
+    bool hasMediaSessionWithActiveMediaElements() const { return m_hasMediaSessionWithActiveMediaElements; }
     void handleMediaEvent(WebCore::MediaEventType);
+    void isMediaElementPaused(uint64_t, RefPtr<UnsignedCallback>);
 #endif
 
     // WebPopupMenuProxy::Client
@@ -1025,7 +1028,9 @@ public:
     void isPlayingMediaDidChange(WebCore::MediaProducer::MediaStateFlags);
 
 #if ENABLE(MEDIA_SESSION)
+    void hasMediaSessionWithActiveMediaElementsDidChange(bool);
     void mediaSessionMetadataDidChange(const WebCore::MediaSessionMetadata&);
+    void focusedContentMediaElementDidChange(uint64_t);
 #endif
 
 #if PLATFORM(MAC)
@@ -1058,6 +1063,9 @@ public:
     void logDiagnosticMessage(const String& message, const String& description, bool shouldSample);
     void logDiagnosticMessageWithResult(const String& message, const String& description, uint32_t result, bool shouldSample);
     void logDiagnosticMessageWithValue(const String& message, const String& description, const String& value, bool shouldSample);
+    void logSampledDiagnosticMessage(const String& message, const String& description);
+    void logSampledDiagnosticMessageWithResult(const String& message, const String& description, uint32_t result);
+    void logSampledDiagnosticMessageWithValue(const String& message, const String& description, const String& value);
 
 #if ENABLE(WIRELESS_PLAYBACK_TARGET) && !PLATFORM(IOS)
     void addPlaybackTargetPickerClient(uint64_t);
@@ -1198,7 +1206,7 @@ private:
     void reachedApplicationCacheOriginQuota(const String& originIdentifier, uint64_t currentQuota, uint64_t totalBytesNeeded, PassRefPtr<Messages::WebPageProxy::ReachedApplicationCacheOriginQuota::DelayedReply>);
     void requestGeolocationPermissionForFrame(uint64_t geolocationID, uint64_t frameID, String originIdentifier);
 
-    void requestUserMediaPermissionForFrame(uint64_t userMediaID, uint64_t frameID, String originIdentifier, bool audio, bool video);
+    void requestUserMediaPermissionForFrame(uint64_t userMediaID, uint64_t frameID, String originIdentifier, bool audio, bool video, const Vector<String>& deviceUIDsVideo, const Vector<String>& deviceUIDsAudio);
 
     void runModal();
     void notifyScrollerThumbIsVisibleInRect(const WebCore::IntRect&);
@@ -1468,6 +1476,13 @@ private:
     void useFixedLayoutDidChange(bool useFixedLayout) { m_useFixedLayout = useFixedLayout; }
     void fixedLayoutSizeDidChange(WebCore::IntSize fixedLayoutSize) { m_fixedLayoutSize = fixedLayoutSize; }
 
+#if ENABLE(VIDEO)
+    void mediaDocumentNaturalSizeChanged(const WebCore::IntSize&);
+#if USE(GSTREAMER)
+    void requestInstallMissingMediaPlugins(const String& details);
+#endif
+#endif
+
     void handleAutoFillButtonClick(const UserData&);
 
     void handleMessage(IPC::Connection&, const String& messageName, const UserData& messageBody);
@@ -1568,6 +1583,7 @@ private:
     WebCore::ViewState::Flags m_viewState;
     bool m_viewWasEverInWindow;
 #if PLATFORM(IOS)
+    bool m_allowsMediaDocumentInlinePlayback { false };
     bool m_alwaysRunsAtForegroundPriority;
     ProcessThrottler::ForegroundActivityToken m_activityToken;
 #endif
@@ -1634,6 +1650,7 @@ private:
     bool m_syncNavigationActionPolicyActionIsValid;
     WebCore::PolicyAction m_syncNavigationActionPolicyAction;
     uint64_t m_syncNavigationActionPolicyDownloadID;
+    bool m_shouldSuppressAppLinksInNextNavigationPolicyDecision { false };
 
     Deque<NativeWebKeyboardEvent> m_keyEventQueue;
     Deque<NativeWebWheelEvent> m_wheelEventQueue;
@@ -1761,6 +1778,10 @@ private:
     Vector<uint64_t> m_nextViewStateChangeCallbacks;
 
     WebCore::MediaProducer::MediaStateFlags m_mediaState { WebCore::MediaProducer::IsNotPlaying };
+
+#if ENABLE(MEDIA_SESSION)
+    bool m_hasMediaSessionWithActiveMediaElements { false };
+#endif
 
 #if ENABLE(WIRELESS_PLAYBACK_TARGET) && !PLATFORM(IOS)
     bool m_requiresTargetMonitoring { false };

@@ -50,6 +50,7 @@
 #import "Range.h"
 #import "RenderImage.h"
 #import "ScriptController.h"
+#import "TextIndicator.h"
 #import "WebScriptObjectPrivate.h"
 #import <JavaScriptCore/APICast.h>
 #import <wtf/HashMap.h>
@@ -580,6 +581,58 @@ id <DOMEventTarget> kit(WebCore::EventTarget* eventTarget)
 
     WebCore::Node& node = jsCast<JSNode*>(object)->impl();
     return kit(&node);
+}
+
+- (void)getPreviewSnapshotImage:(CGImageRef*)cgImage andRects:(NSArray **)rects
+{
+    if (!cgImage || !rects)
+        return;
+
+    *cgImage = nullptr;
+    *rects = nullptr;
+
+    Node* coreNode = core(self);
+
+    Ref<Range> range = rangeOfContents(*coreNode);
+
+    const float margin = 4 / coreNode->document().page()->pageScaleFactor();
+    RefPtr<TextIndicator> textIndicator = TextIndicator::createWithRange(range, TextIndicatorPresentationTransition::None, margin);
+
+    if (textIndicator) {
+        if (Image* image = textIndicator->contentImage())
+            *cgImage = (CGImageRef)CFAutorelease(CGImageRetain(image->getCGImageRef()));
+    }
+
+    RetainPtr<NSMutableArray> rectArray = adoptNS([[NSMutableArray alloc] init]);
+
+    if (!*cgImage) {
+        if (RenderObject* renderer = coreNode->renderer()) {
+            FloatRect boundingBox;
+            if (renderer->isRenderImage())
+                boundingBox = downcast<RenderImage>(*renderer).absoluteContentQuad().enclosingBoundingBox();
+            else
+                boundingBox = renderer->absoluteBoundingBoxRect();
+
+            boundingBox.inflate(margin);
+
+            CGRect cgRect = coreNode->document().frame()->view()->contentsToWindow(enclosingIntRect(boundingBox));
+            [rectArray addObject:[NSValue value:&cgRect withObjCType:@encode(CGRect)]];
+
+            *rects = rectArray.autorelease();
+        }
+        return;
+    }
+
+    FloatPoint origin = textIndicator->textBoundingRectInRootViewCoordinates().location();
+    for (const FloatRect& rect : textIndicator->textRectsInBoundingRectCoordinates()) {
+        CGRect cgRect = rect;
+        cgRect.origin.x += origin.x();
+        cgRect.origin.y += origin.y();
+        cgRect = coreNode->document().frame()->view()->contentsToWindow(enclosingIntRect(cgRect));
+        [rectArray addObject:[NSValue value:&cgRect withObjCType:@encode(CGRect)]];
+    }
+
+    *rects = rectArray.autorelease();
 }
 
 @end

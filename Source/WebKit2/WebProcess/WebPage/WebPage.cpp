@@ -216,10 +216,16 @@
 #include "CoordinatedLayerTreeHostMessages.h"
 #endif
 
+#if ENABLE(VIDEO) && USE(GSTREAMER)
+#include <WebCore/MediaPlayerRequestInstallMissingPluginsCallback.h>
+#endif
+
 using namespace JSC;
 using namespace WebCore;
 
 namespace WebKit {
+
+static const double pageScrollHysteresisSeconds = 0.3;
 
 class SendStopResponsivenessTimer {
 public:
@@ -239,14 +245,14 @@ private:
 
 DEFINE_DEBUG_ONLY_GLOBAL(WTF::RefCountedLeakCounter, webPageCounter, ("WebPage"));
 
-PassRefPtr<WebPage> WebPage::create(uint64_t pageID, const WebPageCreationParameters& parameters)
+Ref<WebPage> WebPage::create(uint64_t pageID, const WebPageCreationParameters& parameters)
 {
-    RefPtr<WebPage> page = adoptRef(new WebPage(pageID, parameters));
+    Ref<WebPage> page = adoptRef(*new WebPage(pageID, parameters));
 
     if (page->pageGroup()->isVisibleToInjectedBundle() && WebProcess::singleton().injectedBundle())
-        WebProcess::singleton().injectedBundle()->didCreatePage(page.get());
+        WebProcess::singleton().injectedBundle()->didCreatePage(page.ptr());
 
-    return page.release();
+    return page;
 }
 
 WebPage::WebPage(uint64_t pageID, const WebPageCreationParameters& parameters)
@@ -295,6 +301,7 @@ WebPage::WebPage(uint64_t pageID, const WebPageCreationParameters& parameters)
 #if ENABLE(MEDIA_STREAM)
     , m_userMediaPermissionRequestManager(*this)
 #endif
+    , m_pageScrolledHysteresis([this](HysteresisState state) { if (state == HysteresisState::Stopped) pageStoppedScrolling(); }, pageScrollHysteresisSeconds)
     , m_canRunBeforeUnloadConfirmPanel(parameters.canRunBeforeUnloadConfirmPanel)
     , m_canRunModal(parameters.canRunModal)
     , m_isRunningModal(false)
@@ -314,7 +321,6 @@ WebPage::WebPage(uint64_t pageID, const WebPageCreationParameters& parameters)
 #endif
 #if PLATFORM(IOS)
     , m_selectionAnchor(Start)
-    , m_firstLayerTreeTransactionIDAfterDidCommitLoad(0)
     , m_hasReceivedVisibleContentRectsAfterDidCommitLoad(false)
     , m_scaleWasSetByUIProcess(false)
     , m_userHasChangedPageScaleFactor(false)
@@ -517,6 +523,10 @@ WebPage::WebPage(uint64_t pageID, const WebPageCreationParameters& parameters)
         scaleView(parameters.viewScaleFactor);
 
     m_page->setUserContentExtensionsEnabled(parameters.userContentExtensionsEnabled);
+
+#if PLATFORM(IOS)
+    m_page->settings().setContentDispositionAttachmentSandboxEnabled(true);
+#endif
 }
 
 void WebPage::reinitializeWebPage(const WebPageCreationParameters& parameters)
@@ -696,7 +706,7 @@ PassRefPtr<Plugin> WebPage::createPlugin(WebFrame* frame, HTMLPlugInElement* plu
     PluginProcessType processType = pluginElement->displayState() == HTMLPlugInElement::WaitingForSnapshot ? PluginProcessTypeSnapshot : PluginProcessTypeNormal;
 #endif
 
-    bool allowOnlyApplicationPlugins = !frame->coreFrame()->loader().subframeLoader().allowPlugins(NotAboutToInstantiatePlugin);
+    bool allowOnlyApplicationPlugins = !frame->coreFrame()->loader().subframeLoader().allowPlugins();
 
     uint64_t pluginProcessToken;
     uint32_t pluginLoadPolicy;
@@ -704,7 +714,8 @@ PassRefPtr<Plugin> WebPage::createPlugin(WebFrame* frame, HTMLPlugInElement* plu
     if (!sendSync(Messages::WebPageProxy::FindPlugin(parameters.mimeType, static_cast<uint32_t>(processType), parameters.url.string(), frameURLString, pageURLString, allowOnlyApplicationPlugins), Messages::WebPageProxy::FindPlugin::Reply(pluginProcessToken, newMIMEType, pluginLoadPolicy, unavailabilityDescription)))
         return nullptr;
 
-    bool isBlockedPlugin = static_cast<PluginModuleLoadPolicy>(pluginLoadPolicy) == PluginModuleBlocked;
+    PluginModuleLoadPolicy loadPolicy = static_cast<PluginModuleLoadPolicy>(pluginLoadPolicy);
+    bool isBlockedPlugin = (loadPolicy == PluginModuleBlockedForSecurity) || (loadPolicy == PluginModuleBlockedForCompatibility);
 
     if (isBlockedPlugin || !pluginProcessToken) {
 #if ENABLE(PDFKIT_PLUGIN)
@@ -930,23 +941,23 @@ void WebPage::close()
     }
 
 #if ENABLE(FULLSCREEN_API)
-    m_fullScreenManager = 0;
+    m_fullScreenManager = nullptr;
 #endif
 
     if (m_activePopupMenu) {
         m_activePopupMenu->disconnectFromPage();
-        m_activePopupMenu = 0;
+        m_activePopupMenu = nullptr;
     }
 
     if (m_activeOpenPanelResultListener) {
         m_activeOpenPanelResultListener->disconnectFromPage();
-        m_activeOpenPanelResultListener = 0;
+        m_activeOpenPanelResultListener = nullptr;
     }
 
 #if ENABLE(INPUT_TYPE_COLOR)
     if (m_activeColorChooser) {
         m_activeColorChooser->disconnectFromPage();
-        m_activeColorChooser = 0;
+        m_activeColorChooser = nullptr;
     }
 #endif
 
@@ -954,6 +965,13 @@ void WebPage::close()
     if (m_printOperation) {
         m_printOperation->disconnectFromPage();
         m_printOperation = nullptr;
+    }
+#endif
+
+#if ENABLE(VIDEO) && USE(GSTREAMER)
+    if (m_installMediaPluginsCallback) {
+        m_installMediaPluginsCallback->invalidate();
+        m_installMediaPluginsCallback = nullptr;
     }
 #endif
 
@@ -1146,7 +1164,7 @@ void WebPage::reload(uint64_t navigationID, bool reloadFromOrigin, const Sandbox
 {
     SendStopResponsivenessTimer stopper(this);
 
-    ASSERT(!m_pendingNavigationID);
+    ASSERT(!m_mainFrame->coreFrame()->loader().frameHasLoaded() || !m_pendingNavigationID);
     m_pendingNavigationID = navigationID;
 
     m_sandboxExtensionTracker.beginLoad(m_mainFrame.get(), sandboxExtensionHandle);
@@ -1281,11 +1299,11 @@ void WebPage::sendViewportAttributesChanged()
     // This also takes care of the relayout.
     setFixedLayoutSize(roundedIntSize(attr.layoutSize));
 
-#if USE(COORDINATED_GRAPHICS_MULTIPROCESS)
-    send(Messages::WebPageProxy::DidChangeViewportProperties(attr));
-#else
+#if USE(COORDINATED_GRAPHICS_THREADED)
     if (m_drawingArea->layerTreeHost())
         m_drawingArea->layerTreeHost()->didChangeViewportProperties(attr);
+#else
+    send(Messages::WebPageProxy::DidChangeViewportProperties(attr));
 #endif
 }
 #endif
@@ -1470,7 +1488,7 @@ void WebPage::scaleView(double scale)
 void WebPage::scaleViewAndUpdateGeometryFenced(double scale, IntSize viewSize, uint64_t callbackID)
 {
     scaleView(scale);
-    m_drawingArea->updateGeometry(viewSize, IntSize(), false);
+    m_drawingArea->updateGeometry(viewSize, IntSize(), false, MachSendRight());
     m_drawingArea->replyWithFenceAfterNextFlush(callbackID);
 }
 #endif
@@ -1725,7 +1743,8 @@ PassRefPtr<WebImage> WebPage::snapshotAtSize(const IntRect& rect, const IntSize&
 
     auto graphicsContext = snapshot->bitmap()->createGraphicsContext();
 
-    Color backgroundColor = coreFrame->settings().backgroundShouldExtendBeyondPage() ? frameView->documentBackgroundColor() : frameView->baseBackgroundColor();
+    Color documentBackgroundColor = frameView->documentBackgroundColor();
+    Color backgroundColor = (coreFrame->settings().backgroundShouldExtendBeyondPage() && documentBackgroundColor.isValid()) ? documentBackgroundColor : frameView->baseBackgroundColor();
     graphicsContext->fillRect(IntRect(IntPoint(), bitmapSize), backgroundColor, ColorSpaceDeviceRGB);
 
     if (!(options & SnapshotOptionsExcludeDeviceScaleFactor)) {
@@ -1817,16 +1836,25 @@ void WebPage::pageDidScroll()
 #endif
     m_uiClient->pageDidScroll(this);
 
+    m_pageScrolledHysteresis.impulse();
+
     send(Messages::WebPageProxy::PageDidScroll());
+}
+
+void WebPage::pageStoppedScrolling()
+{
+    // Maintain the current history item's scroll position up-to-date.
+    if (Frame* frame = m_mainFrame->coreFrame())
+        frame->loader().history().saveScrollPositionAndViewStateToItem(frame->loader().history().currentItem());
 }
 
 #if USE(COORDINATED_GRAPHICS)
 void WebPage::pageDidRequestScroll(const IntPoint& point)
 {
-#if USE(COORDINATED_GRAPHICS_MULTIPROCESS)
-    send(Messages::WebPageProxy::PageDidRequestScroll(point));
-#elif USE(COORDINATED_GRAPHICS_THREADED)
+#if USE(COORDINATED_GRAPHICS_THREADED)
     drawingArea()->scroll(IntRect(point, IntSize()), IntSize());
+#elif USE(COORDINATED_GRAPHICS_MULTIPROCESS)
+    send(Messages::WebPageProxy::PageDidRequestScroll(point));
 #endif
 }
 #endif
@@ -2130,9 +2158,9 @@ void WebPage::validateCommand(const String& commandName, uint64_t callbackID)
     send(Messages::WebPageProxy::ValidateCommandCallback(commandName, isEnabled, state, callbackID));
 }
 
-void WebPage::executeEditCommand(const String& commandName)
+void WebPage::executeEditCommand(const String& commandName, const String& argument)
 {
-    executeEditingCommand(commandName, String());
+    executeEditingCommand(commandName, argument);
 }
 
 void WebPage::restoreSession(const Vector<BackForwardListItemState>& itemStates)
@@ -2409,6 +2437,9 @@ void WebPage::didReceivePolicyDecision(uint64_t frameID, uint64_t listenerID, ui
 void WebPage::didStartPageTransition()
 {
     m_drawingArea->setLayerTreeStateIsFrozen(true);
+#if PLATFORM(IOS)
+    m_hasFocusedDueToUserInteraction = false;
+#endif
 }
 
 void WebPage::didCompletePageTransition()
@@ -2937,6 +2968,7 @@ void WebPage::updatePreferences(const WebPreferencesStore& store)
 void WebPage::willCommitLayerTree(RemoteLayerTreeTransaction& layerTransaction)
 {
     layerTransaction.setContentsSize(corePage()->mainFrame().view()->contentsSize());
+    layerTransaction.setScrollOrigin(corePage()->mainFrame().view()->scrollOrigin());
     layerTransaction.setPageScaleFactor(corePage()->pageScaleFactor());
     layerTransaction.setRenderTreeSize(corePage()->renderTreeSize());
     layerTransaction.setPageExtendedBackgroundColor(corePage()->pageExtendedBackgroundColor());
@@ -2990,6 +3022,11 @@ WebVideoFullscreenManager* WebPage::videoFullscreenManager()
     if (!m_videoFullscreenManager)
         m_videoFullscreenManager = WebVideoFullscreenManager::create(this);
     return m_videoFullscreenManager.get();
+}
+
+void WebPage::setAllowsMediaDocumentInlinePlayback(bool allows)
+{
+    m_page->setAllowsMediaDocumentInlinePlayback(allows);
 }
 #endif
 
@@ -3270,7 +3307,7 @@ void WebPage::countStringMatches(const String& string, uint32_t options, uint32_
 void WebPage::didChangeSelectedIndexForActivePopupMenu(int32_t newIndex)
 {
     changeSelectedIndex(newIndex);
-    m_activePopupMenu = 0;
+    m_activePopupMenu = nullptr;
 }
 
 void WebPage::changeSelectedIndex(int32_t index)
@@ -3306,12 +3343,12 @@ void WebPage::didChooseFilesForOpenPanel(const Vector<String>& files)
         return;
 
     m_activeOpenPanelResultListener->didChooseFiles(files);
-    m_activeOpenPanelResultListener = 0;
+    m_activeOpenPanelResultListener = nullptr;
 }
 
 void WebPage::didCancelForOpenPanel()
 {
-    m_activeOpenPanelResultListener = 0;
+    m_activeOpenPanelResultListener = nullptr;
 }
 
 #if ENABLE(SANDBOX_EXTENSIONS)
@@ -3338,9 +3375,9 @@ void WebPage::didReceiveNotificationPermissionDecision(uint64_t notificationID, 
 }
 
 #if ENABLE(MEDIA_STREAM)
-void WebPage::didReceiveUserMediaPermissionDecision(uint64_t userMediaID, bool allowed)
+void WebPage::didReceiveUserMediaPermissionDecision(uint64_t userMediaID, bool allowed, const String& deviceUIDVideo, const String& deviceUIDAudio)
 {
-    m_userMediaPermissionRequestManager.didReceiveUserMediaPermissionDecision(userMediaID, allowed);
+    m_userMediaPermissionRequestManager.didReceiveUserMediaPermissionDecision(userMediaID, allowed, deviceUIDVideo, deviceUIDAudio);
 }
 #endif
 
@@ -3415,7 +3452,7 @@ void WebPage::didSelectItemFromActiveContextMenu(const WebContextMenuItemData& i
         return;
 
     m_contextMenu->itemSelected(item);
-    m_contextMenu = 0;
+    m_contextMenu = nullptr;
 }
 #endif
 
@@ -3496,7 +3533,7 @@ void WebPage::mainFrameDidLayout()
 #endif
 #if PLATFORM(IOS)
     if (FrameView* frameView = mainFrameView()) {
-        IntSize newContentSize = frameView->contentsSize();
+        IntSize newContentSize = frameView->contentsSizeRespectingOverflow();
         if (m_viewportConfiguration.contentsSize() != newContentSize) {
             m_viewportConfiguration.setContentsSize(newContentSize);
             viewportConfigurationChanged();
@@ -4031,6 +4068,12 @@ void WebPage::handleMediaEvent(uint32_t eventType)
 {
     m_page->handleMediaEvent(static_cast<MediaEventType>(eventType));
 }
+
+void WebPage::isMediaElementPaused(uint64_t elementID, uint64_t callbackID)
+{
+    bool paused = m_page->isMediaElementPaused(elementID);
+    send(Messages::WebPageProxy::UnsignedCallback(paused, callbackID));
+}
 #endif
 
 void WebPage::setMayStartMediaWhenInWindow(bool mayStartMedia)
@@ -4219,7 +4262,7 @@ bool WebPage::canPluginHandleResponse(const ResourceResponse& response)
 {
 #if ENABLE(NETSCAPE_PLUGIN_API)
     uint32_t pluginLoadPolicy;
-    bool allowOnlyApplicationPlugins = !m_mainFrame->coreFrame()->loader().subframeLoader().allowPlugins(NotAboutToInstantiatePlugin);
+    bool allowOnlyApplicationPlugins = !m_mainFrame->coreFrame()->loader().subframeLoader().allowPlugins();
 
     uint64_t pluginProcessToken;
     String newMIMEType;
@@ -4227,7 +4270,8 @@ bool WebPage::canPluginHandleResponse(const ResourceResponse& response)
     if (!sendSync(Messages::WebPageProxy::FindPlugin(response.mimeType(), PluginProcessTypeNormal, response.url().string(), response.url().string(), response.url().string(), allowOnlyApplicationPlugins), Messages::WebPageProxy::FindPlugin::Reply(pluginProcessToken, newMIMEType, pluginLoadPolicy, unavailabilityDescription)))
         return false;
 
-    return pluginLoadPolicy != PluginModuleBlocked && pluginProcessToken;
+    bool isBlockedPlugin = (pluginLoadPolicy == PluginModuleBlockedForSecurity) || (pluginLoadPolicy == PluginModuleBlockedForCompatibility);
+    return !isBlockedPlugin && pluginProcessToken;
 #else
     UNUSED_PARAM(response);
     return false;
@@ -4543,7 +4587,7 @@ bool WebPage::canShowMIMEType(const String& MIMEType) const
         return true;
 
     const PluginData& pluginData = m_page->pluginData();
-    if (pluginData.supportsWebVisibleMimeType(MIMEType, PluginData::AllPlugins) && corePage()->mainFrame().loader().subframeLoader().allowPlugins(NotAboutToInstantiatePlugin))
+    if (pluginData.supportsWebVisibleMimeType(MIMEType, PluginData::AllPlugins) && corePage()->mainFrame().loader().subframeLoader().allowPlugins())
         return true;
 
     // We can use application plugins even if plugins aren't enabled.
@@ -4600,6 +4644,11 @@ void WebPage::didReplaceMultipartContent(const WebFrame& frame)
 
 void WebPage::didCommitLoad(WebFrame* frame)
 {
+#if PLATFORM(IOS)
+    frame->setFirstLayerTreeTransactionIDAfterDidCommitLoad(downcast<RemoteLayerTreeDrawingArea>(*m_drawingArea).nextTransactionID());
+    cancelPotentialTapInFrame(*frame);
+#endif
+
     if (!frame->isMainFrame())
         return;
 
@@ -4618,10 +4667,8 @@ void WebPage::didCommitLoad(WebFrame* frame)
 #if PLATFORM(IOS)
     m_hasReceivedVisibleContentRectsAfterDidCommitLoad = false;
     m_scaleWasSetByUIProcess = false;
-    m_firstLayerTreeTransactionIDAfterDidCommitLoad = downcast<RemoteLayerTreeDrawingArea>(*m_drawingArea).nextTransactionID();
     m_userHasChangedPageScaleFactor = false;
     m_estimatedLatency = std::chrono::milliseconds(1000 / 60);
-    cancelPotentialTap();
 
 #if ENABLE(IOS_TOUCH_EVENTS)
     WebProcess::singleton().eventDispatcher().clearQueuedTouchEventsForPage(*this);
@@ -4889,16 +4936,16 @@ void WebPage::setScrollbarOverlayStyle(WTF::Optional<uint32_t> scrollbarStyle)
     m_page->mainFrame().view()->recalculateScrollbarOverlayStyle();
 }
 
-PassRefPtr<DocumentLoader> WebPage::createDocumentLoader(Frame& frame, const ResourceRequest& request, const SubstituteData& substituteData)
+Ref<DocumentLoader> WebPage::createDocumentLoader(Frame& frame, const ResourceRequest& request, const SubstituteData& substituteData)
 {
-    RefPtr<WebDocumentLoader> documentLoader = WebDocumentLoader::create(request, substituteData);
+    Ref<WebDocumentLoader> documentLoader = WebDocumentLoader::create(request, substituteData);
 
     if (m_pendingNavigationID && frame.isMainFrame()) {
         documentLoader->setNavigationID(m_pendingNavigationID);
         m_pendingNavigationID = 0;
     }
 
-    return documentLoader.release();
+    return WTF::move(documentLoader);
 }
 
 void WebPage::updateCachedDocumentLoader(WebDocumentLoader& documentLoader, Frame& frame)
@@ -5003,5 +5050,12 @@ void WebPage::setUserContentExtensionsEnabled(bool userContentExtensionsEnabled)
 
     m_page->setUserContentExtensionsEnabled(userContentExtensionsEnabled);
 }
+
+#if ENABLE(VIDEO)
+void WebPage::mediaDocumentNaturalSizeChanged(const IntSize& newSize)
+{
+    send(Messages::WebPageProxy::MediaDocumentNaturalSizeChanged(newSize));
+}
+#endif
 
 } // namespace WebKit

@@ -113,7 +113,7 @@ DEFINE_DEBUG_ONLY_GLOBAL(RefCountedLeakCounter, cachedResourceLeakCounter, ("Cac
 
 CachedResource::CachedResource(const ResourceRequest& request, Type type, SessionID sessionID)
     : m_resourceRequest(request)
-    , m_decodedDataDeletionTimer(*this, &CachedResource::decodedDataDeletionTimerFired, deadDecodedDataDeletionIntervalForResourceType(type))
+    , m_decodedDataDeletionTimer(*this, &CachedResource::destroyDecodedData, deadDecodedDataDeletionIntervalForResourceType(type))
     , m_sessionID(sessionID)
     , m_loadPriority(defaultPriorityForResourceType(type))
     , m_responseTimestamp(std::chrono::system_clock::now())
@@ -317,7 +317,7 @@ void CachedResource::error(CachedResource::Status status)
 {
     setStatus(status);
     ASSERT(errorOccurred());
-    m_data.clear();
+    m_data = nullptr;
 
     setLoading(false);
     checkNotify();
@@ -405,6 +405,7 @@ void CachedResource::responseReceived(const ResourceResponse& response)
 void CachedResource::clearLoader()
 {
     ASSERT(m_loader);
+    m_identifierForLoadWithoutResourceLoader = m_loader->identifier();
     m_loader = nullptr;
     deleteIfPossible();
 }

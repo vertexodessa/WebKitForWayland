@@ -50,16 +50,18 @@ public:
     inline void markUsed() { m_timeLastUsed = monotonicallyIncreasingTime(); }
     double lastUsedTime() const { return m_timeLastUsed; }
 
+    bool hasManagedTexture() const { return m_hasManagedTexture; }
+
 private:
 
     RefPtr<BitmapTexture> m_texture;
-    double m_timeLastUsed;
+    double m_timeLastUsed { 0 };
 
     GLuint m_textureID;
     IntSize m_size;
     bool m_hasAlpha;
     bool m_shouldFlip;
-    bool m_isManagedTexture;
+    bool m_hasManagedTexture;
 };
 
 };

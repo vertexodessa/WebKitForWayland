@@ -28,7 +28,7 @@
 
 #include "FloatSize.h"
 #include <wtf/MediaTime.h>
-#include <wtf/ThreadSafeRefCounted.h>
+#include <wtf/RefCounted.h>
 #include <wtf/text/AtomicString.h>
 
 namespace WebCore {
@@ -48,7 +48,7 @@ struct PlatformSample {
     } sample;
 };
 
-class MediaSample : public ThreadSafeRefCounted<MediaSample> {
+class MediaSample : public RefCounted<MediaSample> {
 public:
     virtual ~MediaSample() { }
 
@@ -58,6 +58,8 @@ public:
     virtual AtomicString trackID() const = 0;
     virtual size_t sizeInBytes() const = 0;
     virtual FloatSize presentationSize() const = 0;
+    virtual void offsetTimestampsBy(const MediaTime&) = 0;
+    virtual void setTimestamps(const MediaTime&, const MediaTime&) = 0;
 
     enum SampleFlags {
         None = 0,

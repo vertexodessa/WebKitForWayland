@@ -62,6 +62,7 @@ class AudioSourceProviderGStreamer;
 class AudioTrackPrivateGStreamer;
 class InbandMetadataTextTrackPrivateGStreamer;
 class InbandTextTrackPrivateGStreamer;
+class MediaPlayerRequestInstallMissingPluginsCallback;
 class VideoTrackPrivateGStreamer;
 
 class MediaPlayerPrivateGStreamer : public MediaPlayerPrivateGStreamerBase {
@@ -82,7 +83,7 @@ public:
     void load(const String& url, MediaSourcePrivateClient*) override;
 #endif
 #if ENABLE(MEDIA_STREAM)
-    void load(MediaStreamPrivate*) override;
+    void load(MediaStreamPrivate&) override;
 #endif
     void commitLoad();
     void cancelLoad() override;
@@ -163,6 +164,12 @@ public:
     void notifyAppendComplete();
 #endif
 
+#if ENABLE(ENCRYPTED_MEDIA_V2)
+    void needKey(RefPtr<Uint8Array> initData);
+    void setCDMSession(CDMSession*);
+    void keyAdded();
+#endif
+
 private:
     static void getSupportedTypes(HashSet<String>&);
     static MediaPlayer::SupportsType supportsType(const MediaEngineSupportParameters&);
@@ -171,6 +178,12 @@ private:
     static bool supportsKeySystem(const String& keySystem, const String& mimeType);
 
     GstElement* createAudioSink() override;
+
+#if ENABLE(ENCRYPTED_MEDIA_V2)
+    static MediaPlayer::SupportsType extendedSupportsType(const MediaEngineSupportParameters&);
+    std::unique_ptr<CDMSession> createSession(const String&);
+    CDMSession* m_cdmSession;
+#endif
 
     float playbackPosition() const;
 
@@ -259,7 +272,7 @@ private:
 #endif
     GstState m_requestedState;
     GRefPtr<GstElement> m_autoAudioSink;
-    bool m_missingPlugins;
+    RefPtr<MediaPlayerRequestInstallMissingPluginsCallback> m_missingPluginsCallback;
 #if ENABLE(VIDEO_TRACK)
     Vector<RefPtr<AudioTrackPrivateGStreamer>> m_audioTracks;
     Vector<RefPtr<InbandTextTrackPrivateGStreamer>> m_textTracks;

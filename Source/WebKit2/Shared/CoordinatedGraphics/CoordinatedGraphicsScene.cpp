@@ -112,12 +112,8 @@ void CoordinatedGraphicsScene::paintToCurrentGLContext(const TransformationMatri
     m_textureMapper->endClip();
     m_textureMapper->endPainting();
 
-    if (currentRootLayer->descendantsOrSelfHaveRunningAnimations()) {
-        RefPtr<CoordinatedGraphicsScene> protector(this);
-        dispatchOnClientRunLoop([=] {
-            protector->updateViewport();
-        });
-    }
+    if (currentRootLayer->descendantsOrSelfHaveRunningAnimations() && m_client)
+        m_client->updateViewport();
 }
 
 void CoordinatedGraphicsScene::paintToGraphicsContext(PlatformGraphicsContext* platformContext, const Color& backgroundColor, bool drawsBackground)
@@ -188,9 +184,15 @@ void CoordinatedGraphicsScene::syncPlatformLayerIfNeeded(TextureMapperLayer* lay
         return;
 
     if (state.platformLayerProxy) {
-        m_platformLayerProxies.set(layer, state.platformLayerProxy);
-        state.platformLayerProxy->setCompositor(this);
-        state.platformLayerProxy->setTargetLayer(layer);
+        auto result = m_platformLayerProxies.add(layer, nullptr);
+        ASSERT(result.isNewEntry || result.iterator->value == state.platformLayerProxy);
+        if (!result.iterator->value) {
+            result.iterator->value = state.platformLayerProxy;
+
+            MutexLocker locker(state.platformLayerProxy->mutex());
+            state.platformLayerProxy->setCompositor(locker, this);
+            state.platformLayerProxy->setTargetLayer(locker, layer);
+        }
     } else
         m_platformLayerProxies.remove(layer);
 #else
@@ -202,10 +204,8 @@ void CoordinatedGraphicsScene::syncPlatformLayerIfNeeded(TextureMapperLayer* lay
 #if USE(COORDINATED_GRAPHICS_THREADED)
 void CoordinatedGraphicsScene::onNewBufferAvailable()
 {
-    RefPtr<CoordinatedGraphicsScene> protector(this);
-    dispatchOnClientRunLoop([=] {
-        protector->updateViewport();
-    });
+    if (m_client)
+        m_client->updateViewport();
 }
 #endif
 
@@ -381,8 +381,11 @@ void CoordinatedGraphicsScene::deleteLayer(CoordinatedLayerID layerID)
     m_surfaceBackingStores.remove(layer.get());
 #endif
 #if USE(COORDINATED_GRAPHICS_THREADED)
-    if (auto* platformLayerProxy = m_platformLayerProxies.get(layer.get()))
-        platformLayerProxy->setTargetLayer(nullptr);
+    if (auto* platformLayerProxy = m_platformLayerProxies.get(layer.get())) {
+        MutexLocker locker(platformLayerProxy->mutex());
+        platformLayerProxy->setCompositor(locker, nullptr);
+        platformLayerProxy->setTargetLayer(locker, nullptr);
+    }
     m_platformLayerProxies.remove(layer.get());
 #endif
 }
@@ -614,16 +617,11 @@ void CoordinatedGraphicsScene::commitSceneState(const CoordinatedGraphicsState& 
 
     commitPendingBackingStoreOperations();
     removeReleasedImageBackingsIfNeeded();
-
-    // The pending tiles state is on its way for the screen, tell the web process to render the next one.
-    RefPtr<CoordinatedGraphicsScene> protector(this);
-    dispatchOnMainThread([=] {
-        protector->renderNextFrame();
-    });
 }
 
 void CoordinatedGraphicsScene::renderNextFrame()
 {
+    ASSERT(WTF::isMainThread());
     if (m_client)
         m_client->renderNextFrame();
 }
@@ -738,6 +736,7 @@ void CoordinatedGraphicsScene::setActive(bool active)
 
     m_isActive = active;
     if (m_isActive) {
+        m_clientShouldRenderNextFrame = true;
         RefPtr<CoordinatedGraphicsScene> protector(this);
         dispatchOnMainThread([=] {
             protector->renderNextFrame();

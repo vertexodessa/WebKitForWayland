@@ -1085,6 +1085,10 @@ static void WebKitInitializeGamepadProviderIfNecessary()
 
     _private->page->setDeviceScaleFactor([self _deviceScaleFactor]);
 #endif
+
+#if PLATFORM(IOS)
+    _private->page->settings().setContentDispositionAttachmentSandboxEnabled(true);
+#endif
 }
 
 - (id)_initWithFrame:(NSRect)f frameName:(NSString *)frameName groupName:(NSString *)groupName
@@ -1558,6 +1562,14 @@ static NSMutableSet *knownPluginMIMETypes()
     if (!_private->page)
         return 0;
     return _private->page->renderTreeSize();
+}
+
+- (NSSize)_contentsSizeRespectingOverflow
+{
+    if (FrameView* view = [self _mainCoreFrame]->view())
+        return view->contentsSizeRespectingOverflow();
+    
+    return [[[[self mainFrame] frameView] documentView] bounds].size;
 }
 
 - (void)_dispatchTileDidDraw:(CALayer*)tile
@@ -8273,6 +8285,19 @@ static WebFrameView *containingFrameView(NSView *view)
     if (result == nil)
         result = [self mainFrame];
     return result;
+}
+
+- (void)_clearCredentials
+{
+    Frame* frame = [self _mainCoreFrame];
+    if (!frame)
+        return;
+
+    NetworkingContext* networkingContext = frame->loader().networkingContext();
+    if (!networkingContext)
+        return;
+
+    networkingContext->storageSession().credentialStorage().clearCredentials();
 }
 
 - (BOOL)_needsOneShotDrawingSynchronization

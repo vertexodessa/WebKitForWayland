@@ -149,6 +149,11 @@ public:
         WebsiteDataRecord,
         WebsiteDataStore,
 
+#if ENABLE(MEDIA_SESSION)
+        MediaSessionFocusManager,
+        MediaSessionMetadata,
+#endif
+
         // Bundle types
         Bundle,
         BundleBackForwardList,

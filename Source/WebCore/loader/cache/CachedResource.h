@@ -109,7 +109,7 @@ public:
     virtual bool shouldIgnoreHTTPStatusCodeErrors() const { return false; }
 
     ResourceRequest& resourceRequest() { return m_resourceRequest; }
-    WEBCORE_EXPORT const URL& url() const { return m_resourceRequest.url();}
+    const URL& url() const { return m_resourceRequest.url();}
 #if ENABLE(CACHE_PARTITIONING)
     const String& cachePartition() const { return m_resourceRequest.cachePartition(); }
 #endif
@@ -260,6 +260,8 @@ public:
     virtual char* getOrCreateReadBuffer(size_t /* requestedSize */, size_t& /* actualSize */) { return nullptr; }
 #endif
 
+    unsigned long identifierForLoadWithoutResourceLoader() const { return m_identifierForLoadWithoutResourceLoader; }
+
 protected:
     void setEncodedSize(unsigned);
     void setDecodedSize(unsigned);
@@ -341,9 +343,14 @@ private:
     HashSet<CachedResourceHandleBase*> m_handlesToRevalidate;
 
     RedirectChainCacheStatus m_redirectChainCacheStatus;
+
+    unsigned long m_identifierForLoadWithoutResourceLoader { 0 };
 };
 
 class CachedResource::Callback {
+#if !COMPILER(MSVC)
+    WTF_MAKE_FAST_ALLOCATED;
+#endif
 public:
     Callback(CachedResource&, CachedResourceClient&);
 

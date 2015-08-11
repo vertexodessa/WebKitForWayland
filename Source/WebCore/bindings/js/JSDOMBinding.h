@@ -35,6 +35,7 @@
 #include <heap/Weak.h>
 #include <heap/WeakInlines.h>
 #include <runtime/Error.h>
+#include <runtime/IteratorOperations.h>
 #include <runtime/JSArray.h>
 #include <runtime/JSArrayBuffer.h>
 #include <runtime/JSCJSValueInlines.h>
@@ -211,7 +212,7 @@ template<typename WrapperClass, typename DOMClass> inline JSDOMWrapper* createWr
 {
     ASSERT(node);
     ASSERT(!getCachedWrapper(globalObject->world(), node));
-    WrapperClass* wrapper = WrapperClass::create(getDOMStructure<WrapperClass>(globalObject->vm(), globalObject), globalObject, *node);
+    WrapperClass* wrapper = WrapperClass::create(getDOMStructure<WrapperClass>(globalObject->vm(), globalObject), globalObject, Ref<DOMClass>(*node));
     cacheWrapper(globalObject->world(), node, wrapper);
     return wrapper;
 }
@@ -396,6 +397,21 @@ inline JSC::JSValue toJS(JSC::ExecState* exec, JSDOMGlobalObject*, const String&
     return jsStringOrNull(exec, value);
 }
 
+inline JSC::JSValue toJSIterator(JSC::ExecState& state, JSDOMGlobalObject&, JSC::JSValue value)
+{
+    return createIteratorResultObject(&state, value, false);
+}
+
+template<typename T> inline JSC::JSValue toJSIterator(JSC::ExecState& state, JSDOMGlobalObject& globalObject, const T& value)
+{
+    return createIteratorResultObject(&state, toJS(&state, &globalObject, value), false);
+}
+
+inline JSC::JSValue toJSIteratorEnd(JSC::ExecState& state)
+{
+    return createIteratorResultObject(&state, JSC::jsUndefined(), true);
+}
+
 template<typename T> struct JSValueTraits {
     static JSC::JSValue arrayJSValue(JSC::ExecState* exec, JSDOMGlobalObject* globalObject, const T& value)
     {
@@ -487,6 +503,14 @@ template<> struct NativeValueTraits<float> {
     static inline bool nativeValue(JSC::ExecState* exec, JSC::JSValue jsValue, float& indexedValue)
     {
         indexedValue = jsValue.toFloat(exec);
+        return !exec->hadException();
+    }
+};
+
+template<> struct NativeValueTraits<double> {
+    static inline bool nativeValue(JSC::ExecState* exec, JSC::JSValue jsValue, double& indexedValue)
+    {
+        indexedValue = jsValue.toNumber(exec);
         return !exec->hadException();
     }
 };

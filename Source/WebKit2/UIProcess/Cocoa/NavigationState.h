@@ -73,6 +73,8 @@ public:
     void navigationGestureDidEnd(bool willNavigate, WebBackForwardListItem&);
     void willRecordNavigationSnapshot(WebBackForwardListItem&);
 
+    void didFirstPaint();
+
 private:
     class NavigationClient final : public API::NavigationClient {
     public:
@@ -95,7 +97,7 @@ private:
         virtual bool canAuthenticateAgainstProtectionSpace(WebPageProxy&, WebProtectionSpace*) override;
         virtual void didReceiveAuthenticationChallenge(WebPageProxy&, AuthenticationChallengeProxy*) override;
         virtual void processDidCrash(WebPageProxy&) override;
-        virtual PassRefPtr<API::Data> webCryptoMasterKey(WebPageProxy&) override;
+        virtual RefPtr<API::Data> webCryptoMasterKey(WebPageProxy&) override;
 
 #if USE(QUICK_LOOK)
         virtual void didStartLoadForQuickLookDocumentInMainFrame(const WTF::String& fileName, const WTF::String& uti) override;

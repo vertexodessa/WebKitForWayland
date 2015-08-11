@@ -226,9 +226,9 @@ messages -> WebPageProxy {
     ExecuteUndoRedo(uint32_t action) -> (bool result)
 
     # Diagnostic messages logging
-    LogDiagnosticMessage(String message, String description, bool shouldSample)
-    LogDiagnosticMessageWithResult(String message, String description, uint32_t result, bool shouldSample)
-    LogDiagnosticMessageWithValue(String message, String description, String value, bool shouldSample)
+    LogSampledDiagnosticMessage(String message, String description)
+    LogSampledDiagnosticMessageWithResult(String message, String description, uint32_t result)
+    LogSampledDiagnosticMessageWithValue(String message, String description, String value)
 
     # Editor notifications
     EditorStateChanged(struct WebKit::EditorState editorState)
@@ -267,7 +267,7 @@ messages -> WebPageProxy {
     
 #if ENABLE(MEDIA_STREAM)
     # MediaSteam messages
-    RequestUserMediaPermissionForFrame(uint64_t userMediaID, uint64_t frameID, String originIdentifier, bool audio, bool video)
+    RequestUserMediaPermissionForFrame(uint64_t userMediaID, uint64_t frameID, String originIdentifier, bool audio, bool video, Vector<String> deviceUIDsVideo, Vector<String> deviceUIDsAudio)
 #endif
 
     # Notification messages
@@ -425,7 +425,9 @@ messages -> WebPageProxy {
     IsPlayingMediaDidChange(unsigned state)
 
 #if ENABLE(MEDIA_SESSION)
+    HasMediaSessionWithActiveMediaElementsDidChange(bool state)
     MediaSessionMetadataDidChange(WebCore::MediaSessionMetadata metadata);
+    FocusedContentMediaElementDidChange(uint64_t elementID)
 #endif
 
 #if PLATFORM(MAC)
@@ -443,6 +445,14 @@ messages -> WebPageProxy {
     PlaybackTargetPickerClientStateDidChange(uint64_t contextId, unsigned mediaState)
 #endif
 
+#if ENABLE(VIDEO)
+    MediaDocumentNaturalSizeChanged(WebCore::IntSize newSize)
+#endif
+
     UseFixedLayoutDidChange(bool useFixedLayout)
     FixedLayoutSizeDidChange(WebCore::IntSize fixedLayoutSize)
+
+#if ENABLE(VIDEO) && USE(GSTREAMER)
+    RequestInstallMissingMediaPlugins(String details)
+#endif
 }

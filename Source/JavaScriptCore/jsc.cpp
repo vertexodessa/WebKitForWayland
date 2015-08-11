@@ -28,6 +28,7 @@
 #include "CodeBlock.h"
 #include "Completion.h"
 #include "CopiedSpaceInlines.h"
+#include "DFGPlan.h"
 #include "Disassembler.h"
 #include "Exception.h"
 #include "ExceptionHelpers.h"
@@ -42,6 +43,7 @@
 #include "JSONObject.h"
 #include "JSProxy.h"
 #include "JSString.h"
+#include "JSWASMModule.h"
 #include "ProfilerDatabase.h"
 #include "SamplingTool.h"
 #include "StackVisitor.h"
@@ -49,6 +51,7 @@
 #include "StructureRareDataInlines.h"
 #include "TestRunnerUtils.h"
 #include "TypeProfilerLog.h"
+#include "WASMModuleParser.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -491,6 +494,12 @@ static EncodedJSValue JSC_HOST_CALL functionReturnTypeFor(ExecState*);
 static EncodedJSValue JSC_HOST_CALL functionDumpBasicBlockExecutionRanges(ExecState*);
 static EncodedJSValue JSC_HOST_CALL functionHasBasicBlockExecuted(ExecState*);
 static EncodedJSValue JSC_HOST_CALL functionEnableExceptionFuzz(ExecState*);
+#if ENABLE(WEBASSEMBLY)
+static EncodedJSValue JSC_HOST_CALL functionLoadWebAssembly(ExecState*);
+#endif
+#if ENABLE(ES6_MODULES)
+static EncodedJSValue JSC_HOST_CALL functionCheckModuleSyntax(ExecState*);
+#endif
 
 #if ENABLE(SAMPLING_FLAGS)
 static EncodedJSValue JSC_HOST_CALL functionSetSamplingFlags(ExecState*);
@@ -654,6 +663,13 @@ protected:
 
         addFunction(vm, "enableExceptionFuzz", functionEnableExceptionFuzz, 0);
         
+#if ENABLE(WEBASSEMBLY)
+        addFunction(vm, "loadWebAssembly", functionLoadWebAssembly, 1);
+#endif
+#if ENABLE(ES6_MODULES)
+        addFunction(vm, "checkModuleSyntax", functionCheckModuleSyntax, 1);
+#endif
+
         JSArray* array = constructEmptyArray(globalExec(), 0);
         for (size_t i = 0; i < arguments.size(); ++i)
             array->putDirectIndex(globalExec(), i, jsString(globalExec(), arguments[i]));
@@ -1182,6 +1198,41 @@ EncodedJSValue JSC_HOST_CALL functionEnableExceptionFuzz(ExecState*)
     return JSValue::encode(jsUndefined());
 }
 
+#if ENABLE(WEBASSEMBLY)
+EncodedJSValue JSC_HOST_CALL functionLoadWebAssembly(ExecState* exec)
+{
+    String fileName = exec->argument(0).toString(exec)->value(exec);
+    Vector<char> buffer;
+    if (!fillBufferWithContentsOfFile(fileName, buffer))
+        return JSValue::encode(exec->vm().throwException(exec, createError(exec, ASCIILiteral("Could not open file."))));
+    RefPtr<WebAssemblySourceProvider> sourceProvider = WebAssemblySourceProvider::create(reinterpret_cast<Vector<uint8_t>&>(buffer), fileName);
+    SourceCode source(sourceProvider);
+    String errorMessage;
+    JSWASMModule* module = parseWebAssembly(exec, source, errorMessage);
+    if (!module)
+        return JSValue::encode(exec->vm().throwException(exec, createSyntaxError(exec, errorMessage)));
+    return JSValue::encode(module);
+}
+#endif
+
+#if ENABLE(ES6_MODULES)
+EncodedJSValue JSC_HOST_CALL functionCheckModuleSyntax(ExecState* exec)
+{
+    String source = exec->argument(0).toString(exec)->value(exec);
+
+    StopWatch stopWatch;
+    stopWatch.start();
+
+    ParserError error;
+    bool validSyntax = checkModuleSyntax(exec->vm(), makeSource(source), error);
+    stopWatch.stop();
+
+    if (!validSyntax)
+        exec->vm().throwException(exec, jsNontrivialString(exec, toString("SyntaxError: ", error.message(), ":", error.line())));
+    return JSValue::encode(jsNumber(stopWatch.getElapsedMS()));
+}
+#endif
+
 // Use SEH for Release builds only to get rid of the crash report dialog
 // (luckily the same tests fail in Release and Debug builds so far). Need to
 // be in a separate main function because the jscmain function requires object
@@ -1247,11 +1298,10 @@ int main(int argc, char** argv)
     ecore_init();
 #endif
 
-    // Initialize JSC before getting VM.
-#if ENABLE(SAMPLING_REGIONS)
-    WTF::initializeMainThread();
-#endif
-    JSC::initializeThreading();
+    // Need to initialize WTF threading before we start any threads. Cannot initialize JSC
+    // threading yet, since that would do somethings that we'd like to defer until after we
+    // have a chance to parse options.
+    WTF::initializeThreading();
 
     if (char* timeoutString = getenv("JSC_timeout")) {
         if (sscanf(timeoutString, "%lf", &s_desiredTimeout) != 1) {
@@ -1400,6 +1450,7 @@ static void runInteractive(GlobalObject* globalObject)
             printf("%s\n", returnValue.toString(globalObject->globalExec())->value(globalObject->globalExec()).utf8().data());
 
         globalObject->globalExec()->clearException();
+        globalObject->vm().drainMicrotasks();
     }
     printf("\n");
 }
@@ -1428,6 +1479,8 @@ static NO_RETURN void printUsageStatement(bool help = false)
 
 void CommandLine::parseArguments(int argc, char** argv)
 {
+    Options::initialize();
+    
     int i = 1;
     bool needToDumpOptions = false;
     bool needToExit = false;
@@ -1492,8 +1545,7 @@ void CommandLine::parseArguments(int argc, char** argv)
         }
 
         // See if the -- option is a JSC VM option.
-        // NOTE: At this point, we know that the arg starts with "--". Skip it.
-        if (JSC::Options::setOption(&arg[2])) {
+        if (strstr(arg, "--") == arg && JSC::Options::setOption(&arg[2])) {
             // The arg was recognized as a VM option and has been parsed.
             continue; // Just continue with the next arg. 
         }
@@ -1521,6 +1573,13 @@ int jscmain(int argc, char** argv)
     // Note that the options parsing can affect VM creation, and thus
     // comes first.
     CommandLine options(argc, argv);
+
+    // Initialize JSC before getting VM.
+#if ENABLE(SAMPLING_REGIONS)
+    WTF::initializeMainThread();
+#endif
+    JSC::initializeThreading();
+
     VM* vm = &VM::create(LargeHeap).leakRef();
     int result;
     {
@@ -1551,9 +1610,18 @@ int jscmain(int argc, char** argv)
             Options::fireExecutableAllocationFuzzAt() || Options::fireExecutableAllocationFuzzAtOrAfter();
         if (Options::enableExecutableAllocationFuzz() && (!fireAtEnabled || Options::verboseExecutableAllocationFuzz()))
             printf("JSC EXECUTABLE ALLOCATION FUZZ: encountered %u checks.\n", numberOfExecutableAllocationFuzzChecks());
-        if (Options::enableOSRExitFuzz())
-            printf("JSC OSR EXIT FUZZ: encountered %u checks.\n", numberOfOSRExitFuzzChecks());
+        if (Options::enableOSRExitFuzz()) {
+            printf("JSC OSR EXIT FUZZ: encountered %u static checks.\n", numberOfStaticOSRExitFuzzChecks());
+            printf("JSC OSR EXIT FUZZ: encountered %u dynamic checks.\n", numberOfOSRExitFuzzChecks());
+        }
 #endif
+        auto compileTimeStats = DFG::Plan::compileTimeStats();
+        Vector<CString> compileTimeKeys;
+        for (auto& entry : compileTimeStats)
+            compileTimeKeys.append(entry.key);
+        std::sort(compileTimeKeys.begin(), compileTimeKeys.end());
+        for (CString key : compileTimeKeys)
+            printf("%40s: %.3lf ms\n", key.data(), compileTimeStats.get(key));
     }
     
     return result;

@@ -1928,6 +1928,7 @@ static const AccessibilityRoleMap& createAccessibilityRoleMap()
         { ListBoxRole, NSAccessibilityListRole },
         { ListBoxOptionRole, NSAccessibilityStaticTextRole },
         { CellRole, NSAccessibilityCellRole },
+        { GridCellRole, NSAccessibilityCellRole },
         { TableHeaderContainerRole, NSAccessibilityGroupRole },
         { ColumnHeaderRole, NSAccessibilityCellRole },
         { RowHeaderRole, NSAccessibilityCellRole },
@@ -3096,7 +3097,8 @@ static NSString* roleValueToNSString(AccessibilityRole value)
     if ([attributeName isEqualToString: NSAccessibilitySelectedChildrenAttribute])
         return m_object->canSetSelectedChildrenAttribute();
     
-    if ([attributeName isEqualToString:NSAccessibilityDisclosingAttribute])
+    if ([attributeName isEqualToString:NSAccessibilityDisclosingAttribute]
+        || [attributeName isEqualToString:NSAccessibilityExpandedAttribute])
         return m_object->canSetExpandedAttribute();
     
     if ([attributeName isEqualToString:NSAccessibilitySelectedRowsAttribute])
@@ -3423,7 +3425,7 @@ static NSString* roleValueToNSString(AccessibilityRole value)
         } else if ([attributeName isEqualToString: NSAccessibilityVisibleCharacterRangeAttribute]) {
             m_object->makeRangeVisible(PlainTextRange(range.location, range.length));
         }
-    } else if ([attributeName isEqualToString:NSAccessibilityDisclosingAttribute])
+    } else if ([attributeName isEqualToString:NSAccessibilityDisclosingAttribute] || [attributeName isEqualToString:NSAccessibilityExpandedAttribute])
         m_object->setIsExpanded([number boolValue]);
     else if ([attributeName isEqualToString:NSAccessibilitySelectedRowsAttribute]) {
         AccessibilityObject::AccessibilityChildrenVector selectedRows;
@@ -4046,8 +4048,9 @@ static void formatForDebugger(const VisiblePositionRange& range, char* buffer, u
             
             NSUInteger arrayLength = std::min(childCount - index, maxCount);
             return [children subarrayWithRange:NSMakeRange(index, arrayLength)];
-        } else if (m_object->isTree()) {
-            // Tree objects return their rows as their children. We can use the original method in this case.
+        } else if (m_object->isTree() || m_object->isTreeItem()) {
+            // Tree objects return their rows as their children & tree items return their contents sans rows.
+            // We can use the original method in this case.
             return [super accessibilityArrayAttributeValues:attribute index:index maxCount:maxCount];
         }
         

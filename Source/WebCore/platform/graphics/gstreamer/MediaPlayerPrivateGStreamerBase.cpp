@@ -657,14 +657,15 @@ void MediaPlayerPrivateGStreamerBase::updateOnCompositorThread()
             return;
         }
 
-        if (!m_platformLayerProxy->hasTargetLayer()) {
+        MutexLocker locker(m_platformLayerProxy->mutex());
+        if (!m_platformLayerProxy->hasTargetLayer(locker)) {
             g_cond_signal(&m_updateCondition);
             return;
         }
 
         IntSize size = IntSize(GST_VIDEO_INFO_WIDTH(&videoInfo), GST_VIDEO_INFO_HEIGHT(&videoInfo));
 
-        unique_ptr<TextureMapperPlatformLayerBuffer> buffer = m_platformLayerProxy->getAvailableBuffer(size);
+        unique_ptr<TextureMapperPlatformLayerBuffer> buffer = m_platformLayerProxy->getAvailableBuffer(locker, size);
         if (UNLIKELY(!buffer)) {
             if (UNLIKELY(!m_context3D))
                 m_context3D = GraphicsContext3D::create(GraphicsContext3D::Attributes(), nullptr, GraphicsContext3D::RenderToCurrentGLContext);
@@ -675,7 +676,8 @@ void MediaPlayerPrivateGStreamerBase::updateOnCompositorThread()
         }
 
         updateTexture(buffer->textureGL(), videoInfo);
-        m_platformLayerProxy->pushNextBuffer(WTF::move(buffer), TextureMapperPlatformLayerProxy::PushOnCompositionThread);
+        m_platformLayerProxy->pushNextBuffer(locker, WTF::move(buffer));
+        m_platformLayerProxy->requestUpdate(locker);
     }
 
     g_cond_signal(&m_updateCondition);
@@ -692,9 +694,8 @@ void MediaPlayerPrivateGStreamerBase::triggerRepaint(GstSample* sample)
 #if USE(COORDINATED_GRAPHICS_THREADED)
     {
         WTF::GMutexLocker<GMutex> lock(m_updateMutex);
-        m_platformLayerProxy->scheduleUpdateOnCompositorThread([this] {
-            this->updateOnCompositorThread();
-        });
+        if (!m_platformLayerProxy->scheduleUpdateOnCompositorThread([this] { this->updateOnCompositorThread(); }))
+            return;
         g_cond_wait(&m_updateCondition, &m_updateMutex);
     }
     return;

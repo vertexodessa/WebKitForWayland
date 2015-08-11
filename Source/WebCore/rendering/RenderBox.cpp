@@ -43,6 +43,7 @@
 #include "HTMLTextAreaElement.h"
 #include "HitTestResult.h"
 #include "InlineElementBox.h"
+#include "MainFrame.h"
 #include "Page.h"
 #include "PaintInfo.h"
 #include "RenderBoxRegionInfo.h"
@@ -434,6 +435,10 @@ void RenderBox::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle
     if ((oldStyle && oldStyle->shapeOutside()) || style().shapeOutside())
         updateShapeOutsideInfoAfterStyleChange(style(), oldStyle);
 #endif
+
+#if ENABLE(CSS_GRID_LAYOUT)
+    updateGridAlignmentAfterStyleChange(oldStyle);
+#endif
 }
 
 #if ENABLE(CSS_SHAPES)
@@ -459,6 +464,24 @@ void RenderBox::updateShapeOutsideInfoAfterStyleChange(const RenderStyle& style,
 
     if (shapeOutside || shapeOutside != oldShapeOutside)
         markShapeOutsideDependentsForLayout();
+}
+#endif
+
+#if ENABLE(CSS_GRID_LAYOUT)
+void RenderBox::updateGridAlignmentAfterStyleChange(const RenderStyle* oldStyle)
+{
+    if (!oldStyle || !parent() || !parent()->isRenderGrid())
+        return;
+
+    // auto-margin prevents alignment properties to be applied, which affects specially
+    // to the stretching logic. We must detect and handling style changes like this.
+    bool isHorizontalGrid = parent()->isHorizontalWritingMode();
+    Length topOrLeft = isHorizontalGrid ? style().marginTop() : style().marginLeft();
+    Length bottomOrRight = isHorizontalGrid ? style().marginBottom() : style().marginRight();
+    Length oldTopOrLeft = isHorizontalGrid ? oldStyle->marginTop() : oldStyle->marginLeft();
+    Length oldBottomOrRight = isHorizontalGrid ? oldStyle->marginBottom() : oldStyle->marginRight();
+    if ((!topOrLeft.isAuto() && oldTopOrLeft.isAuto()) || (!bottomOrRight.isAuto() && oldBottomOrRight.isAuto()))
+        updateLogicalHeight();
 }
 #endif
 
@@ -1300,6 +1323,7 @@ void RenderBox::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoint& pai
     // If we have a native theme appearance, paint that before painting our background.
     // The theme will tell us whether or not we should also paint the CSS background.
     ControlStates* controlStates = nullptr;
+    bool borderOrBackgroundPaintingIsNeeded = true;
     if (style().hasAppearance()) {
         if (hasControlStatesForRenderer(this))
             controlStates = controlStatesForRenderer(this);
@@ -1307,14 +1331,12 @@ void RenderBox::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoint& pai
             controlStates = new ControlStates();
             addControlStatesForRenderer(this, controlStates);
         }
+        borderOrBackgroundPaintingIsNeeded = theme().paint(*this, *controlStates, paintInfo, paintRect);
+        if (controlStates->needsRepaint())
+            view().scheduleLazyRepaint(*this);
     }
 
-    bool themePainted = style().hasAppearance() && !theme().paint(*this, controlStates, paintInfo, paintRect);
-
-    if (controlStates && controlStates->needsRepaint())
-        view().scheduleLazyRepaint(*this);
-
-    if (!themePainted) {
+    if (borderOrBackgroundPaintingIsNeeded) {
         if (bleedAvoidance == BackgroundBleedBackgroundOverBorder)
             paintBorder(paintInfo, paintRect, style(), bleedAvoidance);
 
@@ -1326,7 +1348,7 @@ void RenderBox::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoint& pai
     paintBoxShadow(paintInfo, paintRect, style(), Inset);
 
     // The theme will tell us whether or not we should also paint the CSS border.
-    if (bleedAvoidance != BackgroundBleedBackgroundOverBorder && (!style().hasAppearance() || (!themePainted && theme().paintBorderOnly(*this, paintInfo, paintRect))) && style().hasBorderDecoration())
+    if (bleedAvoidance != BackgroundBleedBackgroundOverBorder && (!style().hasAppearance() || (borderOrBackgroundPaintingIsNeeded && theme().paintBorderOnly(*this, paintInfo, paintRect))) && style().hasBorderDecoration())
         paintBorder(paintInfo, paintRect, style(), bleedAvoidance);
 
     if (bleedAvoidance == BackgroundBleedUseTransparencyLayer)
@@ -1573,7 +1595,7 @@ LayoutRect RenderBox::maskClipRect(const LayoutPoint& paintOffset)
     LayoutRect result;
     LayoutRect borderBox = borderBoxRect();
     for (const FillLayer* maskLayer = style().maskLayers(); maskLayer; maskLayer = maskLayer->next()) {
-        if (maskLayer->maskImage()) {
+        if (maskLayer->image()) {
             // Masks should never have fixed attachment, so it's OK for paintContainer to be null.
             BackgroundImageGeometry geometry = calculateBackgroundImageGeometry(nullptr, *maskLayer, paintOffset, borderBox);
             result.unite(geometry.destRect());
@@ -4497,7 +4519,7 @@ void RenderBox::addVisualOverflow(const LayoutRect& rect)
 
 void RenderBox::clearOverflow()
 {
-    m_overflow.clear();
+    m_overflow = nullptr;
     RenderFlowThread* flowThread = flowThreadContainingBlock();
     if (flowThread)
         flowThread->clearRegionsOverflow(this);
@@ -4981,6 +5003,9 @@ const RenderBox* RenderBox::findEnclosingScrollableContainer() const
         if (candidate.hasOverflowClip())
             return &candidate;
     }
+    // If all parent elements are not overflow scrollable, check the body.
+    if (document().body() && frame().mainFrame().view() && frame().mainFrame().view()->isScrollable())
+        return document().body()->renderBox();
     
     return nullptr;
 }

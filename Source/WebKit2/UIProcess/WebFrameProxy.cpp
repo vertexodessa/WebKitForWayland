@@ -57,11 +57,11 @@ WebFrameProxy::~WebFrameProxy()
 
 void WebFrameProxy::webProcessWillShutDown()
 {
-    m_page = 0;
+    m_page = nullptr;
 
     if (m_activeListener) {
         m_activeListener->invalidate();
-        m_activeListener = 0;
+        m_activeListener = nullptr;
     }
 }
 
@@ -108,6 +108,11 @@ bool WebFrameProxy::canShowMIMEType(const String& mimeType) const
 bool WebFrameProxy::isDisplayingStandaloneImageDocument() const
 {
     return Image::supportsType(m_MIMEType);
+}
+
+bool WebFrameProxy::isDisplayingStandaloneMediaDocument() const
+{
+    return MIMETypeRegistry::isSupportedMediaMIMEType(m_MIMEType);
 }
 
 bool WebFrameProxy::isDisplayingMarkupDocument() const

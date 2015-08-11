@@ -55,7 +55,7 @@ void PageClientImpl::scrollView(const WebCore::IntRect&, const WebCore::IntSize&
 {
 }
 
-void PageClientImpl::requestScroll(const WebCore::FloatPoint&, bool)
+void PageClientImpl::requestScroll(const WebCore::FloatPoint&, const WebCore::IntPoint&, bool)
 {
 }
 
@@ -177,12 +177,12 @@ void PageClientImpl::doneWithTouchEvent(const NativeWebTouchEvent&, bool)
 {
 }
 
-PassRefPtr<WebPopupMenuProxy> PageClientImpl::createPopupMenuProxy(WebPageProxy*)
+RefPtr<WebPopupMenuProxy> PageClientImpl::createPopupMenuProxy(WebPageProxy*)
 {
     return nullptr;
 }
 
-PassRefPtr<WebContextMenuProxy> PageClientImpl::createContextMenuProxy(WebPageProxy*)
+RefPtr<WebContextMenuProxy> PageClientImpl::createContextMenuProxy(WebPageProxy*)
 {
     return nullptr;
 }
@@ -223,11 +223,11 @@ void PageClientImpl::navigationGestureWillEnd(bool, WebBackForwardListItem&)
 {
 }
 
-void PageClientImpl::navigationGestureDidEnd()
+void PageClientImpl::navigationGestureDidEnd(bool, WebBackForwardListItem&)
 {
 }
 
-void PageClientImpl::navigationGestureDidEnd(bool, WebBackForwardListItem&)
+void PageClientImpl::navigationGestureDidEnd()
 {
 }
 
@@ -254,5 +254,26 @@ void PageClientImpl::didSameDocumentNavigationForMainFrame(SameDocumentNavigatio
 void PageClientImpl::didChangeBackgroundColor()
 {
 }
+
+#if ENABLE(VIDEO)
+void PageClientImpl::mediaDocumentNaturalSizeChanged(const WebCore::IntSize&)
+{
+}
+#endif
+
+void PageClientImpl::refView()
+{
+}
+
+void PageClientImpl::derefView()
+{
+}
+
+#if USE(GSTREAMER)
+GUniquePtr<GstInstallPluginsContext> PageClientImpl::createGstInstallPluginsContext()
+{
+    return nullptr;
+}
+#endif
 
 } // namespace WebKit

@@ -30,7 +30,7 @@ namespace WebCore {
 
 TextureMapperPlatformLayerBuffer::TextureMapperPlatformLayerBuffer(RefPtr<BitmapTexture>&& texture)
     : m_texture(WTF::move(texture))
-    , m_isManagedTexture(true)
+    , m_hasManagedTexture(true)
 {
 }
 
@@ -39,7 +39,7 @@ TextureMapperPlatformLayerBuffer::TextureMapperPlatformLayerBuffer(GLuint textur
     , m_size(size)
     , m_hasAlpha(hasAlpha)
     , m_shouldFlip(shouldFlip)
-    , m_isManagedTexture(false)
+    , m_hasManagedTexture(false)
 {
 }
 
@@ -49,12 +49,12 @@ TextureMapperPlatformLayerBuffer::~TextureMapperPlatformLayerBuffer()
 
 bool TextureMapperPlatformLayerBuffer::canReuseWithoutReset(const IntSize& size, GC3Dint internalFormat)
 {
-    return m_texture->canReuseWith(size) && (static_cast<BitmapTextureGL*>(m_texture.get())->internalFormat() == internalFormat || internalFormat == GraphicsContext3D::DONT_CARE);
+    return m_texture && m_texture->canReuseWith(size) && (static_cast<BitmapTextureGL*>(m_texture.get())->internalFormat() == internalFormat || internalFormat == GraphicsContext3D::DONT_CARE);
 }
 
 void TextureMapperPlatformLayerBuffer::paintToTextureMapper(TextureMapper* textureMapper, const FloatRect& targetRect, const TransformationMatrix& modelViewMatrix, float opacity)
 {
-    if (m_isManagedTexture) {
+    if (m_hasManagedTexture) {
         ASSERT(m_texture);
         textureMapper->drawTexture(*m_texture, targetRect, modelViewMatrix, opacity);
         return;

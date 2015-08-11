@@ -69,10 +69,16 @@ private:
         virtual void exceededDatabaseQuota(WebPageProxy*, WebFrameProxy*, API::SecurityOrigin*, const WTF::String& databaseName, const WTF::String& displayName, unsigned long long currentQuota, unsigned long long currentOriginUsage, unsigned long long currentUsage, unsigned long long expectedUsage, std::function<void (unsigned long long)>) override;
         virtual void reachedApplicationCacheOriginQuota(WebPageProxy*, const WebCore::SecurityOrigin&, uint64_t currentQuota, uint64_t totalBytesNeeded, std::function<void (unsigned long long)> completionHandler) override;
         virtual void printFrame(WebKit::WebPageProxy*, WebKit::WebFrameProxy*) override;
-    #if PLATFORM(IOS)
+#if PLATFORM(IOS)
+#if HAVE(APP_LINKS)
+        virtual bool shouldIncludeAppLinkActionsForElement(_WKActivatedElementInfo *) override;
+#endif
         virtual RetainPtr<NSArray> actionsForElement(_WKActivatedElementInfo *, RetainPtr<NSArray> defaultActions) override;
         virtual void didNotHandleTapAsClick(const WebCore::IntPoint&) override;
-    #endif
+#endif
+#if ENABLE(VIDEO)
+        virtual void mediaDocumentNaturalSizeChanged(const WebCore::IntSize&) override;
+#endif
 
         UIDelegate& m_uiDelegate;
     };
@@ -94,8 +100,14 @@ private:
         bool webViewDidEnterFullscreen : 1;
         bool webViewDidExitFullscreen : 1;
 #if PLATFORM(IOS)
+#if HAVE(APP_LINKS)
+        bool webViewShouldIncludeAppLinkActionsForElement : 1;
+#endif
         bool webViewActionsForElementDefaultActions : 1;
         bool webViewDidNotHandleTapAsClickAtPoint : 1;
+#endif
+#if ENABLE(VIDEO)
+        bool webViewMediaDocumentNaturalSizeChanged : 1;
 #endif
     } m_delegateMethods;
 };

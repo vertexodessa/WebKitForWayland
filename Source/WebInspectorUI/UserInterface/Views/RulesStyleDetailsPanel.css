@@ -24,7 +24,7 @@
  */
 
 .sidebar > .panel.details.css-style .rules .label {
-    color: rgb(60%, 60%, 60%);
+    color: hsl(0, 0%, 60%);
     text-shadow: white 0 1px 0;
 
     padding: 0 10px;
@@ -36,7 +36,7 @@
 
 .sidebar > .panel.details.css-style .rules .label + .style-declaration-section {
     margin-top: 5px;
-    border-top: 1px solid rgb(179, 179, 179);
+    border-top: 1px solid hsla(0, 0%, 0%, 0.3);
 }
 
 .sidebar > .panel.details.css-style .rules .new-rule {
@@ -52,6 +52,10 @@
     opacity: 0.5;
 }
 
+.sidebar > .panel.details.css-style .rules > *:first-child:matches(.new-rule) {
+    margin-top: 8px;
+}
+
 .sidebar > .panel.details.css-style > .content.filter-in-progress .label {
     padding-top: 15px;
 }
@@ -62,7 +66,11 @@
 
 .sidebar > .panel.details.css-style > .content.filter-in-progress .label.filter-matching-label {
     padding-bottom: 5px;
-    border-bottom: 1px solid rgb(179, 179, 179);
+    border-bottom: 1px solid hsla(0, 0%, 0%, 0.3);
+}
+
+.sidebar > .panel.details.css-style > .content.filter-in-progress .label:not(.filter-section-non-matching) + .label.filter-matching-label:not(.filter-section-non-matching) {
+    padding-top: 0;
 }
 
 .sidebar > .panel.details.css-style > .content.filter-in-progress .new-rule {
@@ -74,12 +82,12 @@
 }
 
 .sidebar > .panel.details.css-style > .content:not(.filter-in-progress) > .rules > .new-rule + .style-declaration-section {
-    border-top: 1px solid rgb(179, 179, 179);
+    border-top: 1px solid hsla(0, 0%, 0%, 0.3);
 }
 
 .sidebar > .panel.details.css-style > .content:not(.filter-in-progress) > .rules > .new-rule + .label {
     padding-top: 10px;
-    border-top: 1px solid rgb(179, 179, 179);
+    border-top: 1px solid hsla(0, 0%, 0%, 0.3);
 }
 
 .sidebar > .panel.details.css-style .rules .new-rule img {
@@ -119,9 +127,17 @@
 .sidebar > .panel.details.css-style > .content.filter-in-progress > .rules.filter-non-matching > .no-filter-results > .no-filter-results-message {
     font-size: 13px;
     color: white;
-    background-color: rgba(0, 0, 0, 0.15);
-    text-shadow: rgba(0, 0, 0, 0.2) 0 1px 0;
-    box-shadow: inset rgba(0, 0, 0, 0.2) 0 1px 0, rgba(255, 255, 255, 0.4) 0 1px 0;
+    background-color: hsla(0, 0%, 0%, 0.15);
+    text-shadow: hsla(0, 0%, 0%, 0.2) 0 1px 0;
+    box-shadow: inset hsla(0, 0%, 0%, 0.2) 0 1px 0, hsla(0, 0%, 100%, 0.4) 0 1px 0;
     border-radius: 6px;
     padding: 5px 15px 6px;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2) {
+    .sidebar > .panel.details.css-style > .content:not(.filter-in-progress) > .rules > .new-rule + .label,
+    .sidebar > .panel.details.css-style > .content.filter-in-progress .label.filter-matching-label,
+    .no-filter-results-message {
+        border-width: 0.5px !important;
+    }
 }

@@ -264,7 +264,7 @@ void HTMLLinkElement::clearSheet()
     ASSERT(m_sheet);
     ASSERT(m_sheet->ownerNode() == this);
     m_sheet->clearOwnerNode();
-    m_sheet = 0;
+    m_sheet = nullptr;
 }
 
 Node::InsertionNotificationRequest HTMLLinkElement::insertedInto(ContainerNode& insertionPoint)
@@ -346,7 +346,7 @@ void HTMLLinkElement::setCSSStyleSheet(const String& href, const URL& baseURL, c
     m_sheet->setMediaQueries(MediaQuerySet::createAllowingDescriptionSyntax(m_media));
     m_sheet->setTitle(title());
 
-    styleSheet.get().parseAuthorStyleSheet(cachedStyleSheet);
+    styleSheet.get().parseAuthorStyleSheet(cachedStyleSheet, document().securityOrigin());
 
     m_loading = false;
     styleSheet.get().notifyLoadedSheet(cachedStyleSheet);

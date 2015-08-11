@@ -29,6 +29,7 @@
 #if ENABLE(VIDEO)
 
 #include "AudioSession.h"
+#include "Document.h"
 #include "Logging.h"
 #include "NotImplemented.h"
 #include "PlatformMediaSession.h"
@@ -36,10 +37,18 @@
 namespace WebCore {
 
 #if !PLATFORM(IOS)
+static PlatformMediaSessionManager* platformMediaSessionManager = nullptr;
+
 PlatformMediaSessionManager& PlatformMediaSessionManager::sharedManager()
 {
-    DEPRECATED_DEFINE_STATIC_LOCAL(PlatformMediaSessionManager, manager, ());
-    return manager;
+    if (!platformMediaSessionManager)
+        platformMediaSessionManager = new PlatformMediaSessionManager;
+    return *platformMediaSessionManager;
+}
+
+PlatformMediaSessionManager* PlatformMediaSessionManager::sharedManagerIfExists()
+{
+    return platformMediaSessionManager;
 }
 #endif
 
@@ -282,6 +291,20 @@ void PlatformMediaSessionManager::applicationWillEnterBackground() const
     }
 }
 
+void PlatformMediaSessionManager::applicationDidEnterBackground(bool isSuspendedUnderLock) const
+{
+    LOG(Media, "PlatformMediaSessionManager::applicationDidEnterBackground");
+
+    if (!isSuspendedUnderLock)
+        return;
+
+    Vector<PlatformMediaSession*> sessions = m_sessions;
+    for (auto* session : sessions) {
+        if (m_restrictions[session->mediaType()] & BackgroundProcessPlaybackRestricted)
+            session->forceInterruption(PlatformMediaSession::EnteringBackground);
+    }
+}
+
 void PlatformMediaSessionManager::applicationWillEnterForeground() const
 {
     LOG(Media, "PlatformMediaSessionManager::applicationWillEnterForeground");
@@ -327,6 +350,22 @@ void PlatformMediaSessionManager::systemDidWake()
 void PlatformMediaSessionManager::audioOutputDeviceChanged()
 {
     updateSessionState();
+}
+
+void PlatformMediaSessionManager::stopAllMediaPlaybackForDocument(const Document* document)
+{
+    Vector<PlatformMediaSession*> sessions = m_sessions;
+    for (auto* session : sessions) {
+        if (session->client().hostingDocument() == document)
+            session->pauseSession();
+    }
+}
+
+void PlatformMediaSessionManager::stopAllMediaPlaybackForProcess()
+{
+    Vector<PlatformMediaSession*> sessions = m_sessions;
+    for (auto* session : sessions)
+        session->pauseSession();
 }
 
 }

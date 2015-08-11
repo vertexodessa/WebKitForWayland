@@ -160,6 +160,7 @@ WebProcessPool::WebProcessPool(API::ProcessPoolConfiguration& configuration)
     , m_processTerminationEnabled(true)
 #if ENABLE(NETWORK_PROCESS)
     , m_canHandleHTTPSServerTrustEvaluation(true)
+    , m_didNetworkProcessCrash(false)
 #endif
 #if USE(SOUP)
     , m_ignoreTLSErrors(true)
@@ -190,6 +191,9 @@ WebProcessPool::WebProcessPool(API::ProcessPoolConfiguration& configuration)
 #endif
 #if ENABLE(BATTERY_STATUS)
     addSupplement<WebBatteryManagerProxy>();
+#endif
+#if ENABLE(MEDIA_SESSION)
+    addSupplement<WebMediaSessionFocusManager>();
 #endif
 
     processPools().append(this);
@@ -419,6 +423,12 @@ NetworkProcessProxy& WebProcessPool::ensureNetworkProcess()
     m_networkProcess->send(Messages::NetworkProcess::SetQOS(networkProcessLatencyQOS(), networkProcessThroughputQOS()), 0);
 #endif
 
+    if (m_didNetworkProcessCrash) {
+        m_didNetworkProcessCrash = false;
+        for (auto& process : m_processes)
+            process->reinstateNetworkProcessAssertionState(*m_networkProcess);
+    }
+
     return *m_networkProcess;
 }
 
@@ -426,6 +436,7 @@ void WebProcessPool::networkProcessCrashed(NetworkProcessProxy* networkProcessPr
 {
     ASSERT(m_networkProcess);
     ASSERT(networkProcessProxy == m_networkProcess.get());
+    m_didNetworkProcessCrash = true;
 
     WebContextSupplementMap::const_iterator it = m_supplements.begin();
     WebContextSupplementMap::const_iterator end = m_supplements.end();

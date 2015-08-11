@@ -218,6 +218,7 @@ Page* WebChromeClient::createWindow(Frame* frame, const FrameLoadRequest& reques
     navigationActionData.mouseButton = InjectedBundleNavigationAction::mouseButtonForNavigationAction(navigationAction);
     navigationActionData.isProcessingUserGesture = navigationAction.processingUserGesture();
     navigationActionData.canHandleRequest = m_page->canHandleRequest(request.resourceRequest());
+    navigationActionData.shouldOpenExternalURLsPolicy = navigationAction.shouldOpenExternalURLsPolicy();
 
     uint64_t newPageID = 0;
     WebPageCreationParameters parameters;
@@ -833,12 +834,12 @@ bool WebChromeClient::hasOpenedPopup() const
     return false;
 }
 
-PassRefPtr<WebCore::PopupMenu> WebChromeClient::createPopupMenu(WebCore::PopupMenuClient* client) const
+RefPtr<WebCore::PopupMenu> WebChromeClient::createPopupMenu(WebCore::PopupMenuClient* client) const
 {
     return WebPopupMenu::create(m_page, client);
 }
 
-PassRefPtr<WebCore::SearchPopupMenu> WebChromeClient::createSearchPopupMenu(WebCore::PopupMenuClient* client) const
+RefPtr<WebCore::SearchPopupMenu> WebChromeClient::createSearchPopupMenu(WebCore::PopupMenuClient* client) const
 {
     return WebSearchPopupMenu::create(m_page, client);
 }
@@ -1062,9 +1063,19 @@ void WebChromeClient::isPlayingMediaDidChange(WebCore::MediaProducer::MediaState
 }
 
 #if ENABLE(MEDIA_SESSION)
+void WebChromeClient::hasMediaSessionWithActiveMediaElementsDidChange(bool state)
+{
+    m_page->send(Messages::WebPageProxy::HasMediaSessionWithActiveMediaElementsDidChange(state));
+}
+
 void WebChromeClient::mediaSessionMetadataDidChange(const WebCore::MediaSessionMetadata& metadata)
 {
     m_page->send(Messages::WebPageProxy::MediaSessionMetadataDidChange(metadata));
+}
+
+void WebChromeClient::focusedContentMediaElementDidChange(uint64_t elementID)
+{
+    m_page->send(Messages::WebPageProxy::FocusedContentMediaElementDidChange(elementID));
 }
 #endif
 
@@ -1152,5 +1163,18 @@ void WebChromeClient::playbackTargetPickerClientStateDidChange(uint64_t contextI
 }
 #endif
 
+#if ENABLE(VIDEO)
+void WebChromeClient::mediaDocumentNaturalSizeChanged(const WebCore::IntSize& newSize)
+{
+    m_page->mediaDocumentNaturalSizeChanged(newSize);
+}
+
+#if USE(GSTREAMER)
+void WebChromeClient::requestInstallMissingMediaPlugins(const String& details, WebCore::MediaPlayerRequestInstallMissingPluginsCallback& callback)
+{
+    m_page->requestInstallMissingMediaPlugins(details, callback);
+}
+#endif
+#endif // ENABLE(VIDEO)
 
 } // namespace WebKit

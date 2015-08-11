@@ -224,7 +224,7 @@ void JIT::emitSlow_op_get_by_val(Instruction* currentInstruction, Vector<SlowCas
     
     emitGetVirtualRegister(base, regT0);
     emitGetVirtualRegister(property, regT1);
-    Call call = callOperation(operationGetByValDefault, dst, regT0, regT1, profile);
+    Call call = callOperation(operationGetByValOptimize, dst, regT0, regT1, profile);
 
     m_byValCompilationInfo[m_byValInstructionIndex].slowPathTarget = slowPath;
     m_byValCompilationInfo[m_byValInstructionIndex].returnAddress = call;
@@ -826,14 +826,6 @@ void JIT::emit_op_put_to_arguments(Instruction* currentInstruction)
     emitGetVirtualRegister(arguments, regT0);
     emitGetVirtualRegister(value, regT1);
     store64(regT1, Address(regT0, DirectArguments::storageOffset() + index * sizeof(WriteBarrier<Unknown>)));
-}
-
-void JIT::emit_op_init_global_const(Instruction* currentInstruction)
-{
-    JSGlobalObject* globalObject = m_codeBlock->globalObject();
-    emitWriteBarrier(globalObject, currentInstruction[2].u.operand, ShouldFilterValue);
-    emitGetVirtualRegister(currentInstruction[2].u.operand, regT0);
-    store64(regT0, currentInstruction[1].u.variablePointer);
 }
 
 #endif // USE(JSVALUE64)

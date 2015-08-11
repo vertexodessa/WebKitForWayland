@@ -913,7 +913,6 @@ set(WebCore_SOURCES
     Modules/mediastream/MediaTrackConstraintSet.cpp
     Modules/mediastream/MediaTrackConstraints.cpp
     Modules/mediastream/NavigatorMediaDevices.cpp
-    Modules/mediastream/NavigatorUserMedia.cpp
     Modules/mediastream/NavigatorUserMediaError.cpp
     Modules/mediastream/RTCConfiguration.cpp
     Modules/mediastream/RTCDTMFSender.cpp
@@ -1069,6 +1068,8 @@ set(WebCore_SOURCES
     accessibility/AccessibilityTableColumn.cpp
     accessibility/AccessibilityTableHeaderContainer.cpp
     accessibility/AccessibilityTableRow.cpp
+    accessibility/AccessibilityTree.cpp
+    accessibility/AccessibilityTreeItem.cpp
 
     bindings/generic/ActiveDOMCallback.cpp
     bindings/generic/RuntimeEnabledFeatures.cpp
@@ -1094,6 +1095,7 @@ set(WebCore_SOURCES
     bindings/js/JSCallbackData.cpp
     bindings/js/JSCanvasRenderingContext2DCustom.cpp
     bindings/js/JSCanvasRenderingContextCustom.cpp
+    bindings/js/JSCharacterDataCustom.cpp
     bindings/js/JSCommandLineAPIHostCustom.cpp
     bindings/js/JSCryptoAlgorithmBuilder.cpp
     bindings/js/JSCryptoAlgorithmDictionary.cpp
@@ -1102,6 +1104,7 @@ set(WebCore_SOURCES
     bindings/js/JSCryptoKeyPairCustom.cpp
     bindings/js/JSCryptoKeySerializationJWK.cpp
     bindings/js/JSCryptoOperationData.cpp
+    bindings/js/JSCustomEventCustom.cpp
     bindings/js/JSCustomSQLStatementErrorCallback.cpp
     bindings/js/JSCustomXPathNSResolver.cpp
     bindings/js/JSDOMBinding.cpp
@@ -1125,6 +1128,8 @@ set(WebCore_SOURCES
     bindings/js/JSDeviceOrientationEventCustom.cpp
     bindings/js/JSDictionary.cpp
     bindings/js/JSDocumentCustom.cpp
+    bindings/js/JSDocumentFragmentCustom.cpp
+    bindings/js/JSDocumentTypeCustom.cpp
     bindings/js/JSElementCustom.cpp
     bindings/js/JSErrorHandler.cpp
     bindings/js/JSEventCustom.cpp
@@ -1174,6 +1179,7 @@ set(WebCore_SOURCES
     bindings/js/JSNodeFilterCondition.cpp
     bindings/js/JSNodeFilterCustom.cpp
     bindings/js/JSNodeIteratorCustom.cpp
+    bindings/js/JSNodeOrString.cpp
     bindings/js/JSNodeListCustom.cpp
     bindings/js/JSOscillatorNodeCustom.cpp
     bindings/js/JSPannerNodeCustom.cpp
@@ -1359,7 +1365,6 @@ set(WebCore_SOURCES
     css/WebKitCSSFilterValue.cpp
     css/WebKitCSSMatrix.cpp
     css/WebKitCSSRegionRule.cpp
-    css/WebKitCSSResourceValue.cpp
     css/WebKitCSSTransformValue.cpp
     css/WebKitCSSViewportRule.cpp
 
@@ -1451,6 +1456,7 @@ set(WebCore_SOURCES
     dom/NodeFilter.cpp
     dom/NodeFilterCondition.cpp
     dom/NodeIterator.cpp
+    dom/NodeOrString.cpp
     dom/NodeRareData.cpp
     dom/NodeRenderingTraversal.cpp
     dom/NodeTraversal.cpp
@@ -1744,6 +1750,7 @@ set(WebCore_SOURCES
     html/canvas/CanvasRenderingContext.cpp
     html/canvas/CanvasRenderingContext2D.cpp
     html/canvas/CanvasStyle.cpp
+    html/canvas/DOMPath.cpp
     html/canvas/EXTBlendMinMax.cpp
     html/canvas/EXTFragDepth.cpp
     html/canvas/EXTShaderTextureLOD.cpp
@@ -2171,11 +2178,11 @@ set(WebCore_SOURCES
     platform/graphics/IntRect.cpp
     platform/graphics/IntSize.cpp
     platform/graphics/LayoutRect.cpp
-    platform/graphics/MaskImageOperation.cpp
     platform/graphics/MediaPlayer.cpp
     platform/graphics/NamedImageGeneratedImage.cpp
     platform/graphics/Path.cpp
     platform/graphics/PathTraversalState.cpp
+    platform/graphics/PathUtilities.cpp
     platform/graphics/Pattern.cpp
     platform/graphics/PlatformTimeRanges.cpp
     platform/graphics/Region.cpp
@@ -2383,7 +2390,6 @@ set(WebCore_SOURCES
     rendering/RenderLayerBacking.cpp
     rendering/RenderLayerCompositor.cpp
     rendering/RenderLayerFilterInfo.cpp
-    rendering/RenderLayerMaskImageInfo.cpp
     rendering/RenderLayerModelObject.cpp
     rendering/RenderLineBoxList.cpp
     rendering/RenderLineBreak.cpp
@@ -2793,6 +2799,46 @@ set(WebCore_SOURCES
     xml/parser/XMLDocumentParserLibxml2.cpp
     xml/parser/XMLDocumentParserScope.cpp
 )
+
+if (ENABLE_ALLINONE_BUILD)
+    message(STATUS "All-in-One build is enabled.")
+    set(allInOnes
+        accessibility/AccessibilityAllInOne.cpp
+
+        bindings/js/JSBindingsAllInOne.cpp
+
+        css/CSSAllInOne.cpp
+
+        dom/DOMAllInOne.cpp
+
+        editing/EditingAllInOne.cpp
+
+        html/HTMLElementsAllInOne.cpp
+
+        inspector/InspectorAllInOne.cpp
+
+        loader/appcache/ApplicationCacheAllInOne.cpp
+
+        mathml/MathMLAllInOne.cpp
+
+        platform/text/TextAllInOne.cpp
+
+        rendering/RenderingAllInOne.cpp
+
+        rendering/style/StyleAllInOne.cpp
+
+        rendering/svg/RenderSVGAllInOne.cpp
+
+        svg/SVGAllInOne.cpp
+    )
+    foreach (allInOne ${allInOnes})
+        PROCESS_ALLINONE_FILE("${WebCore_SOURCES}" ${allInOne} newSources ${AllInOne})
+        set(WebCore_SOURCES
+            ${allInOne}
+            ${newSources}
+        )
+    endforeach ()
+endif ()
 
 set(WebCore_CSS_PROPERTY_NAMES
     ${WEBCORE_DIR}/css/CSSPropertyNames.in
@@ -3518,6 +3564,8 @@ list(APPEND WebCore_SOURCES ${DERIVED_SOURCES_WEBCORE_DIR}/EventFactory.cpp)
 
 GENERATE_EVENT_FACTORY(${WEBCORE_DIR}/dom/EventTargetFactory.in EventTargetInterfaces.h)
 ADD_SOURCE_WEBCORE_DERIVED_DEPENDENCIES(${WEBCORE_DIR}/dom/EventNames.cpp EventTargetInterfaces.h)
+ADD_SOURCE_WEBCORE_DERIVED_DEPENDENCIES(${WEBCORE_DIR}/dom/DOMAllInOne.cpp EventTargetInterfaces.h)
+list(APPEND WebCore_SOURCES ${DERIVED_SOURCES_WEBCORE_DIR}/EventTargetInterfaces.h)
 
 
 GENERATE_EXCEPTION_CODE_DESCRIPTION(${WEBCORE_DIR}/dom/DOMExceptions.in ExceptionCodeDescription.cpp)
@@ -3578,11 +3626,23 @@ include_directories(SYSTEM ${WebCore_SYSTEM_INCLUDE_DIRECTORIES})
 
 if (MSVC)
     ADD_PRECOMPILED_HEADER("WebCorePrefix.h" "WebCorePrefix.cpp" WebCore_SOURCES)
+    if (CMAKE_SIZEOF_VOID_P EQUAL 4)
+        list(APPEND WebCore_SOURCES platform/win/makesafeseh.asm)
+        set_source_files_properties(platform/win/makesafeseh.asm PROPERTIES COMPILE_FLAGS "/safeseh")
+    endif ()
 endif ()
 
 add_library(WebCore ${WebCore_LIBRARY_TYPE} ${WebCore_SOURCES})
 set_target_properties(WebCore PROPERTIES COMPILE_DEFINITIONS "BUILDING_WebCore")
 set_target_properties(WebCore PROPERTIES FOLDER "WebCore")
+
+# The -ftree-sra optimization (implicit with -O2) causes crashes when
+# allocating large chunks of memory using bmalloc on Intel 32bit.
+# See https://bugs.webkit.org/show_bug.cgi?id=146440
+string(TOLOWER ${CMAKE_HOST_SYSTEM_PROCESSOR} LOWERCASE_CMAKE_HOST_SYSTEM_PROCESSOR)
+if (CMAKE_COMPILER_IS_GNUCXX AND "${LOWERCASE_CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "(i[3-6]86|x86)$")
+    ADD_TARGET_PROPERTIES(WebCore COMPILE_FLAGS "-fno-tree-sra")
+endif ()
 
 if (WebCore_OUTPUT_NAME)
     set_target_properties(WebCore PROPERTIES OUTPUT_NAME ${WebCore_OUTPUT_NAME})
@@ -3600,7 +3660,7 @@ if (WebCoreTestSupport_OUTPUT_NAME)
     set_target_properties(WebCoreTestSupport PROPERTIES OUTPUT_NAME ${WebCoreTestSupport_OUTPUT_NAME})
 endif ()
 
-if (ENABLE_GRAPHICS_CONTEXT_3D)
+if (ENABLE_GRAPHICS_CONTEXT_3D AND NOT WIN32)
     add_library(ANGLESupport STATIC ${ANGLESupport_SOURCES})
     set_target_properties(ANGLESupport PROPERTIES FOLDER "WebCore")
 

@@ -45,10 +45,6 @@
 #include <wtf/Threading.h>
 #include <wtf/glib/GSourceWrap.h>
 
-#if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
-#include <WebCore/DisplayRefreshMonitor.h>
-#endif
-
 namespace WebCore {
 class CoordinatedSurface;
 class GraphicsContext;
@@ -66,7 +62,7 @@ class WebPage;
 class ThreadedCoordinatedLayerTreeHost : public LayerTreeHost, public WebCore::CompositingCoordinator::Client, public ThreadedCompositor::Client {
     WTF_MAKE_NONCOPYABLE(ThreadedCoordinatedLayerTreeHost); WTF_MAKE_FAST_ALLOCATED;
 public:
-    static PassRefPtr<ThreadedCoordinatedLayerTreeHost> create(WebPage*);
+    static Ref<ThreadedCoordinatedLayerTreeHost> create(WebPage*);
     virtual ~ThreadedCoordinatedLayerTreeHost();
 
     virtual const LayerTreeContext& layerTreeContext() override { return m_layerTreeContext; };
@@ -102,7 +98,8 @@ public:
     virtual void scheduleAnimation() override;
 #endif
 
-    void setViewOverlayRootLayer(WebCore::GraphicsLayer*);
+    virtual void setViewOverlayRootLayer(WebCore::GraphicsLayer*) override;
+
     static PassRefPtr<WebCore::CoordinatedSurface> createCoordinatedSurface(const WebCore::IntSize&, WebCore::CoordinatedSurface::Flags);
 
 protected:
@@ -123,7 +120,6 @@ private:
     // ThreadedCompositor::Client
     virtual void setVisibleContentsRect(const WebCore::FloatRect&, const WebCore::FloatPoint&, float) override;
     virtual void purgeBackingStores() override;
-    virtual void frameComplete() override;
     virtual void renderNextFrame() override;
     virtual void commitScrollOffset(uint32_t layerID, const WebCore::IntSize& offset) override;
 
@@ -134,7 +130,7 @@ private:
     virtual void paintLayerContents(const WebCore::GraphicsLayer*, WebCore::GraphicsContext&, const WebCore::IntRect& clipRect) override;
 
 #if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
-    virtual RefPtr<WebCore::DisplayRefreshMonitor> createDisplayRefreshMonitor(PlatformDisplayID);
+    virtual RefPtr<WebCore::DisplayRefreshMonitor> createDisplayRefreshMonitor(PlatformDisplayID) override;
 #endif
 
     LayerTreeContext m_layerTreeContext;
@@ -157,21 +153,6 @@ private:
 
     GSourceWrap::Static m_layerFlushTimer;
     bool m_layerFlushSchedulingEnabled;
-
-#if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
-    class DisplayRefreshMonitor : public WebCore::DisplayRefreshMonitor {
-    public:
-        DisplayRefreshMonitor();
-
-        virtual bool requestRefreshCallback() override;
-        void dispatchDisplayRefreshCallback();
-
-    private:
-        void displayRefreshCallback();
-        RunLoop::Timer<DisplayRefreshMonitor> m_displayRefreshTimer;
-    };
-    RefPtr<DisplayRefreshMonitor> m_displayRefreshMonitor;
-#endif
 };
 
 } // namespace WebKit

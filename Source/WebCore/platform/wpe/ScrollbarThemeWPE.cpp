@@ -42,13 +42,13 @@ bool ScrollbarThemeWPE::hasThumb(Scrollbar&)
     return true;
 }
 
-IntRect ScrollbarThemeWPE::backButtonRect(Scrollbar& scrollbar, ScrollbarPart part, bool)
+IntRect ScrollbarThemeWPE::backButtonRect(Scrollbar&, ScrollbarPart, bool)
 {
     notImplemented();
     return IntRect();
 }
 
-IntRect ScrollbarThemeWPE::forwardButtonRect(Scrollbar& scrollbar, ScrollbarPart part, bool)
+IntRect ScrollbarThemeWPE::forwardButtonRect(Scrollbar&, ScrollbarPart, bool)
 {
     notImplemented();
     return IntRect();

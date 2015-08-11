@@ -70,7 +70,7 @@ void UserMediaPermissionRequestManager::cancelRequest(UserMediaRequest& request)
     m_idToRequestMap.remove(requestID);
 }
 
-void UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(uint64_t requestID, bool allowed)
+void UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(uint64_t userMediaID, bool allowed, const String& deviceUIDVideo, const String& deviceUIDAudio)
 {
     notImplemented();
 }

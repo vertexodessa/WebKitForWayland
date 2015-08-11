@@ -89,7 +89,6 @@
 #include "RenderLayerBacking.h"
 #include "RenderLayerCompositor.h"
 #include "RenderLayerFilterInfo.h"
-#include "RenderLayerMaskImageInfo.h"
 #include "RenderMarquee.h"
 #include "RenderMultiColumnFlowThread.h"
 #include "RenderNamedFlowFragment.h"
@@ -303,7 +302,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject& rendererLayerModelObject)
     , m_layerListMutationAllowed(true)
 #endif
     , m_hasFilterInfo(false)
-    , m_hasMaskImageInfo(false)
 #if ENABLE(CSS_COMPOSITING)
     , m_blendMode(BlendModeNormal)
     , m_hasNotIsolatedCompositedBlendingDescendants(false)
@@ -326,8 +324,6 @@ RenderLayer::RenderLayer(RenderLayerModelObject& rendererLayerModelObject)
     // Non-stacking containers should have empty z-order lists. As this is already the case,
     // there is no need to dirty / recompute these lists.
     m_zOrderListsDirty = isStackingContainer();
-
-    ScrollableArea::setConstrainsScrollingToContentEdge(false);
 
     if (!renderer().firstChild()) {
         m_visibleContentStatusDirty = false;
@@ -370,7 +366,6 @@ RenderLayer::~RenderLayer()
         removeReflection();
 
     FilterInfo::remove(*this);
-    MaskImageInfo::remove(*this);
 
     // Child layers will be deleted by their corresponding render objects, so
     // we don't need to delete them ourselves.
@@ -1454,13 +1449,12 @@ RenderLayer* RenderLayer::enclosingAncestorForPosition(EPosition position) const
     return curr;
 }
 
-static RenderLayer* parentLayerCrossFrame(const RenderLayer* layer)
+static RenderLayer* parentLayerCrossFrame(const RenderLayer& layer, LayoutRect* rect = nullptr)
 {
-    ASSERT(layer);
-    if (layer->parent())
-        return layer->parent();
+    if (layer.parent())
+        return layer.parent();
 
-    HTMLFrameOwnerElement* ownerElement = layer->renderer().document().ownerElement();
+    HTMLFrameOwnerElement* ownerElement = layer.renderer().document().ownerElement();
     if (!ownerElement)
         return nullptr;
 
@@ -1468,12 +1462,18 @@ static RenderLayer* parentLayerCrossFrame(const RenderLayer* layer)
     if (!ownerRenderer)
         return nullptr;
 
+    // Convert the rect into the coordinate space of the parent frame's document.
+    if (rect) {
+        IntRect viewRect = layer.renderer().frame().view()->convertToContainingView(enclosingIntRect(*rect));
+        *rect = ownerRenderer->frame().view()->viewToContents(viewRect);
+    }
+
     return ownerRenderer->enclosingLayer();
 }
 
-RenderLayer* RenderLayer::enclosingScrollableLayer() const
+RenderLayer* RenderLayer::enclosingScrollableLayer(LayoutRect* rect) const
 {
-    for (RenderLayer* nextLayer = parentLayerCrossFrame(this); nextLayer; nextLayer = parentLayerCrossFrame(nextLayer)) {
+    for (RenderLayer* nextLayer = parentLayerCrossFrame(*this, rect); nextLayer; nextLayer = parentLayerCrossFrame(*nextLayer, rect)) {
         if (is<RenderBox>(nextLayer->renderer()) && downcast<RenderBox>(nextLayer->renderer()).canBeScrolledAndHasScrollableArea())
             return nextLayer;
     }
@@ -1530,7 +1530,7 @@ inline bool RenderLayer::shouldRepaintAfterLayout() const
     return !isComposited() || backing()->paintsIntoCompositedAncestor();
 }
 
-static bool compositedWithOwnBackingStore(const RenderLayer* layer)
+bool compositedWithOwnBackingStore(const RenderLayer* layer)
 {
     return layer->isComposited() && !layer->backing()->paintsIntoCompositedAncestor();
 }
@@ -2536,7 +2536,7 @@ void RenderLayer::scrollRectToVisible(const LayoutRect& rect, const ScrollAlignm
     }
     
     if (renderer().frame().eventHandler().autoscrollInProgress())
-        parentLayer = enclosingScrollableLayer();
+        parentLayer = enclosingScrollableLayer(&newRect);
 
     if (parentLayer)
         parentLayer->scrollRectToVisible(newRect, alignX, alignY);
@@ -3187,7 +3187,7 @@ bool RenderLayer::isScrollableOrRubberbandable()
 
 bool RenderLayer::hasScrollableOrRubberbandableAncestor()
 {
-    for (RenderLayer* nextLayer = parentLayerCrossFrame(this); nextLayer; nextLayer = parentLayerCrossFrame(nextLayer)) {
+    for (RenderLayer* nextLayer = parentLayerCrossFrame(*this); nextLayer; nextLayer = parentLayerCrossFrame(*nextLayer)) {
         if (nextLayer->isScrollableOrRubberbandable())
             return true;
     }
@@ -4280,7 +4280,8 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     if (localPaintingInfo.overlapTestRequests && isSelfPaintingLayer)
         performOverlapTests(*localPaintingInfo.overlapTestRequests, localPaintingInfo.rootLayer, this);
 
-    bool selectionOnly  = localPaintingInfo.paintBehavior & PaintBehaviorSelectionOnly;
+    bool selectionAndBackgroundsOnly = localPaintingInfo.paintBehavior & PaintBehaviorSelectionAndBackgroundsOnly;
+    bool selectionOnly = localPaintingInfo.paintBehavior & PaintBehaviorSelectionOnly;
     
     PaintBehavior paintBehavior = PaintBehaviorNormal;
     if (localPaintFlags & PaintLayerPaintingSkipRootBackground)
@@ -4319,7 +4320,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     if (isPaintingCompositedForeground) {
         if (shouldPaintContent)
             paintForegroundForFragments(layerFragments, context, transparencyLayerContext, paintingInfo.paintDirtyRect, haveTransparency,
-                localPaintingInfo, paintBehavior, subtreePaintRootForRenderer, selectionOnly);
+                localPaintingInfo, paintBehavior, subtreePaintRootForRenderer, selectionOnly || selectionAndBackgroundsOnly);
     }
 
     if (shouldPaintOutline)
@@ -4351,7 +4352,7 @@ void RenderLayer::paintLayerContents(GraphicsContext* context, const LayerPainti
     // Make sure that we now use the original transparency context.
     ASSERT(transparencyLayerContext == context);
 
-    if (shouldPaintContent && !selectionOnly) {
+    if (shouldPaintContent && !(selectionOnly || selectionAndBackgroundsOnly)) {
         if (shouldPaintMask(paintingInfo.paintBehavior, localPaintFlags)) {
             // Paint the mask for the fragments.
             paintMaskForFragments(layerFragments, context, localPaintingInfo, subtreePaintRootForRenderer);
@@ -6713,7 +6714,6 @@ void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle
     updateBlendMode();
 #endif
     updateOrRemoveFilterClients();
-    updateOrRemoveMaskImageClients();
 
     updateNeedsCompositedScrolling();
 
@@ -6866,14 +6866,6 @@ void RenderLayer::updateOrRemoveFilterClients()
         FilterInfo::get(*this).updateReferenceFilterClients(renderer().style().filter());
     else if (FilterInfo* filterInfo = FilterInfo::getIfExists(*this))
         filterInfo->removeReferenceFilterClients();
-}
-
-void RenderLayer::updateOrRemoveMaskImageClients()
-{
-    if (renderer().style().maskImage().get())
-        MaskImageInfo::get(*this).updateMaskImageClients();
-    else if (MaskImageInfo* maskImageInfo = MaskImageInfo::getIfExists(*this))
-        maskImageInfo->removeMaskImageClients();
 }
 
 void RenderLayer::updateOrRemoveFilterEffectRenderer()

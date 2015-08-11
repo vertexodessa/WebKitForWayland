@@ -1677,22 +1677,30 @@ void AccessibilityRenderObject::setFocused(bool on)
         return;
     }
 
+    // When a node is told to set focus, that can cause it to be deallocated, which means that doing
+    // anything else inside this object will crash. To fix this, we added a RefPtr to protect this object
+    // long enough for duration.
+    RefPtr<AccessibilityObject> protect(this);
+    
     // If this node is already the currently focused node, then calling focus() won't do anything.
     // That is a problem when focus is removed from the webpage to chrome, and then returns.
     // In these cases, we need to do what keyboard and mouse focus do, which is reset focus first.
     if (document->focusedElement() == node)
         document->setFocusedElement(nullptr);
 
-    axObjectCache()->setIsSynchronizingSelection(true);
-    downcast<Element>(*node).focus();
-    axObjectCache()->setIsSynchronizingSelection(false);
+    // If we return from setFocusedElement and our element has been removed from a tree, axObjectCache() may be null.
+    if (AXObjectCache* cache = axObjectCache()) {
+        cache->setIsSynchronizingSelection(true);
+        downcast<Element>(*node).focus();
+        cache->setIsSynchronizingSelection(false);
+    }
 }
 
 void AccessibilityRenderObject::setSelectedRows(AccessibilityChildrenVector& selectedRows)
 {
     // Setting selected only makes sense in trees and tables (and tree-tables).
     AccessibilityRole role = roleValue();
-    if (role != TreeRole && role != TreeGridRole && role != TableRole)
+    if (role != TreeRole && role != TreeGridRole && role != TableRole && role != GridRole)
         return;
     
     bool isMulti = isMultiSelectable();
@@ -2491,7 +2499,9 @@ AccessibilityRole AccessibilityRenderObject::determineAccessibilityRole()
     if (!m_renderer)
         return UnknownRole;
 
-    if ((m_ariaRole = determineAriaRoleAttribute()) != UnknownRole)
+    // Sometimes we need to ignore the attribute role. Like if a tree is malformed,
+    // we want to ignore the treeitem's attribute role.
+    if ((m_ariaRole = determineAriaRoleAttribute()) != UnknownRole && !shouldIgnoreAttributeRole())
         return m_ariaRole;
     
     Node* node = m_renderer->node();
@@ -2743,6 +2753,7 @@ bool AccessibilityRenderObject::inheritsPresentationalRole() const
         }
         possibleParentTagNames = &listItemParents.get();
         break;
+    case GridCellRole:
     case CellRole:
         if (tableCellParents.get().isEmpty())
             tableCellParents.get().add(tableTag);
@@ -2800,6 +2811,9 @@ bool AccessibilityRenderObject::ariaRoleHasPresentationalChildren() const
 
 bool AccessibilityRenderObject::canSetExpandedAttribute() const
 {
+    if (roleValue() == DetailsRole)
+        return true;
+    
     // An object can be expanded if it aria-expanded is true or false.
     const AtomicString& ariaExpanded = getAttribute(aria_expandedAttr);
     return equalIgnoringCase(ariaExpanded, "true") || equalIgnoringCase(ariaExpanded, "false");
@@ -3235,7 +3249,7 @@ void AccessibilityRenderObject::selectedChildren(AccessibilityChildrenVector& re
     AccessibilityRole role = roleValue();
     if (role == ListBoxRole) // native list boxes would be AccessibilityListBoxes, so only check for aria list boxes
         ariaListboxSelectedChildren(result);
-    else if (role == TreeRole || role == TreeGridRole || role == TableRole)
+    else if (role == TreeRole || role == TreeGridRole || role == TableRole || role == GridRole)
         ariaSelectedRows(result);
 }
 

@@ -269,6 +269,12 @@ enum class DocumentCompatibilityMode : unsigned char {
 
 enum DimensionsCheck { WidthDimensionsCheck = 1 << 0, HeightDimensionsCheck = 1 << 1, AllDimensionsCheck = 1 << 2 };
 
+enum class HttpEquivPolicy {
+    Enabled,
+    DisabledBySettings,
+    DisabledByContentDispositionAttachmentSandbox
+};
+
 class Document : public ContainerNode, public TreeScope, public ScriptExecutionContext, public FontSelectorClient {
 public:
     static Ref<Document> create(Frame* frame, const URL& url)
@@ -719,7 +725,6 @@ public:
     void unscheduleStyleRecalc();
     bool hasPendingStyleRecalc() const;
     bool hasPendingForcedStyleRecalc() const;
-    void styleRecalcTimerFired();
     void optimizedStyleSheetUpdateTimerFired();
 
     void registerNodeListForInvalidation(LiveNodeList&);
@@ -1008,6 +1013,12 @@ public:
     void registerForVisibilityStateChangedCallbacks(Element*);
     void unregisterForVisibilityStateChangedCallbacks(Element*);
 
+#if ENABLE(VIDEO)
+    void registerForAllowsMediaDocumentInlinePlaybackChangedCallbacks(HTMLMediaElement&);
+    void unregisterForAllowsMediaDocumentInlinePlaybackChangedCallbacks(HTMLMediaElement&);
+    void allowsMediaDocumentInlinePlaybackChanged();
+#endif
+
     WEBCORE_EXPORT void setShouldCreateRenderers(bool);
     bool shouldCreateRenderers();
 
@@ -1265,6 +1276,7 @@ public:
 #endif
 
     ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicyToPropagate() const;
+    bool shouldEnforceContentDispositionAttachmentSandbox() const;
 
 protected:
     enum ConstructionFlags { Synthesized = 1, NonRenderedPlaceholder = 1 << 1 };
@@ -1350,12 +1362,13 @@ private:
 
     void wheelEventHandlersChanged();
 
+    HttpEquivPolicy httpEquivPolicy() const;
+
     // DOM Cookies caching.
     const String& cachedDOMCookies() const { return m_cachedDOMCookies; }
     void setCachedDOMCookies(const String&);
     bool isDOMCookieCacheValid() const { return m_cookieCacheExpiryTimer.isActive(); }
     void invalidateDOMCookieCache();
-    void domCookieCacheExpiryTimerFired();
     virtual void didLoadResourceSynchronously(const ResourceRequest&) override final;
 
     unsigned m_referencingNodeCount;
@@ -1541,6 +1554,9 @@ private:
 #endif
 
     HashSet<Element*> m_visibilityStateCallbackElements;
+#if ENABLE(VIDEO)
+    HashSet<HTMLMediaElement*> m_allowsMediaDocumentInlinePlaybackElements;
+#endif
 
     HashMap<StringImpl*, Element*, CaseFoldingHash> m_elementsByAccessKey;
     bool m_accessKeyMapValid;

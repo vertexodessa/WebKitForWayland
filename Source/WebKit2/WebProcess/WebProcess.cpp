@@ -82,6 +82,7 @@
 #include <WebCore/Page.h>
 #include <WebCore/PageCache.h>
 #include <WebCore/PageGroup.h>
+#include <WebCore/PlatformMediaSessionManager.h>
 #include <WebCore/ResourceHandle.h>
 #include <WebCore/RuntimeEnabledFeatures.h>
 #include <WebCore/SchemeRegistry.h>
@@ -656,7 +657,13 @@ void WebProcess::didClose(IPC::Connection&)
     GCController::singleton().garbageCollectSoon();
     FontCache::singleton().invalidate();
     MemoryCache::singleton().setDisabled(true);
-#endif    
+#endif
+
+#if ENABLE(VIDEO)
+    // FIXME(146657): This explicit media stop command should not be necessary
+    if (auto* platformMediaSessionManager = PlatformMediaSessionManager::sharedManagerIfExists())
+        platformMediaSessionManager->stopAllMediaPlaybackForProcess();
+#endif
 
     // The UI process closed this connection, shut down.
     stopRunLoop();
@@ -1034,7 +1041,7 @@ void WebProcess::networkProcessConnectionClosed(NetworkProcessConnection* connec
     ASSERT(m_networkProcessConnection);
     ASSERT_UNUSED(connection, m_networkProcessConnection == connection);
 
-    m_networkProcessConnection = 0;
+    m_networkProcessConnection = nullptr;
     
     m_webResourceLoadScheduler->networkProcessCrashed();
 }
@@ -1051,7 +1058,7 @@ void WebProcess::webToDatabaseProcessConnectionClosed(WebToDatabaseProcessConnec
     ASSERT(m_webToDatabaseProcessConnection);
     ASSERT(m_webToDatabaseProcessConnection == connection);
 
-    m_webToDatabaseProcessConnection = 0;
+    m_webToDatabaseProcessConnection = nullptr;
 }
 
 WebToDatabaseProcessConnection* WebProcess::webToDatabaseProcessConnection()
@@ -1238,6 +1245,14 @@ void WebProcess::actualPrepareToSuspend(ShouldAcknowledgeWhenReadyToSuspend shou
 
 void WebProcess::processWillSuspendImminently(bool& handled)
 {
+    if (parentProcessConnection()->inSendSync()) {
+        // Avoid reentrency bugs such as rdar://problem/21605505 by just bailing
+        // if we get an incoming ProcessWillSuspendImminently message when waiting for a
+        // reply to a sync message.
+        // FIXME: ProcessWillSuspendImminently should not be a sync message.
+        return;
+    }
+
     supplement<WebDatabaseManager>()->closeAllDatabases();
     actualPrepareToSuspend(ShouldAcknowledgeWhenReadyToSuspend::No);
     handled = true;

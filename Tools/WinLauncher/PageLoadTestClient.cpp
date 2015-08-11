@@ -60,8 +60,12 @@ void PageLoadTestClient::pageLoadStartedAtTime(CFAbsoluteTime startTime)
 
 void PageLoadTestClient::didStartProvisionalLoad(IWebFrame& frame)
 {
-    BOOL mainFrame;
-    if (FAILED(frame.isMainFrame(&mainFrame)))
+    _com_ptr_t<_com_IIID<IWebFrame2, &__uuidof(IWebFrame2)>> frame2;
+    if (FAILED(frame.QueryInterface(&frame2.GetInterfacePtr())))
+        return;
+
+    BOOL mainFrame = FALSE;
+    if (frame2 && FAILED(frame2->isMainFrame(&mainFrame)))
         return;
 
     if (mainFrame) {
@@ -230,7 +234,7 @@ void PageLoadTestClient::dumpRunStatistics()
     if (m_pagesTimed) {
         meanTime = m_totalTime / m_pagesTimed;
         squareMeanRootTime = (m_totalSquareRootsOfTime / m_pagesTimed) * (m_totalSquareRootsOfTime / m_pagesTimed);
-        geometricMeanTime = std::pow(m_geometricMeanProductSum, (1.0 / m_pagesTimed));
+        geometricMeanTime = pow(m_geometricMeanProductSum, (1.0 / m_pagesTimed));
     }
 
     file->printf("FINISHED:    Total Time = %.1f ms\n", m_totalTime * 1000.0);

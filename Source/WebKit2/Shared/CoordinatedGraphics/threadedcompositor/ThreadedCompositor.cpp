@@ -72,15 +72,13 @@ public:
 
     void scheduleUpdate()
     {
-        if (m_updateTimer.isActive())
-            return;
-
-        if (m_updateState.load() == UpdateState::Completed) {
+        if (m_updateState.compareExchangeStrong(UpdateState::Completed, UpdateState::InProgress)) {
             m_updateTimer.startOneShot(0);
             return;
         }
 
-        m_updateState.compareExchangeStrong(UpdateState::InProgress, UpdateState::UpdateOnCompletion);
+        if (m_updateState.compareExchangeStrong(UpdateState::InProgress, UpdateState::PendingAfterCompletion))
+            return;
     }
 
     void stopUpdates()
@@ -91,13 +89,11 @@ public:
 
     void updateCompleted()
     {
-        ASSERT(&RunLoop::current() == &m_runLoop);
-
         if (m_updateState.compareExchangeStrong(UpdateState::InProgress, UpdateState::Completed))
             return;
 
-        if (m_updateState.compareExchangeStrong(UpdateState::UpdateOnCompletion, UpdateState::Completed)) {
-            updateTimerFired();
+        if (m_updateState.compareExchangeStrong(UpdateState::PendingAfterCompletion, UpdateState::InProgress)) {
+            m_updateTimer.startOneShot(0);
             return;
         }
 
@@ -113,17 +109,12 @@ private:
     enum class UpdateState {
         Completed,
         InProgress,
-        UpdateOnCompletion,
+        PendingAfterCompletion,
     };
 
     void updateTimerFired()
     {
-        if (m_updateState.compareExchangeStrong(UpdateState::Completed, UpdateState::InProgress)) {
-            m_updateFunction();
-            return;
-        }
-
-        ASSERT_NOT_REACHED();
+        m_updateFunction();
     }
 
     RunLoop& m_runLoop;
@@ -140,7 +131,12 @@ Ref<ThreadedCompositor> ThreadedCompositor::create(Client* client)
 ThreadedCompositor::ThreadedCompositor(Client* client)
     : m_client(client)
     , m_threadIdentifier(0)
+#if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
+    , m_displayRefreshMonitor(adoptRef(new DisplayRefreshMonitor(this)))
+#endif
 {
+    m_clientRendersNextFrame.store(false);
+    m_coordinateUpdateCompletionWithClient.store(false);
     createCompositingThread();
 }
 
@@ -151,10 +147,7 @@ ThreadedCompositor::~ThreadedCompositor()
 
 void ThreadedCompositor::setNeedsDisplay()
 {
-    RefPtr<ThreadedCompositor> protector(this);
-    callOnCompositingThread([=] {
-        protector->scheduleDisplayImmediately();
-    });
+    m_compositingRunLoop->scheduleUpdate();
 }
 
 void ThreadedCompositor::setNativeSurfaceHandleForCompositing(uint64_t handle)
@@ -305,9 +298,17 @@ void ThreadedCompositor::renderLayerTree()
 
 void ThreadedCompositor::updateSceneState(const CoordinatedGraphicsState& state)
 {
+    RefPtr<ThreadedCompositor> protector(this);
     RefPtr<CoordinatedGraphicsScene> scene = m_scene;
-    m_scene->appendUpdate([scene, state] {
+    m_scene->appendUpdate([protector, scene, state] {
         scene->commitSceneState(state);
+
+        protector->m_clientRendersNextFrame.store(true);
+        bool coordinateUpdate = std::any_of(state.layersToUpdate.begin(), state.layersToUpdate.end(),
+            [](const std::pair<CoordinatedLayerID, CoordinatedGraphicsLayerState>& it) {
+                return it.second.platformLayerChanged;
+            });
+        protector->m_coordinateUpdateCompletionWithClient.store(coordinateUpdate);
     });
 
     setNeedsDisplay();
@@ -397,10 +398,71 @@ const struct wl_callback_listener ThreadedCompositor::m_frameListener = {
         wl_callback_destroy(callback);
 
         auto& threadedCompositor = *static_cast<ThreadedCompositor*>(data);
-        threadedCompositor.m_client->frameComplete();
-        threadedCompositor.m_compositingRunLoop->updateCompleted();
+        bool shouldDispatchDisplayRefreshCallback = threadedCompositor.m_clientRendersNextFrame.load()
+            || threadedCompositor.m_displayRefreshMonitor->requiresDisplayRefreshCallback();
+        bool shouldCoordinateUpdateCompletionWithClient = threadedCompositor.m_coordinateUpdateCompletionWithClient.load();
+
+        if (shouldDispatchDisplayRefreshCallback)
+            threadedCompositor.m_displayRefreshMonitor->dispatchDisplayRefreshCallback();
+        if (!shouldCoordinateUpdateCompletionWithClient)
+            threadedCompositor.m_compositingRunLoop->updateCompleted();
     }
 };
+
+#if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
+RefPtr<WebCore::DisplayRefreshMonitor> ThreadedCompositor::createDisplayRefreshMonitor(PlatformDisplayID)
+{
+    return m_displayRefreshMonitor;
+}
+
+ThreadedCompositor::DisplayRefreshMonitor::DisplayRefreshMonitor(ThreadedCompositor* compositor)
+    : WebCore::DisplayRefreshMonitor(0)
+    , m_displayRefreshTimer(RunLoop::main(), this, &ThreadedCompositor::DisplayRefreshMonitor::displayRefreshCallback)
+    , m_compositor(compositor)
+{
+}
+
+bool ThreadedCompositor::DisplayRefreshMonitor::requestRefreshCallback()
+{
+    MutexLocker locker(mutex());
+    setIsScheduled(true);
+    return true;
+}
+
+bool ThreadedCompositor::DisplayRefreshMonitor::requiresDisplayRefreshCallback()
+{
+    MutexLocker locker(mutex());
+    return isScheduled() && isPreviousFrameDone();
+}
+
+void ThreadedCompositor::DisplayRefreshMonitor::dispatchDisplayRefreshCallback()
+{
+    m_displayRefreshTimer.startOneShot(0);
+}
+
+void ThreadedCompositor::DisplayRefreshMonitor::displayRefreshCallback()
+{
+    bool shouldHandleDisplayRefreshNotification = false;
+    {
+        MutexLocker locker(mutex());
+        shouldHandleDisplayRefreshNotification = isScheduled() && isPreviousFrameDone();
+        if (shouldHandleDisplayRefreshNotification) {
+            setIsPreviousFrameDone(false);
+            setMonotonicAnimationStartTime(monotonicallyIncreasingTime());
+        }
+    }
+
+    if (shouldHandleDisplayRefreshNotification)
+        DisplayRefreshMonitor::handleDisplayRefreshedNotificationOnMainThread(this);
+
+    if (m_compositor) {
+        if (m_compositor->m_clientRendersNextFrame.compareExchangeStrong(true, false))
+            m_compositor->m_scene->renderNextFrame();
+        if (m_compositor->m_coordinateUpdateCompletionWithClient.compareExchangeStrong(true, false))
+            m_compositor->m_compositingRunLoop->updateCompleted();
+    }
+}
+#endif
 
 }
 #endif // USE(COORDINATED_GRAPHICS_THREADED)

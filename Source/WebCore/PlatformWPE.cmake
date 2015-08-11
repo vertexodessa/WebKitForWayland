@@ -166,6 +166,17 @@ list(APPEND WebCore_SOURCES
     ${DERIVED_SOURCES_WEBCORE_DIR}/WaylandWPEProtocol.c
 )
 
+list(APPEND WebCore_USER_AGENT_STYLE_SHEETS
+    ${WEBCORE_DIR}/Modules/mediacontrols/mediaControlsBase.css
+)
+
+set(WebCore_USER_AGENT_SCRIPTS
+    ${WEBCORE_DIR}/English.lproj/mediaControlsLocalizedStrings.js
+    ${WEBCORE_DIR}/Modules/mediacontrols/mediaControlsBase.js
+)
+
+set(WebCore_USER_AGENT_SCRIPTS_DEPENDENCIES ${WEBCORE_DIR}/platform/wpe/RenderThemeWPE.cpp)
+
 list(APPEND WebCore_LIBRARIES
     ${CAIRO_LIBRARIES}
     ${EGL_LIBRARIES}
@@ -334,6 +345,13 @@ if (ENABLE_ENCRYPTED_MEDIA OR ENABLE_ENCRYPTED_MEDIA_V2)
         platform/graphics/gstreamer/WebKitCommonEncryptionDecryptorGStreamer.cpp
         platform/graphics/gstreamer/WebKitMediaAesCtr.c
     )
+
+    if (ENABLE_ENCRYPTED_MEDIA_V2 AND ENABLE_DXDRM)
+        list(APPEND WebCore_SOURCES
+            platform/graphics/gstreamer/CDMPRSessionGStreamer.cpp
+            platform/graphics/gstreamer/WebKitPlayReadyDecryptorGStreamer.cpp
+        )
+    endif ()
 endif ()
 
 if (ENABLE_MEDIA_STREAM)

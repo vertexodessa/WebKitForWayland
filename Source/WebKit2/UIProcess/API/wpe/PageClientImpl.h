@@ -45,7 +45,7 @@ private:
     virtual void displayView() override;
     virtual bool canScrollView() override { return false; }
     virtual void scrollView(const WebCore::IntRect&, const WebCore::IntSize&) override;
-    virtual void requestScroll(const WebCore::FloatPoint&, bool) override;
+    virtual void requestScroll(const WebCore::FloatPoint&, const WebCore::IntPoint&, bool) override;
     virtual WebCore::IntSize viewSize() override;
     virtual bool isViewWindowActive() override;
     virtual bool isViewFocused() override;
@@ -80,8 +80,8 @@ private:
     virtual void doneWithKeyEvent(const NativeWebKeyboardEvent&, bool) override;
     virtual void doneWithTouchEvent(const NativeWebTouchEvent&, bool) override;
 
-    virtual PassRefPtr<WebPopupMenuProxy> createPopupMenuProxy(WebPageProxy*) override;
-    virtual PassRefPtr<WebContextMenuProxy> createContextMenuProxy(WebPageProxy*) override;
+    virtual RefPtr<WebPopupMenuProxy> createPopupMenuProxy(WebPageProxy*) override;
+    virtual RefPtr<WebContextMenuProxy> createContextMenuProxy(WebPageProxy*) override;
 
     virtual void setTextIndicator(Ref<WebCore::TextIndicator>, WebCore::TextIndicatorLifetime) override;
     virtual void clearTextIndicator(WebCore::TextIndicatorDismissalAnimation) override;
@@ -95,8 +95,8 @@ private:
 
     virtual void navigationGestureDidBegin() override;
     virtual void navigationGestureWillEnd(bool, WebBackForwardListItem&) override;
-    virtual void navigationGestureDidEnd() override;
     virtual void navigationGestureDidEnd(bool, WebBackForwardListItem&) override;
+    virtual void navigationGestureDidEnd() override;
     virtual void willRecordNavigationSnapshot(WebBackForwardListItem&) override;
 
     virtual void didFirstVisuallyNonEmptyLayoutForMainFrame() override;
@@ -105,6 +105,17 @@ private:
     virtual void didSameDocumentNavigationForMainFrame(SameDocumentNavigationType) override;
 
     virtual void didChangeBackgroundColor() override;
+
+#if ENABLE(VIDEO)
+    virtual void mediaDocumentNaturalSizeChanged(const WebCore::IntSize&) override;
+#endif
+
+    virtual void refView() override;
+    virtual void derefView() override;
+
+#if USE(GSTREAMER)
+    virtual GUniquePtr<GstInstallPluginsContext> createGstInstallPluginsContext() override;
+#endif
 
     WKWPE::View& m_view;
 };

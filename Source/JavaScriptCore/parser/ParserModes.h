@@ -33,7 +33,7 @@ namespace JSC {
 
 enum class JSParserStrictMode { NotStrict, Strict };
 enum class JSParserBuiltinMode { NotBuiltin, Builtin };
-enum class JSParserCodeType { Program, Function };
+enum class JSParserCodeType { Program, Function, Module };
 
 enum class ConstructorKind { None, Base, Derived };
 enum class SuperBinding { Needed, NotNeeded };
@@ -43,6 +43,15 @@ enum ProfilerMode { ProfilerOff, ProfilerOn };
 enum DebuggerMode { DebuggerOff, DebuggerOn };
 
 enum FunctionMode { FunctionExpression, FunctionDeclaration };
+
+enum FunctionParseMode {
+    NormalFunctionMode,
+    GetterMode,
+    SetterMode,
+    MethodMode,
+    NotAFunctionMode,
+    ArrowFunctionMode
+};
 
 inline bool functionNameIsInScope(const Identifier& name, FunctionMode functionMode)
 {

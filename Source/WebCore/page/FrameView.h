@@ -105,6 +105,8 @@ public:
     virtual void setContentsSize(const IntSize&) override;
     virtual void updateContentsSize() override;
 
+    WEBCORE_EXPORT IntSize contentsSizeRespectingOverflow() const;
+
     void layout(bool allowSubtree = true);
     WEBCORE_EXPORT bool didFirstLayout() const;
     void layoutTimerFired();
@@ -243,7 +245,6 @@ public:
     virtual bool isRubberBandInProgress() const override;
     WEBCORE_EXPORT virtual IntPoint minimumScrollPosition() const override;
     WEBCORE_EXPORT virtual IntPoint maximumScrollPosition() const override;
-    void delayedScrollEventTimerFired();
 
     void viewportContentsChanged();
     WEBCORE_EXPORT void resumeVisibleImageAnimationsIncludingSubframes();
@@ -313,8 +314,6 @@ public:
     WEBCORE_EXPORT void updateControlTints();
 
     void restoreScrollbar();
-
-    void postLayoutTimerFired();
 
     WEBCORE_EXPORT bool wasScrolledByUser() const;
     WEBCORE_EXPORT void setWasScrolledByUser(bool);
@@ -427,7 +426,7 @@ public:
     // to rubber-band, which the main frame might be allowed to do even if there is no content to scroll to. In that case,
     // callers use Scrollability::ScrollableOrRubberbandable.
     enum class Scrollability { Scrollable, ScrollableOrRubberbandable };
-    bool isScrollable(Scrollability definitionOfScrollable = Scrollability::Scrollable);
+    WEBCORE_EXPORT bool isScrollable(Scrollability definitionOfScrollable = Scrollability::Scrollable);
 
     virtual bool isScrollableOrRubberbandable() override;
     virtual bool hasScrollableOrRubberbandableAncestor() override;

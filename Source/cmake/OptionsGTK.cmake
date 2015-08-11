@@ -2,7 +2,7 @@ include(GNUInstallDirs)
 
 set(PROJECT_VERSION_MAJOR 2)
 set(PROJECT_VERSION_MINOR 9)
-set(PROJECT_VERSION_MICRO 3)
+set(PROJECT_VERSION_MICRO 5)
 set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_MICRO})
 set(WEBKITGTK_API_VERSION 4.0)
 
@@ -15,8 +15,8 @@ endif ()
 
 # Libtool library version, not to be confused with API version.
 # See http://www.gnu.org/software/libtool/manual/html_node/Libtool-versioning.html
-CALCULATE_LIBRARY_VERSIONS_FROM_LIBTOOL_TRIPLE(WEBKIT2 45 1 8)
-CALCULATE_LIBRARY_VERSIONS_FROM_LIBTOOL_TRIPLE(JAVASCRIPTCORE 20 2 2)
+CALCULATE_LIBRARY_VERSIONS_FROM_LIBTOOL_TRIPLE(WEBKIT2 47 0 10)
+CALCULATE_LIBRARY_VERSIONS_FROM_LIBTOOL_TRIPLE(JAVASCRIPTCORE 20 4 2)
 
 # These are shared variables, but we special case their definition so that we can use the
 # CMAKE_INSTALL_* variables that are populated by the GNUInstallDirs macro.
@@ -69,7 +69,7 @@ WEBKIT_OPTION_DEFINE(ENABLE_INTROSPECTION "Whether to enable GObject introspecti
 WEBKIT_OPTION_DEFINE(ENABLE_OPENGL "Whether to use OpenGL." PUBLIC ON)
 WEBKIT_OPTION_DEFINE(ENABLE_PLUGIN_PROCESS_GTK2 "Whether to build WebKitPluginProcess2 to load GTK2 based plugins." PUBLIC ON)
 WEBKIT_OPTION_DEFINE(ENABLE_X11_TARGET "Whether to enable support for the X11 windowing target." PUBLIC ON)
-WEBKIT_OPTION_DEFINE(ENABLE_WAYLAND_TARGET "Whether to enable support for the Wayland windowing target." PUBLIC OFF)
+WEBKIT_OPTION_DEFINE(ENABLE_WAYLAND_TARGET "Whether to enable support for the Wayland windowing target." PUBLIC ON)
 WEBKIT_OPTION_DEFINE(USE_LIBNOTIFY "Whether to enable the default web notification implementation." PUBLIC ON)
 WEBKIT_OPTION_DEFINE(USE_LIBHYPHEN "Whether to enable the default automatic hyphenation implementation." PUBLIC ON)
 
@@ -143,6 +143,7 @@ WEBKIT_OPTION_DEFAULT_PORT_VALUE(USE_SYSTEM_MALLOC PUBLIC OFF)
 
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_3D_TRANSFORMS PRIVATE ON)
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_ACCESSIBILITY PRIVATE ON)
+WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_ALLINONE_BUILD PRIVATE OFF)
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_ATTACHMENT_ELEMENT PRIVATE OFF)
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_BATTERY_STATUS PRIVATE OFF)
 WEBKIT_OPTION_DEFAULT_PORT_VALUE(ENABLE_CANVAS_PATH PRIVATE OFF)
@@ -219,7 +220,7 @@ set(ENABLE_PLUGIN_PROCESS ${ENABLE_X11_TARGET})
 add_definitions(-DBUILDING_GTK__=1)
 add_definitions(-DGETTEXT_PACKAGE="WebKit2GTK-${WEBKITGTK_API_VERSION}")
 add_definitions(-DDATA_DIR="${CMAKE_INSTALL_DATADIR}")
-add_definitions(-DUSER_AGENT_GTK_MAJOR_VERSION=601)
+add_definitions(-DUSER_AGENT_GTK_MAJOR_VERSION=602)
 add_definitions(-DUSER_AGENT_GTK_MINOR_VERSION=1)
 add_definitions(-DWEBKITGTK_API_VERSION_STRING="${WEBKITGTK_API_VERSION}")
 
@@ -338,6 +339,13 @@ if (ENABLE_PLUGIN_PROCESS_GTK2)
     find_package(GDK2 2.24.10 REQUIRED)
 endif ()
 
+if (ENABLE_SECCOMP_FILTERS)
+    find_package(LibSeccomp)
+    if (NOT PC_LIBSECCOMP_FOUND)
+        message(FATAL_ERROR "libseccomp is required for ENABLE_SECCOMP_FILTERS")
+    endif ()
+endif ()
+
 if (ENABLE_SPELLCHECK)
     find_package(Enchant)
     if (NOT PC_ENCHANT_FOUND)
@@ -431,6 +439,12 @@ if (USE_LIBHYPHEN)
     if (NOT HYPHEN_FOUND)
        message(FATAL_ERROR "libhyphen is needed for USE_LIBHYPHEN.")
     endif ()
+endif ()
+
+# Override the cached variables, gtk-doc and gobject-introspection do not really work when cross-building.
+if (CMAKE_CROSSCOMPILING)
+    set(ENABLE_GTKDOC OFF)
+    set(ENABLE_INTROSPECTION OFF)
 endif ()
 
 set(DERIVED_SOURCES_GOBJECT_DOM_BINDINGS_DIR ${DERIVED_SOURCES_DIR}/webkitdom)

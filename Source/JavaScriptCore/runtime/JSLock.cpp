@@ -73,7 +73,7 @@ void JSLockHolder::init()
 JSLockHolder::~JSLockHolder()
 {
     RefPtr<JSLock> apiLock(&m_vm->apiLock());
-    m_vm.clear();
+    m_vm = nullptr;
     apiLock->unlock();
 }
 
@@ -176,6 +176,8 @@ void JSLock::unlock(intptr_t unlockCount)
 void JSLock::willReleaseLock()
 {
     if (m_vm) {
+        m_vm->drainMicrotasks();
+
         m_vm->heap.releaseDelayedReleasedObjects();
         m_vm->setStackPointerAtVMEntry(nullptr);
     }

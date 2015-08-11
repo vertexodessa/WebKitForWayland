@@ -45,6 +45,10 @@ enum FormType { // KEEP IN SYNC WITH edjeGroupFromFormType()
     CheckBox,
     ComboBox,
     ProgressBar,
+    ScrollbarHorizontalThumb,
+    ScrollbarHorizontalTrackBackground,
+    ScrollbarVerticalThumb,
+    ScrollbarVerticalTrackBackground,
     SearchField,
     SearchFieldResultsButton,
     SearchFieldResultsDecoration,
@@ -86,7 +90,7 @@ public:
     // A method to obtain the baseline position for a "leaf" control. This will only be used if a baseline
     // position cannot be determined by examining child content. Checkboxes and radio buttons are examples of
     // controls that need to do this.
-    virtual int baselinePosition(const RenderObject&) const override;
+    virtual int baselinePosition(const RenderBox&) const override;
 
     virtual Color platformActiveSelectionBackgroundColor() const override;
     virtual Color platformInactiveSelectionBackgroundColor() const override;
@@ -171,10 +175,11 @@ public:
 #if ENABLE(VIDEO_TRACK)
     virtual bool supportsClosedCaptioning() const override { return true; }
 #endif
-    virtual bool shouldShowPlaceholderWhenFocused() const override { return true; }
 
     void setThemePath(const String&);
     String themePath() const;
+
+    bool paintThemePart(const GraphicsContext&, FormType, const IntRect&);
 
 protected:
     static float defaultFontSize;

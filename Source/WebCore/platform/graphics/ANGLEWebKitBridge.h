@@ -43,6 +43,7 @@
 #endif
 #endif
 
+
 #if !PLATFORM(GTK) && !PLATFORM(EFL) && !PLATFORM(WPE) && !PLATFORM(WIN) && !defined(BUILDING_WITH_CMAKE)
 #include "ANGLE/ShaderLang.h"
 #elif PLATFORM(WIN) && !defined(BUILDING_WITH_CMAKE)
@@ -78,7 +79,7 @@ struct ANGLEShaderSymbol {
         return symbolType == SHADER_SYMBOL_TYPE_UNIFORM
             && (dataType == GL_SAMPLER_2D
             || dataType == GL_SAMPLER_CUBE
-#if !PLATFORM(IOS) && !((PLATFORM(EFL) || PLATFORM(GTK) ||  PLATFORM(WPE)) && USE(OPENGL_ES_2))
+#if !PLATFORM(IOS) && !((PLATFORM(EFL) || PLATFORM(GTK) || PLATFORM(WPE)) && USE(OPENGL_ES_2))
             || dataType == GL_SAMPLER_2D_RECT_ARB
 #endif
             );
@@ -114,4 +115,3 @@ private:
 } // namespace WebCore
 
 #endif
-

@@ -40,6 +40,7 @@
 #include "JSLock.h"
 #include "LLIntData.h"
 #include "MacroAssemblerCodeRef.h"
+#include "Microtask.h"
 #include "NumericStrings.h"
 #include "PrivateName.h"
 #include "PrototypeMap.h"
@@ -55,6 +56,7 @@
 #include <wtf/Bag.h>
 #include <wtf/BumpPointerAllocator.h>
 #include <wtf/DateMath.h>
+#include <wtf/Deque.h>
 #include <wtf/Forward.h>
 #include <wtf/HashMap.h>
 #include <wtf/HashSet.h>
@@ -151,6 +153,23 @@ struct LocalTimeOffsetCache {
     double end;
     double increment;
     WTF::TimeType timeType;
+};
+
+class QueuedTask {
+    WTF_MAKE_NONCOPYABLE(QueuedTask);
+    WTF_MAKE_FAST_ALLOCATED;
+public:
+    void run();
+
+    QueuedTask(VM& vm, JSGlobalObject* globalObject, PassRefPtr<Microtask> microtask)
+        : m_globalObject(vm, globalObject)
+        , m_microtask(microtask)
+    {
+    }
+
+private:
+    Strong<JSGlobalObject> m_globalObject;
+    RefPtr<Microtask> m_microtask;
 };
 
 class ConservativeRoots;
@@ -275,10 +294,7 @@ public:
     Strong<Structure> inferredValueStructure;
     Strong<Structure> functionRareDataStructure;
     Strong<Structure> exceptionStructure;
-#if ENABLE(PROMISES)
     Strong<Structure> promiseDeferredStructure;
-    Strong<Structure> promiseReactionStructure;
-#endif
     Strong<JSCell> iterationTerminator;
     Strong<JSCell> emptyPropertyNameEnumerator;
 
@@ -520,6 +536,7 @@ public:
     JS_EXPORT_PRIVATE void discardAllCode();
 
     void registerWatchpointForImpureProperty(const Identifier&, Watchpoint*);
+    
     // FIXME: Use AtomicString once it got merged with Identifier.
     JS_EXPORT_PRIVATE void addImpureProperty(const String&);
 
@@ -536,6 +553,9 @@ public:
     ControlFlowProfiler* controlFlowProfiler() { return m_controlFlowProfiler.get(); }
     bool enableControlFlowProfiler();
     bool disableControlFlowProfiler();
+
+    JS_EXPORT_PRIVATE void queueMicrotask(JSGlobalObject*, PassRefPtr<Microtask>);
+    JS_EXPORT_PRIVATE void drainMicrotasks();
 
 private:
     friend class LLIntOffsetsExtractor;
@@ -591,6 +611,7 @@ private:
     FunctionHasExecutedCache m_functionHasExecutedCache;
     std::unique_ptr<ControlFlowProfiler> m_controlFlowProfiler;
     unsigned m_controlFlowProfilerEnabledCount;
+    Deque<std::unique_ptr<QueuedTask>> m_microtaskQueue;
 };
 
 #if ENABLE(GC_VALIDATION)

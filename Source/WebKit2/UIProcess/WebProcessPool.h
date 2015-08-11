@@ -63,6 +63,10 @@
 #include "NetworkProcessProxy.h"
 #endif
 
+#if ENABLE(MEDIA_SESSION)
+#include "WebMediaSessionFocusManager.h"
+#endif
+
 #if PLATFORM(COCOA)
 OBJC_CLASS NSMutableDictionary;
 OBJC_CLASS NSObject;
@@ -498,6 +502,7 @@ private:
 
 #if ENABLE(NETWORK_PROCESS)
     bool m_canHandleHTTPSServerTrustEvaluation;
+    bool m_didNetworkProcessCrash;
     RefPtr<NetworkProcessProxy> m_networkProcess;
 #endif
 

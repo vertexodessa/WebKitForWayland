@@ -265,7 +265,7 @@ void JIT::emitSlow_op_get_by_val(Instruction* currentInstruction, Vector<SlowCas
     
     emitLoad(base, regT1, regT0);
     emitLoad(property, regT3, regT2);
-    Call call = callOperation(operationGetByValDefault, dst, regT1, regT0, regT3, regT2, profile);
+    Call call = callOperation(operationGetByValOptimize, dst, regT1, regT0, regT3, regT2, profile);
 
     m_byValCompilationInfo[m_byValInstructionIndex].slowPathTarget = slowPath;
     m_byValCompilationInfo[m_byValInstructionIndex].returnAddress = call;
@@ -859,21 +859,6 @@ void JIT::emit_op_put_to_arguments(Instruction* currentInstruction)
     emitLoad(value, regT1, regT2);
     store32(regT1, Address(regT0, DirectArguments::storageOffset() + index * sizeof(WriteBarrier<Unknown>) + TagOffset));
     store32(regT2, Address(regT0, DirectArguments::storageOffset() + index * sizeof(WriteBarrier<Unknown>) + PayloadOffset));
-}
-
-void JIT::emit_op_init_global_const(Instruction* currentInstruction)
-{
-    WriteBarrier<Unknown>* variablePointer = currentInstruction[1].u.variablePointer;
-    int value = currentInstruction[2].u.operand;
-
-    JSGlobalObject* globalObject = m_codeBlock->globalObject();
-
-    emitWriteBarrier(globalObject, value, ShouldFilterValue);
-
-    emitLoad(value, regT1, regT0);
-    
-    store32(regT1, variablePointer->tagPointer());
-    store32(regT0, variablePointer->payloadPointer());
 }
 
 } // namespace JSC

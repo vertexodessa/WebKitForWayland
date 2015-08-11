@@ -83,6 +83,7 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
         // Otherwise we end up in race conditions during complete or delete-complete phases.
         this._codeMirror.on("change", this._contentChanged.bind(this));
         this._codeMirror.on("blur", this._editorBlured.bind(this));
+        this._codeMirror.on("beforeChange", this._handleBeforeChange.bind(this));
 
         if (typeof this._delegate.cssStyleDeclarationTextEditorFocused === "function")
             this._codeMirror.on("focus", this._editorFocused.bind(this));
@@ -357,7 +358,9 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
             this.clearSelection();
 
         var index = line.indexOf(":");
-        this._codeMirror.setSelection({line: 0, ch: 0}, {line: 0, ch: index < 0 ? trimmedLine.length : index});
+        var cursor = {line: 0, ch: 0};
+
+        this._codeMirror.setSelection(cursor, {line: 0, ch: index < 0 || this._textAtCursorIsComment(this._codeMirror, cursor) ? trimmedLine.length : index});
     }
 
     selectLastProperty()
@@ -366,8 +369,19 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
         var lineText = this._codeMirror.getLine(line);
         var trimmedLine = lineText.trimRight();
 
-        var colon = /(?::\s*)/.exec(lineText);
-        this._codeMirror.setSelection({line, ch: colon ? colon.index + colon[0].length : 0}, {line, ch: trimmedLine.length - trimmedLine.endsWith(";")});
+        var lastAnchor;
+        var lastHead;
+
+        if (this._textAtCursorIsComment(this._codeMirror, {line, ch: line.length})) {
+            lastAnchor = 0;
+            lastHead = line.length;
+        } else {
+            var colon = /(?::\s*)/.exec(lineText);
+            lastAnchor = colon ? colon.index + colon[0].length : 0;
+            lastHead = trimmedLine.length - trimmedLine.endsWith(";");
+        }
+
+        this._codeMirror.setSelection({line, ch: lastAnchor}, {line, ch: lastHead});
     }
 
     // Protected
@@ -394,14 +408,33 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
 
     // Private
 
+    _textAtCursorIsComment(codeMirror, cursor)
+    {
+        var token = codeMirror.getTokenTypeAt(cursor);
+        return token && token.includes("comment");
+    }
+
     _highlightNextNameOrValue(codeMirror, cursor, text)
     {
-        var match = text.match(/(?:[^:;\s]\s*)+/g);
-        var firstMatch = text.indexOf(match[0]) + match[0].length;
-        var nextHead = cursor.ch < firstMatch ? text.indexOf(match[0]) : text.indexOf(match[1]);
-        var nextAnchor = cursor.ch < firstMatch ? firstMatch : text.indexOf(match[1]) + match[1].length;
+        var nextAnchor;
+        var nextHead;
 
-        codeMirror.setSelection({line: cursor.line, ch: nextHead}, {line: cursor.line, ch: nextAnchor});
+        if (this._textAtCursorIsComment(codeMirror, cursor)) {
+            nextAnchor = 0;
+            nextHead = text.length;
+        } else {
+            var colonIndex = text.indexOf(":");
+            var substringIndex = colonIndex >= 0 && cursor.ch >= colonIndex ? colonIndex : 0;
+
+            var regExp = /(?:[^:;\s]\s*)+/g;
+            regExp.lastIndex = substringIndex;
+            var match = regExp.exec(text);
+
+            nextAnchor = match.index;
+            nextHead = nextAnchor + match[0].length;
+        }
+
+        codeMirror.setSelection({line: cursor.line, ch: nextAnchor}, {line: cursor.line, ch: nextHead});
     }
 
     _handleMouseDown(event)
@@ -413,13 +446,8 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
         var line = this._codeMirror.getLine(cursor.line);
         var trimmedLine = line.trimRight();
 
-        if (!trimmedLine.trimLeft().length)
+        if (!trimmedLine.trimLeft().length || cursor.ch !== trimmedLine.length)
             return;
-
-        if (cursor.ch !== trimmedLine.length) {
-            this._highlightNextNameOrValue(this._codeMirror, cursor, line);
-            return;
-        }
 
         this._mouseDownCursorPosition = cursor;
     }
@@ -432,10 +460,41 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
         var cursor = this._codeMirror.coordsChar({left: event.x, top: event.y});
         var line = this._codeMirror.getLine(cursor.line);
 
-        if (this._mouseDownCursorPosition.line === cursor.line && this._mouseDownCursorPosition.ch === cursor.ch)
-            this._codeMirror.replaceRange(line.trimRight().endsWith(";") ? "\n" : ";\n", cursor);
+        if (this._mouseDownCursorPosition.line === cursor.line && this._mouseDownCursorPosition.ch === cursor.ch) {
+            var replacement = "\n";
+
+            if (!line.trimRight().endsWith(";") && !this._textAtCursorIsComment(this._codeMirror, cursor))
+                replacement = ";" + replacement;
+
+            this._codeMirror.replaceRange(replacement, cursor);
+        }
 
         this._mouseDownCursorPosition = null;
+    }
+
+    _handleBeforeChange(codeMirror, change)
+    {
+        if (change.origin !== "+delete" || this._completionController.isShowingCompletions())
+            return CodeMirror.Pass;
+
+        if (!change.to.line && !change.to.ch) {
+            if (codeMirror.lineCount() === 1)
+                return CodeMirror.Pass;
+
+            var line = codeMirror.getLine(change.to.line);
+            if (line && line.trim().length)
+                return CodeMirror.Pass;
+
+            codeMirror.execCommand("deleteLine");
+            return;
+        }
+
+        var marks = codeMirror.findMarksAt(change.to);
+        if (!marks.length)
+            return CodeMirror.Pass;
+
+        for (var mark of marks)
+            mark.clear();
     }
 
     _handleEnterKey(codeMirror)
@@ -445,11 +504,19 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
         var trimmedLine = line.trimRight();
         var hasEndingSemicolon = trimmedLine.endsWith(";");
 
+        if (!trimmedLine.trimLeft().length)
+            return CodeMirror.Pass;
+
         if (hasEndingSemicolon && cursor.ch === trimmedLine.length - 1)
             ++cursor.ch;
 
         if (cursor.ch === trimmedLine.length) {
-            codeMirror.replaceRange(hasEndingSemicolon ? "\n" : ";\n", cursor);
+            var replacement = "\n";
+
+            if (!hasEndingSemicolon && !this._textAtCursorIsComment(this._codeMirror, cursor))
+                replacement = ";" + replacement;
+
+            this._codeMirror.replaceRange(replacement, cursor);
             return;
         }
 
@@ -465,7 +532,12 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
         cursor.ch = trimmedLine.length;
 
         if (cursor.ch) {
-            codeMirror.replaceRange(trimmedLine.endsWith(";") ? "\n" : ";\n", cursor);
+            var replacement = "\n";
+
+            if (!trimmedLine.endsWith(";") && !this._textAtCursorIsComment(this._codeMirror, cursor))
+                replacement = ";" + replacement;
+
+            this._codeMirror.replaceRange(replacement, cursor);
             return;
         }
 
@@ -487,15 +559,29 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
         var cursor = codeMirror.getCursor();
         var line = codeMirror.getLine(cursor.line);
         var previousLine = codeMirror.getLine(cursor.line - 1);
-        var trimmedPreviousLine = previousLine ? previousLine.trimRight() : "";
 
         if (!line && !previousLine && !cursor.line)
             return switchRule.call(this);
 
-        if (cursor.ch === line.indexOf(":") || line.indexOf(":") < 0) {
+        var trimmedPreviousLine = previousLine ? previousLine.trimRight() : "";
+        var previousAnchor;
+        var previousHead;
+        var isComment = this._textAtCursorIsComment(codeMirror, cursor);
+
+        if (cursor.ch === line.indexOf(":") || line.indexOf(":") < 0 || isComment) {
             if (previousLine) {
-                var colon = /(?::\s*)/.exec(previousLine);
-                codeMirror.setSelection({line: cursor.line - 1, ch: colon ? colon.index + colon[0].length : 0}, {line: cursor.line - 1, ch: trimmedPreviousLine.length - trimmedPreviousLine.endsWith(";")});
+                --cursor.line;
+
+                if (this._textAtCursorIsComment(codeMirror, cursor)) {
+                    previousAnchor = 0;
+                    previousHead = trimmedPreviousLine.length;
+                } else {
+                    var colon = /(?::\s*)/.exec(previousLine);
+                    previousAnchor = colon ? colon.index + colon[0].length : 0;
+                    previousHead = trimmedPreviousLine.length - trimmedPreviousLine.endsWith(";");
+                }
+                
+                codeMirror.setSelection({line: cursor.line, ch: previousAnchor}, {line: cursor.line, ch: previousHead});
                 return;
             }
 
@@ -507,12 +593,16 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
             return switchRule.call(this);
         }
 
-        var match = line.match(/(?:[^:;\s]\s*)+/g);
-        var lastMatch = line.indexOf(match.lastValue) + match.lastValue.length;
-        var prevHead = cursor.ch > lastMatch ? line.indexOf(match.lastValue) : line.indexOf(match[0]);
-        var prevAnchor = cursor.ch > lastMatch ? lastMatch : line.indexOf(match[0]) + match[0].length;
+        if (isComment) {
+            previousAnchor = 0;
+            previousHead = line.length;
+        } else {
+            var match = /(?:[^:;\s]\s*)+/.exec(line);
+            previousAnchor = match.index;
+            previousHead = previousAnchor + match[0].length;
+        }
 
-        codeMirror.setSelection({line: cursor.line, ch: prevHead}, {line: cursor.line, ch: prevAnchor});
+        codeMirror.setSelection({line: cursor.line, ch: previousAnchor}, {line: cursor.line, ch: previousHead});
     }
 
     _handleTabKey(codeMirror)
@@ -562,7 +652,7 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
 
                 var replacement = "";
 
-                if (!hasEndingSemicolon)
+                if (!hasEndingSemicolon && !this._textAtCursorIsComment(codeMirror, cursor))
                     replacement += ";";
 
                 if (lastLine)
@@ -576,8 +666,7 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
                     return;
                 }
 
-                var colon = nextLine.indexOf(":");
-                codeMirror.setSelection({line: cursor.line + 1, ch: 0}, {line: cursor.line + 1, ch: colon < 0 ? trimmedNextLine.length : colon});
+                this._highlightNextNameOrValue(codeMirror, {line: cursor.line + 1, ch: 0}, nextLine);
             }.bind(this));
 
             return;
@@ -655,6 +744,7 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
         // Reset the content on blur since we stop accepting external changes while the the editor is focused.
         // This causes us to pick up any change that was suppressed while the editor was focused.
         this._resetContent();
+        this.dispatchEventToListeners(WebInspector.CSSStyleDeclarationTextEditor.Event.Blurred);
     }
 
     _editorFocused(codeMirror)
@@ -690,6 +780,8 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
         if (this._commitChangesTimeout)
             clearTimeout(this._commitChangesTimeout);
         this._commitChangesTimeout = setTimeout(this._commitChanges.bind(this), delay);
+
+        this.dispatchEventToListeners(WebInspector.CSSStyleDeclarationTextEditor.Event.ContentChanged);
     }
 
     _updateTextMarkers(nonatomic)
@@ -721,34 +813,10 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
             });
 
             if (!this._codeMirror.getOption("readOnly")) {
-                // Matches a comment like: /* -webkit-foo: bar; */
-                var commentedPropertyRegex = /\/\*\s*[-\w]+\s*:\s*[^;]+;?\s*\*\//g;
-
                 // Look for comments that look like properties and add checkboxes in front of them.
-                var lineCount = this._codeMirror.lineCount();
-                for (var i = 0; i < lineCount; ++i) {
-                    var lineContent = this._codeMirror.getLine(i);
-
-                    var match = commentedPropertyRegex.exec(lineContent);
-                    while (match) {
-                        var checkboxElement = document.createElement("input");
-                        checkboxElement.type = "checkbox";
-                        checkboxElement.checked = false;
-                        checkboxElement.addEventListener("change", this._propertyCommentCheckboxChanged.bind(this));
-
-                        var from = {line: i, ch: match.index};
-                        var to = {line: i, ch: match.index + match[0].length};
-
-                        var checkboxMarker = this._codeMirror.setUniqueBookmark(from, checkboxElement);
-                        checkboxMarker.__propertyCheckbox = true;
-
-                        var commentTextMarker = this._codeMirror.markText(from, to);
-
-                        checkboxElement.__commentTextMarker = commentTextMarker;
-
-                        match = commentedPropertyRegex.exec(lineContent);
-                    }
-                }
+                this._codeMirror.eachLine(function(lineHandler) {
+                    this._createCommentedCheckboxMarker(lineHandler);
+                }.bind(this));
             }
 
             // Look for colors and make swatches.
@@ -761,6 +829,41 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
             update.call(this);
         else
             this._codeMirror.operation(update.bind(this));
+    }
+
+    _createCommentedCheckboxMarker(lineHandle)
+    {
+        var lineNumber = lineHandle.lineNo();
+
+        // Since lineNumber can be 0, it is also necessary to check if it is a number before returning.
+        if (!lineNumber && isNaN(lineNumber))
+            return;
+
+        // Matches a comment like: /* -webkit-foo: bar; */
+        var commentedPropertyRegex = /\/\*\s*[-\w]+\s*:\s*[^;]+;?\s*\*\//g;
+
+        var match = commentedPropertyRegex.exec(lineHandle.text);
+        if (!match)
+            return;
+
+        while (match) {
+            var checkboxElement = document.createElement("input");
+            checkboxElement.type = "checkbox";
+            checkboxElement.checked = false;
+            checkboxElement.addEventListener("change", this._propertyCommentCheckboxChanged.bind(this));
+
+            var from = {line: lineNumber, ch: match.index};
+            var to = {line: lineNumber, ch: match.index + match[0].length};
+
+            var checkboxMarker = this._codeMirror.setUniqueBookmark(from, checkboxElement);
+            checkboxMarker.__propertyCheckbox = true;
+
+            var commentTextMarker = this._codeMirror.markText(from, to);
+
+            checkboxElement.__commentTextMarker = commentTextMarker;
+
+            match = commentedPropertyRegex.exec(lineHandle.text);
+        }
     }
 
     _createColorSwatches(nonatomic, lineNumber)
@@ -978,19 +1081,29 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
 
         if (propertyNameIsValid) {
             // The property's name is valid but its value is not (either it is not supported for this property or there is no value).
-            var start = {line: from.line, ch: from.ch + property.name.length + 2};
+            var semicolon = /:\s*/.exec(property.text);
+            var start = {line: from.line, ch: semicolon.index + semicolon[0].length};
             var end = {line: to.line, ch: start.ch + property.value.length};
 
             this._codeMirror.markText(start, end, {className: "invalid"});
 
-            var valueReplacement = property.value.length ? WebInspector.UIString("The value '%s' is not supported for this property.\nClick to delete and open autocomplete.").format(property.value) : WebInspector.UIString("This property needs a value.\nClick to open autocomplete.");
+            if (/^(?:\d+)$/.test(property.value)) {
+                invalidMarkerInfo = {
+                    position: start,
+                    title: WebInspector.UIString("The value '%s' needs units.\nClick to add 'px' to the value.").format(property.value),
+                    correction: property.name + ": " + property.value + "px;",
+                    autocomplete: false
+                };
+            } else {
+                var valueReplacement = property.value.length ? WebInspector.UIString("The value '%s' is not supported for this property.\nClick to delete and open autocomplete.").format(property.value) : WebInspector.UIString("This property needs a value.\nClick to open autocomplete.");
 
-            invalidMarkerInfo = {
-                position: start,
-                title: valueReplacement,
-                correction: property.name + ": ",
-                autocomplete: true
-            };
+                invalidMarkerInfo = {
+                    position: start,
+                    title: valueReplacement,
+                    correction: property.name + ": ",
+                    autocomplete: true
+                };
+            }
         } else if (!instancesOfProperty.call(this, "-webkit-" + property.name) && WebInspector.CSSCompletions.cssNameCompletions.propertyRequiresWebkitPrefix(property.name)) {
             // The property is valid and exists in the rule while its prefixed version does not.
             invalidMarkerInfo = {
@@ -1357,8 +1470,8 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
         var mapping = {original: [0], formatted: [0]};
         // FIXME: <rdar://problem/10593948> Provide a way to change the tab width in the Web Inspector
         var indentString = "    ";
-        var builder = new FormatterContentBuilder(mapping, [], [], 0, 0, indentString);
-        var formatter = new Formatter(this._codeMirror, builder);
+        var builder = new WebInspector.FormatterContentBuilder(mapping, [], [], 0, 0, indentString);
+        var formatter = new WebInspector.Formatter(this._codeMirror, builder);
         var start = {line: 0, ch: 0};
         var end = {line: this._codeMirror.lineCount() - 1};
         formatter.format(start, end);
@@ -1444,7 +1557,13 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
             // 2) `_createTextMarkerForPropertyIfNeeded` relies on CSSProperty instances.
             var cssPropertiesMap = new Map();
             this._iterateOverProperties(false, function(cssProperty) {
-                cssPropertiesMap.set(cssProperty.text.replace(findWhitespace, ""), cssProperty);
+                cssProperty.__refreshedAfterBlur = false;
+
+                var propertyTextSansWhitespace = cssProperty.text.replace(findWhitespace, "");
+                var existingProperties = cssPropertiesMap.get(propertyTextSansWhitespace) || [];
+                existingProperties.push(cssProperty);
+
+                cssPropertiesMap.set(propertyTextSansWhitespace, existingProperties);
             });
 
             // Go through the Editor line by line and create TextMarker when a
@@ -1452,10 +1571,24 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
             this._codeMirror.eachLine(function(lineHandler) {
                 var lineNumber = lineHandler.lineNo();
                 var lineContentSansWhitespace = lineHandler.text.replace(findWhitespace, "");
-                if (cssPropertiesMap.has(lineContentSansWhitespace)) {
+                var properties = cssPropertiesMap.get(lineContentSansWhitespace);
+
+                if (!properties) {
+                    this._createCommentedCheckboxMarker(lineHandler);
+                    return;
+                }
+
+                for (var property of properties) {
+                    if (property.__refreshedAfterBlur)
+                        continue;
+
                     var from = {line: lineNumber, ch: 0};
                     var to = {line: lineNumber};
-                    this._createTextMarkerForPropertyIfNeeded(from, to, cssPropertiesMap.get(lineContentSansWhitespace));
+
+                    this._createTextMarkerForPropertyIfNeeded(from, to, property);
+                    property.__refreshedAfterBlur = true;
+
+                    break;
                 }
             }.bind(this));
 
@@ -1539,6 +1672,11 @@ WebInspector.CSSStyleDeclarationTextEditor = class CSSStyleDeclarationTextEditor
     {
         this._tokenTrackingController.highlightRange(candidate.hoveredTokenRange);
     }
+};
+
+WebInspector.CSSStyleDeclarationTextEditor.Event = {
+    ContentChanged: "css-style-declaration-text-editor-content-changed",
+    Blurred: "css-style-declaration-text-editor-blurred"
 };
 
 WebInspector.CSSStyleDeclarationTextEditor.StyleClassName = "css-style-text-editor";

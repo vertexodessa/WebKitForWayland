@@ -49,13 +49,13 @@ using namespace WebCore;
 
 static const float minimumAttachedHeight = 250;
 static const float maximumAttachedHeightRatio = 0.75;
-static const float minimumAttachedWidth = 750;
+static const float minimumAttachedWidth = 500;
 
 namespace WebKit {
 
-PassRefPtr<WebInspector> WebInspector::create(WebPage* page)
+Ref<WebInspector> WebInspector::create(WebPage* page)
 {
-    return adoptRef(new WebInspector(page));
+    return adoptRef(*new WebInspector(page));
 }
 
 WebInspector::WebInspector(WebPage* page)

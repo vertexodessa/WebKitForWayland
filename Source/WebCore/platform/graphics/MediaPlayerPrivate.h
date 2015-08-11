@@ -50,7 +50,7 @@ public:
     virtual void load(const String& url, MediaSourcePrivateClient*) = 0;
 #endif
 #if ENABLE(MEDIA_STREAM)
-    virtual void load(MediaStreamPrivate*) = 0;
+    virtual void load(MediaStreamPrivate&) = 0;
 #endif
     virtual void cancelLoad() = 0;
     
@@ -116,7 +116,7 @@ public:
 
     virtual void setVolume(float) { }
     virtual void setVolumeDouble(double volume) { return setVolume(volume); }
-#if PLATFORM(IOS)
+#if PLATFORM(IOS) || PLATFORM(WPE)
     virtual float volume() const { return 1; }
 #endif
 

@@ -37,6 +37,7 @@
 #include "DFGCommon.h"
 #include "DFGEpoch.h"
 #include "DFGLazyJSValue.h"
+#include "DFGMultiGetByOffsetData.h"
 #include "DFGNodeFlags.h"
 #include "DFGNodeOrigin.h"
 #include "DFGNodeType.h"
@@ -63,11 +64,6 @@ struct BasicBlock;
 struct StorageAccessData {
     PropertyOffset offset;
     unsigned identifierNumber;
-};
-
-struct MultiGetByOffsetData {
-    unsigned identifierNumber;
-    Vector<GetByIdVariant, 2> variants;
 };
 
 struct MultiPutByOffsetData {
@@ -720,6 +716,12 @@ struct Node {
         RELEASE_ASSERT(result);
         return result;
     }
+
+    JSValue initializationValueForActivation() const
+    {
+        ASSERT(op() == CreateActivation);
+        return bitwise_cast<FrozenValue*>(m_opInfo2)->value();
+    }
      
     bool containsMovHint()
     {
@@ -1246,8 +1248,6 @@ struct Node {
         case CallVarargs:
         case ConstructVarargs:
         case CallForwardVarargs:
-        case NativeCall:
-        case NativeConstruct:
         case GetByOffset:
         case MultiGetByOffset:
         case GetClosureVar:
@@ -1279,8 +1279,6 @@ struct Node {
     {
         switch (op()) {
         case CheckCell:
-        case NativeConstruct:
-        case NativeCall:
         case NewFunction:
         case CreateActivation:
         case MaterializeCreateActivation:
@@ -1293,13 +1291,7 @@ struct Node {
     FrozenValue* cellOperand()
     {
         ASSERT(hasCellOperand());
-        switch (op()) {
-        case MaterializeCreateActivation:
-            return reinterpret_cast<FrozenValue*>(m_opInfo2);
-        default:
-            return reinterpret_cast<FrozenValue*>(m_opInfo);
-        }
-        RELEASE_ASSERT_NOT_REACHED();
+        return reinterpret_cast<FrozenValue*>(m_opInfo);
     }
     
     template<typename T>
@@ -1359,6 +1351,7 @@ struct Node {
         switch (op()) {
         case CheckStructure:
         case CheckStructureImmediate:
+        case MaterializeNewObject:
             return true;
         default:
             return false;
@@ -1444,7 +1437,7 @@ struct Node {
     ObjectMaterializationData& objectMaterializationData()
     {
         ASSERT(hasObjectMaterializationData());
-        return *reinterpret_cast<ObjectMaterializationData*>(m_opInfo);
+        return *reinterpret_cast<ObjectMaterializationData*>(m_opInfo2);
     }
 
     bool isObjectAllocation()

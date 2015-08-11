@@ -62,7 +62,6 @@ Graph::Graph(VM& vm, Plan& plan, LongLivedState& longLivedState)
     , m_codeBlock(m_plan.codeBlock.get())
     , m_profiledBlock(m_codeBlock->alternative())
     , m_allocator(longLivedState.m_allocator)
-    , m_mustHandleValues(OperandsLike, plan.mustHandleValues)
     , m_nextMachineLocal(0)
     , m_fixpointState(BeforeFixpoint)
     , m_structureRegistrationState(HaveNotStartedRegistering)
@@ -72,9 +71,6 @@ Graph::Graph(VM& vm, Plan& plan, LongLivedState& longLivedState)
 {
     ASSERT(m_profiledBlock);
     
-    for (unsigned i = m_mustHandleValues.size(); i--;)
-        m_mustHandleValues[i] = freezeFragile(plan.mustHandleValues[i]);
-
     m_hasDebuggerEnabled = m_profiledBlock->globalObject()->hasDebugger()
         || Options::forceDebuggerBytecodeGeneration();
 }
@@ -261,8 +257,8 @@ void Graph::dump(PrintStream& out, const char* prefix, Node* node, DumpContext* 
     if (node->hasMultiGetByOffsetData()) {
         MultiGetByOffsetData& data = node->multiGetByOffsetData();
         out.print(comma, "id", data.identifierNumber, "{", identifiers()[data.identifierNumber], "}");
-        for (unsigned i = 0; i < data.variants.size(); ++i)
-            out.print(comma, inContext(data.variants[i], context));
+        for (unsigned i = 0; i < data.cases.size(); ++i)
+            out.print(comma, inContext(data.cases[i], context));
     }
     if (node->hasMultiPutByOffsetData()) {
         MultiPutByOffsetData& data = node->multiPutByOffsetData();
@@ -528,6 +524,14 @@ void Graph::dump(PrintStream& out, DumpContext* context)
         } }
         out.print("\n");
     }
+    
+    out.print("GC Values:\n");
+    for (FrozenValue* value : m_frozenValues) {
+        if (value->pointsToHeap())
+            out.print("    ", inContext(*value, &myContext), "\n");
+    }
+
+    out.print(inContext(watchpoints(), &myContext));
     
     if (!myContext.isEmpty()) {
         myContext.dump(out);
@@ -846,6 +850,30 @@ void Graph::clearFlagsOnAllNodes(NodeFlags flags)
     }
 }
 
+bool Graph::watchCondition(const ObjectPropertyCondition& key)
+{
+    if (!key.isWatchable())
+        return false;
+    
+    m_plan.weakReferences.addLazily(key.object());
+    if (key.hasPrototype())
+        m_plan.weakReferences.addLazily(key.prototype());
+    if (key.hasRequiredValue())
+        m_plan.weakReferences.addLazily(key.requiredValue());
+    
+    m_plan.watchpoints.addLazily(key);
+
+    if (key.kind() == PropertyCondition::Presence)
+        m_safeToLoad.add(std::make_pair(key.object(), key.offset()));
+    
+    return true;
+}
+
+bool Graph::isSafeToLoad(JSObject* base, PropertyOffset offset)
+{
+    return m_safeToLoad.contains(std::make_pair(base, offset));
+}
+
 FullBytecodeLiveness& Graph::livenessFor(CodeBlock* codeBlock)
 {
     HashMap<CodeBlock*, std::unique_ptr<FullBytecodeLiveness>>::iterator iter = m_bytecodeLiveness.find(codeBlock);
@@ -1018,8 +1046,12 @@ JSValue Graph::tryGetConstantProperty(JSValue base, Structure* structure, Proper
 JSValue Graph::tryGetConstantProperty(
     JSValue base, const StructureAbstractValue& structure, PropertyOffset offset)
 {
-    if (structure.isTop() || structure.isClobbered())
+    if (structure.isTop() || structure.isClobbered()) {
+        // FIXME: If we just converted the offset to a uid, we could do ObjectPropertyCondition
+        // watching to constant-fold the property.
+        // https://bugs.webkit.org/show_bug.cgi?id=147271
         return JSValue();
+    }
     
     return tryGetConstantProperty(base, structure.set(), offset);
 }
@@ -1106,26 +1138,21 @@ void Graph::registerFrozenValues()
     m_codeBlock->constants().resize(0);
     m_codeBlock->constantsSourceCodeRepresentation().resize(0);
     for (FrozenValue* value : m_frozenValues) {
-        if (value->structure())
-            ASSERT(m_plan.weakReferences.contains(value->structure()));
+        if (!value->pointsToHeap())
+            continue;
+        
+        ASSERT(value->structure());
+        ASSERT(m_plan.weakReferences.contains(value->structure()));
         
         switch (value->strength()) {
-        case FragileValue: {
-            break;
-        }
         case WeakValue: {
             m_plan.weakReferences.addLazily(value->value().asCell());
             break;
         }
         case StrongValue: {
             unsigned constantIndex = m_codeBlock->addConstantLazily();
-            initializeLazyWriteBarrierForConstant(
-                m_plan.writeBarriers,
-                m_codeBlock->constants()[constantIndex],
-                m_codeBlock,
-                constantIndex,
-                m_codeBlock->ownerExecutable(),
-                value->value());
+            // We already have a barrier on the code block.
+            m_codeBlock->constants()[constantIndex].setWithoutWriteBarrier(value->value());
             break;
         } }
     }
@@ -1170,17 +1197,9 @@ void Graph::visitChildren(SlotVisitor& visitor)
                 break;
                 
             case MultiGetByOffset:
-                for (unsigned i = node->multiGetByOffsetData().variants.size(); i--;) {
-                    GetByIdVariant& variant = node->multiGetByOffsetData().variants[i];
-                    const StructureSet& set = variant.structureSet();
-                    for (unsigned j = set.size(); j--;)
-                        visitor.appendUnbarrieredReadOnlyPointer(set[j]);
-
-                    // Don't need to mark anything in the structure chain because that would
-                    // have been decomposed into CheckStructure's. Don't need to mark the
-                    // callLinkStatus because we wouldn't use MultiGetByOffset if any of the
-                    // variants did that.
-                    ASSERT(!variant.callLinkStatus());
+                for (const MultiGetByOffsetCase& getCase : node->multiGetByOffsetData().cases) {
+                    for (Structure* structure : getCase.set())
+                        visitor.appendUnbarrieredReadOnlyPointer(structure);
                 }
                 break;
                     
@@ -1202,7 +1221,7 @@ void Graph::visitChildren(SlotVisitor& visitor)
     }
 }
 
-FrozenValue* Graph::freezeFragile(JSValue value)
+FrozenValue* Graph::freeze(JSValue value)
 {
     if (UNLIKELY(!value))
         return FrozenValue::emptySingleton();
@@ -1221,16 +1240,9 @@ FrozenValue* Graph::freezeFragile(JSValue value)
     return result.iterator->value = m_frozenValues.add(frozenValue);
 }
 
-FrozenValue* Graph::freeze(JSValue value)
-{
-    FrozenValue* result = freezeFragile(value);
-    result->strengthenTo(WeakValue);
-    return result;
-}
-
 FrozenValue* Graph::freezeStrong(JSValue value)
 {
-    FrozenValue* result = freezeFragile(value);
+    FrozenValue* result = freeze(value);
     result->strengthenTo(StrongValue);
     return result;
 }

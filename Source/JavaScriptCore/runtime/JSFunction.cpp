@@ -521,7 +521,7 @@ bool JSFunction::defineOwnProperty(JSObject* object, ExecState* exec, PropertyNa
      
     if (descriptor.configurablePresent() && descriptor.configurable()) {
         if (throwException)
-            exec->vm().throwException(exec, createTypeError(exec, ASCIILiteral("Attempting to configurable attribute of unconfigurable property.")));
+            exec->vm().throwException(exec, createTypeError(exec, ASCIILiteral("Attempting to change configurable attribute of unconfigurable property.")));
         return false;
     }
     if (descriptor.enumerablePresent() && descriptor.enumerable()) {
@@ -552,14 +552,16 @@ ConstructType JSFunction::getConstructData(JSCell* cell, ConstructData& construc
 {
     JSFunction* thisObject = jsCast<JSFunction*>(cell);
 
-    if (thisObject->isBuiltinFunction())
-        return ConstructTypeNone;
-
     if (thisObject->isHostFunction()) {
         constructData.native.function = thisObject->nativeConstructor();
         return ConstructTypeHost;
     }
-    constructData.js.functionExecutable = thisObject->jsExecutable();
+
+    FunctionExecutable* functionExecutable = thisObject->jsExecutable();
+    if (functionExecutable->constructAbility() == ConstructAbility::CannotConstruct)
+        return ConstructTypeNone;
+
+    constructData.js.functionExecutable = functionExecutable;
     constructData.js.scope = thisObject->scope();
     return ConstructTypeJS;
 }

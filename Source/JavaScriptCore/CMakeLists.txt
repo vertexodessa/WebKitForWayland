@@ -26,6 +26,7 @@ set(JavaScriptCore_INCLUDE_DIRECTORIES
     "${JAVASCRIPTCORE_DIR}/replay"
     "${JAVASCRIPTCORE_DIR}/runtime"
     "${JAVASCRIPTCORE_DIR}/tools"
+    "${JAVASCRIPTCORE_DIR}/wasm"
     "${JAVASCRIPTCORE_DIR}/yarr"
     "${WTF_DIR}"
     "${DERIVED_SOURCES_DIR}"
@@ -83,7 +84,6 @@ set(JavaScriptCore_SOURCES
     bytecode/CodeOrigin.cpp
     bytecode/CodeType.cpp
     bytecode/ComplexGetStatus.cpp
-    bytecode/ConstantStructureCheck.cpp
     bytecode/DFGExitProfile.cpp
     bytecode/DeferredCompilationCallback.cpp
     bytecode/DeferredSourceDump.cpp
@@ -96,10 +96,13 @@ set(JavaScriptCore_SOURCES
     bytecode/JumpTable.cpp
     bytecode/LazyOperandValueProfile.cpp
     bytecode/MethodOfGettingAValueProfile.cpp
+    bytecode/ObjectPropertyCondition.cpp
+    bytecode/ObjectPropertyConditionSet.cpp
     bytecode/Opcode.cpp
     bytecode/PolymorphicGetByIdList.cpp
     bytecode/PolymorphicPutByIdList.cpp
     bytecode/PreciseJumpTargets.cpp
+    bytecode/PropertyCondition.cpp
     bytecode/PutByIdStatus.cpp
     bytecode/PutByIdVariant.cpp
     bytecode/ReduceWhitespace.cpp
@@ -110,6 +113,7 @@ set(JavaScriptCore_SOURCES
     bytecode/StructureStubClearingWatchpoint.cpp
     bytecode/StructureStubInfo.cpp
     bytecode/ToThisStatus.cpp
+    bytecode/TrackedReferences.cpp
     bytecode/UnlinkedCodeBlock.cpp
     bytecode/UnlinkedInstructionStream.cpp
     bytecode/ValueRecovery.cpp
@@ -126,6 +130,8 @@ set(JavaScriptCore_SOURCES
 
     dfg/DFGAbstractHeap.cpp
     dfg/DFGAbstractValue.cpp
+    dfg/DFGAdaptiveInferredPropertyValueWatchpoint.cpp
+    dfg/DFGAdaptiveStructureWatchpoint.cpp
     dfg/DFGArgumentsEliminationPhase.cpp
     dfg/DFGArgumentsUtilities.cpp
     dfg/DFGArithMode.cpp
@@ -160,7 +166,6 @@ set(JavaScriptCore_SOURCES
     dfg/DFGDesiredTransitions.cpp
     dfg/DFGDesiredWatchpoints.cpp
     dfg/DFGDesiredWeakReferences.cpp
-    dfg/DFGDesiredWriteBarriers.cpp
     dfg/DFGDisassembler.cpp
     dfg/DFGDoesGC.cpp
     dfg/DFGDominators.cpp
@@ -178,7 +183,6 @@ set(JavaScriptCore_SOURCES
     dfg/DFGGraphSafepoint.cpp
     dfg/DFGHeapLocation.cpp
     dfg/DFGInPlaceAbstractState.cpp
-    dfg/DFGInsertOSRHintsForUpdate.cpp
     dfg/DFGIntegerCheckCombiningPhase.cpp
     dfg/DFGIntegerRangeOptimizationPhase.cpp
     dfg/DFGInvalidationPointInjectionPhase.cpp
@@ -193,8 +197,10 @@ set(JavaScriptCore_SOURCES
     dfg/DFGLongLivedState.cpp
     dfg/DFGLoopPreHeaderCreationPhase.cpp
     dfg/DFGMayExit.cpp
+    dfg/DFGMinifiedGraph.cpp
     dfg/DFGMinifiedNode.cpp
     dfg/DFGMovHintRemovalPhase.cpp
+    dfg/DFGMultiGetByOffsetData.cpp
     dfg/DFGNaiveDominators.cpp
     dfg/DFGNaturalLoops.cpp
     dfg/DFGNode.cpp
@@ -383,6 +389,7 @@ set(JavaScriptCore_SOURCES
     parser/SourceCode.cpp
     parser/SourceProvider.cpp
     parser/SourceProviderCache.cpp
+    parser/VariableEnvironment.cpp
 
     profiler/LegacyProfiler.cpp
     profiler/Profile.cpp
@@ -408,6 +415,10 @@ set(JavaScriptCore_SOURCES
     tools/JSDollarVM.cpp
     tools/JSDollarVMPrototype.cpp
 
+    wasm/JSWASMModule.cpp
+    wasm/WASMModuleParser.cpp
+    wasm/WASMReader.cpp
+
     yarr/RegularExpression.cpp
     yarr/YarrCanonicalizeUCS2.cpp
     yarr/YarrInterpreter.cpp
@@ -428,7 +439,6 @@ set(JavaScriptCore_RUNTIME_SOURCES
     runtime/BooleanConstructor.cpp
     runtime/BooleanObject.cpp
     runtime/BooleanPrototype.cpp
-    runtime/BundlePath.cpp
     runtime/CallData.cpp
     runtime/ClonedArguments.cpp
     runtime/CodeCache.cpp
@@ -471,8 +481,16 @@ set(JavaScriptCore_RUNTIME_SOURCES
     runtime/IndexingType.cpp
     runtime/InferredValue.cpp
     runtime/InitializeThreading.cpp
-    runtime/IntendedStructureChain.cpp
     runtime/InternalFunction.cpp
+    runtime/IntlCollator.cpp
+    runtime/IntlCollatorConstructor.cpp
+    runtime/IntlCollatorPrototype.cpp
+    runtime/IntlDateTimeFormat.cpp
+    runtime/IntlDateTimeFormatConstructor.cpp
+    runtime/IntlDateTimeFormatPrototype.cpp
+    runtime/IntlNumberFormat.cpp
+    runtime/IntlNumberFormatConstructor.cpp
+    runtime/IntlNumberFormatPrototype.cpp
     runtime/IntlObject.cpp
     runtime/IteratorOperations.cpp
     runtime/IteratorPrototype.cpp
@@ -486,7 +504,6 @@ set(JavaScriptCore_RUNTIME_SOURCES
     runtime/JSBoundFunction.cpp
     runtime/JSCJSValue.cpp
     runtime/JSCallee.cpp
-    runtime/JSCatchScope.cpp
     runtime/JSCell.cpp
     runtime/JSConsole.cpp
     runtime/JSDataView.cpp
@@ -498,6 +515,7 @@ set(JavaScriptCore_RUNTIME_SOURCES
     runtime/JSGlobalObject.cpp
     runtime/JSGlobalObjectDebuggable.cpp
     runtime/JSGlobalObjectFunctions.cpp
+    runtime/JSJob.cpp
     runtime/JSLexicalEnvironment.cpp
     runtime/JSLock.cpp
     runtime/JSMap.cpp
@@ -509,10 +527,9 @@ set(JavaScriptCore_RUNTIME_SOURCES
     runtime/JSPromise.cpp
     runtime/JSPromiseConstructor.cpp
     runtime/JSPromiseDeferred.cpp
-    runtime/JSPromiseFunctions.cpp
     runtime/JSPromisePrototype.cpp
-    runtime/JSPromiseReaction.cpp
     runtime/JSPropertyNameEnumerator.cpp
+    runtime/JSPropertyNameIterator.cpp
     runtime/JSProxy.cpp
     runtime/JSScope.cpp
     runtime/JSSegmentedVariableObject.cpp
@@ -553,6 +570,7 @@ set(JavaScriptCore_RUNTIME_SOURCES
     runtime/PropertySlot.cpp
     runtime/PropertyTable.cpp
     runtime/PrototypeMap.cpp
+    runtime/ReflectObject.cpp
     runtime/RegExp.cpp
     runtime/RegExpCache.cpp
     runtime/RegExpCachedResult.cpp
@@ -618,6 +636,12 @@ set(JavaScriptCore_LUT_FILES
     runtime/DateConstructor.cpp
     runtime/DatePrototype.cpp
     runtime/ErrorPrototype.cpp
+    runtime/IntlCollatorConstructor.cpp
+    runtime/IntlCollatorPrototype.cpp
+    runtime/IntlDateTimeFormatConstructor.cpp
+    runtime/IntlDateTimeFormatPrototype.cpp
+    runtime/IntlNumberFormatConstructor.cpp
+    runtime/IntlNumberFormatPrototype.cpp
     runtime/JSDataViewPrototype.cpp
     runtime/JSGlobalObject.cpp
     runtime/JSONObject.cpp
@@ -626,6 +650,7 @@ set(JavaScriptCore_LUT_FILES
     runtime/NumberConstructor.cpp
     runtime/NumberPrototype.cpp
     runtime/ObjectConstructor.cpp
+    runtime/ReflectObject.cpp
     runtime/RegExpConstructor.cpp
     runtime/RegExpPrototype.cpp
     runtime/StringConstructor.cpp
@@ -745,6 +770,7 @@ add_custom_command(
     DEPENDS LLIntOffsetsExtractor ${LLINT_ASM} ${OFFLINE_ASM} ${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}/InitBytecodes.asm
     COMMAND ${RUBY_EXECUTABLE} ${JAVASCRIPTCORE_DIR}/offlineasm/asm.rb -I${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}/ ${JAVASCRIPTCORE_DIR}/llint/LowLevelInterpreter.asm $<TARGET_FILE:LLIntOffsetsExtractor> ${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}/${LLIntOutput}
     COMMAND ${CMAKE_COMMAND} -E touch_nocreate ${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}/${LLIntOutput}
+    WORKING_DIRECTORY ${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}
     VERBATIM)
 
 # The explanation for not making LLIntAssembly.h part of the OBJECT_DEPENDS property of some of
@@ -800,43 +826,6 @@ if (ENABLE_FTL_JIT)
         DEPENDS ${LLVM_STATIC_LIBRARIES}
         COMMAND ${CMAKE_COMMAND} -E touch ${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}/WebKitLLVMLibraryToken.h
         VERBATIM)
-
-    if (ENABLE_FTL_NATIVE_CALL_INLINING)
-        function(JOIN VALUES GLUE OUTPUT)
-            string(REPLACE ";" "${GLUE}" _TMP_STR "${VALUES}")
-            set(${OUTPUT} "${_TMP_STR}" PARENT_SCOPE)
-        endfunction()
-
-        JOIN("${JavaScriptCore_INCLUDE_DIRECTORIES}" " -I" JSC_INCLUDES)
-
-        set(LLVM_BITCODE_FILES)
-
-        foreach (_file ${JavaScriptCore_RUNTIME_SOURCES})
-            get_filename_component(_name ${_file} NAME_WE)
-            add_custom_command(
-                OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runtime/${_name}.bc
-                COMMAND ${PYTHON_EXECUTABLE} ${JAVASCRIPTCORE_DIR}/create-llvm-ir-from-source-file.py ${_file} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} ${CLANG_EXE} "${JSC_INCLUDES}"
-                WORKING_DIRECTORY "${JAVASCRIPTCORE_DIR}"
-                VERBATIM)
-
-            ADD_SOURCE_DEPENDENCIES(${CMAKE_CURRENT_SOURCE_DIR}/ftl/FTLState.cpp ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runtime/${_name}.bc)
-            list(APPEND LLVM_BITCODE_FILES
-                ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runtime/${_name}.bc
-            )
-        endforeach ()
-
-        get_filename_component(LLVM_BINS ${LLVM_CONFIG_EXE} PATH)
-
-        add_custom_command(
-            OUTPUT ${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}/InlineRuntimeSymbolTable.h
-            MAIN_DEPENDENCY ${JAVASCRIPTCORE_DIR}/create-symbol-table-index.py
-            DEPENDS ${LLVM_BITCODE_FILES}
-            COMMAND ${PYTHON_EXECUTABLE} ${JAVASCRIPTCORE_DIR}/create-symbol-table-index.py ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} ${JAVASCRIPTCORE_DIR} ${DERIVED_SOURCES_JAVASCRIPTCORE_DIR} ${LLVM_BINS}
-            WORKING_DIRECTORY "${JAVASCRIPTCORE_DIR}"
-            VERBATIM)
-
-        ADD_SOURCE_DEPENDENCIES(${CMAKE_CURRENT_SOURCE_DIR}/ftl/FTLState.cpp ${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}/InlineRuntimeSymbolTable.h)
-    endif ()
 
     WEBKIT_WRAP_SOURCELIST(${llvmForJSC_SOURCES})
     add_library(llvmForJSC SHARED ${llvmForJSC_SOURCES} ${DERIVED_SOURCES_JAVASCRIPTCORE_DIR}/WebKitLLVMLibraryToken.h)

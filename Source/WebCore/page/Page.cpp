@@ -31,7 +31,6 @@
 #include "ContextMenuClient.h"
 #include "ContextMenuController.h"
 #include "DatabaseProvider.h"
-#include "DocumentLoader.h"
 #include "DocumentMarkerController.h"
 #include "DocumentStyleSheetCollection.h"
 #include "DragController.h"
@@ -283,33 +282,6 @@ Page::~Page()
     m_visitedLinkStore->removePage(*this);
 }
 
-std::unique_ptr<Page> Page::createPageFromBuffer(PageConfiguration& pageConfiguration, const SharedBuffer* buffer, const String& mimeType, bool canHaveScrollbars, bool transparent)
-{
-    ASSERT(buffer);
-    
-    std::unique_ptr<Page> newPage = std::make_unique<Page>(pageConfiguration);
-    newPage->settings().setMediaEnabled(false);
-    newPage->settings().setScriptEnabled(false);
-    newPage->settings().setPluginsEnabled(false);
-    
-    Frame& frame = newPage->mainFrame();
-    frame.setView(FrameView::create(frame));
-    frame.init();
-    FrameLoader& loader = frame.loader();
-    loader.forceSandboxFlags(SandboxAll);
-    
-    frame.view()->setCanHaveScrollbars(canHaveScrollbars);
-    frame.view()->setTransparent(transparent);
-    
-    ASSERT(loader.activeDocumentLoader()); // DocumentLoader should have been created by frame->init().
-    loader.activeDocumentLoader()->writer().setMIMEType(mimeType);
-    loader.activeDocumentLoader()->writer().begin(URL()); // create the empty document
-    loader.activeDocumentLoader()->writer().addData(buffer->data(), buffer->size());
-    loader.activeDocumentLoader()->writer().end();
-    
-    return newPage;
-}
-
 void Page::clearPreviousItemFromAllPages(HistoryItem* item)
 {
     if (!allPages)
@@ -516,7 +488,7 @@ void Page::refreshPlugins(bool reload)
     Vector<Ref<Frame>> framesNeedingReload;
 
     for (auto& page : *allPages) {
-        page->m_pluginData.clear();
+        page->m_pluginData = nullptr;
 
         if (!reload)
             continue;
@@ -1252,6 +1224,15 @@ void Page::handleMediaEvent(MediaEventType eventType)
         break;
     }
 }
+
+bool Page::isMediaElementPaused(uint64_t elementID)
+{
+    if (HTMLMediaElement* element = HTMLMediaElement::elementWithID(elementID))
+        return element->paused();
+
+    ASSERT_NOT_REACHED();
+    return true;
+}
 #endif
 
 #if !ASSERT_DISABLED
@@ -1763,5 +1744,21 @@ WheelEventTestTrigger& Page::ensureTestTrigger()
 
     return *m_testTrigger;
 }
+
+#if ENABLE(VIDEO)
+void Page::setAllowsMediaDocumentInlinePlayback(bool flag)
+{
+    if (m_allowsMediaDocumentInlinePlayback == flag)
+        return;
+    m_allowsMediaDocumentInlinePlayback = flag;
+
+    Vector<Ref<Document>> documents;
+    for (Frame* frame = m_mainFrame.get(); frame; frame = frame->tree().traverseNext())
+        documents.append(*frame->document());
+
+    for (auto& document : documents)
+        document->allowsMediaDocumentInlinePlaybackChanged();
+}
+#endif
 
 } // namespace WebCore

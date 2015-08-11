@@ -57,6 +57,10 @@ class WebOpenPanelResultListenerProxy;
 class WebPageProxy;
 struct NavigationActionData;
 struct SecurityOriginData;
+
+#if ENABLE(MEDIA_SESSION)
+class WebMediaSessionMetadata;
+#endif
 }
 
 namespace API {
@@ -150,12 +154,23 @@ public:
 
     virtual void isPlayingAudioDidChange(WebKit::WebPageProxy&) { }
 
+#if ENABLE(MEDIA_SESSION)
+    virtual void mediaSessionMetadataDidChange(WebKit::WebPageProxy&, WebKit::WebMediaSessionMetadata*) { }
+#endif
+
 #if PLATFORM(IOS)
+#if HAVE(APP_LINKS)
+    virtual bool shouldIncludeAppLinkActionsForElement(_WKActivatedElementInfo *) { return true; }
+#endif
     virtual RetainPtr<NSArray> actionsForElement(_WKActivatedElementInfo *, RetainPtr<NSArray> defaultActions) { return WTF::move(defaultActions); }
     virtual void didNotHandleTapAsClick(const WebCore::IntPoint&) { }
 #endif
 
     virtual void didClickAutoFillButton(WebKit::WebPageProxy&, API::Object*) { }
+
+#if ENABLE(VIDEO)
+    virtual void mediaDocumentNaturalSizeChanged(const WebCore::IntSize&) { }
+#endif
 };
 
 } // namespace API

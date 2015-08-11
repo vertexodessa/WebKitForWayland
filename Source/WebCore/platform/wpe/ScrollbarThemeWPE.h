@@ -34,13 +34,13 @@ class ScrollbarThemeWPE final : public ScrollbarThemeComposite {
 public:
     ScrollbarThemeWPE() = default;
     virtual ~ScrollbarThemeWPE() = default;
-    
-    virtual bool hasButtons(Scrollbar&);
-    virtual bool hasThumb(Scrollbar&);
-    
-    virtual IntRect backButtonRect(Scrollbar&, ScrollbarPart, bool painting = false);
-    virtual IntRect forwardButtonRect(Scrollbar&, ScrollbarPart, bool painting = false);
-    virtual IntRect trackRect(Scrollbar&, bool painting = false);
+
+    virtual bool hasButtons(Scrollbar&) override;
+    virtual bool hasThumb(Scrollbar&) override;
+
+    virtual IntRect backButtonRect(Scrollbar&, ScrollbarPart, bool painting = false) override;
+    virtual IntRect forwardButtonRect(Scrollbar&, ScrollbarPart, bool painting = false) override;
+    virtual IntRect trackRect(Scrollbar&, bool painting = false) override;
 };
 
 } // namespace WebCore

@@ -480,19 +480,12 @@ void CoordinatedGraphicsLayer::setShowRepaintCounter(bool show)
 
 void CoordinatedGraphicsLayer::setContentsToImage(Image* image)
 {
-    NativeImagePtr newNativeImagePtr = image ? image->nativeImageForCurrentFrame() : 0;
-    if (newNativeImagePtr) {
-        // This code makes the assumption that pointer equality on a NativeImagePtr is a valid way to tell if the image is changed.
-        // This assumption is true in Qt, GTK and EFL.
-        if (newNativeImagePtr == m_compositedNativeImagePtr)
-            return;
+    NativeImagePtr nativeImagePtr = image ? image->nativeImageForCurrentFrame() : nullptr;
+    if (m_compositedImage == image && m_compositedNativeImagePtr == nativeImagePtr)
+        return;
 
-        m_compositedImage = image;
-        m_compositedNativeImagePtr = newNativeImagePtr;
-    } else {
-        m_compositedImage = 0;
-        m_compositedNativeImagePtr = 0;
-    }
+    m_compositedImage = image;
+    m_compositedNativeImagePtr = nativeImagePtr;
 
     GraphicsLayer::setContentsToImage(image);
     didChangeImageBacking();
@@ -555,11 +548,6 @@ void CoordinatedGraphicsLayer::setNeedsDisplayInRect(const FloatRect& rect, Shou
     didChangeLayerState();
 
     addRepaintRect(rect);
-}
-
-CoordinatedLayerID CoordinatedGraphicsLayer::id() const
-{
-    return m_id;
 }
 
 void CoordinatedGraphicsLayer::setScrollableArea(ScrollableArea* scrollableArea)
@@ -853,7 +841,7 @@ void CoordinatedGraphicsLayer::releaseImageBackingIfNeeded()
 
     ASSERT(m_coordinator);
     m_coordinatedImageBacking->removeHost(this);
-    m_coordinatedImageBacking.clear();
+    m_coordinatedImageBacking = nullptr;
     m_layerState.imageID = InvalidCoordinatedImageBackingID;
     m_layerState.imageChanged = true;
 }
@@ -910,9 +898,8 @@ void CoordinatedGraphicsLayer::adjustContentsScale()
 
 void CoordinatedGraphicsLayer::createBackingStore()
 {
-    m_mainBackingStore = std::make_unique<TiledBackingStore>(this);
+    m_mainBackingStore = std::make_unique<TiledBackingStore>(this, effectiveContentsScale());
     m_mainBackingStore->setSupportsAlpha(!contentsOpaque());
-    m_mainBackingStore->setContentsScale(effectiveContentsScale());
 }
 
 void CoordinatedGraphicsLayer::tiledBackingStorePaint(GraphicsContext* context, const IntRect& rect)
@@ -1039,6 +1026,7 @@ void CoordinatedGraphicsLayer::updateContentBuffers()
     bool newBackingStore = false;
     if (!m_mainBackingStore) {
         createBackingStore();
+        m_pendingVisibleRectAdjustment = true;
         newBackingStore = true;
     }
 

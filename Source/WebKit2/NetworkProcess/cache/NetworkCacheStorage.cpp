@@ -49,6 +49,8 @@ static const char bodyPostfix[] = "-body";
 static double computeRecordWorth(FileTimes);
 
 struct Storage::ReadOperation {
+    WTF_MAKE_FAST_ALLOCATED;
+public:
     ReadOperation(const Key& key, const RetrieveCompletionHandler& completionHandler)
         : key(key)
         , completionHandler(completionHandler)
@@ -64,6 +66,8 @@ struct Storage::ReadOperation {
 };
 
 struct Storage::WriteOperation {
+    WTF_MAKE_FAST_ALLOCATED;
+public:
     WriteOperation(const Record& record, const MappedBodyHandler& mappedBodyHandler)
         : record(record)
         , mappedBodyHandler(mappedBodyHandler)
@@ -76,6 +80,8 @@ struct Storage::WriteOperation {
 };
 
 struct Storage::TraverseOperation {
+    WTF_MAKE_FAST_ALLOCATED;
+public:
     TraverseOperation(TraverseFlags flags, const TraverseHandler& handler)
         : flags(flags)
         , handler(handler)
@@ -485,29 +491,28 @@ void Storage::dispatchReadOperation(ReadOperation& readOperation)
     ASSERT(RunLoop::isMain());
     ASSERT(m_activeReadOperations.contains(&readOperation));
 
-    auto recordPath = recordPathForKey(readOperation.key);
-
-    ++readOperation.activeCount;
-
     bool shouldGetBodyBlob = !m_bodyFilter || m_bodyFilter->mayContain(readOperation.key.hash());
-    if (shouldGetBodyBlob)
+
+    ioQueue().dispatch([this, &readOperation, shouldGetBodyBlob] {
+        auto recordPath = recordPathForKey(readOperation.key);
+
         ++readOperation.activeCount;
+        if (shouldGetBodyBlob)
+            ++readOperation.activeCount;
 
-    RefPtr<IOChannel> channel = IOChannel::open(recordPath, IOChannel::Type::Read);
-    channel->read(0, std::numeric_limits<size_t>::max(), &ioQueue(), [this, &readOperation](const Data& fileData, int error) {
-        if (!error)
-            readRecord(readOperation, fileData);
-        finishReadOperation(readOperation);
-    });
+        auto channel = IOChannel::open(recordPath, IOChannel::Type::Read);
+        channel->read(0, std::numeric_limits<size_t>::max(), &ioQueue(), [this, &readOperation](const Data& fileData, int error) {
+            if (!error)
+                readRecord(readOperation, fileData);
+            finishReadOperation(readOperation);
+        });
 
-    if (!shouldGetBodyBlob)
-        return;
-
-    // Read the body blob in parallel with the record read.
-    ioQueue().dispatch([this, &readOperation] {
-        auto bodyPath = bodyPathForKey(readOperation.key);
-        readOperation.resultBodyBlob = m_blobStorage.get(bodyPath);
-        finishReadOperation(readOperation);
+        if (shouldGetBodyBlob) {
+            // Read the body blob in parallel with the record read.
+            auto bodyPath = bodyPathForKey(readOperation.key);
+            readOperation.resultBodyBlob = m_blobStorage.get(bodyPath);
+            finishReadOperation(readOperation);
+        }
     });
 }
 

@@ -1124,9 +1124,8 @@ void MediaPlayerPrivateAVFoundationObjC::setVideoFullscreenLayer(PlatformLayer* 
     CAContext *newContext = nil;
     
     if (m_videoFullscreenLayer && m_videoLayer) {
-        [m_videoLayer setFrame:CGRectMake(0, 0, m_videoFullscreenFrame.width(), m_videoFullscreenFrame.height())];
-        [m_videoLayer removeFromSuperlayer];
         [m_videoFullscreenLayer insertSublayer:m_videoLayer.get() atIndex:0];
+        [m_videoLayer setFrame:CGRectMake(0, 0, m_videoFullscreenFrame.width(), m_videoFullscreenFrame.height())];
         newContext = [m_videoFullscreenLayer context];
     } else if (m_videoInlineLayer && m_videoLayer) {
         [m_videoLayer setFrame:[m_videoInlineLayer bounds]];
@@ -1158,11 +1157,7 @@ void MediaPlayerPrivateAVFoundationObjC::setVideoFullscreenFrame(FloatRect frame
         return;
 
     if (m_videoLayer) {
-        [m_videoLayer setStyle:nil]; // This enables actions, i.e. implicit animations.
-        [CATransaction begin];
         [m_videoLayer setFrame:CGRectMake(0, 0, frame.width(), frame.height())];
-        [CATransaction commit];
-        [m_videoLayer web_disableAllActions];
     }
     syncTextTrackBounds();
 }
@@ -1182,8 +1177,12 @@ void MediaPlayerPrivateAVFoundationObjC::setVideoFullscreenGravity(MediaPlayer::
         videoGravity = AVLayerVideoGravityResizeAspectFill;
     else
         ASSERT_NOT_REACHED();
+    
+    if ([m_videoLayer videoGravity] == videoGravity)
+        return;
 
     [m_videoLayer setVideoGravity:videoGravity];
+    syncTextTrackBounds();
 }
 
 void MediaPlayerPrivateAVFoundationObjC::setVideoFullscreenMode(MediaPlayer::VideoFullscreenMode mode)
@@ -1627,7 +1626,10 @@ MediaPlayer::SupportsType MediaPlayerPrivateAVFoundationObjC::supportsType(const
     if (parameters.isMediaSource)
         return MediaPlayer::IsNotSupported;
 #endif
-
+#if ENABLE(MEDIA_STREAM)
+    if (parameters.isMediaStream)
+        return MediaPlayer::IsNotSupported;
+#endif
     if (isUnsupportedMIMEType(parameters.type))
         return MediaPlayer::IsNotSupported;
 
@@ -2822,14 +2824,13 @@ void MediaPlayerPrivateAVFoundationObjC::setShouldPlayToPlaybackTarget(bool shou
 {
     m_shouldPlayToPlaybackTarget = shouldPlay;
 
+    AVOutputContext *newContext = shouldPlay ? m_outputContext.get() : nil;
+    LOG(Media, "MediaPlayerPrivateAVFoundationObjC::setShouldPlayToPlaybackTarget(%p) - target = %p, shouldPlay = %s", this, newContext, boolString(shouldPlay));
+
     if (!m_avPlayer)
         return;
 
-    AVOutputContext *newContext = shouldPlay ? m_outputContext.get() : nil;
     RetainPtr<AVOutputContext> currentContext = m_avPlayer.get().outputContext;
-
-    LOG(Media, "MediaPlayerPrivateAVFoundationObjC::setShouldPlayToPlaybackTarget(%p) - target = %p, shouldPlay = %s", this, newContext, boolString(shouldPlay));
-
     if ((!newContext && !currentContext.get()) || [currentContext.get() isEqual:newContext])
         return;
 

@@ -27,7 +27,7 @@ WebInspector.ComputedStyleDetailsPanel = class ComputedStyleDetailsPanel extends
 {
     constructor(delegate)
     {
-        super(delegate, WebInspector.ComputedStyleDetailsPanel.StyleClassName, "computed", WebInspector.UIString("Computed"));
+        super(delegate, WebInspector.ComputedStyleDetailsPanel.StyleClassName, "computed", WebInspector.UIString("Styles \u2014 Computed"));
 
         this._computedStyleShowAllSetting = new WebInspector.Setting("computed-style-show-all", false);
 
@@ -224,7 +224,7 @@ WebInspector.ComputedStyleDetailsPanel = class ComputedStyleDetailsPanel extends
 
     _goToContentFlowArrowWasClicked()
     {
-        WebInspector.showContentFlowDOMTree(this._contentFlow, this.nodeStyles.node, true);
+        WebInspector.showContentFlowDOMTree(this._contentFlow, this.nodeStyles.node);
     }
 };
 

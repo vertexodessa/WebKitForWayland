@@ -59,20 +59,18 @@ public:
     TextureMapperPlatformLayerProxy();
     virtual ~TextureMapperPlatformLayerProxy();
 
-    enum PushOnThread {
-        PushOnCompositionThread,
-        PushOnNonCompositionThread
-    };
-    void pushNextBuffer(std::unique_ptr<TextureMapperPlatformLayerBuffer>, PushOnThread = PushOnNonCompositionThread);
-    std::unique_ptr<TextureMapperPlatformLayerBuffer> getAvailableBuffer(const IntSize&, GC3Dint internalFormat = GraphicsContext3D::DONT_CARE);
+    Mutex& mutex() { return m_pushMutex; }
+    std::unique_ptr<TextureMapperPlatformLayerBuffer> getAvailableBuffer(MutexLocker&, const IntSize&, GC3Dint internalFormat = GraphicsContext3D::DONT_CARE);
+    void pushNextBuffer(MutexLocker&, std::unique_ptr<TextureMapperPlatformLayerBuffer>);
+    void requestUpdate(MutexLocker&);
 
-    void setCompositor(Compositor*);
-    void setTargetLayer(TextureMapperLayer*);
-    bool hasTargetLayer();
+    void setCompositor(MutexLocker&, Compositor*);
+    void setTargetLayer(MutexLocker&, TextureMapperLayer*);
+    bool hasTargetLayer(MutexLocker&);
 
     void swapBuffer();
 
-    void scheduleUpdateOnCompositorThread(std::function<void()>&&);
+    bool scheduleUpdateOnCompositorThread(std::function<void()>&&);
 
 private:
     void scheduleReleaseUnusedBuffers();

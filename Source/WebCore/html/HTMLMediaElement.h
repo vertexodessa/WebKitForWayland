@@ -147,7 +147,9 @@ public:
     MediaPlayerEnums::MovieLoadType movieLoadType() const;
     
     bool inActiveDocument() const { return m_inActiveDocument; }
-    
+
+    const Document* hostingDocument() const override { return &document(); }
+
 // DOM API
 // error state
     PassRefPtr<MediaError> error() const;
@@ -342,8 +344,6 @@ public:
 
 #if ENABLE(WIRELESS_PLAYBACK_TARGET)
     void webkitShowPlaybackTargetPicker();
-    bool webkitCurrentPlaybackTargetIsWireless() const;
-
     virtual bool addEventListener(const AtomicString& eventType, PassRefPtr<EventListener>, bool useCapture) override;
     virtual bool removeEventListener(const AtomicString& eventType, EventListener*, bool useCapture) override;
 
@@ -353,6 +353,7 @@ public:
     virtual void setWirelessPlaybackTarget(Ref<MediaPlaybackTarget>&&) override;
     virtual void setShouldPlayToPlaybackTarget(bool) override;
 #endif
+    bool webkitCurrentPlaybackTargetIsWireless() const;
 
     // EventTarget function.
     // Both Node (via HTMLElement) and ActiveDOMObject define this method, which
@@ -419,11 +420,18 @@ public:
     void mediaLoadingFailedFatally(MediaPlayerEnums::NetworkState);
 
 #if ENABLE(MEDIA_SESSION)
+    WEBCORE_EXPORT double playerVolume() const;
+
     const String& kind() const { return m_kind; }
     void setKind(const String& kind) { m_kind = kind; }
 
     MediaSession* session() const;
     void setSession(MediaSession*);
+
+    void setShouldDuck(bool);
+
+    static HTMLMediaElement* elementWithID(uint64_t);
+    uint64_t elementID() const { return m_elementID; }
 #endif
 
 #if ENABLE(MEDIA_SOURCE)
@@ -446,6 +454,8 @@ public:
     virtual MediaProducer::MediaStateFlags mediaState() const override;
 
     void layoutSizeChanged();
+
+    void allowsMediaDocumentInlinePlaybackChanged();
 
 protected:
     HTMLMediaElement(const QualifiedName&, Document&, bool);
@@ -503,6 +513,8 @@ private:
     void suspend(ReasonForSuspension) override;
     void resume() override;
     void stop() override;
+    void stopWithoutDestroyingMediaPlayer();
+    virtual void contextDestroyed() override;
     
     virtual void mediaVolumeDidChange() override;
 
@@ -601,6 +613,10 @@ private:
 
     virtual double mediaPlayerRequestedPlaybackRate() const override final;
     virtual VideoFullscreenMode mediaPlayerFullscreenMode() const override final { return fullscreenMode(); }
+
+#if USE(GSTREAMER)
+    virtual void requestInstallMissingPlugins(const String&, MediaPlayerRequestInstallMissingPluginsCallback&) override final;
+#endif
 
     void pendingActionTimerFired();
     void progressEventTimerFired();
@@ -816,6 +832,8 @@ private:
 #if ENABLE(MEDIA_SESSION)
     String m_kind;
     RefPtr<MediaSession> m_session;
+    bool m_shouldDuck { false };
+    uint64_t m_elementID;
 #endif
 
 #if ENABLE(MEDIA_SOURCE)

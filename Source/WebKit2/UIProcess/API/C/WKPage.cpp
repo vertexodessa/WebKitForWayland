@@ -80,7 +80,8 @@
 #endif
 
 #if ENABLE(MEDIA_SESSION)
-#include <WebCore/MediaEventTypes.h>
+#include "WebMediaSessionMetadata.h"
+#include <WebCore/MediaSessionEvents.h>
 #endif
 
 using namespace WebCore;
@@ -1149,7 +1150,7 @@ void WKPageSetPageLoaderClient(WKPageRef pageRef, const WKPageLoaderClientBase* 
                 m_client.willGoToBackForwardListItem(toAPI(&page), toAPI(item), toAPI(userData), m_client.base.clientInfo);
         }
 
-        virtual PassRefPtr<API::Data> webCryptoMasterKey(WebPageProxy& page) override
+        virtual RefPtr<API::Data> webCryptoMasterKey(WebPageProxy& page) override
         {
             return page.process().processPool().client().copyWebCryptoMasterKey(&page.process().processPool());
         }
@@ -1800,6 +1801,16 @@ void WKPageSetPageUIClient(WKPageRef pageRef, const WKPageUIClientBase* wkClient
 
             m_client.didClickAutoFillButton(toAPI(&page), toAPI(userInfo), m_client.base.clientInfo);
         }
+
+#if ENABLE(MEDIA_SESSION)
+        virtual void mediaSessionMetadataDidChange(WebPageProxy& page, WebMediaSessionMetadata* metadata) override
+        {
+            if (!m_client.mediaSessionMetadataDidChange)
+                return;
+
+            m_client.mediaSessionMetadataDidChange(toAPI(&page), toAPI(metadata), m_client.base.clientInfo);
+        }
+#endif
     };
 
     toImpl(pageRef)->setUIClient(std::make_unique<UIClient>(wkClient));
@@ -1920,7 +1931,7 @@ void WKPageSetPageNavigationClient(WKPageRef pageRef, const WKPageNavigationClie
             m_client.webProcessDidCrash(toAPI(&page), m_client.base.clientInfo);
         }
 
-        virtual PassRefPtr<API::Data> webCryptoMasterKey(WebPageProxy& page) override
+        virtual RefPtr<API::Data> webCryptoMasterKey(WebPageProxy& page) override
         {
             if (!m_client.copyWebCryptoMasterKey)
                 return nullptr;
@@ -2140,6 +2151,16 @@ void WKPageSetMediaVolume(WKPageRef page, float volume)
 void WKPageSetMuted(WKPageRef page, bool muted)
 {
     toImpl(page)->setMuted(muted);
+}
+
+bool WKPageHasMediaSessionWithActiveMediaElements(WKPageRef page)
+{
+#if ENABLE(MEDIA_SESSION)
+    return toImpl(page)->hasMediaSessionWithActiveMediaElements();
+#else
+    UNUSED_PARAM(page);
+    return false;
+#endif
 }
 
 void WKPageHandleMediaEvent(WKPageRef page, WKMediaEventType wkEventType)

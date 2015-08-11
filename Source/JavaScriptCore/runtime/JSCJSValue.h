@@ -1,7 +1,7 @@
 /*
  *  Copyright (C) 1999-2001 Harri Porten (porten@kde.org)
  *  Copyright (C) 2001 Peter Kelly (pmk@post.com)
- *  Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009, 2012 Apple Inc. All rights reserved.
+ *  Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009, 2012, 2015 Apple Inc. All rights reserved.
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Library General Public
@@ -23,9 +23,11 @@
 #ifndef JSCJSValue_h
 #define JSCJSValue_h
 
-#include <math.h>
+#include "JSExportMacros.h"
 #include "PureNaN.h"
-#include <stddef.h> // for size_t
+#include <functional>
+#include <math.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <wtf/Assertions.h>
 #include <wtf/Forward.h>
@@ -291,7 +293,7 @@ public:
     bool isCell() const;
     JSCell* asCell() const;
     JS_EXPORT_PRIVATE bool isValidCallee();
-        
+
     JSValue structureOrUndefined() const;
 
     JS_EXPORT_PRIVATE void dump(PrintStream&) const;
@@ -485,6 +487,11 @@ inline JSValue jsNull()
 inline JSValue jsUndefined()
 {
     return JSValue(JSValue::JSUndefined);
+}
+
+inline JSValue jsTDZValue()
+{
+    return JSValue();
 }
 
 inline JSValue jsBoolean(bool b)

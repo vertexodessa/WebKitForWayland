@@ -351,7 +351,6 @@ static bool shouldAllowPictureInPictureMediaPlayback()
     [self _updateScrollViewBackground];
 
     _viewportMetaTagWidth = -1;
-    _allowsLinkPreview = YES;
 
     [self _frameOrBoundsChanged];
 
@@ -451,7 +450,11 @@ static bool shouldAllowPictureInPictureMediaPlayback()
 
 - (WKNavigation *)loadRequest:(NSURLRequest *)request
 {
-    return [self _loadRequest:request withOptions:nil];
+    auto navigation = _page->loadRequest(request);
+    if (!navigation)
+        return nil;
+
+    return [wrapper(*navigation.release().leakRef()) autorelease];
 }
 
 - (WKNavigation *)loadFileURL:(NSURL *)URL allowingReadAccessToURL:(NSURL *)readAccessURL
@@ -653,6 +656,35 @@ static WKErrorCode callbackErrorCode(WebKit::CallbackBase::Error error)
 - (WKPageRef)_pageForTesting
 {
     return toAPI(_page.get());
+}
+
+- (BOOL)allowsLinkPreview
+{
+#if PLATFORM(MAC)
+    return [_wkView allowsLinkPreview];
+#elif PLATFORM(IOS)
+    return _allowsLinkPreview;
+#endif
+}
+
+- (void)setAllowsLinkPreview:(BOOL)allowsLinkPreview
+{
+#if PLATFORM(MAC)
+    [_wkView setAllowsLinkPreview:allowsLinkPreview];
+    return;
+#elif PLATFORM(IOS)
+    if (_allowsLinkPreview == allowsLinkPreview)
+        return;
+
+    _allowsLinkPreview = allowsLinkPreview;
+
+#if HAVE(LINK_PREVIEW)
+    if (_allowsLinkPreview)
+        [_contentView _registerPreview];
+    else
+        [_contentView _unregisterPreview];
+#endif // HAVE(LINK_PREVIEW)
+#endif // PLATFORM(IOS)
 }
 
 #pragma mark iOS-specific methods
@@ -955,8 +987,23 @@ static inline bool areEssentiallyEqualAsFloat(float a, float b)
     [_scrollView setMinimumZoomScale:layerTreeTransaction.minimumScaleFactor()];
     [_scrollView setMaximumZoomScale:layerTreeTransaction.maximumScaleFactor()];
     [_scrollView setZoomEnabled:layerTreeTransaction.allowsUserScaling()];
-    if (!layerTreeTransaction.scaleWasSetByUIProcess() && ![_scrollView isZooming] && ![_scrollView isZoomBouncing] && ![_scrollView _isAnimatingZoom])
-        [_scrollView setZoomScale:layerTreeTransaction.pageScaleFactor()];
+    if (!layerTreeTransaction.scaleWasSetByUIProcess() && ![_scrollView isZooming] && ![_scrollView isZoomBouncing] && ![_scrollView _isAnimatingZoom]) {
+        float newPageScaleFactor = layerTreeTransaction.pageScaleFactor();
+
+        if (!areEssentiallyEqualAsFloat(contentZoomScale(self), newPageScaleFactor)) {
+            // FIXME: We need to handle stick to bottom.
+            WebCore::FloatRect oldUnobscuredContentRect = _page->unobscuredContentRect();
+            if (!oldUnobscuredContentRect.isEmpty() && oldUnobscuredContentRect.y() < 1) {
+                CGFloat relativeHorizontalPosition = oldUnobscuredContentRect.x() / oldUnobscuredContentRect.width();
+                CGPoint newTopLeft = { relativeHorizontalPosition * newContentSize.width, 0 };
+                CGSize scrollViewSize = [_scrollView bounds].size;
+                CGSize rectToZoomSize = CGSizeMake(scrollViewSize.width / newPageScaleFactor, scrollViewSize.height / newPageScaleFactor);
+                [_scrollView zoomToRect: { newTopLeft, rectToZoomSize } animated:NO];
+                ASSERT(areEssentiallyEqualAsFloat(newPageScaleFactor, contentZoomScale(self)));
+            } else
+                [_scrollView setZoomScale:newPageScaleFactor];
+        }
+    }
 
     [self _updateScrollViewBackground];
 
@@ -967,6 +1014,8 @@ static inline bool areEssentiallyEqualAsFloat(float a, float b)
         _needsResetViewStateAfterCommitLoadForMainFrame = NO;
         [_scrollView setContentOffset:[self _adjustedContentOffset:CGPointZero]];
         [self _updateVisibleContentRects];
+        if (_observedRenderingProgressEvents & _WKRenderingProgressEventFirstPaint)
+            _navigationState->didFirstPaint();
     }
 
     bool isTransactionAfterPageRestore = layerTreeTransaction.transactionID() >= _firstTransactionIDAfterPageRestore;
@@ -1139,12 +1188,14 @@ static WebCore::FloatPoint constrainContentOffset(WebCore::FloatPoint contentOff
     return contentOffset;
 }
 
-- (void)_scrollToContentOffset:(WebCore::FloatPoint)contentOffsetInPageCoordinates
+- (void)_scrollToContentOffset:(WebCore::FloatPoint)contentOffsetInPageCoordinates scrollOrigin:(WebCore::IntPoint)scrollOrigin
 {
     if (_dynamicViewportUpdateMode != DynamicViewportUpdateMode::NotResizing)
         return;
 
-    WebCore::FloatPoint scaledOffset = contentOffsetInPageCoordinates;
+    WebCore::FloatPoint contentOffsetRespectingOrigin = scrollOrigin + toFloatSize(contentOffsetInPageCoordinates);
+
+    WebCore::FloatPoint scaledOffset = contentOffsetRespectingOrigin;
     CGFloat zoomScale = contentZoomScale(self);
     scaledOffset.scale(zoomScale, zoomScale);
 
@@ -1859,21 +1910,18 @@ static WebCore::FloatPoint constrainContentOffset(WebCore::FloatPoint contentOff
 }
 #endif // PLATFORM(MAC)
 
+#if ENABLE(VIDEO)
+- (void)_mediaDocumentNaturalSizeChanged:(NSSize)newSize
+{
+    id <WKUIDelegatePrivate> uiDelegate = static_cast<id <WKUIDelegatePrivate>>([self UIDelegate]);
+    if ([uiDelegate respondsToSelector:@selector(_webView:mediaDocumentNaturalSizeChanged:)])
+        [uiDelegate _webView:self mediaDocumentNaturalSizeChanged:newSize];
+}
+#endif
+
 @end
 
 @implementation WKWebView (WKPrivate)
-
-- (WKNavigation *)_loadRequest:(NSURLRequest *)request withOptions:(NSDictionary *)loadOptions
-{
-    bool shouldOpenExternalURLs = [loadOptions[_WKShouldOpenExternalURLsKey] boolValue];
-    WebCore::ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicy = shouldOpenExternalURLs ? WebCore::ShouldOpenExternalURLsPolicy::ShouldAllow : WebCore::ShouldOpenExternalURLsPolicy::ShouldNotAllow;
-
-    auto navigation = _page->loadRequest(request, shouldOpenExternalURLsPolicy);
-    if (!navigation)
-        return nil;
-
-    return [wrapper(*navigation.release().leakRef()) autorelease];
-}
 
 - (BOOL)_isEditable
 {
@@ -2455,6 +2503,13 @@ static inline WebKit::FindOptions toFindOptions(_WKFindOptions wkFindOptions)
     return NO;
 }
 
+- (BOOL)_isDisplayingStandaloneMediaDocument
+{
+    if (auto* mainFrame = _page->mainFrame())
+        return mainFrame->isDisplayingStandaloneMediaDocument();
+    return NO;
+}
+
 - (BOOL)_isShowingNavigationGestureSnapshot
 {
     return _page->isShowingNavigationGestureSnapshot();
@@ -2571,6 +2626,24 @@ static inline WebKit::FindOptions toFindOptions(_WKFindOptions wkFindOptions)
         return scrollPerfData->data();
 #endif
     return nil;
+}
+
+#pragma mark media playback restrictions
+
+- (BOOL)_allowsMediaDocumentInlinePlayback
+{
+#if PLATFORM(IOS)
+    return _page->allowsMediaDocumentInlinePlayback();
+#else
+    return NO;
+#endif
+}
+
+- (void)_setAllowsMediaDocumentInlinePlayback:(BOOL)flag
+{
+#if PLATFORM(IOS)
+    _page->setAllowsMediaDocumentInlinePlayback(flag);
+#endif
 }
 
 #pragma mark iOS-specific methods
@@ -2875,14 +2948,21 @@ static inline WebKit::FindOptions toFindOptions(_WKFindOptions wkFindOptions)
 
 #if USE(IOSURFACE)
     // If we are parented and thus won't incur a significant penalty from paging in tiles, snapshot the view hierarchy directly.
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 90000
+    if (CADisplay *display = self.window.screen._display) {
+#else
     if (self.window) {
+#endif
         auto surface = WebCore::IOSurface::create(WebCore::expandedIntSize(WebCore::FloatSize(imageSize)), WebCore::ColorSpaceDeviceRGB);
         CGFloat imageScaleInViewCoordinates = imageWidth / rectInViewCoordinates.size.width;
         CATransform3D transform = CATransform3DMakeScale(imageScaleInViewCoordinates, imageScaleInViewCoordinates, 1);
         transform = CATransform3DTranslate(transform, -rectInViewCoordinates.origin.x, -rectInViewCoordinates.origin.y, 0);
-        CARenderServerRenderLayerWithTransform(MACH_PORT_NULL, self.layer.context.contextId, reinterpret_cast<uint64_t>(self.layer), surface->surface(), 0, 0, &transform);
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 90000
+        CARenderServerRenderDisplayLayerWithTransformAndTimeOffset(MACH_PORT_NULL, (CFStringRef)display.name, self.layer.context.contextId, reinterpret_cast<uint64_t>(self.layer), surface->surface(), 0, 0, &transform, 0);
+#else
+        CARenderServerRenderLayerWithTransform(MACH_PORT_NULL, self.layer.context.contextId, reinterpret_cast<uint64_t>(self.layer), surface->surface(), 0, 0, &transform); 
+#endif
         completionHandler(surface->createImage().get());
-
         return;
     }
 #endif
@@ -2977,26 +3057,7 @@ static inline WebKit::FindOptions toFindOptions(_WKFindOptions wkFindOptions)
     return (_WKWebViewPrintFormatter *)viewPrintFormatter;
 }
 
-- (BOOL)_allowsLinkPreview
-{
-    return _allowsLinkPreview;
-}
-
-- (void)_setAllowsLinkPreview:(BOOL)allowsLinkPreview
-{
-    if (_allowsLinkPreview == allowsLinkPreview)
-        return;
-
-    _allowsLinkPreview = allowsLinkPreview;
-#if HAVE(LINK_PREVIEW)
-    if (_allowsLinkPreview)
-        [_contentView _registerPreviewInWindow:[_contentView window]];
-    else
-        [_contentView _unregisterPreviewInWindow:[_contentView window]];
-#endif
-}
-
-#else
+#else // #if PLATFORM(IOS)
 
 #pragma mark - OS X-specific methods
 

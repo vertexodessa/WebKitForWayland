@@ -94,7 +94,7 @@ SubresourceLoader::~SubresourceLoader()
 #endif
 }
 
-PassRefPtr<SubresourceLoader> SubresourceLoader::create(Frame* frame, CachedResource* resource, const ResourceRequest& request, const ResourceLoaderOptions& options)
+RefPtr<SubresourceLoader> SubresourceLoader::create(Frame* frame, CachedResource* resource, const ResourceRequest& request, const ResourceLoaderOptions& options)
 {
     RefPtr<SubresourceLoader> subloader(adoptRef(new SubresourceLoader(frame, resource, options)));
 #if PLATFORM(IOS)
@@ -108,7 +108,7 @@ PassRefPtr<SubresourceLoader> SubresourceLoader::create(Frame* frame, CachedReso
 #endif
     if (!subloader->init(request))
         return nullptr;
-    return subloader.release();
+    return subloader;
 }
     
 #if PLATFORM(IOS)
@@ -152,7 +152,7 @@ bool SubresourceLoader::isSubresourceLoader()
     return true;
 }
 
-void SubresourceLoader::willSendRequest(ResourceRequest& newRequest, const ResourceResponse& redirectResponse)
+void SubresourceLoader::willSendRequestInternal(ResourceRequest& newRequest, const ResourceResponse& redirectResponse)
 {
     // Store the previous URL because the call to ResourceLoader::willSendRequest will modify it.
     URL previousURL = request().url();
@@ -185,7 +185,7 @@ void SubresourceLoader::willSendRequest(ResourceRequest& newRequest, const Resou
     if (newRequest.isNull() || reachedTerminalState())
         return;
 
-    ResourceLoader::willSendRequest(newRequest, redirectResponse);
+    ResourceLoader::willSendRequestInternal(newRequest, redirectResponse);
     if (newRequest.isNull())
         cancel();
 }

@@ -261,6 +261,7 @@ struct WKViewInterpretKeyEventsParameters {
     BOOL _ignoresNonWheelEvents;
     BOOL _ignoresAllEvents;
     BOOL _allowsBackForwardNavigationGestures;
+    BOOL _allowsLinkPreview;
 
     RetainPtr<WKViewLayoutStrategy> _layoutStrategy;
     CGSize _minimumViewSize;
@@ -2706,7 +2707,7 @@ static void* keyValueObservingContext = &keyValueObservingContext;
         [self _accessibilityRegisterUIProcessTokens];
 
 #if __MAC_OS_X_VERSION_MIN_REQUIRED >= 101000
-        if (_data->_immediateActionGestureRecognizer && ![[self gestureRecognizers] containsObject:_data->_immediateActionGestureRecognizer.get()] && !_data->_ignoresNonWheelEvents)
+        if (_data->_immediateActionGestureRecognizer && ![[self gestureRecognizers] containsObject:_data->_immediateActionGestureRecognizer.get()] && !_data->_ignoresNonWheelEvents && _data->_allowsLinkPreview)
             [self addGestureRecognizer:_data->_immediateActionGestureRecognizer.get()];
 #endif
     } else {
@@ -2812,7 +2813,7 @@ static void* keyValueObservingContext = &keyValueObservingContext;
 
 - (void)drawRect:(NSRect)rect
 {
-    LOG(View, "drawRect: x:%g, y:%g, width:%g, height:%g", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+    LOG(Printing, "drawRect: x:%g, y:%g, width:%g, height:%g", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
     _data->_page->endPrinting();
 }
 
@@ -3520,7 +3521,7 @@ static bool matchesExtensionOrEquivalent(NSString *filename, NSString *extension
 
 - (void)pasteboardChangedOwner:(NSPasteboard *)pasteboard
 {
-    _data->_promisedImage = 0;
+    _data->_promisedImage = nullptr;
     _data->_promisedFilename = "";
     _data->_promisedURL = "";
 }
@@ -3531,7 +3532,7 @@ static bool matchesExtensionOrEquivalent(NSString *filename, NSString *extension
 
     if ([type isEqual:NSTIFFPboardType] && _data->_promisedImage) {
         [pasteboard setData:(NSData *)_data->_promisedImage->getTIFFRepresentation() forType:NSTIFFPboardType];
-        _data->_promisedImage = 0;
+        _data->_promisedImage = nullptr;
     }
 }
 
@@ -3797,6 +3798,8 @@ static NSString *pathWithUniqueFilenameForPath(NSString *path)
     [workspaceNotificationCenter addObserver:self selector:@selector(_activeSpaceDidChange:) name:NSWorkspaceActiveSpaceDidChangeNotification object:nil];
 
 #if __MAC_OS_X_VERSION_MIN_REQUIRED >= 101000
+    _data->_allowsLinkPreview = YES;
+
     if (Class gestureClass = NSClassFromString(@"NSImmediateActionGestureRecognizer")) {
         _data->_immediateActionGestureRecognizer = adoptNS([(NSImmediateActionGestureRecognizer *)[gestureClass alloc] init]);
         _data->_immediateActionController = adoptNS([[WKImmediateActionController alloc] initWithPage:*_data->_page view:self recognizer:_data->_immediateActionGestureRecognizer.get()]);
@@ -4002,7 +4005,7 @@ static NSString *pathWithUniqueFilenameForPath(NSString *path)
 
 - (NSPrintOperation *)printOperationWithPrintInfo:(NSPrintInfo *)printInfo forFrame:(WKFrameRef)frameRef
 {
-    LOG(View, "Creating an NSPrintOperation for frame '%s'", toImpl(frameRef)->url().utf8().data());
+    LOG(Printing, "Creating an NSPrintOperation for frame '%s'", toImpl(frameRef)->url().utf8().data());
 
     // FIXME: If the frame cannot be printed (e.g. if it contains an encrypted PDF that disallows
     // printing), this function should return nil.
@@ -4221,6 +4224,26 @@ static NSString *pathWithUniqueFilenameForPath(NSString *path)
     return _data->_allowsBackForwardNavigationGestures;
 }
 
+- (BOOL)allowsLinkPreview
+{
+    return _data->_allowsLinkPreview;
+}
+
+- (void)setAllowsLinkPreview:(BOOL)allowsLinkPreview
+{
+    if (_data->_allowsLinkPreview == allowsLinkPreview)
+        return;
+
+    _data->_allowsLinkPreview = allowsLinkPreview;
+    
+#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 101000
+    if (!allowsLinkPreview)
+        [self removeGestureRecognizer:_data->_immediateActionGestureRecognizer.get()];
+    else if (NSGestureRecognizer *immediateActionRecognizer = _data->_immediateActionGestureRecognizer.get())
+        [self addGestureRecognizer:immediateActionRecognizer];
+#endif
+}
+
 - (void)_setIgnoresAllEvents:(BOOL)ignoresAllEvents
 {
     _data->_ignoresAllEvents = ignoresAllEvents;
@@ -4244,8 +4267,10 @@ static NSString *pathWithUniqueFilenameForPath(NSString *path)
 #if __MAC_OS_X_VERSION_MIN_REQUIRED >= 101000
     if (ignoresNonWheelEvents)
         [self removeGestureRecognizer:_data->_immediateActionGestureRecognizer.get()];
-    else if (NSGestureRecognizer *immediateActionRecognizer = _data->_immediateActionGestureRecognizer.get())
-        [self addGestureRecognizer:immediateActionRecognizer];
+    else if (NSGestureRecognizer *immediateActionRecognizer = _data->_immediateActionGestureRecognizer.get()) {
+        if (_data->_allowsLinkPreview)
+            [self addGestureRecognizer:immediateActionRecognizer];
+    }
 #endif
 }
 
@@ -4407,12 +4432,16 @@ static NSString *pathWithUniqueFilenameForPath(NSString *path)
     return nsColor(color);
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
 // This method forces a drawing area geometry update, even if frame size updates are disabled.
 // The updated is performed asynchronously; we don't wait for the geometry update before returning.
 // The area drawn need not match the current frame size - if it differs it will be anchored to the
 // frame according to the current contentAnchor.
 - (void)forceAsyncDrawingAreaSizeUpdate:(NSSize)size
 {
+    // This SPI is only used on 10.9 and below, and is incompatible with the fence-based drawing area size synchronization in 10.10+.
+#if __MAC_OS_X_VERSION_MIN_REQUIRED <= 1090
     if (_data->_clipsToVisibleRect)
         [self _updateViewExposedRect];
     [self _setDrawingAreaSize:size];
@@ -4422,10 +4451,15 @@ static NSString *pathWithUniqueFilenameForPath(NSString *path)
     // the drawing area size such that the latest update is sent.
     if (DrawingAreaProxy* drawingArea = _data->_page->drawingArea())
         drawingArea->waitForPossibleGeometryUpdate(std::chrono::milliseconds::zero());
+#else
+    ASSERT_NOT_REACHED();
+#endif
 }
 
 - (void)waitForAsyncDrawingAreaSizeUpdate
 {
+    // This SPI is only used on 10.9 and below, and is incompatible with the fence-based drawing area size synchronization in 10.10+.
+#if __MAC_OS_X_VERSION_MIN_REQUIRED <= 1090
     if (DrawingAreaProxy* drawingArea = _data->_page->drawingArea()) {
         // If a geometry update is still pending then the action of receiving the
         // first geometry update may result in another update being scheduled -
@@ -4433,7 +4467,11 @@ static NSString *pathWithUniqueFilenameForPath(NSString *path)
         drawingArea->waitForPossibleGeometryUpdate(DrawingAreaProxy::didUpdateBackingStoreStateTimeout() / 2);
         drawingArea->waitForPossibleGeometryUpdate(DrawingAreaProxy::didUpdateBackingStoreStateTimeout() / 2);
     }
+#else
+    ASSERT_NOT_REACHED();
+#endif
 }
+#pragma clang diagnostic pop
 
 - (BOOL)isUsingUISideCompositing
 {

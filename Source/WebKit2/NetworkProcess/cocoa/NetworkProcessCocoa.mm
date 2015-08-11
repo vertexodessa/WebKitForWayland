@@ -34,6 +34,7 @@
 #import "SandboxExtension.h"
 #import "SecurityOriginData.h"
 #import <WebCore/CFNetworkSPI.h>
+#import <WebCore/NetworkStorageSession.h>
 #import <WebCore/PublicSuffix.h>
 #import <WebCore/ResourceRequestCFNet.h>
 #import <WebCore/SecurityOrigin.h>
@@ -100,17 +101,16 @@ void NetworkProcess::platformInitializeNetworkProcessCocoa(const NetworkProcessC
             return;
         }
 #endif
+        String nsURLCacheDirectory = m_diskCacheDirectory;
 #if PLATFORM(IOS)
-        [NSURLCache setSharedURLCache:adoptNS([[NSURLCache alloc]
-            _initWithMemoryCapacity:parameters.nsURLCacheMemoryCapacity
-            diskCapacity:parameters.nsURLCacheDiskCapacity
-            relativePath:parameters.uiProcessBundleIdentifier]).get()];
-#else
+        // NSURLCache path is relative to network process cache directory.
+        // This puts cache files under <container>/Library/Caches/com.apple.WebKit.Networking/
+        nsURLCacheDirectory = ".";
+#endif
         [NSURLCache setSharedURLCache:adoptNS([[NSURLCache alloc]
             initWithMemoryCapacity:parameters.nsURLCacheMemoryCapacity
             diskCapacity:parameters.nsURLCacheDiskCapacity
-            diskPath:parameters.diskCacheDirectory]).get()];
-#endif
+            diskPath:nsURLCacheDirectory]).get()];
     }
 
     RetainPtr<CFURLCacheRef> cache = adoptCF(CFURLCacheCopySharedURLCache());
@@ -210,6 +210,16 @@ void NetworkProcess::clearCFURLCacheForOrigins(const Vector<SecurityOriginData>&
         RetainPtr<CFArrayRef> partitionHostNames = adoptCF(WKCFURLCacheCopyAllHostNamesInPersistentStoreForPartition(partition.get()));
         WKCFURLCacheDeleteHostNamesInPersistentStoreForPartition(partitionHostNames.get(), partition.get());
     }
+}
+
+void NetworkProcess::clearHSTSCache(WebCore::NetworkStorageSession& session, std::chrono::system_clock::time_point modifiedSince)
+{
+#if PLATFORM(IOS) || (PLATFORM(MAC) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 101000)
+    NSTimeInterval timeInterval = std::chrono::duration_cast<std::chrono::duration<double>>(modifiedSince.time_since_epoch()).count();
+    NSDate *date = [NSDate dateWithTimeIntervalSince1970:timeInterval];
+
+    _CFNetworkResetHSTSHostsSinceDate(session.platformSession(), (__bridge CFDateRef)date);
+#endif
 }
 
 static void clearNSURLCache(dispatch_group_t group, std::chrono::system_clock::time_point modifiedSince, const std::function<void ()>& completionHandler)

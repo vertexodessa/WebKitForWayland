@@ -30,8 +30,6 @@
 #include <WebCore/FrameLoader.h>
 #include <WebCore/SecurityOrigin.h>
 
-#include <glib.h>
-
 using namespace WebCore;
 
 namespace WebKit {
@@ -65,8 +63,7 @@ void UserMediaPermissionRequestManager::startRequest(UserMediaRequest& request)
     ASSERT(webFrame);
 
     SecurityOrigin* origin = request.securityOrigin();
-    
-    m_page.send(Messages::WebPageProxy::RequestUserMediaPermissionForFrame(requestID, webFrame->frameID(), origin->databaseIdentifier(), request.requiresAudio(), request.requiresVideo()));
+    m_page.send(Messages::WebPageProxy::RequestUserMediaPermissionForFrame(requestID, webFrame->frameID(), origin->databaseIdentifier(), request.requiresAudio(), request.requiresVideo(), request.videoDeviceUIDs(), request.audioDeviceUIDs()));
 }
 
 void UserMediaPermissionRequestManager::cancelRequest(UserMediaRequest& request)

@@ -224,6 +224,18 @@ void NavigationState::willRecordNavigationSnapshot(WebBackForwardListItem& item)
     [static_cast<id <WKNavigationDelegatePrivate>>(navigationDelegate) _webView:m_webView willSnapshotBackForwardListItem:wrapper(item)];
 }
 
+void NavigationState::didFirstPaint()
+{
+    if (!m_navigationDelegateMethods.webViewRenderingProgressDidChange)
+        return;
+
+    auto navigationDelegate = m_navigationDelegate.get();
+    if (!navigationDelegate)
+        return;
+
+    [static_cast<id <WKNavigationDelegatePrivate>>(navigationDelegate) _webView:m_webView renderingProgressDidChange:_WKRenderingProgressEventFirstPaint];
+}
+
 NavigationState::NavigationClient::NavigationClient(NavigationState& navigationState)
     : m_navigationState(navigationState)
 {
@@ -236,16 +248,7 @@ NavigationState::NavigationClient::~NavigationClient()
 static void tryAppLink(RefPtr<API::NavigationAction> navigationAction, const String& currentMainFrameURL, std::function<void (bool)> completionHandler)
 {
 #if HAVE(APP_LINKS)
-    bool mainFrameNavigation = !navigationAction->targetFrame() || navigationAction->targetFrame()->isMainFrame();
-    bool shouldOpenExternalURLs = navigationAction->shouldOpenExternalURLs();
-    if (!mainFrameNavigation || !shouldOpenExternalURLs) {
-        completionHandler(false);
-        return;
-    }
-
-    // If the new URL is within the same origin as the current URL, do not try to open it externally.
-    URL currentURL = URL(ParsedURLString, currentMainFrameURL);
-    if (protocolHostAndPortAreEqual(currentURL, navigationAction->request().url())) {
+    if (!navigationAction->shouldOpenAppLinks()) {
         completionHandler(false);
         return;
     }
@@ -667,7 +670,7 @@ void NavigationState::NavigationClient::processDidCrash(WebKit::WebPageProxy& pa
     [static_cast<id <WKNavigationDelegatePrivate>>(navigationDelegate.get()) _webViewWebProcessDidCrash:m_navigationState.m_webView];
 }
 
-PassRefPtr<API::Data> NavigationState::NavigationClient::webCryptoMasterKey(WebKit::WebPageProxy&)
+RefPtr<API::Data> NavigationState::NavigationClient::webCryptoMasterKey(WebKit::WebPageProxy&)
 {
     if (!m_navigationState.m_navigationDelegateMethods.webCryptoMasterKeyForWebView)
         return nullptr;

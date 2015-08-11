@@ -34,10 +34,15 @@
 #include <WebCore/IntSize.h>
 #include <WebCore/TransformationMatrix.h>
 #include <WebCore/WaylandSurfaceWPE.h>
+#include <wtf/Atomics.h>
 #include <wtf/FastMalloc.h>
 #include <wtf/Noncopyable.h>
 #include <wtf/ThreadSafeRefCounted.h>
 #include <wtf/Threading.h>
+
+#if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
+#include <WebCore/DisplayRefreshMonitor.h>
+#endif
 
 namespace WebCore {
 struct CoordinatedGraphicsState;
@@ -57,7 +62,6 @@ public:
     public:
         virtual void setVisibleContentsRect(const WebCore::FloatRect&, const WebCore::FloatPoint&, float) = 0;
         virtual void purgeBackingStores() = 0;
-        virtual void frameComplete() = 0;
         virtual void renderNextFrame() = 0;
         virtual void commitScrollOffset(uint32_t layerID, const WebCore::IntSize& offset) = 0;
     };
@@ -76,6 +80,8 @@ public:
     void didChangeContentsSize(const WebCore::IntSize&);
     void scrollTo(const WebCore::IntPoint&);
     void scrollBy(const WebCore::IntSize&);
+
+    RefPtr<WebCore::DisplayRefreshMonitor> createDisplayRefreshMonitor(PlatformDisplayID);
 
 private:
     ThreadedCompositor(Client*);
@@ -119,6 +125,27 @@ private:
     Mutex m_terminateRunLoopConditionMutex;
 
     static const struct wl_callback_listener m_frameListener;
+
+#if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
+    class DisplayRefreshMonitor : public WebCore::DisplayRefreshMonitor {
+    public:
+        DisplayRefreshMonitor(ThreadedCompositor*);
+
+        virtual bool requestRefreshCallback() override;
+
+        bool requiresDisplayRefreshCallback();
+        void dispatchDisplayRefreshCallback();
+
+    private:
+        void displayRefreshCallback();
+        RunLoop::Timer<DisplayRefreshMonitor> m_displayRefreshTimer;
+        ThreadedCompositor* m_compositor;
+    };
+    RefPtr<DisplayRefreshMonitor> m_displayRefreshMonitor;
+#endif
+
+    Atomic<bool> m_clientRendersNextFrame;
+    Atomic<bool> m_coordinateUpdateCompletionWithClient;
 };
 
 } // namespace WebKit

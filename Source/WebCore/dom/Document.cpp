@@ -3,7 +3,7 @@
  *           (C) 1999 Antti Koivisto (koivisto@kde.org)
  *           (C) 2001 Dirk Mueller (mueller@kde.org)
  *           (C) 2006 Alexey Proskuryakov (ap@webkit.org)
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2011, 2012, 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2004-2015 Apple Inc. All rights reserved.
  * Copyright (C) 2008, 2009 Torch Mobile Inc. All rights reserved. (http://www.torchmobile.com/)
  * Copyright (C) 2008, 2009, 2011, 2012 Google Inc. All rights reserved.
  * Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies)
@@ -112,6 +112,7 @@
 #include "PageGroup.h"
 #include "PageTransitionEvent.h"
 #include "PlatformLocale.h"
+#include "PlatformMediaSessionManager.h"
 #include "PlatformStrategies.h"
 #include "PlugInsResources.h"
 #include "PluginDocument.h"
@@ -443,7 +444,7 @@ Document::Document(Frame* frame, const URL& url, unsigned documentClasses, unsig
     , m_readyState(Complete)
     , m_bParsing(false)
     , m_optimizedStyleSheetUpdateTimer(*this, &Document::optimizedStyleSheetUpdateTimerFired)
-    , m_styleRecalcTimer(*this, &Document::styleRecalcTimerFired)
+    , m_styleRecalcTimer(*this, &Document::updateStyleIfNeeded)
     , m_pendingStyleRecalcShouldForce(false)
     , m_inStyleRecalc(false)
     , m_closeAfterStyleRecalc(false)
@@ -521,7 +522,7 @@ Document::Document(Frame* frame, const URL& url, unsigned documentClasses, unsig
     , m_inputCursor(EmptyInputCursor::create())
 #endif
     , m_didAssociateFormControlsTimer(*this, &Document::didAssociateFormControlsTimerFired)
-    , m_cookieCacheExpiryTimer(*this, &Document::domCookieCacheExpiryTimerFired)
+    , m_cookieCacheExpiryTimer(*this, &Document::invalidateDOMCookieCache)
     , m_disabledFieldsetElementsCount(0)
     , m_hasInjectedPlugInsScript(false)
     , m_renderTreeBeingDestroyed(false)
@@ -632,6 +633,11 @@ Document::~Document()
     if (m_cachedResourceLoader->document() == this)
         m_cachedResourceLoader->setDocument(nullptr);
 
+#if ENABLE(VIDEO)
+    if (auto* platformMediaSessionManager = PlatformMediaSessionManager::sharedManagerIfExists())
+        platformMediaSessionManager->stopAllMediaPlaybackForDocument(this);
+#endif
+    
     // We must call clearRareData() here since a Document class inherits TreeScope
     // as well as Node. See a comment on TreeScope.h for the reason.
     if (hasRareData())
@@ -1609,6 +1615,25 @@ bool Document::hidden() const
     return pageVisibilityState() != PageVisibilityStateVisible;
 }
 
+
+#if ENABLE(VIDEO)
+void Document::registerForAllowsMediaDocumentInlinePlaybackChangedCallbacks(HTMLMediaElement& element)
+{
+    m_allowsMediaDocumentInlinePlaybackElements.add(&element);
+}
+
+void Document::unregisterForAllowsMediaDocumentInlinePlaybackChangedCallbacks(HTMLMediaElement& element)
+{
+    m_allowsMediaDocumentInlinePlaybackElements.remove(&element);
+}
+
+void Document::allowsMediaDocumentInlinePlaybackChanged()
+{
+    for (auto* element : m_allowsMediaDocumentInlinePlaybackElements)
+        element->allowsMediaDocumentInlinePlaybackChanged();
+}
+#endif
+
 #if ENABLE(CSP_NEXT)
 DOMSecurityPolicy& Document::securityPolicy()
 {
@@ -1726,11 +1751,6 @@ bool Document::hasPendingStyleRecalc() const
 bool Document::hasPendingForcedStyleRecalc() const
 {
     return m_styleRecalcTimer.isActive() && m_pendingStyleRecalcShouldForce;
-}
-
-void Document::styleRecalcTimerFired()
-{
-    updateStyleIfNeeded();
 }
 
 void Document::recalcStyle(Style::Change change)
@@ -2424,7 +2444,7 @@ void Document::detachParser()
     if (!m_parser)
         return;
     m_parser->detach();
-    m_parser.clear();
+    m_parser = nullptr;
 }
 
 void Document::cancelParsing()
@@ -3023,8 +3043,24 @@ void Document::processHttpEquiv(const String& equiv, const String& content)
 {
     ASSERT(!equiv.isNull() && !content.isNull());
 
-    if (page() && !page()->settings().httpEquivEnabled())
+    HttpEquivPolicy policy = httpEquivPolicy();
+    if (policy != HttpEquivPolicy::Enabled) {
+        String reason;
+        switch (policy) {
+        case HttpEquivPolicy::Enabled:
+            ASSERT_NOT_REACHED();
+            break;
+        case HttpEquivPolicy::DisabledBySettings:
+            reason = "by the embedder.";
+            break;
+        case HttpEquivPolicy::DisabledByContentDispositionAttachmentSandbox:
+            reason = "for documents with Content-Disposition: attachment.";
+            break;
+        }
+        String message = "http-equiv '" + equiv + "' is disabled " + reason;
+        addConsoleMessage(MessageSource::Security, MessageLevel::Error, message);
         return;
+    }
 
     Frame* frame = this->frame();
 
@@ -4892,15 +4928,8 @@ void Document::initSecurityContext()
     setCookieURL(m_url);
     enforceSandboxFlags(m_frame->loader().effectiveSandboxFlags());
 
-#if PLATFORM(IOS)
-    // On iOS we display attachments inline regardless of whether the response includes
-    // the HTTP header "Content-Disposition: attachment". So, we enforce a unique
-    // security origin for such documents. As an optimization, we don't need to parse
-    // the responde header (i.e. call ResourceResponse::isAttachment()) for a synthesized
-    // document because such documents cannot be an attachment.
-    if (!m_isSynthesized && m_frame->loader().activeDocumentLoader()->response().isAttachment())
-        enforceSandboxFlags(SandboxOrigin);
-#endif
+    if (shouldEnforceContentDispositionAttachmentSandbox())
+        enforceSandboxFlags(SandboxAll);
 
     setSecurityOriginPolicy(SecurityOriginPolicy::create(isSandboxed(SandboxOrigin) ? SecurityOrigin::createUnique() : SecurityOrigin::create(m_url)));
     setContentSecurityPolicy(std::make_unique<ContentSecurityPolicy>(this));
@@ -5882,7 +5911,7 @@ void Document::clearScriptedAnimationController()
     // FIXME: consider using ActiveDOMObject.
     if (m_scriptedAnimationController)
         m_scriptedAnimationController->clearDocumentPointer();
-    m_scriptedAnimationController.clear();
+    m_scriptedAnimationController = nullptr;
 }
 #endif
     
@@ -5997,6 +6026,15 @@ void Document::didAddWheelEventHandler(Node& node)
 
     if (Frame* frame = this->frame())
         DebugPageOverlays::didChangeEventHandlers(*frame);
+}
+
+HttpEquivPolicy Document::httpEquivPolicy() const
+{
+    if (shouldEnforceContentDispositionAttachmentSandbox())
+        return HttpEquivPolicy::DisabledByContentDispositionAttachmentSandbox;
+    if (page() && !page()->settings().httpEquivEnabled())
+        return HttpEquivPolicy::DisabledBySettings;
+    return HttpEquivPolicy::Enabled;
 }
 
 static bool removeHandlerFromSet(EventTargetSet& handlerSet, Node& node, EventHandlerRemoval removal)
@@ -6300,7 +6338,7 @@ void Document::updateHoverActiveState(const HitTestRequest& request, Element* in
             curr->setActive(false);
             m_userActionElements.setInActiveChain(curr, false);
         }
-        m_activeElement.clear();
+        m_activeElement = nullptr;
     } else {
         Element* newActiveElement = innerElementInDocument;
         if (!oldActiveElement && newActiveElement && request.active() && !request.touchMove()) {
@@ -6490,11 +6528,6 @@ void Document::invalidateDOMCookieCache()
     m_cachedDOMCookies = String();
 }
 
-void Document::domCookieCacheExpiryTimerFired()
-{
-    invalidateDOMCookieCache();
-}
-
 void Document::didLoadResourceSynchronously(const ResourceRequest&)
 {
     // Synchronous resources loading can set cookies so we invalidate the cookies cache
@@ -6670,6 +6703,19 @@ ShouldOpenExternalURLsPolicy Document::shouldOpenExternalURLsPolicyToPropagate()
         return documentLoader->shouldOpenExternalURLsPolicyToPropagate();
 
     return ShouldOpenExternalURLsPolicy::ShouldNotAllow;
+}
+
+bool Document::shouldEnforceContentDispositionAttachmentSandbox() const
+{
+    if (m_isSynthesized)
+        return false;
+
+    bool contentDispositionAttachmentSandboxEnabled = settings() && settings()->contentDispositionAttachmentSandboxEnabled();
+    bool responseIsAttachment = false;
+    if (DocumentLoader* documentLoader = m_frame ? m_frame->loader().activeDocumentLoader() : nullptr)
+        responseIsAttachment = documentLoader->response().isAttachment();
+
+    return contentDispositionAttachmentSandboxEnabled && responseIsAttachment;
 }
 
 } // namespace WebCore
