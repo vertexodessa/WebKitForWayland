@@ -247,7 +247,6 @@ set(WebCore_NON_SVG_IDL_FILES
     Modules/mediastream/MediaSourceStates.idl
     Modules/mediastream/MediaStream.idl
     Modules/mediastream/MediaStreamCapabilities.idl
-    Modules/mediastream/MediaStreamEvent.idl
     Modules/mediastream/MediaStreamTrack.idl
     Modules/mediastream/MediaStreamTrackEvent.idl
     Modules/mediastream/MediaStreamTrackSourcesCallback.idl
@@ -274,6 +273,7 @@ set(WebCore_NON_SVG_IDL_FILES
     Modules/mediastream/RTCStatsCallback.idl
     Modules/mediastream/RTCStatsReport.idl
     Modules/mediastream/RTCStatsResponse.idl
+    Modules/mediastream/RTCTrackEvent.idl
     Modules/mediastream/SourceInfo.idl
 
     Modules/navigatorcontentutils/NavigatorContentUtils.idl
@@ -907,7 +907,6 @@ set(WebCore_SOURCES
     Modules/mediastream/MediaSourceStates.cpp
     Modules/mediastream/MediaStream.cpp
     Modules/mediastream/MediaStreamCapabilities.cpp
-    Modules/mediastream/MediaStreamEvent.cpp
     Modules/mediastream/MediaStreamRegistry.cpp
     Modules/mediastream/MediaStreamTrack.cpp
     Modules/mediastream/MediaStreamTrackEvent.cpp
@@ -930,6 +929,7 @@ set(WebCore_SOURCES
     Modules/mediastream/RTCStatsReport.cpp
     Modules/mediastream/RTCStatsRequestImpl.cpp
     Modules/mediastream/RTCStatsResponse.cpp
+    Modules/mediastream/RTCTrackEvent.cpp
     Modules/mediastream/RTCVoidRequestImpl.cpp
     Modules/mediastream/SourceInfo.cpp
     Modules/mediastream/UserMediaController.cpp
@@ -1007,8 +1007,6 @@ set(WebCore_SOURCES
     Modules/webdatabase/DOMWindowWebDatabase.cpp
     Modules/webdatabase/Database.cpp
     Modules/webdatabase/DatabaseAuthorizer.cpp
-    Modules/webdatabase/DatabaseBackend.cpp
-    Modules/webdatabase/DatabaseBackendBase.cpp
     Modules/webdatabase/DatabaseContext.cpp
     Modules/webdatabase/DatabaseManager.cpp
     Modules/webdatabase/DatabaseServer.cpp
@@ -1020,7 +1018,6 @@ set(WebCore_SOURCES
     Modules/webdatabase/SQLResultSet.cpp
     Modules/webdatabase/SQLResultSetRowList.cpp
     Modules/webdatabase/SQLStatement.cpp
-    Modules/webdatabase/SQLStatementBackend.cpp
     Modules/webdatabase/SQLTransaction.cpp
     Modules/webdatabase/SQLTransactionBackend.cpp
     Modules/webdatabase/SQLTransactionClient.cpp
