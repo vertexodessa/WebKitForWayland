@@ -41,10 +41,7 @@
 
 #if ENABLE(MEDIA_SOURCE)
 #include "MediaSourceGStreamer.h"
-#endif
-
-#if ENABLE(ENCRYPTED_MEDIA)
-#include <wtf/threads/BinarySemaphore.h>
+#include "WebKitMediaSourceGStreamer.h"
 #endif
 
 typedef struct _GstBuffer GstBuffer;
@@ -57,6 +54,10 @@ namespace WebCore {
 #if ENABLE(WEB_AUDIO)
 class AudioSourceProvider;
 class AudioSourceProviderGStreamer;
+#endif
+
+#if USE(DXDRM)
+class DiscretixSession;
 #endif
 
 class AudioTrackPrivateGStreamer;
@@ -155,8 +156,6 @@ public:
     MediaPlayer::MediaKeyException generateKeyRequest(const String&, const unsigned char*, unsigned);
     MediaPlayer::MediaKeyException cancelKeyRequest(const String&, const String&);
     void needKey(const String&, const String&, const unsigned char*, unsigned);
-
-    void signalDRM();
 #endif
 
     bool isLiveStream() const override { return m_isStreaming; }
@@ -179,10 +178,18 @@ private:
 
     GstElement* createAudioSink() override;
 
+#if USE(DXDRM)
+    DiscretixSession* dxdrmSession() const;
+    void emitSession();
+#endif
+
 #if ENABLE(ENCRYPTED_MEDIA_V2)
-    static MediaPlayer::SupportsType extendedSupportsType(const MediaEngineSupportParameters&);
     std::unique_ptr<CDMSession> createSession(const String&);
     CDMSession* m_cdmSession;
+#endif
+
+#if ENABLE(ENCRYPTED_MEDIA) && USE(DXDRM)
+    DiscretixSession* m_dxdrmSession;
 #endif
 
     float playbackPosition() const;
@@ -284,16 +291,13 @@ private:
 #endif
 #if ENABLE(MEDIA_SOURCE)
     RefPtr<MediaSourcePrivateClient> m_mediaSource;
-    bool isMediaSource() const { return m_mediaSource; }
+    bool isMediaSource() const { return m_mediaSource && WEBKIT_IS_MEDIA_SRC(m_source.get()); }
 #else
     bool isMediaSource() const { return false; }
 #endif
 #if USE(GSTREAMER_GL)
     GstGLContext* m_glContext;
     GstGLDisplay* m_glDisplay;
-#endif
-#if ENABLE(ENCRYPTED_MEDIA)
-    BinarySemaphore m_drmKeySemaphore;
 #endif
     Mutex m_pendingAsyncOperationsLock;
     GList* m_pendingAsyncOperations;

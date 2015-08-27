@@ -217,6 +217,7 @@ list(APPEND WebCore_INCLUDE_DIRECTORIES
     ${GSTREAMER_BASE_INCLUDE_DIRS}
     ${GSTREAMER_AUDIO_INCLUDE_DIRS}
     ${GSTREAMER_APP_INCLUDE_DIRS}
+    ${GSTREAMER_GL_INCLUDE_DIRS}
     ${GSTREAMER_PBUTILS_INCLUDE_DIRS}
     ${GSTREAMER_TAG_INCLUDE_DIRS}
     ${GSTREAMER_VIDEO_INCLUDE_DIRS}
@@ -330,13 +331,7 @@ if (ENABLE_SUBTLE_CRYPTO)
     )
 endif ()
 
-if (ENABLE_DXDRM)
-    list(APPEND WebCore_LIBRARIES
-        -lDxDrm
-    )
-endif ()
-
-if (ENABLE_ENCRYPTED_MEDIA OR ENABLE_ENCRYPTED_MEDIA_V2)
+if (ENABLE_ENCRYPTED_MEDIA)
     list(APPEND WebCore_LIBRARIES
         -lcrypto
     )
@@ -346,10 +341,21 @@ if (ENABLE_ENCRYPTED_MEDIA OR ENABLE_ENCRYPTED_MEDIA_V2)
         platform/graphics/gstreamer/WebKitMediaAesCtr.c
     )
 
-    if (ENABLE_ENCRYPTED_MEDIA_V2 AND ENABLE_DXDRM)
+endif ()
+
+if ((ENABLE_ENCRYPTED_MEDIA OR ENABLE_ENCRYPTED_MEDIA_V2) AND ENABLE_DXDRM)
+    list(APPEND WebCore_LIBRARIES
+        -lDxDrm
+    )
+
+    list(APPEND WebCore_SOURCES
+        platform/graphics/gstreamer/DiscretixSession.cpp
+        platform/graphics/gstreamer/WebKitPlayReadyDecryptorGStreamer.cpp
+    )
+
+    if (ENABLE_ENCRYPTED_MEDIA_V2)
         list(APPEND WebCore_SOURCES
             platform/graphics/gstreamer/CDMPRSessionGStreamer.cpp
-            platform/graphics/gstreamer/WebKitPlayReadyDecryptorGStreamer.cpp
         )
     endif ()
 endif ()

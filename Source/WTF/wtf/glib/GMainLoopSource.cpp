@@ -26,6 +26,8 @@
 #include "config.h"
 #include "GMainLoopSource.h"
 
+#include <wtf/MainThread.h>
+
 #if USE(GLIB)
 
 #include <gio/gio.h>
@@ -99,7 +101,7 @@ void GMainLoopSource::scheduleIdleSource(const char* name, GSourceFunc sourceFun
     g_source_attach(m_context.source.get(), context);
 }
 
-void GMainLoopSource::schedule(const char* name, std::function<void ()> function, int priority, std::function<void ()> destroyFunction, GMainContext* context)
+void GMainLoopSource::schedule(const char* name, std::function<void ()>&& function, int priority, std::function<void ()>&& destroyFunction, GMainContext* context)
 {
     cancel();
 
@@ -116,7 +118,7 @@ void GMainLoopSource::schedule(const char* name, std::function<void ()> function
     scheduleIdleSource(name, reinterpret_cast<GSourceFunc>(voidSourceCallback), priority, context);
 }
 
-void GMainLoopSource::schedule(const char* name, std::function<bool ()> function, int priority, std::function<void ()> destroyFunction, GMainContext* context)
+void GMainLoopSource::schedule(const char* name, std::function<bool ()>&& function, int priority, std::function<void ()>&& destroyFunction, GMainContext* context)
 {
     cancel();
 
@@ -133,7 +135,7 @@ void GMainLoopSource::schedule(const char* name, std::function<bool ()> function
     scheduleIdleSource(name, reinterpret_cast<GSourceFunc>(boolSourceCallback), priority, context);
 }
 
-void GMainLoopSource::schedule(const char* name, std::function<bool (GIOCondition)> function, GSocket* socket, GIOCondition condition, int priority, std::function<void ()> destroyFunction, GMainContext* context)
+void GMainLoopSource::schedule(const char* name, std::function<bool (GIOCondition)>&& function, GSocket* socket, GIOCondition condition, int priority, std::function<void ()>&& destroyFunction, GMainContext* context)
 {
     cancel();
 
@@ -174,7 +176,7 @@ void GMainLoopSource::scheduleTimeoutSource(const char* name, GSourceFunc source
     g_source_attach(m_context.source.get(), context);
 }
 
-void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<void ()> function, std::chrono::milliseconds delay, int priority, std::function<void ()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<void ()>&& function, std::chrono::milliseconds delay, int priority, std::function<void ()>&& destroyFunction, GMainContext* context)
 {
     cancel();
 
@@ -191,7 +193,7 @@ void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<void ()
     scheduleTimeoutSource(name, reinterpret_cast<GSourceFunc>(voidSourceCallback), priority, context);
 }
 
-void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<bool ()> function, std::chrono::milliseconds delay, int priority, std::function<void ()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<bool ()>&& function, std::chrono::milliseconds delay, int priority, std::function<void ()>&& destroyFunction, GMainContext* context)
 {
     cancel();
 
@@ -208,7 +210,7 @@ void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<bool ()
     scheduleTimeoutSource(name, reinterpret_cast<GSourceFunc>(boolSourceCallback), priority, context);
 }
 
-void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<void ()> function, std::chrono::seconds delay, int priority, std::function<void ()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<void ()>&& function, std::chrono::seconds delay, int priority, std::function<void ()>&& destroyFunction, GMainContext* context)
 {
     cancel();
 
@@ -225,7 +227,7 @@ void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<void ()
     scheduleTimeoutSource(name, reinterpret_cast<GSourceFunc>(voidSourceCallback), priority, context);
 }
 
-void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<bool ()> function, std::chrono::seconds delay, int priority, std::function<void ()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<bool ()>&& function, std::chrono::seconds delay, int priority, std::function<void ()>&& destroyFunction, GMainContext* context)
 {
     cancel();
 
@@ -271,7 +273,7 @@ static GSource* createMicrosecondsTimeoutSource(uint64_t delay)
     return source;
 }
 
-void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<void ()> function, std::chrono::microseconds delay, int priority, std::function<void ()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<void ()>&& function, std::chrono::microseconds delay, int priority, std::function<void ()>&& destroyFunction, GMainContext* context)
 {
     cancel();
 
@@ -288,7 +290,7 @@ void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<void ()
     scheduleTimeoutSource(name, reinterpret_cast<GSourceFunc>(voidSourceCallback), priority, context);
 }
 
-void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<bool ()> function, std::chrono::microseconds delay, int priority, std::function<void ()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<bool ()>&& function, std::chrono::microseconds delay, int priority, std::function<void ()>&& destroyFunction, GMainContext* context)
 {
     cancel();
 
@@ -305,44 +307,44 @@ void GMainLoopSource::scheduleAfterDelay(const char* name, std::function<bool ()
     scheduleTimeoutSource(name, reinterpret_cast<GSourceFunc>(boolSourceCallback), priority, context);
 }
 
-void GMainLoopSource::scheduleAndDeleteOnDestroy(const char* name, std::function<void()> function, int priority, std::function<void()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAndDeleteOnDestroy(const char* name, std::function<void()>&& function, int priority, std::function<void()>&& destroyFunction, GMainContext* context)
 {
-    create().schedule(name, function, priority, destroyFunction, context);
+    create().schedule(name, WTF::move(function), priority, WTF::move(destroyFunction), context);
 }
 
-void GMainLoopSource::scheduleAndDeleteOnDestroy(const char* name, std::function<bool()> function, int priority, std::function<void()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAndDeleteOnDestroy(const char* name, std::function<bool()>&& function, int priority, std::function<void()>&& destroyFunction, GMainContext* context)
 {
-    create().schedule(name, function, priority, destroyFunction, context);
+    create().schedule(name, WTF::move(function), priority, WTF::move(destroyFunction), context);
 }
 
-void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<void()> function, std::chrono::milliseconds delay, int priority, std::function<void()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<void()>&& function, std::chrono::milliseconds delay, int priority, std::function<void()>&& destroyFunction, GMainContext* context)
 {
-    create().scheduleAfterDelay(name, function, delay, priority, destroyFunction, context);
+    create().scheduleAfterDelay(name, WTF::move(function), delay, priority, WTF::move(destroyFunction), context);
 }
 
-void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<bool()> function, std::chrono::milliseconds delay, int priority, std::function<void()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<bool()>&& function, std::chrono::milliseconds delay, int priority, std::function<void()>&& destroyFunction, GMainContext* context)
 {
-    create().scheduleAfterDelay(name, function, delay, priority, destroyFunction, context);
+    create().scheduleAfterDelay(name, WTF::move(function), delay, priority, WTF::move(destroyFunction), context);
 }
 
-void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<void()> function, std::chrono::seconds delay, int priority, std::function<void()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<void()>&& function, std::chrono::seconds delay, int priority, std::function<void()>&& destroyFunction, GMainContext* context)
 {
-    create().scheduleAfterDelay(name, function, delay, priority, destroyFunction, context);
+    create().scheduleAfterDelay(name, WTF::move(function), delay, priority, WTF::move(destroyFunction), context);
 }
 
-void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<bool()> function, std::chrono::seconds delay, int priority, std::function<void()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<bool()>&& function, std::chrono::seconds delay, int priority, std::function<void()>&& destroyFunction, GMainContext* context)
 {
-    create().scheduleAfterDelay(name, function, delay, priority, destroyFunction, context);
+    create().scheduleAfterDelay(name, WTF::move(function), delay, priority, WTF::move(destroyFunction), context);
 }
 
-void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<void()> function, std::chrono::microseconds delay, int priority, std::function<void()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<void()>&& function, std::chrono::microseconds delay, int priority, std::function<void()>&& destroyFunction, GMainContext* context)
 {
-    create().scheduleAfterDelay(name, function, delay, priority, destroyFunction, context);
+    create().scheduleAfterDelay(name, WTF::move(function), delay, priority, WTF::move(destroyFunction), context);
 }
 
-void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<bool()> function, std::chrono::microseconds delay, int priority, std::function<void()> destroyFunction, GMainContext* context)
+void GMainLoopSource::scheduleAfterDelayAndDeleteOnDestroy(const char* name, std::function<bool()>&& function, std::chrono::microseconds delay, int priority, std::function<void()>&& destroyFunction, GMainContext* context)
 {
-    create().scheduleAfterDelay(name, function, delay, priority, destroyFunction, context);
+    create().scheduleAfterDelay(name, WTF::move(function), delay, priority, WTF::move(destroyFunction), context);
 }
 
 bool GMainLoopSource::prepareVoidCallback(Context& context)
@@ -487,6 +489,9 @@ GMainLoopSource::Simple::Simple(const char* name)
     , m_function(nullptr)
     , m_status(Ready)
 {
+    g_mutex_init(&m_mutex);
+    g_cond_init(&m_condition);
+
     g_source_set_name(m_source.get(), name);
     g_source_set_callback(m_source.get(), reinterpret_cast<GSourceFunc>(simpleSourceCallback), this, nullptr);
 
@@ -499,10 +504,18 @@ GMainLoopSource::Simple::Simple(const char* name, std::function<void ()> functio
     , m_status(Ready)
 {
     ASSERT(m_function);
+    g_mutex_init(&m_mutex);
+    g_cond_init(&m_condition);
     g_source_set_name(m_source.get(), name);
     g_source_set_callback(m_source.get(), reinterpret_cast<GSourceFunc>(simpleSourceCallback), this, nullptr);
 
     g_source_attach(m_source.get(), g_main_context_get_thread_default());
+}
+
+GMainLoopSource::Simple::~Simple()
+{
+    g_mutex_clear(&m_mutex);
+    g_cond_clear(&m_condition);
 }
 
 void GMainLoopSource::Simple::schedule(std::chrono::microseconds delay)
@@ -518,6 +531,24 @@ void GMainLoopSource::Simple::schedule(std::chrono::microseconds delay, std::fun
 
     g_source_set_ready_time(m_source.get(), g_get_monotonic_time() + delay.count());
     m_status = Scheduled;
+}
+
+void GMainLoopSource::Simple::scheduleAndWaitCompletion(std::chrono::microseconds delay, std::function<void ()> function)
+{
+    ASSERT(function);
+    m_function = WTF::move(function);
+
+    if (isMainThread()) {
+        simpleSourceCallback(this);
+        return;
+    }
+
+    g_mutex_lock(&m_mutex);
+    g_source_set_ready_time(m_source.get(), g_get_monotonic_time() + delay.count());
+    m_status = Scheduled;
+    while (isActive())
+        g_cond_wait(&m_condition, &m_mutex);
+    g_mutex_unlock(&m_mutex);
 }
 
 void GMainLoopSource::Simple::cancel()
@@ -544,10 +575,13 @@ gboolean GMainLoopSource::Simple::simpleSourceCallback(GMainLoopSource::Simple* 
 {
     ASSERT(source->m_function);
 
+    g_mutex_lock(&source->m_mutex);
     g_source_set_ready_time(source->m_source.get(), -1);
     source->m_status = Dispatching;
     source->m_function();
     source->m_status = Ready;
+    g_cond_signal(&source->m_condition);
+    g_mutex_unlock(&source->m_mutex);
     return G_SOURCE_CONTINUE;
 }
 
