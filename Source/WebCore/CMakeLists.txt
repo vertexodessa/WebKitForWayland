@@ -268,6 +268,8 @@ set(WebCore_NON_SVG_IDL_FILES
     Modules/mediastream/RTCIceServer.idl
     Modules/mediastream/RTCPeerConnection.idl
     Modules/mediastream/RTCPeerConnectionErrorCallback.idl
+    Modules/mediastream/RTCRtpReceiver.idl
+    Modules/mediastream/RTCRtpSender.idl
     Modules/mediastream/RTCSessionDescription.idl
     Modules/mediastream/RTCSessionDescriptionCallback.idl
     Modules/mediastream/RTCStatsCallback.idl
@@ -916,6 +918,7 @@ set(WebCore_SOURCES
     Modules/mediastream/MediaTrackConstraints.cpp
     Modules/mediastream/NavigatorMediaDevices.cpp
     Modules/mediastream/NavigatorUserMediaError.cpp
+    Modules/mediastream/RTCConfiguration.cpp
     Modules/mediastream/RTCDTMFSender.cpp
     Modules/mediastream/RTCDTMFToneChangeEvent.cpp
     Modules/mediastream/RTCDataChannel.cpp
@@ -924,8 +927,11 @@ set(WebCore_SOURCES
     Modules/mediastream/RTCIceCandidateEvent.cpp
     Modules/mediastream/RTCOfferAnswerOptions.cpp
     Modules/mediastream/RTCPeerConnection.cpp
+    Modules/mediastream/RTCRtpReceiver.cpp
+    Modules/mediastream/RTCRtpSender.cpp
+    Modules/mediastream/RTCRtpSenderReceiverBase.cpp
     Modules/mediastream/RTCSessionDescription.cpp
-    Modules/mediastream/RTCSessionDescriptionRequestImpl.cpp
+    # Modules/mediastream/RTCSessionDescriptionRequestImpl.cpp
     Modules/mediastream/RTCStatsReport.cpp
     Modules/mediastream/RTCStatsRequestImpl.cpp
     Modules/mediastream/RTCStatsResponse.cpp
@@ -934,6 +940,9 @@ set(WebCore_SOURCES
     Modules/mediastream/SourceInfo.cpp
     Modules/mediastream/UserMediaController.cpp
     Modules/mediastream/UserMediaRequest.cpp
+
+    
+    
 
     Modules/navigatorcontentutils/NavigatorContentUtils.cpp
 
@@ -2243,6 +2252,8 @@ set(WebCore_SOURCES
     platform/graphics/transforms/TranslateTransformOperation.cpp
 
     platform/mediastream/MediaDevicesPrivate.cpp
+    platform/mediastream/MediaEndpointConfigurationConversions.cpp
+    platform/mediastream/MediaEndpointInit.cpp
     platform/mediastream/MediaStreamPrivate.cpp
     platform/mediastream/MediaStreamTrackPrivate.cpp
     platform/mediastream/RTCIceCandidateDescriptor.cpp

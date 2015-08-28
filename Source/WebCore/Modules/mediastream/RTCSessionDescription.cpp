@@ -32,10 +32,12 @@
 #include "config.h"
 
 #if ENABLE(MEDIA_STREAM)
+
 #include "RTCSessionDescription.h"
 
 #include "Dictionary.h"
 #include "ExceptionCode.h"
+#include "RTCSessionDescriptionDescriptor.h"
 
 namespace WebCore {
 
@@ -60,22 +62,22 @@ RefPtr<RTCSessionDescription> RTCSessionDescription::create(const Dictionary& di
         return nullptr;
     }
 
-    return adoptRef(new RTCSessionDescription(type, sdp));
+    return adoptRef(*new RTCSessionDescription(RTCSessionDescriptionDescriptor::create(type, sdp)));
 }
 
-Ref<RTCSessionDescription> RTCSessionDescription::create(const RTCSessionDescription* description)
+RefPtr<RTCSessionDescription> RTCSessionDescription::create(RefPtr<RTCSessionDescriptionDescriptor> descriptor)
 {
-    return adoptRef(*new RTCSessionDescription(description->type(), description->sdp()));
+    ASSERT(descriptor);
+    return adoptRef(*new RTCSessionDescription(descriptor));
 }
 
 Ref<RTCSessionDescription> RTCSessionDescription::create(const String& type, const String& sdp)
 {
-    return adoptRef(*new RTCSessionDescription(type, sdp));
+    return adoptRef(*new RTCSessionDescription(RTCSessionDescriptionDescriptor::create(type, sdp)));
 }
 
-RTCSessionDescription::RTCSessionDescription(const String& type, const String& sdp)
-    : m_type(type)
-    , m_sdp(sdp)
+RTCSessionDescription::RTCSessionDescription(RefPtr<RTCSessionDescriptionDescriptor> descriptor)
+    : m_descriptor(descriptor)
 {
 }
 
@@ -85,25 +87,30 @@ RTCSessionDescription::~RTCSessionDescription()
 
 const String& RTCSessionDescription::type() const
 {
-    return m_type;
+    return m_descriptor->type();
 }
 
 void RTCSessionDescription::setType(const String& type, ExceptionCode& ec)
 {
     if (verifyType(type))
-        m_type = type;
+        m_descriptor->setType(type);
     else
         ec = TYPE_MISMATCH_ERR;
 }
 
 const String& RTCSessionDescription::sdp() const
 {
-    return m_sdp;
+    return m_descriptor->sdp();
 }
 
 void RTCSessionDescription::setSdp(const String& sdp)
 {
-    m_sdp = sdp;
+    m_descriptor->setSdp(sdp);
+}
+
+RTCSessionDescriptionDescriptor* RTCSessionDescription::descriptor()
+{
+    return m_descriptor.get();
 }
 
 } // namespace WebCore

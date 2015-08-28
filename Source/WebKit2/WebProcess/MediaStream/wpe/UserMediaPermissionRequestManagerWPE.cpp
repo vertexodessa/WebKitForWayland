@@ -50,14 +50,32 @@ UserMediaPermissionRequestManager::UserMediaPermissionRequestManager(WebPage& pa
 
 void UserMediaPermissionRequestManager::startRequest(UserMediaRequest& request)
 {
-    // The user permission request dialog is not supported by WPE, so 
-    // there for check a environment variable to contol the grant             
-    if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION"))
-    {
-        request.userMediaAccessGranted();
+    /* 
+     * FIX_ME:
+     * The user permission request dialog is not supported by WPE, so 
+     * there for check some environment variables to contol the grant
+     * process.
+     */
+    String deviceUIDAudio = emptyString();
+    String deviceUIDVideo = emptyString();
+    
+    if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION")){
+		/*
+		 *  FIX_ME: Temporary solution to hint about preferred device names.
+		 */ 
+        char* deviceUID = getenv("WPE_AUDIO_SOURCE_NAME");
+        if (deviceUID) {
+             deviceUIDAudio = String(deviceUID);
+        }
+        
+        deviceUID = getenv("WPE_VIDEO_SOURCE_NAME");
+        if (deviceUID) {
+            deviceUIDVideo = String(deviceUID);
+		}
+        
+        request.userMediaAccessGranted(deviceUIDVideo, deviceUIDAudio);
     } 
-    else 
-    {
+    else {
         request.userMediaAccessDenied();
     } 
 }
@@ -68,7 +86,7 @@ void UserMediaPermissionRequestManager::cancelRequest(UserMediaRequest& request)
     if (!requestID)
         return;
     m_idToRequestMap.remove(requestID);
-}
+} 
 
 void UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(uint64_t userMediaID, bool allowed, const String& deviceUIDVideo, const String& deviceUIDAudio)
 {

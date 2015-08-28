@@ -42,11 +42,12 @@
 namespace WebCore {
 
 class Dictionary;
+class RTCSessionDescriptionDescriptor;
 
 class RTCSessionDescription : public RefCounted<RTCSessionDescription>, public ScriptWrappable {
 public:
     static RefPtr<RTCSessionDescription> create(const Dictionary&, ExceptionCode&);
-    static Ref<RTCSessionDescription> create(const RTCSessionDescription*);
+    static RefPtr<RTCSessionDescription> create(RefPtr<RTCSessionDescriptionDescriptor>);
     static Ref<RTCSessionDescription> create(const String& type, const String& sdp);
     virtual ~RTCSessionDescription();
 
@@ -56,11 +57,13 @@ public:
     const String& sdp() const;
     void setSdp(const String&);
 
+    RTCSessionDescriptionDescriptor* descriptor();
+
 private:
+    explicit RTCSessionDescription(RefPtr<RTCSessionDescriptionDescriptor>);
     explicit RTCSessionDescription(const String& type, const String& sdp);
 
-    String m_type;
-    String m_sdp;
+    RefPtr<RTCSessionDescriptionDescriptor> m_descriptor;
 };
 
 } // namespace WebCore

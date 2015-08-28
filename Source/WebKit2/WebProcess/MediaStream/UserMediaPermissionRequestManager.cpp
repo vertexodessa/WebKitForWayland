@@ -74,7 +74,7 @@ void UserMediaPermissionRequestManager::cancelRequest(UserMediaRequest& request)
     m_idToRequestMap.remove(requestID);
 }
 
-void UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(uint64_t requestID, bool allowed)
+void UserMediaPermissionRequestManager::didReceiveUserMediaPermissionDecision(uint64_t requestID, bool allowed, const String& deviceUIDVideo, const String& deviceUIDAudio)
 {
     RefPtr<UserMediaRequest> request = m_idToRequestMap.take(requestID);
     if (!request)
