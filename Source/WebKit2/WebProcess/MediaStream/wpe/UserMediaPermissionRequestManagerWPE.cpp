@@ -61,18 +61,18 @@ void UserMediaPermissionRequestManager::startRequest(UserMediaRequest& request)
     
     if (g_getenv("WPE_WEBRTC_GRANT_PERMISSION")){
 		/*
-		 *  FIX_ME: Temporary solution to hint about preferred device names.
+		 *  FIX_ME: Temporary solution. 
 		 */ 
-        char* deviceUID = getenv("WPE_AUDIO_SOURCE_NAME");
+        char* deviceUID = getenv("WEBKIT_AUDIO_SOURCE_NAME");
         if (deviceUID) {
              deviceUIDAudio = String(deviceUID);
         }
         
-        deviceUID = getenv("WPE_VIDEO_SOURCE_NAME");
+        deviceUID = getenv("WEBKIT_VIDEO_SOURCE_NAME");
         if (deviceUID) {
             deviceUIDVideo = String(deviceUID);
 		}
-        
+     
         request.userMediaAccessGranted(deviceUIDVideo, deviceUIDAudio);
     } 
     else {
