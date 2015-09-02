@@ -28,52 +28,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MediaEndpoint_h
-#define MediaEndpoint_h
+#include "config.h"
 
 #if ENABLE(MEDIA_STREAM)
-
-// #include "RTCConfigurationPrivate.h"
-#include "MediaEndpointInit.h"
-#include <wtf/text/WTFString.h>
+#include "PeerConnectionBackend.h"
 
 namespace WebCore {
 
-class IceCandidate;
-class MediaEndpoint;
-class MediaEndpointConfiguration;
-class RealtimeMediaSource;
+static std::unique_ptr<PeerConnectionBackend> createPeerConnectionBackend(PeerConnectionBackendClient*)
+{
+    return nullptr;
+}
 
-class MediaEndpointClient {
-public:
-    virtual void gotDtlsCertificate(unsigned mdescIndex, const String& certificate) = 0;
-    virtual void gotIceCandidate(unsigned mdescIndex, RefPtr<IceCandidate>&&) = 0;
-    virtual void doneGatheringCandidates(unsigned mdescIndex) = 0;
-    virtual void gotRemoteSource(unsigned mdescIndex, RefPtr<RealtimeMediaSource>&&) = 0;
-
-    virtual ~MediaEndpointClient() { }
-};
-
-typedef std::unique_ptr<MediaEndpoint> (*CreateMediaEndpoint)(MediaEndpointClient*);
-
-class MediaEndpoint {
-public:
-    WEBCORE_EXPORT static CreateMediaEndpoint create;
-    virtual ~MediaEndpoint() { }
-
-    // FIMXE: look over naming
-    virtual void setConfiguration(RefPtr<MediaEndpointInit>&&) = 0;
-
-    virtual void prepareToReceive(MediaEndpointConfiguration*, bool isInitiator) = 0;
-    virtual void prepareToSend(MediaEndpointConfiguration*, bool isInitiator) = 0;
-
-    virtual void addRemoteCandidate(IceCandidate&, unsigned mdescIndex, const String& ufrag, const String& password) = 0;
-
-    virtual void stop() = 0;
-};
+CreatePeerConnectionBackend PeerConnectionBackend::create = createPeerConnectionBackend;
 
 } // namespace WebCore
 
 #endif // ENABLE(MEDIA_STREAM)
-
-#endif // MediaEndpoint_h

@@ -28,52 +28,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MediaEndpoint_h
-#define MediaEndpoint_h
+#ifndef PeerConnectionStates_h
+#define PeerConnectionStates_h
 
 #if ENABLE(MEDIA_STREAM)
 
-// #include "RTCConfigurationPrivate.h"
-#include "MediaEndpointInit.h"
-#include <wtf/text/WTFString.h>
-
 namespace WebCore {
 
-class IceCandidate;
-class MediaEndpoint;
-class MediaEndpointConfiguration;
-class RealtimeMediaSource;
+namespace PeerConnectionStates {
 
-class MediaEndpointClient {
-public:
-    virtual void gotDtlsCertificate(unsigned mdescIndex, const String& certificate) = 0;
-    virtual void gotIceCandidate(unsigned mdescIndex, RefPtr<IceCandidate>&&) = 0;
-    virtual void doneGatheringCandidates(unsigned mdescIndex) = 0;
-    virtual void gotRemoteSource(unsigned mdescIndex, RefPtr<RealtimeMediaSource>&&) = 0;
-
-    virtual ~MediaEndpointClient() { }
+enum class SignalingState {
+    Stable = 1,
+    HaveLocalOffer = 2,
+    HaveRemoteOffer = 3,
+    HaveLocalPrAnswer = 4,
+    HaveRemotePrAnswer = 5,
+    Closed = 6,
+    Invalid = 7
 };
 
-typedef std::unique_ptr<MediaEndpoint> (*CreateMediaEndpoint)(MediaEndpointClient*);
-
-class MediaEndpoint {
-public:
-    WEBCORE_EXPORT static CreateMediaEndpoint create;
-    virtual ~MediaEndpoint() { }
-
-    // FIMXE: look over naming
-    virtual void setConfiguration(RefPtr<MediaEndpointInit>&&) = 0;
-
-    virtual void prepareToReceive(MediaEndpointConfiguration*, bool isInitiator) = 0;
-    virtual void prepareToSend(MediaEndpointConfiguration*, bool isInitiator) = 0;
-
-    virtual void addRemoteCandidate(IceCandidate&, unsigned mdescIndex, const String& ufrag, const String& password) = 0;
-
-    virtual void stop() = 0;
+enum class IceConnectionState {
+    New = 1,
+    Checking = 2,
+    Connected = 3,
+    Completed = 4,
+    Failed = 5,
+    Disconnected = 6,
+    Closed = 7
 };
+
+enum class IceGatheringState {
+    New = 1,
+    Gathering = 2,
+    Complete = 3
+};
+
+}
 
 } // namespace WebCore
 
 #endif // ENABLE(MEDIA_STREAM)
 
-#endif // MediaEndpoint_h
+#endif // PeerConnectionStates_h
