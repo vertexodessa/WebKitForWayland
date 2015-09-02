@@ -110,7 +110,6 @@ struct _WebKitWebSrcPrivate {
     _WebKitWebSrcPrivate()
         : pendingStart(false)
         , startSource("[WebKit] webKitWebSrcStart")
-        , stopSource("[WebKit] webKitWebSrcStop")
         , needDataSource("[WebKit] webKitWebSrcNeedDataMainCb")
         , enoughDataSource("[WebKit] webKitWebSrcEnoughDataMainCb")
         , seekSource("[WebKit] webKitWebSrcSeekMainCb")
@@ -123,6 +122,7 @@ struct _WebKitWebSrcPrivate {
     bool keepAlive;
     GUniquePtr<GstStructure> extraHeaders;
     bool compress;
+    GUniquePtr<gchar> httpMethod;
 
     WebCore::MediaPlayer* player;
 
@@ -140,7 +140,6 @@ struct _WebKitWebSrcPrivate {
 
     gboolean pendingStart;
     GMainLoopSource::Simple startSource;
-    GMainLoopSource::Simple stopSource;
     GMainLoopSource::Simple needDataSource;
     GMainLoopSource::Simple enoughDataSource;
     GMainLoopSource::Simple seekSource;
@@ -162,7 +161,8 @@ enum {
     PROP_LOCATION,
     PROP_KEEP_ALIVE,
     PROP_EXTRA_HEADERS,
-    PROP_COMPRESS
+    PROP_COMPRESS,
+    PROP_METHOD
 };
 
 static GstStaticPadTemplate srcTemplate = GST_STATIC_PAD_TEMPLATE("src",
@@ -272,6 +272,10 @@ static void webkit_web_src_class_init(WebKitWebSrcClass* klass)
         g_param_spec_boolean("compress", "Compress", "Allow compressed content encodings",
             FALSE, static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
 
+    g_object_class_install_property(oklass, PROP_METHOD,
+        g_param_spec_string("method", "method", "The HTTP method to use (default: GET)",
+            nullptr, static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS)));
+
     eklass->change_state = webKitWebSrcChangeState;
 
     g_type_class_add_private(klass, sizeof(WebKitWebSrcPrivate));
@@ -368,6 +372,9 @@ static void webKitWebSrcSetProperty(GObject* object, guint propID, const GValue*
     case PROP_COMPRESS:
         src->priv->compress = g_value_get_boolean(value);
         break;
+    case PROP_METHOD:
+        src->priv->httpMethod.reset(g_value_dup_string(value));
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, propID, pspec);
         break;
@@ -405,6 +412,9 @@ static void webKitWebSrcGetProperty(GObject* object, guint propID, GValue* value
     case PROP_COMPRESS:
         g_value_set_boolean(value, priv->compress);
         break;
+    case PROP_METHOD:
+        g_value_set_string(value, priv->httpMethod.get());
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, propID, pspec);
         break;
@@ -417,7 +427,6 @@ static void removeTimeoutSources(WebKitWebSrc* src)
 
     if (!priv->pendingStart)
         priv->startSource.cancel();
-    priv->stopSource.cancel();
     priv->needDataSource.cancel();
     priv->enoughDataSource.cancel();
     priv->seekSource.cancel();
@@ -433,13 +442,24 @@ static void webKitWebSrcStop(WebKitWebSrc* src)
 
     removeTimeoutSources(src);
 
-    if (priv->client) {
-        delete priv->client;
-        priv->client = 0;
-    }
+    {
+        ResourceHandleStreamingClient* client = nullptr;
+        if (priv->client) {
+            client = priv->client;
+            priv->client = nullptr;
+        }
 
-    if (!priv->keepAlive)
-        priv->loader = nullptr;
+        PlatformMediaResourceLoader* loader = nullptr;
+        if (!priv->keepAlive && priv->loader)
+            loader = priv->loader.leakRef();
+
+        if (client || loader)
+            callOnMainThread([client, loader] {
+                delete client;
+
+                RefPtr<PlatformMediaResourceLoader> loaderRef = adoptRef(loader);
+            });
+    }
 
     if (priv->buffer) {
         unmapGstBuffer(priv->buffer.get());
@@ -551,6 +571,7 @@ static void webKitWebSrcStart(WebKitWebSrc* src)
 
     ASSERT(!priv->client);
 
+    GST_DEBUG_OBJECT(src, "Fetching %s", priv->uri);
     URL url = URL(URL(), priv->uri);
 
     ResourceRequest request(url);
@@ -561,6 +582,9 @@ static void webKitWebSrcStart(WebKitWebSrc* src)
 
     if (priv->player)
         request.setHTTPReferrer(priv->player->referrer());
+
+    if (priv->httpMethod.get())
+        request.setHTTPMethod(priv->httpMethod.get());
 
 #if USE(SOUP)
     // By default, HTTP Accept-Encoding is disabled here as we don't
@@ -657,9 +681,8 @@ static GstStateChangeReturn webKitWebSrcChangeState(GstElement* element, GstStat
     {
         GST_DEBUG_OBJECT(src, "READY->PAUSED");
         priv->pendingStart = TRUE;
-        locker.unlock();
         GstObjectRef protector(GST_OBJECT(src));
-        priv->startSource.scheduleAndWaitCompletion(std::chrono::milliseconds(0), [protector] { webKitWebSrcStart(WEBKIT_WEB_SRC(protector.get())); });
+        priv->startSource.schedule(std::chrono::milliseconds(0), [protector] { webKitWebSrcStart(WEBKIT_WEB_SRC(protector.get())); });
         break;
     }
     case GST_STATE_CHANGE_PAUSED_TO_READY:
@@ -667,8 +690,7 @@ static GstStateChangeReturn webKitWebSrcChangeState(GstElement* element, GstStat
         GST_DEBUG_OBJECT(src, "PAUSED->READY");
         priv->pendingStart = FALSE;
         locker.unlock();
-        GstObjectRef protector(GST_OBJECT(src));
-        priv->stopSource.scheduleAndWaitCompletion(std::chrono::milliseconds(0), [protector] { webKitWebSrcStop(WEBKIT_WEB_SRC(protector.get())); });
+        webKitWebSrcStop(src);
         break;
     }
     default:
@@ -741,7 +763,7 @@ static GstURIType webKitWebSrcUriGetType(GType)
 
 const gchar* const* webKitWebSrcGetProtocols(GType)
 {
-    static const char* protocols[] = {"http", "https", "blob", 0 };
+    static const char* protocols[] = {"webkit+http", "webkit+https", "blob", 0 };
     return protocols;
 }
 
@@ -774,6 +796,8 @@ static gboolean webKitWebSrcSetUri(GstURIHandler* handler, const gchar* uri, GEr
         return TRUE;
 
     URL url(URL(), uri);
+    ASSERT(url.protocol().substring(0, 7) == "webkit+");
+    url.setProtocol(url.protocol().substring(7));
     if (!urlHasSupportedProtocol(url)) {
         g_set_error(error, GST_URI_ERROR, GST_URI_ERROR_BAD_URI, "Invalid URI '%s'", uri);
         return FALSE;
