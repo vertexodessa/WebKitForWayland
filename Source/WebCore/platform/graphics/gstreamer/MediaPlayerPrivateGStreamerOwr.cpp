@@ -197,7 +197,11 @@ bool MediaPlayerPrivateGStreamerOwr::internalLoad()
         } else if (track->type() == RealtimeMediaSource::Video) {
             if (m_videoSource && (m_videoSource.get() == source))
                 g_object_set(m_videoRenderer, "disabled", FALSE, nullptr);
-
+                //
+                // FIXME: Fixate video resolution to HD for now.
+                // 
+                g_object_set(m_videoRenderer, "width", 1280, "height", 720, "max-framerate", 30.0, NULL);
+			
             owr_media_renderer_set_source(OWR_MEDIA_RENDERER(m_videoRenderer), mediaSource);
             m_videoSource = source;
             source->addObserver(this);
