@@ -310,6 +310,15 @@ MediaPlayerPrivateGStreamer::~MediaPlayerPrivateGStreamer()
     }
 #endif
 
+    // Ensure that neither this class nor the base class hold references to any sample
+    // as in the change to NULL the decoder needs to be able to free the buffers
+    clearSamples();
+
+    if (m_videoSink) {
+        GRefPtr<GstPad> videoSinkPad = adoptGRef(gst_element_get_static_pad(m_videoSink.get(), "sink"));
+        g_signal_handlers_disconnect_by_func(videoSinkPad.get(), reinterpret_cast<gpointer>(mediaPlayerPrivateVideoSinkCapsChangedCallback), this);
+    }
+
     if (m_pipeline) {
         GRefPtr<GstBus> bus = adoptGRef(gst_pipeline_get_bus(GST_PIPELINE(m_pipeline.get())));
         ASSERT(bus);
@@ -328,10 +337,6 @@ MediaPlayerPrivateGStreamer::~MediaPlayerPrivateGStreamer()
         gst_element_set_state(m_pipeline.get(), GST_STATE_NULL);
     }
 
-    if (m_videoSink) {
-        GRefPtr<GstPad> videoSinkPad = adoptGRef(gst_element_get_static_pad(m_videoSink.get(), "sink"));
-        g_signal_handlers_disconnect_by_func(videoSinkPad.get(), reinterpret_cast<gpointer>(mediaPlayerPrivateVideoSinkCapsChangedCallback), this);
-    }
 
     // Cancel pending mediaPlayerPrivateNotifyDurationChanged() delayed calls
     m_pendingAsyncOperationsLock.lock();
@@ -1343,14 +1348,20 @@ gboolean MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
             }
         }
 #if ENABLE(VIDEO_TRACK) && USE(GSTREAMER_MPEGTS)
-        else {
-            GstMpegtsSection* section = gst_message_parse_mpegts_section(message);
-            if (section) {
-                processMpegTsSection(section);
-                gst_mpegts_section_unref(section);
-            }
+        else if (GstMpegtsSection* section = gst_message_parse_mpegts_section(message)) {
+            processMpegTsSection(section);
+            gst_mpegts_section_unref(section);
         }
 #endif
+        else {
+            const GstStructure* structure = gst_message_get_structure(message);
+            if (gst_structure_has_name(structure, "adaptive-streaming-statistics") && gst_structure_has_field(structure, "fragment-download-time")) {
+                GUniqueOutPtr<gchar> uri;
+                GstClockTime time;
+                gst_structure_get(structure, "uri", G_TYPE_STRING, &uri.outPtr(), "fragment-download-time", GST_TYPE_CLOCK_TIME, &time, nullptr);
+                INFO_MEDIA_MESSAGE("Fragment %s download time %" GST_TIME_FORMAT, uri.get(), GST_TIME_ARGS(time));
+            }
+        }
         break;
 #if ENABLE(VIDEO_TRACK)
     case GST_MESSAGE_TOC:
@@ -2205,6 +2216,9 @@ MediaPlayer::MediaKeyException MediaPlayerPrivateGStreamer::addKey(const String&
         RefPtr<Uint8Array> nextMessage;
         unsigned short errorCode;
         unsigned long systemCode;
+
+        if (!m_dxdrmSession)
+            return MediaPlayer::InvalidPlayerState;
 
         bool result = m_dxdrmSession->dxdrmProcessKey(key.get(), nextMessage, errorCode, systemCode);
         if (errorCode || !result) {

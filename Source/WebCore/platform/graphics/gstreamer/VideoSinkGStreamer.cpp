@@ -118,6 +118,20 @@ struct _WebKitVideoSinkPrivate {
             gst_caps_unref(currentCaps);
         currentCaps = nullptr;
 
+#if USE(OPENGL_ES_2) && GST_CHECK_VERSION(1, 3, 0)
+        if (context) {
+            gst_gl_context_destroy(context);
+            gst_object_unref(context);
+        }
+        if (other_context) {
+            gst_gl_context_destroy(other_context);
+            gst_object_unref(context);
+        }
+
+        display = nullptr;
+        context = nullptr;
+        other_context = nullptr;
+#endif
         g_mutex_clear(&sampleMutex);
         g_cond_clear(&dataCondition);
     }
@@ -324,6 +338,11 @@ static void unlockSampleMutex(WebKitVideoSinkPrivate* priv)
         priv->sample = 0;
     }
 
+    if (priv->previousSample) {
+        gst_sample_unref(priv->previousSample);
+        priv->previousSample = nullptr;
+    }
+
     priv->unlocked = true;
 
     g_cond_signal(&priv->dataCondition);
@@ -466,9 +485,7 @@ static gboolean webkitVideoSinkQuery(GstBaseSink* baseSink, GstQuery* query)
     {
 #if USE(OPENGL_ES_2) && GST_CHECK_VERSION(1, 3, 0)
         {
-#if !USE(COORDINATED_GRAPHICS_THREADED)
             WTF::GMutexLocker<GMutex> lock(priv->sampleMutex);
-#endif
             if (priv->sample)
                 gst_sample_unref(priv->sample);
             priv->sample = nullptr;

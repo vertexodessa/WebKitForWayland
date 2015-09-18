@@ -190,15 +190,6 @@ MediaPlayerPrivateGStreamerBase::MediaPlayerPrivateGStreamerBase(MediaPlayer* pl
 
 MediaPlayerPrivateGStreamerBase::~MediaPlayerPrivateGStreamerBase()
 {
-    if (m_repaintHandler) {
-        g_signal_handler_disconnect(m_videoSink.get(), m_repaintHandler);
-        m_repaintHandler = 0;
-    }
-
-    if (m_drainHandler)
-        g_signal_handler_disconnect(m_videoSink.get(), m_drainHandler);
-    m_drainHandler = 0;
-
     g_mutex_clear(&m_sampleMutex);
 
     m_player = 0;
@@ -245,6 +236,26 @@ void MediaPlayerPrivateGStreamerBase::setPipeline(GstElement* pipeline)
     GRefPtr<GstBus> bus = adoptGRef(gst_pipeline_get_bus(GST_PIPELINE(m_pipeline.get())));
     gst_bus_enable_sync_message_emission(bus.get());
     g_signal_connect(bus.get(), "sync-message::need-context", G_CALLBACK(mediaPlayerPrivateNeedContextMessageCallback), this);
+}
+
+void MediaPlayerPrivateGStreamerBase::clearSamples()
+{
+#if USE(COORDINATED_GRAPHICS_THREADED)
+    // Disconnect handlers to ensure that new samples aren't going to arrive
+    // before the pipeline destruction
+    if (m_repaintHandler) {
+        g_signal_handler_disconnect(m_videoSink.get(), m_repaintHandler);
+        m_repaintHandler = 0;
+    }
+
+    if (m_drainHandler) {
+        g_signal_handler_disconnect(m_videoSink.get(), m_drainHandler);
+        m_drainHandler = 0;
+    }
+#endif
+
+    WTF::GMutexLocker<GMutex> lock(m_sampleMutex);
+    m_sample = nullptr;
 }
 
 void MediaPlayerPrivateGStreamerBase::handleNeedContextMessage(GstMessage* message)
@@ -672,7 +683,7 @@ void MediaPlayerPrivateGStreamerBase::updateOnCompositorThread()
 #endif
         }
 
-        if (!caps)
+        if (!caps && m_sample)
             caps = gst_sample_get_caps(m_sample.get());
 
         if (UNLIKELY(!caps)) {
