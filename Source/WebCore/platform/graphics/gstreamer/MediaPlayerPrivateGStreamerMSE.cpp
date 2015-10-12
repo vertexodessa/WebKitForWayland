@@ -277,6 +277,52 @@ static gboolean dumpPipeline(gpointer data)
     return G_SOURCE_REMOVE;
 }
 
+// DEBUG
+static void dumpDataToDisk(const unsigned char* data, unsigned length, SourceBufferPrivateGStreamer* sbPrivate)
+{
+    static const int N = 2;
+    static void *sourceBuffers[N] = { 0 };
+    static int counts[N] = { 0 };
+
+    int i;
+    // Locate our own slot or a free one
+    for (i = 0; i < N; i++) {
+        if (sourceBuffers[i] == sbPrivate || sourceBuffers[i] == 0) break;
+    }
+
+    // Slots exhausted, reset the whole array
+    if (i == N) {
+        for (i = 0; i < N; i++) {
+            sourceBuffers[i] = 0;
+            counts[i] = 0;
+        }
+        i = 0;
+    }
+
+    // Remember sourceBuffer if our slot is initialized for the first time
+    if (sourceBuffers[i] == 0)
+        sourceBuffers[i] = sbPrivate;
+
+    counts[i]++;
+
+    String fileName = String::format("/tmp/append-%d-%03d.mp4", i, counts[i]);
+
+    const char* cFileName = fileName.utf8().data();
+    LOG_MEDIA_MESSAGE("fileName=%s", cFileName);
+
+    FILE* f = fopen(cFileName, "w");
+    if (!f) {
+        LOG_MEDIA_MESSAGE("ERROR creating dump file");
+        return;
+    }
+
+    if (!fwrite(data, sizeof(unsigned char), length, f)) {
+        LOG_MEDIA_MESSAGE("ERROR writing to dump file");
+    }
+
+    fclose(f);
+}
+
 void MediaPlayerPrivateGStreamerMSE::notifySeekNeedsData(const MediaTime& seekTime)
 {
     // Reenqueue samples needed to resume playback in the new position
@@ -2039,6 +2085,9 @@ bool MediaSourceClientGStreamerMSE::append(PassRefPtr<SourceBufferPrivateGStream
     GstBuffer* buffer = gst_buffer_new_and_alloc(length);
     gst_buffer_fill(buffer, 0, data, length);
     ap->setAppendStage(AppendPipeline::Ongoing);
+
+    // DEBUG
+    dumpDataToDisk(data, length, sourceBufferPrivate.get());
 
     GstFlowReturn ret = gst_app_src_push_buffer(GST_APP_SRC(ap->appsrc()), buffer);
     return (ret == GST_FLOW_OK);
