@@ -800,8 +800,19 @@ PlaybackPipeline::PlaybackPipeline()
 {
 }
 
+gboolean dumpAfter60sec(gpointer user_data)
+{
+    LOG_MEDIA_MESSAGE("dumpAfter60sec: Dumping");
+    PlaybackPipeline* playbackPipeline = static_cast<PlaybackPipeline*>(user_data);
+    GstElement* pipeline = playbackPipeline->pipeline();
+    GST_DEBUG_BIN_TO_DOT_FILE_WITH_TS(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, "dump-after-60-sec");
+    return G_SOURCE_REMOVE;
+}
+
 PlaybackPipeline::~PlaybackPipeline()
 {
+    LOG_MEDIA_MESSAGE("Deinstalling dumpAfter60sec timer");
+    g_source_remove_by_user_data(this);
 }
 
 void PlaybackPipeline::setWebKitMediaSrc(WebKitMediaSrc* webKitMediaSrc)
@@ -811,6 +822,9 @@ void PlaybackPipeline::setWebKitMediaSrc(WebKitMediaSrc* webKitMediaSrc)
         gst_object_ref(webKitMediaSrc);
 
     m_webKitMediaSrc = adoptGRef(static_cast<WebKitMediaSrc*>(webKitMediaSrc));
+
+    LOG_MEDIA_MESSAGE("Installing dumpAfter60sec timer");
+    g_timeout_add_seconds(60, dumpAfter60sec, this);
 }
 
 WebKitMediaSrc* PlaybackPipeline::webKitMediaSrc()
