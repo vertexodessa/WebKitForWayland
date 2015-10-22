@@ -699,11 +699,14 @@ static void app_src_need_data (GstAppSrc *src, guint length, gpointer user_data)
     int numAppSrcs = g_list_length(webKitMediaSrc->priv->streams);
     Stream* appSrcStream = getStreamByAppSrc(webKitMediaSrc, GST_ELEMENT(src));
 
+    if (webKitMediaSrc->priv->appSrcSeekDataCount > 0 && appSrcStream && !appSrcStream->appSrcNeedDataFlag) {
+        ++webKitMediaSrc->priv->appSrcNeedDataCount;
+        appSrcStream->appSrcNeedDataFlag = true;
+    }
+
+    LOG_MEDIA_MESSAGE("app_src_need_data(): %s seekDataCount=%d, needDataCount=%d", gst_element_get_name(GST_ELEMENT(src)), webKitMediaSrc->priv->appSrcSeekDataCount, webKitMediaSrc->priv->appSrcNeedDataCount);
+
     if (webKitMediaSrc->priv->appSrcSeekDataCount > 0) {
-        if (appSrcStream && !appSrcStream->appSrcNeedDataFlag) {
-            ++webKitMediaSrc->priv->appSrcNeedDataCount;
-            appSrcStream->appSrcNeedDataFlag = true;
-        }
         if (webKitMediaSrc->priv->appSrcSeekDataCount == numAppSrcs && webKitMediaSrc->priv->appSrcNeedDataCount == numAppSrcs) {
             LOG_MEDIA_MESSAGE("All need_datas completed");
             allAppSrcsNeedDataAfterSeek = true;
@@ -731,9 +734,12 @@ static void app_src_need_data (GstAppSrc *src, guint length, gpointer user_data)
                 g_timeout_add(0, GSourceFunc(seekNeedsDataMainThread), user_data);
             break;
         case Nothing:
+            LOG_MEDIA_MESSAGE("app_src_need_data(): nextAction is Nothing");
             break;
         }
     }
+
+    LOG_MEDIA_MESSAGE("app_src_need_data(): end");
 }
 
 static void app_src_enough_data (GstAppSrc *src, gpointer user_data)
@@ -744,7 +750,6 @@ static void app_src_enough_data (GstAppSrc *src, gpointer user_data)
 
 static gboolean app_src_seek_data (GstAppSrc *src, guint64 offset, gpointer user_data)
 {
-    UNUSED_PARAM(src);
     UNUSED_PARAM(offset);
 
     ASSERT(WTF::isMainThread());
@@ -755,6 +760,9 @@ static gboolean app_src_seek_data (GstAppSrc *src, guint64 offset, gpointer user
 
     GST_OBJECT_LOCK(webKitMediaSrc);
     webKitMediaSrc->priv->appSrcSeekDataCount++;
+
+    LOG_MEDIA_MESSAGE("app_src_seek_data(): %s seekDataCount=%d, needDataCount=%d", gst_element_get_name(GST_ELEMENT(src)), webKitMediaSrc->priv->appSrcSeekDataCount, webKitMediaSrc->priv->appSrcNeedDataCount);
+
     GST_OBJECT_UNLOCK(webKitMediaSrc);
 
     return TRUE;
@@ -1305,6 +1313,9 @@ void webkit_media_src_set_mediaplayerprivate(WebKitMediaSrc* src, WebCore::Media
 void webkit_media_src_prepare_seek(WebKitMediaSrc* src, const MediaTime& time)
 {
     GST_OBJECT_LOCK(src);
+
+    LOG_MEDIA_MESSAGE("webkit_media_src_prepare_seek(): seekTime=%f, resetting seekDataCount and needDataCount", time.toFloat());
+
     src->priv->seekTime = time;
     src->priv->appSrcSeekDataCount = 0;
     src->priv->appSrcNeedDataCount = 0;

@@ -186,6 +186,7 @@ void MediaSource::seekToTime(const MediaTime& time)
     // 2.4.3 Seeking
     // https://dvcs.w3.org/hg/html-media/raw-file/tip/media-source/media-source.html#mediasource-seeking
 
+    LOG(MediaSource, "MediaSource::seekToTime(): Setting m_pendingSeekTime = %f", time.toFloat());
     m_pendingSeekTime = time;
 
     LOG(MediaSource, "MediaSource::seekToTime(%p, %f): %lu active source buffers", this, time.toDouble(), m_activeSourceBuffers->length());
@@ -218,6 +219,8 @@ void MediaSource::seekToTime(const MediaTime& time)
 
 void MediaSource::completeSeek()
 {
+    LOG(MediaSource, "MediaSource::completeSeek(): m_pendingSeekTime %f", m_pendingSeekTime.toFloat());
+
     // 2.4.3 Seeking, ctd.
     // https://dvcs.w3.org/hg/html-media/raw-file/tip/media-source/media-source.html#mediasource-seeking
 
@@ -239,6 +242,8 @@ void MediaSource::completeSeek()
 
 void MediaSource::monitorSourceBuffers()
 {
+    LOG(MediaSource, "MediaSource::monitorSourceBuffers()");
+
     // 2.4.4 SourceBuffer Monitoring
     // https://dvcs.w3.org/hg/html-media/raw-file/default/media-source/media-source.html#buffer-monitoring
 
@@ -258,6 +263,7 @@ void MediaSource::monitorSourceBuffers()
         // 1. Set the HTMLMediaElement.readyState attribute to HAVE_METADATA.
         // 2. If this is the first transition to HAVE_METADATA, then queue a task to fire a simple event
         // named loadedmetadata at the media element.
+        LOG(MediaSource, "MediaSource::monitorSourceBuffers(): HaveMetadata");
         m_private->setReadyState(MediaPlayer::HaveMetadata);
 
         // 3. Abort these steps.
@@ -272,6 +278,7 @@ void MediaSource::monitorSourceBuffers()
         // 1. Set the HTMLMediaElement.readyState attribute to HAVE_ENOUGH_DATA.
         // 2. Queue a task to fire a simple event named canplaythrough at the media element.
         // 3. Playback may resume at this point if it was previously suspended by a transition to HAVE_CURRENT_DATA.
+        LOG(MediaSource, "MediaSource::monitorSourceBuffers(): HaveEnoughData, m_pendingSeekTime %s", m_pendingSeekTime.isValid()?"valid":"invalid");
         m_private->setReadyState(MediaPlayer::HaveEnoughData);
 
         if (m_pendingSeekTime.isValid())
@@ -289,6 +296,7 @@ void MediaSource::monitorSourceBuffers()
         // 1. Set the HTMLMediaElement.readyState attribute to HAVE_FUTURE_DATA.
         // 2. If the previous value of HTMLMediaElement.readyState was less than HAVE_FUTURE_DATA, then queue a task to fire a simple event named canplay at the media element.
         // 3. Playback may resume at this point if it was previously suspended by a transition to HAVE_CURRENT_DATA.
+        LOG(MediaSource, "MediaSource::monitorSourceBuffers(): HaveFutureData, m_pendingSeekTime %s", m_pendingSeekTime.isValid()?"valid":"invalid");
         m_private->setReadyState(MediaPlayer::HaveFutureData);
 
         if (m_pendingSeekTime.isValid())
@@ -308,6 +316,8 @@ void MediaSource::monitorSourceBuffers()
     // event named loadeddata at the media element.
     // 3. Playback is suspended at this point since the media element doesn't have enough data to
     // advance the media timeline.
+    LOG(MediaSource, "MediaSource::monitorSourceBuffers(): HaveCurrentData, m_pendingSeekTime %s", m_pendingSeekTime.isValid()?"valid":"invalid");
+
     m_private->setReadyState(MediaPlayer::HaveCurrentData);
 
     if (m_pendingSeekTime.isValid())

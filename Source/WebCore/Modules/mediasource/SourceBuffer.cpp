@@ -1711,8 +1711,11 @@ void SourceBuffer::provideMediaData(TrackBuffer& trackBuffer, AtomicString track
     unsigned enqueuedSamples = 0;
 #endif
 
+    LOG(MediaSource, "provideMediaData: trackID=%s, trackBuffer.decodeQueue.size=%u, ", trackID.string().utf8().data(), static_cast<unsigned int>(trackBuffer.decodeQueue.size()));
+
     while (!trackBuffer.decodeQueue.empty()) {
         if (!m_private->isReadyForMoreSamples(trackID)) {
+            LOG(MediaSource, "provideMediaData: breaking because not ready for more samples");
             m_private->notifyClientWhenReadyForMoreSamples(trackID);
             break;
         }
@@ -1731,8 +1734,10 @@ void SourceBuffer::provideMediaData(TrackBuffer& trackBuffer, AtomicString track
         // new current time without triggering this early return.
         // FIXME(135867): Make this gap detection logic less arbitrary.
         MediaTime oneSecond(1, 1);
-        if (trackBuffer.lastEnqueuedDecodeEndTime.isValid() && sample->decodeTime() - trackBuffer.lastEnqueuedDecodeEndTime > oneSecond)
+        if (trackBuffer.lastEnqueuedDecodeEndTime.isValid() && sample->decodeTime() - trackBuffer.lastEnqueuedDecodeEndTime > oneSecond) {
+            LOG(MediaSource, "provideMediaData: breaking because sample (%f) is >1 sec away in the future from the lastEnqueuedDecodeEndTime (%f)", sample->decodeTime().toFloat(), trackBuffer.lastEnqueuedDecodeEndTime.toFloat());
             break;
+        }
 
         trackBuffer.lastEnqueuedPresentationTime = sample->presentationTime();
         trackBuffer.lastEnqueuedDecodeEndTime = sample->decodeTime() + sample->duration();
