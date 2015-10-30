@@ -61,6 +61,7 @@
 #endif
 
 #if USE(COORDINATED_GRAPHICS_THREADED)
+#include "TextureMapperPlatformLayerBuffer.h"
 #include "TextureMapperPlatformLayerProxy.h"
 #endif
 #endif
@@ -118,9 +119,7 @@ void ImageBufferData::swapBuffersIfNeeded()
 
     if (!m_compositorTexture) {
         createCompositorBuffer();
-
-        LockHolder locker(m_platformLayerProxy->mutex());
-        m_platformLayerProxy->pushNextBuffer(locker, std::make_unique<TextureMapperPlatformLayerBuffer>(m_compositorTexture, m_size, TextureMapperGL::ShouldBlend));
+        m_platformLayerProxy->pushNextBuffer(std::make_unique<TextureMapperPlatformLayerBuffer>(m_compositorTexture, m_size, TextureMapperGL::ShouldBlend));
     }
 
     // It would be great if we could just swap the buffers here as we do with webgl, but that breaks the cases
@@ -184,10 +183,6 @@ ImageBuffer::ImageBuffer(const FloatSize& size, float /* resolutionScale */, Col
     if (m_size.isEmpty())
         return;
 
-#if USE(COORDINATED_GRAPHICS_THREADED)
-    LockHolder locker(m_data.m_platformLayerProxy->mutex());
-#endif
-
 #if ENABLE(ACCELERATED_2D_CANVAS)
     if (renderingMode == Accelerated) {
         m_data.m_surface = createCairoGLSurface(size, m_data.m_texture);
@@ -195,7 +190,7 @@ ImageBuffer::ImageBuffer(const FloatSize& size, float /* resolutionScale */, Col
             renderingMode = Unaccelerated; // If allocation fails, fall back to non-accelerated path.
 #if USE(COORDINATED_GRAPHICS_THREADED)
         else
-            m_data.m_platformLayerProxy->pushNextBuffer(locker, std::make_unique<TextureMapperPlatformLayerBuffer>(m_data.m_texture, m_size, TextureMapperGL::ShouldBlend));
+            m_data.m_platformLayerProxy->pushNextBuffer(std::make_unique<TextureMapperPlatformLayerBuffer>(m_data.m_texture, m_size, TextureMapperGL::ShouldBlend));
 #endif
 
     }
@@ -496,8 +491,7 @@ String ImageBuffer::toDataURL(const String& mimeType, const double* quality, Coo
 }
 #endif
 
-#if ENABLE(ACCELERATED_2D_CANVAS)
-#if !USE(COORDINATED_GRAPHICS_THREADED)
+#if ENABLE(ACCELERATED_2D_CANVAS) && !USE(COORDINATED_GRAPHICS_THREADED)
 void ImageBufferData::paintToTextureMapper(TextureMapper* textureMapper, const FloatRect& targetRect, const TransformationMatrix& matrix, float opacity)
 {
     ASSERT(m_texture);
@@ -511,7 +505,6 @@ void ImageBufferData::paintToTextureMapper(TextureMapper* textureMapper, const F
 
     static_cast<TextureMapperGL*>(textureMapper)->drawTexture(m_texture, TextureMapperGL::ShouldBlend, m_size, targetRect, matrix, opacity);
 }
-#endif
 #endif
 
 PlatformLayer* ImageBuffer::platformLayer() const

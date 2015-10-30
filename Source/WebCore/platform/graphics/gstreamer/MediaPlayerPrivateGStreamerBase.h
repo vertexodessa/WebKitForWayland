@@ -32,12 +32,13 @@
 #include <wtf/Forward.h>
 #include <wtf/glib/GSourceWrap.h>
 
-#if USE(TEXTURE_MAPPER_GL) && !USE(COORDINATED_GRAPHICS)
+#if USE(TEXTURE_MAPPER_GL)
+#include "TextureMapperGL.h"
+#if !USE(COORDINATED_GRAPHICS)
 #include "TextureMapperPlatformLayer.h"
-#endif
-
-#if USE(COORDINATED_GRAPHICS_THREADED)
+#elif USE(COORDINATED_GRAPHICS_THREADED)
 #include "TextureMapperPlatformLayerProxy.h"
+#endif
 #endif
 
 #if USE(GSTREAMER_GL)

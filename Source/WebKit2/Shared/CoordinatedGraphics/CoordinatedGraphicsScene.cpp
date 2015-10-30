@@ -83,8 +83,10 @@ void CoordinatedGraphicsScene::paintToCurrentGLContext(const TransformationMatri
     if (!currentRootLayer)
         return;
 
+#if USE(COORDINATED_GRAPHICS_THREADED)
     for (PlatformLayerProxyMap::iterator it = m_platformLayerProxies.begin(); it != m_platformLayerProxies.end(); ++it)
         it->value->swapBuffer();
+#endif
 
     currentRootLayer->setTextureMapper(m_textureMapper.get());
     currentRootLayer->applyAnimationsRecursively();
@@ -185,9 +187,7 @@ void CoordinatedGraphicsScene::syncPlatformLayerIfNeeded(TextureMapperLayer* lay
 
     if (state.platformLayerProxy) {
         m_platformLayerProxies.set(layer, state.platformLayerProxy);
-        LockHolder locker(state.platformLayerProxy->mutex());
-        state.platformLayerProxy->setCompositor(locker, this);
-        state.platformLayerProxy->setTargetLayer(locker, layer);
+        state.platformLayerProxy->activateOnCompositingThread(this, layer);
     } else
         m_platformLayerProxies.remove(layer);
 #else
@@ -376,10 +376,8 @@ void CoordinatedGraphicsScene::deleteLayer(CoordinatedLayerID layerID)
     m_surfaceBackingStores.remove(layer.get());
 #endif
 #if USE(COORDINATED_GRAPHICS_THREADED)
-    if (auto* platformLayerProxy = m_platformLayerProxies.get(layer.get())) {
-        LockHolder locker(platformLayerProxy->mutex());
-        platformLayerProxy->setTargetLayer(locker, nullptr);
-    }
+    if (auto* platformLayerProxy = m_platformLayerProxies.get(layer.get()))
+        platformLayerProxy->invalidate();
     m_platformLayerProxies.remove(layer.get());
 #endif
 }
