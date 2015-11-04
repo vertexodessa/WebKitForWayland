@@ -817,10 +817,44 @@ gboolean dumpAfter60sec(gpointer user_data)
     return G_SOURCE_REMOVE;
 }
 
+gboolean dumpPositionEverySomeSec(gpointer user_data)
+{
+    LOG_MEDIA_MESSAGE("dumpPositionEverySomeSec: Dumping");
+    PlaybackPipeline* playbackPipeline = static_cast<PlaybackPipeline*>(user_data);
+    GstElement* pipeline = playbackPipeline->pipeline();
+
+    if (!pipeline)
+        return G_SOURCE_REMOVE;
+
+    GstElement* audiosink = gst_bin_get_by_name(GST_BIN(pipeline), "autoaudiosink1-actual-sink-omxhdmiaudio");
+    GstElement* videosink = gst_bin_get_by_name(GST_BIN(pipeline), "webkitvideosink0");
+    gint64 audioposition = GST_CLOCK_TIME_NONE;
+    gint64 videoposition = GST_CLOCK_TIME_NONE;
+
+    if (audiosink) {
+        GstQuery* query = gst_query_new_position(GST_FORMAT_TIME);
+        if (gst_element_query(audiosink, query))
+            gst_query_parse_position(query, 0, &audioposition);
+        gst_query_unref(query);
+        gst_object_unref(GST_OBJECT(audiosink));
+    }
+
+    if (videosink) {
+        GstQuery* query = gst_query_new_position(GST_FORMAT_TIME);
+        if (gst_element_query(videosink, query))
+            gst_query_parse_position(query, 0, &videoposition);
+        gst_query_unref(query);
+        gst_object_unref(GST_OBJECT(videosink));
+    }
+
+    LOG_MEDIA_MESSAGE("dumpPositionEverySomeSec: AUDIO %" GST_TIME_FORMAT ", VIDEO %" GST_TIME_FORMAT, GST_TIME_ARGS(audioposition), GST_TIME_ARGS(videoposition));
+    return G_SOURCE_CONTINUE;
+}
+
 PlaybackPipeline::~PlaybackPipeline()
 {
-    LOG_MEDIA_MESSAGE("Deinstalling dumpAfter60sec timer");
-    g_source_remove_by_user_data(this);
+    LOG_MEDIA_MESSAGE("Deinstalling dumpAfter60sec and dumpPositionEverySomeSec timers");
+    while (g_source_remove_by_user_data(this) == TRUE);
 }
 
 void PlaybackPipeline::setWebKitMediaSrc(WebKitMediaSrc* webKitMediaSrc)
@@ -833,6 +867,9 @@ void PlaybackPipeline::setWebKitMediaSrc(WebKitMediaSrc* webKitMediaSrc)
 
     LOG_MEDIA_MESSAGE("Installing dumpAfter60sec timer");
     g_timeout_add_seconds(60, dumpAfter60sec, this);
+
+    LOG_MEDIA_MESSAGE("Installing dumpPositionEverySomeSec timer");
+    g_timeout_add_seconds(5, dumpPositionEverySomeSec, this);
 }
 
 WebKitMediaSrc* PlaybackPipeline::webKitMediaSrc()
