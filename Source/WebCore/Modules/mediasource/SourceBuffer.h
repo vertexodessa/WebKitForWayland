@@ -125,6 +125,9 @@ public:
     // ActiveDOMObject API.
     bool hasPendingActivity() const override;
 
+    // DEBUG
+    String lastTrackID();
+
 protected:
     // EventTarget interface
     virtual void refEventTarget() override { ref(); }

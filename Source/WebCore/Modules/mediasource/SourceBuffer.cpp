@@ -1942,6 +1942,24 @@ Vector<String> SourceBuffer::bufferedSamplesForTrackID(const AtomicString& track
     return sampleDescriptions;
 }
 
+// DEBUG
+String SourceBuffer::lastTrackID()
+{
+    String trackID = "no-track";
+
+    VideoTrackList* vtracks = videoTracks();
+    VideoTrack* vtrack = vtracks?vtracks->lastItem():nullptr;
+    if (vtrack)
+        trackID = vtrack->id().string();
+
+    AudioTrackList* atracks = audioTracks();
+    AudioTrack* atrack = atracks?atracks->lastItem():nullptr;
+    if (atrack)
+        trackID = atrack->id().string();
+
+    return trackID;
+}
+
 Document& SourceBuffer::document() const
 {
     ASSERT(scriptExecutionContext());
