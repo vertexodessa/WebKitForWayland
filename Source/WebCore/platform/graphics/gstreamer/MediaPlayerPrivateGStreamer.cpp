@@ -494,7 +494,7 @@ void MediaPlayerPrivateGStreamer::seek(float time)
     INFO_MEDIA_MESSAGE("[Seek] seeking to %" GST_TIME_FORMAT " (%f)", GST_TIME_ARGS(clockTime), time);
 
     if (m_seeking) {
-        INFO_MEDIA_MESSAGE("[Seek] There's a previous seek with m_seekTime=%f ongoing: m_timeOfOverlappingSeek=%f, m_seekIsPending=%s, new m_seekTime=%f", m_seekTime, time, m_seekIsPending?"true":"false");
+        INFO_MEDIA_MESSAGE("[Seek] There's a previous seek with m_seekTime=%f ongoing: m_timeOfOverlappingSeek=%f, m_seekIsPending=%s", m_seekTime, time, m_seekIsPending?"true":"false");
         m_timeOfOverlappingSeek = time;
         if (m_seekIsPending) {
             m_seekTime = time;

@@ -242,7 +242,11 @@ void MediaSource::completeSeek()
 
 void MediaSource::monitorSourceBuffers()
 {
-    LOG(MediaSource, "MediaSource::monitorSourceBuffers()");
+    LOG(MediaSource, "MediaSource::monitorSourceBuffers(): Ranges buffered in MediaSource: %s", buffered()->toString().utf8().data());
+    for (auto i = m_activeSourceBuffers->begin(); i != m_activeSourceBuffers->end(); ++i) {
+        SourceBuffer *sb = (*i).get();
+        LOG(MediaSource, "MediaSource::monitorSourceBuffers(): Ranges buffered in SourceBuffer (%p): %s", sb, sb->buffered()->ranges().toString().utf8().data());
+    }
 
     // 2.4.4 SourceBuffer Monitoring
     // https://dvcs.w3.org/hg/html-media/raw-file/default/media-source/media-source.html#buffer-monitoring

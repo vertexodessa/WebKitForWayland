@@ -372,6 +372,7 @@ bool MediaPlayerPrivateGStreamerMSE::doSeek(gint64 position, float rate, GstSeek
     // DEBUG
     dumpPipeline(m_pipeline.get());
 
+    LOG_MEDIA_MESSAGE("gst_element_seek() to %" GST_TIME_FORMAT, GST_TIME_ARGS(startTime));
     if (!gst_element_seek(m_pipeline.get(), rate, GST_FORMAT_TIME, seekType,
         GST_SEEK_TYPE_SET, startTime, GST_SEEK_TYPE_SET, endTime)) {
         LOG_MEDIA_MESSAGE("Returning false");
@@ -584,7 +585,6 @@ void MediaPlayerPrivateGStreamerMSE::updateStates()
     }
     case GST_STATE_CHANGE_ASYNC:
         LOG_MEDIA_MESSAGE("Async: State: %s, pending: %s", gst_element_state_get_name(state), gst_element_state_get_name(pending));
-        // Change in progress.
         break;
     case GST_STATE_CHANGE_FAILURE:
         LOG_MEDIA_MESSAGE("Failure: State: %s, pending: %s", gst_element_state_get_name(state), gst_element_state_get_name(pending));
@@ -630,9 +630,10 @@ void MediaPlayerPrivateGStreamerMSE::updateStates()
         m_player->readyStateChanged();
     }
 
-    if (getStateResult == GST_STATE_CHANGE_SUCCESS && state >= GST_STATE_PAUSED) {
+    if (getStateResult == GST_STATE_CHANGE_SUCCESS && state >= GST_STATE_PAUSED)
         updatePlaybackRate();
-        if (m_seekIsPending && timeIsBuffered(m_seekTime)) {
+    if ((getStateResult == GST_STATE_CHANGE_SUCCESS) && state >= GST_STATE_PAUSED && m_seekIsPending) {
+        if (timeIsBuffered(m_seekTime)) {
             LOG_MEDIA_MESSAGE("[Seek] committing pending seek to %f", m_seekTime);
             m_seekIsPending = false;
             m_seeking = doSeek(toGstClockTime(m_seekTime), m_player->rate(), static_cast<GstSeekFlags>(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE));
@@ -641,6 +642,8 @@ void MediaPlayerPrivateGStreamerMSE::updateStates()
                 m_cachedPosition = -1;
                 LOG_MEDIA_MESSAGE("[Seek] seeking to %f failed", m_seekTime);
             }
+        } else {
+            LOG_MEDIA_MESSAGE("[Seek] Seek is pending, but m_seekTime=%f is unbuffered. MediaSource::monitorSourceBuffers() will take care. Buffered ranges in MediaSource: %s", m_seekTime, m_mediaSource->buffered()->toString().utf8().data());
         }
     }
 }
@@ -1692,11 +1695,15 @@ void AppendPipeline::resetPipeline()
     LOG_MEDIA_MESSAGE("resetting pipeline");
     gst_element_set_state(m_pipeline, GST_STATE_READY);
     gst_element_get_state(m_pipeline, NULL, NULL, 0);
+    LOG_MEDIA_MESSAGE("resetting pipeline: reset");
 
     {
         static int i = 0;
-        WTF::String  dotFileName = String::format("reset-pipeline-%d", ++i);
+        ++i;
+        LOG_MEDIA_MESSAGE("dumping reset-pipeline-%d", i);
+        WTF::String dotFileName = String::format("reset-pipeline-%d", i);
         gst_debug_bin_to_dot_file(GST_BIN(m_pipeline), GST_DEBUG_GRAPH_SHOW_ALL, dotFileName.utf8().data());
+        LOG_MEDIA_MESSAGE("dumped reset-pipeline-%d", i);
     }
 
 }
