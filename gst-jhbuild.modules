@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<!DOCTYPE moduleset SYSTEM "moduleset.dtd">
+<?xml-stylesheet type="text/xsl" href="moduleset.xsl"?>
+<moduleset>
+
+  <!-- This file contains a set of modules that are hard to get on
+       certain distributions. Feel free to add more here, within reason,
+       as long as they are not built by default. -->
+
+  <repository type="tarball" name="ftp.gnome.org"
+      href="http://ftp.gnome.org"/>
+  <repository type="git" name="gstreamer"
+      href="git://anongit.freedesktop.org/git/gstreamer/"/>
+  <repository type="git" name="gitorious.org"
+      href="git://gitorious.org/" />
+  <repository type="git" name="github"
+      href="git://github.com"/>
+  <repository type="git" name="freedesktop"
+      href="http://anongit.freedesktop.org/git"/>
+  <repository type="git" name="gnome-git"
+      href="git://git.gnome.org/"/>
+  <repository type="tarball" name="freedesktop.org"
+      href="http://www.freedesktop.org"/>
+
+
+  <autotools id="libsecret" autogen-sh="configure">
+    <branch repo="ftp.gnome.org"
+            module="/pub/GNOME/sources/libsecret/0.11/libsecret-0.11.tar.xz" version="0.11"
+            hash="sha256:e5399dfb61376a7500d20cb22715152780aa3a2c8a64281ec6bc8f0ebeb8b689"/>
+  </autotools>
+
+  <!-- dconf is interesting in case you need to make sure that you can
+       access your global settings from inside the jhbuild environment
+       (e.g running MiniBrowser behind a proxy needs to read settings
+       from the org.gnome.system.proxy GSettings scheme -->
+  <autotools id="dconf" autogen-sh="configure">
+    <branch repo="ftp.gnome.org"
+            module="/pub/GNOME/sources/dconf/0.14/dconf-0.14.1.tar.xz" version="0.14"
+            hash="sha256:59c58c5eafa0ebd616287d078f4441d5342870a44634445d324e88fc0287f0b8"/>
+    <dependencies>
+      <dep package="glib"/>
+      <dep package="gtk+"/>
+      <dep package="libxml2"/>
+      <dep package="vala"/>
+    </dependencies>
+  </autotools>
+
+
+  <autotools id="glib"
+             autogen-sh="configure"
+             autogenargs="--disable-dtrace">
+    <dependencies>
+      <dep package="libffi"/>
+    </dependencies>
+    <branch module="/pub/GNOME/sources/glib/2.46/glib-2.46.0.tar.xz" version="2.46.0"
+            repo="ftp.gnome.org">
+    </branch>
+  </autotools>
+
+
+  <autotools id="harfbuzz" autogen-sh="configure">
+    <branch module="software/harfbuzz/release/harfbuzz-1.0.4.tar.bz2" version="1.0.4"
+            checkoutdir="harfbuzz-1.0.4"
+            repo="freedesktop.org">
+
+    </branch>
+  </autotools>
+
+  <autotools id="pango" autogen-sh="configure"
+             autogenargs="--enable-cairo">
+    <dependencies>
+      <dep package="cairo"/>
+      <dep package="fontconfig"/>
+    </dependencies>
+    <branch module="/pub/GNOME/sources/pango/1.38/pango-1.38.0.tar.xz" version="1.38.0"
+            repo="ftp.gnome.org">
+    </branch>
+  </autotools>
+
+  <autotools id="gtk+" autogen-sh="configure"
+             autogenargs="--disable-introspection">
+    <dependencies>
+      <dep package="glib"/>
+      <dep package="cairo"/>
+      <dep package="at-spi2-atk"/>
+      <dep package="gdk-pixbuf"/>
+      <dep package="pango"/>
+    </dependencies>
+    <branch module="/pub/GNOME/sources/gtk+/3.18/gtk+-3.18.0.tar.xz" version="3.18.0"
+            repo="ftp.gnome.org"/>
+
+  </autotools>
+
+
+  <autotools id="vala" autogenargs="--enable-vapigen" supports-non-srcdir-builds="no">
+    <pkg-config>libvala-0.20.pc</pkg-config>
+    <branch repo="ftp.gnome.org"
+            module="/pub/GNOME/sources/vala/0.17/vala-0.17.7.tar.xz" version="0.17"
+            hash="sha256:dfdb9b3cb1c455462a57fd71a7e832c3b7b4131e85d2d0a2030111dae9fae24f"/>
+    <dependencies>
+      <dep package="glib"/>
+    </dependencies>
+  </autotools>
+
+   <autotools id="gstreamer" autogenargs="--disable-introspection">
+     <branch repo="gstreamer" module="gstreamer" checkoutdir="gstreamer" tag="master"/>
+   </autotools>
+
+   <autotools id="gst-plugins-base" autogenargs="--disable-examples --disable-introspection">
+     <dependencies>
+       <dep package="gstreamer"/>
+     </dependencies>
+     <branch repo="gstreamer" module="gst-plugins-base" checkoutdir="gst-plugins-base" tag="master"/>
+   </autotools>
+
+   <autotools id="gst-plugins-good" autogenargs="--disable-examples --disable-soup --disable-introspection">
+     <dependencies>
+       <dep package="gst-plugins-base"/>
+     </dependencies>
+     <branch repo="gstreamer" module="gst-plugins-good" checkoutdir="gst-plugins-good" tag="master"/>
+   </autotools>
+
+   <autotools id="gst-plugins-bad" autogenargs=" --disable-introspection">
+     <dependencies>
+       <dep package="gst-plugins-base"/>
+     </dependencies>
+    <branch repo="gstreamer" module="gst-plugins-bad" checkoutdir="gst-plugins-bad" tag="master"/>
+   </autotools>
+
+   <autotools id="gst-libav" autogenargs="--with-libav-extra-configure='--disable-yasm'">
+     <dependencies>
+       <dep package="gst-plugins-base"/>
+     </dependencies>
+     <branch repo="gstreamer" module="gst-libav" checkoutdir="gst-libav" tag="master"/>
+   </autotools>
+
+  <autotools id="gstreamer-vaapi"
+	     autogenargs="--with-gstreamer-api=1.2">
+    <branch repo="gitorious.org"
+	    module="vaapi/gstreamer-vaapi" />
+    <dependencies>
+      <dep package="gstreamer"/>
+      <dep package="gst-plugins-base"/>
+    </dependencies>
+  </autotools>
+
+ <autotools id="gstreamermm">
+     <dependencies>
+       <dep package="gst-plugins-base"/>
+     </dependencies>
+     <branch repo="gnome-git" module="gstreamermm" checkoutdir="gstreamermm" tag="master"/>
+   </autotools>
+
+   <autotools id="gst-debugger">
+     <dependencies>
+       <dep package="gtk+"/>
+       <dep package="gstreamermm"/>
+     </dependencies>
+     <branch repo="gnome-git" module="gst-debugger" checkoutdir="gst-debugger" tag="master"/>
+   </autotools>
+
+</moduleset>
