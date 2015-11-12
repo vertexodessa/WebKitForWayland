@@ -154,7 +154,7 @@ void RunLoop::TimerBase::updateReadyTime()
 void RunLoop::TimerBase::start(double fireInterval, bool repeating)
 {
     m_fireInterval = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::duration<double>(fireInterval));
-    m_isRepeating = repeat;
+    m_isRepeating = repeating;
     updateReadyTime();
 }
 
@@ -166,13 +166,6 @@ void RunLoop::TimerBase::stop()
 bool RunLoop::TimerBase::isActive() const
 {
     return g_source_get_ready_time(m_source.get()) != -1;
-}
-
-void RunLoop::TimerBase::timerFired()
-{
-    fired();
-    if (m_repeating)
-        m_timerSource.schedule(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::duration<double>(m_fireInterval)));
 }
 
 } // namespace WTF

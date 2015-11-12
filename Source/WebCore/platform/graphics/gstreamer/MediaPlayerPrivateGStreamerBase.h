@@ -32,6 +32,10 @@
 #include <wtf/Forward.h>
 #include <wtf/glib/GSourceWrap.h>
 
+#if USE(TEXTURE_MAPPER_GL)
+#include "TextureMapperGL.h"
+#endif
+
 #if USE(TEXTURE_MAPPER_GL) && !USE(COORDINATED_GRAPHICS)
 #include "TextureMapperPlatformLayer.h"
 #endif
@@ -93,7 +97,7 @@ public:
     virtual FloatSize naturalSize() const override;
 
     virtual void setVolume(float) override;
-    virtual float volume() const override;
+    virtual float volume() const;
     void volumeChanged();
     void notifyPlayerOfVolumeChange();
 

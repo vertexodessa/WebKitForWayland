@@ -54,7 +54,6 @@
 #if GST_CHECK_VERSION(1, 1, 0) && USE(TEXTURE_MAPPER_GL)
 #include "BitmapTextureGL.h"
 #include "BitmapTexturePool.h"
-#include "TextureMapperGL.h"
 #endif
 
 #define WL_EGL_PLATFORM
@@ -910,7 +909,7 @@ void MediaPlayerPrivateGStreamerBase::paintToTextureMapper(TextureMapper* textur
             texture = textureMapper->acquireTextureFromPool(size, GST_VIDEO_INFO_HAS_ALPHA(&videoInfo));
             updateTexture(static_cast<BitmapTextureGL&>(*texture), videoInfo);
         }
-        textureMapper->drawTexture(*texture.get(), targetRect, matrix, opacity);
+        textureMapper->drawTexture(*texture.get(), targetRect, modelViewMatrix, opacity);
         return;
     }
 
@@ -970,7 +969,8 @@ GstElement* MediaPlayerPrivateGStreamerBase::createVideoSink()
         m_usingFallbackVideoSink = true;
         m_videoSink = webkitVideoSinkNew();
         m_repaintHandler = g_signal_connect(m_videoSink.get(), "repaint-requested", G_CALLBACK(mediaPlayerPrivateRepaintCallback), this);
-        m_drainHandler = g_signal_connect(m_videoSink.get(), "drain", G_CALLBACK(mediaPlayerPrivateDrainCallback), this);
+        if (g_signal_lookup("drain", WEBKIT_TYPE_VIDEO_SINK))
+            m_drainHandler = g_signal_connect(m_videoSink.get(), "drain", G_CALLBACK(mediaPlayerPrivateDrainCallback), this);
     }
 
     m_fpsSink = gst_element_factory_make("fpsdisplaysink", "sink");

@@ -44,6 +44,10 @@ class Frame;
 class GraphicsContext;
 class Range;
 
+#if PLATFORM(GTK)
+#undef None
+#endif
+ 
 // FIXME: Move PresentationTransition to TextIndicatorWindow, because it's about presentation.
 enum class TextIndicatorPresentationTransition {
     None,

@@ -36,9 +36,13 @@ void WebsiteDataStore::platformDestroy()
 {
 }
 
+#if !PLATFORM(GTK)
 void WebsiteDataStore::platformRemoveRecentSearches(std::chrono::system_clock::time_point)
 {
 }
-
+#endif
 
 } // namespace WebKit
+
+
+

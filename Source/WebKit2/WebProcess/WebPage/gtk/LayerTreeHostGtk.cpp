@@ -52,8 +52,8 @@
 #if defined(GDK_WINDOWING_X11)
 #define Region XRegion
 #define Font XFont
-#define Cursor XCursor
-#define Screen XScreen
+// #define Cursor XCursor
+// #define Screen XScreen
 #include <gdk/gdkx.h>
 #endif
 

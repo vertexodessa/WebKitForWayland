@@ -4,6 +4,7 @@ set(WTF_OUTPUT_NAME WTFGTK)
 list(APPEND WTF_SOURCES
     glib/GLibUtilities.cpp
     glib/GMainLoopSource.cpp
+    glib/GSourceWrap.cpp
     glib/GRefPtr.cpp
     glib/GThreadSafeMainLoopSource.cpp
     glib/MainThreadGLib.cpp
