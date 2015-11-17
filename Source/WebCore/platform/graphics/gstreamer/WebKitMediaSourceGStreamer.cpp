@@ -694,6 +694,7 @@ static void app_src_need_data (GstAppSrc *src, guint length, gpointer user_data)
 
     OnSeekDataAction appSrcSeekDataNextAction;
     bool allAppSrcsNeedDataAfterSeek = false;
+    gchar* name = gst_element_get_name(GST_ELEMENT(src));
 
     GST_OBJECT_LOCK(webKitMediaSrc);
     int numAppSrcs = g_list_length(webKitMediaSrc->priv->streams);
@@ -704,7 +705,7 @@ static void app_src_need_data (GstAppSrc *src, guint length, gpointer user_data)
         appSrcStream->appSrcNeedDataFlag = true;
     }
 
-    LOG_MEDIA_MESSAGE("app_src_need_data(): %s seekDataCount=%d, needDataCount=%d", gst_element_get_name(GST_ELEMENT(src)), webKitMediaSrc->priv->appSrcSeekDataCount, webKitMediaSrc->priv->appSrcNeedDataCount);
+    LOG_MEDIA_MESSAGE("app_src_need_data(): %s seekDataCount=%d, needDataCount=%d", name, webKitMediaSrc->priv->appSrcSeekDataCount, webKitMediaSrc->priv->appSrcNeedDataCount);
 
     if (webKitMediaSrc->priv->appSrcSeekDataCount > 0) {
         if (webKitMediaSrc->priv->appSrcSeekDataCount == numAppSrcs && webKitMediaSrc->priv->appSrcNeedDataCount == numAppSrcs) {
@@ -740,6 +741,8 @@ static void app_src_need_data (GstAppSrc *src, guint length, gpointer user_data)
     }
 
     LOG_MEDIA_MESSAGE("app_src_need_data(): end");
+
+    g_free(name);
 }
 
 static void app_src_enough_data (GstAppSrc *src, gpointer user_data)
@@ -758,12 +761,16 @@ static gboolean app_src_seek_data (GstAppSrc *src, guint64 offset, gpointer user
 
     ASSERT(WEBKIT_IS_MEDIA_SRC(webKitMediaSrc));
 
+    gchar* name = gst_element_get_name(GST_ELEMENT(src));
+
     GST_OBJECT_LOCK(webKitMediaSrc);
     webKitMediaSrc->priv->appSrcSeekDataCount++;
 
-    LOG_MEDIA_MESSAGE("app_src_seek_data(): %s seekDataCount=%d, needDataCount=%d", gst_element_get_name(GST_ELEMENT(src)), webKitMediaSrc->priv->appSrcSeekDataCount, webKitMediaSrc->priv->appSrcNeedDataCount);
+    LOG_MEDIA_MESSAGE("app_src_seek_data(): %s seekDataCount=%d, needDataCount=%d", name, webKitMediaSrc->priv->appSrcSeekDataCount, webKitMediaSrc->priv->appSrcNeedDataCount);
 
     GST_OBJECT_UNLOCK(webKitMediaSrc);
+
+    g_free(name);
 
     return TRUE;
 }
