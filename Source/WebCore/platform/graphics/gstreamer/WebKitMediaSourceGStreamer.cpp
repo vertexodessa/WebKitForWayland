@@ -77,6 +77,7 @@ struct _Stream
     // This helps WebKitMediaSrcPrivate.appSrcNeedDataCount, ensuring that needDatas are
     // counted only once per each appsrc.
     bool appSrcNeedDataFlag;
+    bool appSrcEnoughDataFlag;
 
     // Used to enforce continuity in the appended data and avoid breaking the decoder.
     MediaTime lastEnqueuedTime;
@@ -700,6 +701,8 @@ static void app_src_need_data (GstAppSrc *src, guint length, gpointer user_data)
     int numAppSrcs = g_list_length(webKitMediaSrc->priv->streams);
     Stream* appSrcStream = getStreamByAppSrc(webKitMediaSrc, GST_ELEMENT(src));
 
+    appSrcStream->appSrcEnoughDataFlag = false;
+
     if (webKitMediaSrc->priv->appSrcSeekDataCount > 0 && appSrcStream && !appSrcStream->appSrcNeedDataFlag) {
         ++webKitMediaSrc->priv->appSrcNeedDataCount;
         appSrcStream->appSrcNeedDataFlag = true;
@@ -747,8 +750,18 @@ static void app_src_need_data (GstAppSrc *src, guint length, gpointer user_data)
 
 static void app_src_enough_data (GstAppSrc *src, gpointer user_data)
 {
-    UNUSED_PARAM(src);
-    UNUSED_PARAM(user_data);
+    WebKitMediaSrc* webKitMediaSrc = static_cast<WebKitMediaSrc*>(user_data);
+    ASSERT(WEBKIT_IS_MEDIA_SRC(webKitMediaSrc));
+
+    gchar* name = gst_element_get_name(GST_ELEMENT(src));
+
+    GST_OBJECT_LOCK(webKitMediaSrc);
+    Stream* appSrcStream = getStreamByAppSrc(webKitMediaSrc, GST_ELEMENT(src));
+    appSrcStream->appSrcEnoughDataFlag = true;
+    LOG_MEDIA_MESSAGE("app_src_enough_data(): %s", name);
+    GST_OBJECT_UNLOCK(webKitMediaSrc);
+
+    g_free(name);
 }
 
 static gboolean app_src_seek_data (GstAppSrc *src, guint64 offset, gpointer user_data)
@@ -899,6 +912,7 @@ MediaSourcePrivate::AddStatus PlaybackPipeline::addSourceBuffer(RefPtr<SourceBuf
     stream->parent = m_webKitMediaSrc.get();
     stream->appsrc = gst_element_factory_make("appsrc", nullptr);
     stream->appSrcNeedDataFlag = false;
+    stream->appSrcEnoughDataFlag = false;
     stream->sourceBuffer = sourceBufferPrivate.get();
 
     // No track has been attached yet.
@@ -1264,6 +1278,7 @@ void PlaybackPipeline::flushAndEnqueueNonDisplayingSamples(Vector<RefPtr<MediaSa
 
     GstElement* appsrc = stream->appsrc;
     MediaTime lastEnqueuedTime = stream->lastEnqueuedTime;
+    bool appSrcEnoughDataFlag = stream->appSrcEnoughDataFlag;
     GST_OBJECT_UNLOCK(m_webKitMediaSrc.get());
 
     // Actually no need to flush. The seek preparations have done it for us.
@@ -1274,8 +1289,18 @@ void PlaybackPipeline::flushAndEnqueueNonDisplayingSamples(Vector<RefPtr<MediaSa
         for (Vector<RefPtr<MediaSample> >::iterator it = samples.begin(); it != samples.end(); ++it) {
             GStreamerMediaSample* sample = static_cast<GStreamerMediaSample*>(it->get());
             if (sample->sample() && gst_sample_get_buffer(sample->sample())) {
+                GST_OBJECT_LOCK(m_webKitMediaSrc.get());
+                appSrcEnoughDataFlag = stream->appSrcEnoughDataFlag;
+                GST_OBJECT_UNLOCK(m_webKitMediaSrc.get());
+
+                if (appSrcEnoughDataFlag) {
+                    LOG_MEDIA_MESSAGE("Not pushing, enough-data flag enabled");
+                    break;
+                }
+
                 GstSample* gstsample = gst_sample_ref(sample->sample());
                 lastEnqueuedTime = sample->presentationTime();
+
 
                 GST_BUFFER_FLAG_SET(gst_sample_get_buffer(gstsample), GST_BUFFER_FLAG_DECODE_ONLY);
                 push_sample(GST_APP_SRC(appsrc), gstsample);
@@ -1312,7 +1337,13 @@ void PlaybackPipeline::enqueueSample(PassRefPtr<MediaSample> prsample)
 
     GstElement* appsrc = stream->appsrc;
     MediaTime lastEnqueuedTime = stream->lastEnqueuedTime;
+    bool appSrcEnoughDataFlag = stream->appSrcEnoughDataFlag;
     GST_OBJECT_UNLOCK(m_webKitMediaSrc.get());
+
+    if (appSrcEnoughDataFlag) {
+        LOG_MEDIA_MESSAGE("Not pushing, enough-data flag enabled");
+        return;
+    }
 
     GStreamerMediaSample* sample = static_cast<GStreamerMediaSample*>(rsample.get());
     if (sample->sample() && gst_sample_get_buffer(sample->sample())) {
@@ -1367,6 +1398,7 @@ void webkit_media_src_prepare_seek(WebKitMediaSrc* src, const MediaTime& time)
     for (GList* streams = src->priv->streams; streams; streams = streams->next) {
         Stream* stream = static_cast<Stream*>(streams->data);
         stream->appSrcNeedDataFlag = false;
+        stream->appSrcEnoughDataFlag = false;
         // Don't allow samples away from the seekTime to be enqueued.
         stream->lastEnqueuedTime = time;
     }
