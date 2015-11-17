@@ -38,6 +38,10 @@
 #include <wtf/glib/GMutexLocker.h>
 #include <wtf/glib/GSourceWrap.h>
 
+// DEBUG
+#include <wtf/text/WTFString.h>
+#include <wtf/Threading.h>
+
 #if USE(EGL)
 #define WL_EGL_PLATFORM
 #include <EGL/egl.h>
@@ -87,6 +91,21 @@ static GstStaticPadTemplate s_sinkTemplate = GST_STATIC_PAD_TEMPLATE("sink", GST
 GST_DEBUG_CATEGORY_STATIC(webkitVideoSinkDebug);
 #define GST_CAT_DEFAULT webkitVideoSinkDebug
 
+// DEBUG
+#define MYTRACER() MyTracer(__PRETTY_FUNCTION__);
+class MyTracer {
+public:
+    MyTracer(const gchar* functionName)
+        : m_functionName(functionName) {
+        printf("### %s : begin %d\n", m_functionName.utf8().data(), currentThread()); fflush(stdout);
+    }
+    virtual ~MyTracer() {
+        printf("### %s : end %d\n", m_functionName.utf8().data(), currentThread()); fflush(stdout);
+    }
+private:
+    String m_functionName;
+};
+
 enum {
     REPAINT_REQUESTED,
     DRAIN,
@@ -99,6 +118,7 @@ struct _WebKitVideoSinkPrivate {
     _WebKitVideoSinkPrivate()
         : timeoutSource("[WebKit] webkitVideoSinkTimeoutCallback")
     {
+        MYTRACER();
         g_mutex_init(&sampleMutex);
         g_cond_init(&dataCondition);
         gst_video_info_init(&info);
@@ -106,6 +126,7 @@ struct _WebKitVideoSinkPrivate {
 
     ~_WebKitVideoSinkPrivate()
     {
+        MYTRACER();
         if (sample)
             gst_sample_unref(sample);
         sample = nullptr;
@@ -168,6 +189,7 @@ G_DEFINE_TYPE_WITH_CODE(WebKitVideoSink, webkit_video_sink, GST_TYPE_VIDEO_SINK,
 
 static gboolean _ensure_gl_setup(WebKitVideoSink* gl_sink)
 {
+    MYTRACER();
     GError* error = NULL;
 
 #if GST_CHECK_VERSION(1, 5, 0)
@@ -194,6 +216,7 @@ static gboolean _ensure_gl_setup(WebKitVideoSink* gl_sink)
 
 static void webkit_video_sink_init(WebKitVideoSink* sink)
 {
+    MYTRACER();
     sink->priv = G_TYPE_INSTANCE_GET_PRIVATE(sink, WEBKIT_TYPE_VIDEO_SINK, WebKitVideoSinkPrivate);
     g_object_set(GST_BASE_SINK(sink), "enable-last-sample", FALSE, NULL);
     new (sink->priv) WebKitVideoSinkPrivate();
@@ -201,6 +224,7 @@ static void webkit_video_sink_init(WebKitVideoSink* sink)
 
 static void webkitVideoSinkTimeoutCallback(WebKitVideoSink* sink)
 {
+    MYTRACER();
     WebKitVideoSinkPrivate* priv = sink->priv;
 
 #if !USE(COORDINATED_GRAPHICS_THREADED)
@@ -222,6 +246,7 @@ static void webkitVideoSinkTimeoutCallback(WebKitVideoSink* sink)
 
 static GstFlowReturn webkitVideoSinkRender(GstBaseSink* baseSink, GstBuffer* buffer)
 {
+    MYTRACER();
     WebKitVideoSink* sink = WEBKIT_VIDEO_SINK(baseSink);
     WebKitVideoSinkPrivate* priv = sink->priv;
 
@@ -326,12 +351,14 @@ static GstFlowReturn webkitVideoSinkRender(GstBaseSink* baseSink, GstBuffer* buf
 
 static void webkitVideoSinkFinalize(GObject* object)
 {
+    MYTRACER();
     WEBKIT_VIDEO_SINK(object)->priv->~WebKitVideoSinkPrivate();
     G_OBJECT_CLASS(parent_class)->finalize(object);
 }
 
 static void unlockSampleMutex(WebKitVideoSinkPrivate* priv)
 {
+    MYTRACER();
     WTF::GMutexLocker<GMutex> lock(priv->sampleMutex);
 
     if (priv->sample) {
@@ -351,6 +378,7 @@ static void unlockSampleMutex(WebKitVideoSinkPrivate* priv)
 
 static gboolean webkitVideoSinkUnlock(GstBaseSink* baseSink)
 {
+    MYTRACER();
     WebKitVideoSink* sink = WEBKIT_VIDEO_SINK(baseSink);
 
     unlockSampleMutex(sink->priv);
@@ -360,6 +388,7 @@ static gboolean webkitVideoSinkUnlock(GstBaseSink* baseSink)
 
 static gboolean webkitVideoSinkUnlockStop(GstBaseSink* baseSink)
 {
+    MYTRACER();
     WebKitVideoSinkPrivate* priv = WEBKIT_VIDEO_SINK(baseSink)->priv;
 
     {
@@ -372,6 +401,7 @@ static gboolean webkitVideoSinkUnlockStop(GstBaseSink* baseSink)
 
 static gboolean webkitVideoSinkStop(GstBaseSink* baseSink)
 {
+    MYTRACER();
     WebKitVideoSinkPrivate* priv = WEBKIT_VIDEO_SINK(baseSink)->priv;
 
     unlockSampleMutex(priv);
@@ -386,6 +416,7 @@ static gboolean webkitVideoSinkStop(GstBaseSink* baseSink)
 
 static gboolean webkitVideoSinkStart(GstBaseSink* baseSink)
 {
+    MYTRACER();
     WebKitVideoSinkPrivate* priv = WEBKIT_VIDEO_SINK(baseSink)->priv;
 
     WTF::GMutexLocker<GMutex> lock(priv->sampleMutex);
@@ -395,6 +426,7 @@ static gboolean webkitVideoSinkStart(GstBaseSink* baseSink)
 
 static gboolean webkitVideoSinkSetCaps(GstBaseSink* baseSink, GstCaps* caps)
 {
+    MYTRACER();
     WebKitVideoSink* sink = WEBKIT_VIDEO_SINK(baseSink);
     WebKitVideoSinkPrivate* priv = sink->priv;
 
@@ -414,6 +446,7 @@ static gboolean webkitVideoSinkSetCaps(GstBaseSink* baseSink, GstCaps* caps)
 
 static gboolean webkitVideoSinkProposeAllocation(GstBaseSink* baseSink, GstQuery* query)
 {
+    MYTRACER();
     WebKitVideoSink* sink = WEBKIT_VIDEO_SINK(baseSink);
     GstCaps* caps = nullptr;
     gboolean need_pool = false;
@@ -478,6 +511,7 @@ static gboolean webkitVideoSinkProposeAllocation(GstBaseSink* baseSink, GstQuery
 
 static gboolean webkitVideoSinkQuery(GstBaseSink* baseSink, GstQuery* query)
 {
+    MYTRACER();
     WebKitVideoSink* sink = WEBKIT_VIDEO_SINK(baseSink);
     WebKitVideoSinkPrivate* priv = sink->priv;
 
@@ -523,6 +557,7 @@ static gboolean webkitVideoSinkQuery(GstBaseSink* baseSink, GstQuery* query)
 static void
 webkitVideoSinkSetContext(GstElement* element, GstContext* context)
 {
+    MYTRACER();
     WebKitVideoSink* sink =  WEBKIT_VIDEO_SINK(element);
 
 #if GST_CHECK_VERSION(1, 5, 0)
@@ -535,6 +570,7 @@ webkitVideoSinkSetContext(GstElement* element, GstContext* context)
 
 static void webkit_video_sink_class_init(WebKitVideoSinkClass* klass)
 {
+    MYTRACER();
     GObjectClass* gobjectClass = G_OBJECT_CLASS(klass);
     GstBaseSinkClass* baseSinkClass = GST_BASE_SINK_CLASS(klass);
     GstElementClass* elementClass = GST_ELEMENT_CLASS(klass);
@@ -586,6 +622,7 @@ static void webkit_video_sink_class_init(WebKitVideoSinkClass* klass)
 
 GstElement* webkitVideoSinkNew()
 {
+    MYTRACER();
     return GST_ELEMENT(g_object_new(WEBKIT_TYPE_VIDEO_SINK, 0));
 }
 
