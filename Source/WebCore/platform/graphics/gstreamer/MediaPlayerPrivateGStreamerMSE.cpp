@@ -384,11 +384,6 @@ bool MediaPlayerPrivateGStreamerMSE::doSeek(gint64 position, float rate, GstSeek
     return true;
 }
 
-void MediaPlayerPrivateGStreamerMSE::updatePlaybackRate()
-{
-    notImplemented();
-}
-
 bool MediaPlayerPrivateGStreamerMSE::seeking() const
 {
     return m_seeking && !m_seekCompleted;
@@ -630,20 +625,21 @@ void MediaPlayerPrivateGStreamerMSE::updateStates()
         m_player->readyStateChanged();
     }
 
-    if (getStateResult == GST_STATE_CHANGE_SUCCESS && state >= GST_STATE_PAUSED)
+    if (getStateResult == GST_STATE_CHANGE_SUCCESS && state >= GST_STATE_PAUSED) {
         updatePlaybackRate();
-    if ((getStateResult == GST_STATE_CHANGE_SUCCESS) && state >= GST_STATE_PAUSED && m_seekIsPending) {
-        if (timeIsBuffered(m_seekTime)) {
-            LOG_MEDIA_MESSAGE("[Seek] committing pending seek to %f", m_seekTime);
-            m_seekIsPending = false;
-            m_seeking = doSeek(toGstClockTime(m_seekTime), m_player->rate(), static_cast<GstSeekFlags>(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE));
-            LOG_MEDIA_MESSAGE("m_seeking=%s", m_seeking?"true":"false");
-            if (!m_seeking) {
-                m_cachedPosition = -1;
-                LOG_MEDIA_MESSAGE("[Seek] seeking to %f failed", m_seekTime);
+        if (m_seekIsPending) {
+            if (timeIsBuffered(m_seekTime)) {
+                LOG_MEDIA_MESSAGE("[Seek] committing pending seek to %f", m_seekTime);
+                m_seekIsPending = false;
+                m_seeking = doSeek(toGstClockTime(m_seekTime), m_player->rate(), static_cast<GstSeekFlags>(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE));
+                LOG_MEDIA_MESSAGE("m_seeking=%s", m_seeking?"true":"false");
+                if (!m_seeking) {
+                    m_cachedPosition = -1;
+                    LOG_MEDIA_MESSAGE("[Seek] seeking to %f failed", m_seekTime);
+                }
+            } else {
+                LOG_MEDIA_MESSAGE("[Seek] Seek is pending, but m_seekTime=%f is unbuffered. MediaSource::monitorSourceBuffers() will take care. Buffered ranges in MediaSource: %s", m_seekTime, m_mediaSource->buffered()->toString().utf8().data());
             }
-        } else {
-            LOG_MEDIA_MESSAGE("[Seek] Seek is pending, but m_seekTime=%f is unbuffered. MediaSource::monitorSourceBuffers() will take care. Buffered ranges in MediaSource: %s", m_seekTime, m_mediaSource->buffered()->toString().utf8().data());
         }
     }
 }

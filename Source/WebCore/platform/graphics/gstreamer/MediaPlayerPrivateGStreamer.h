@@ -164,7 +164,6 @@ private:
     void processTableOfContentsEntry(GstTocEntry*, GstTocEntry* parent);
 #endif
     virtual bool doSeek(gint64 position, float rate, GstSeekFlags seekType);
-    virtual void updatePlaybackRate();
 
     String engineDescription() const override { return "GStreamer"; }
     bool didPassCORSAccessCheck() const override;
@@ -172,6 +171,7 @@ private:
 
 protected:
     void cacheDuration();
+    virtual void updatePlaybackRate();
 
     bool m_buffering;
     int m_bufferingPercentage;

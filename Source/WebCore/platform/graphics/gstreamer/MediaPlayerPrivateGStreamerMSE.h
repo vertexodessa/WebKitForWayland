@@ -84,7 +84,6 @@ private:
     void updateStates() override;
 
     bool doSeek(gint64 position, float rate, GstSeekFlags seekType) override;
-    void updatePlaybackRate() override;
 
     // TODO: Implement
     unsigned long totalVideoFrames() override { return 0; }
