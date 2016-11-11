@@ -29,7 +29,8 @@
     Constructor(sequence<MediaStreamTrack> tracks),
     ConstructorCallWith=ScriptExecutionContext,
     PrivateIdentifier,
-    PublicIdentifier
+    PublicIdentifier,
+    InterfaceName=webkitMediaStream
 ] interface MediaStream : EventTarget {
 
     readonly attribute DOMString id;

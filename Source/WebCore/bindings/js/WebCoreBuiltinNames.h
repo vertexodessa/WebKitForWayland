@@ -102,7 +102,8 @@ namespace WebCore {
     macro(Response) \
     macro(RTCIceCandidate) \
     macro(RTCSessionDescription) \
-    macro(XMLHttpRequest)
+    macro(XMLHttpRequest) \
+    macro(webkitMediaStream)
 
 class WebCoreBuiltinNames {
 public:

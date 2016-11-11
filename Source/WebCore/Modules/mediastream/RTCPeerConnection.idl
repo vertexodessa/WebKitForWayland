@@ -38,7 +38,7 @@
     InterfaceName=webkitRTCPeerConnection,
 ] interface RTCPeerConnection : EventTarget {
     // Private initializer
-    [PrivateIdentifier, CallWith=Document, RaisesException] void initializeWith(Dictionary parameters);
+    [PrivateIdentifier, CallWith=Document, RaisesException] void initializeWith(Dictionary parameters, Dictionary constraints);
 
     // RTP Media API extensions
     [PrivateIdentifier, PublicIdentifier] sequence<RTCRtpSender> getSenders();
@@ -52,11 +52,12 @@
     [RaisesException] RTCRtpTransceiver addTransceiver(DOMString kind, optional RTCRtpTransceiverInit init);
 
     // Legacy MediaSream-based API (implemented on top of the RTP Media API)
-    [JSBuiltin] sequence<MediaStream> getLocalStreams();
-    [PrivateIdentifier, PublicIdentifier] sequence<MediaStream> getRemoteStreams();
+    // FIXME: consider using these instead of newly-added
+    //[JSBuiltin] sequence<MediaStream> getLocalStreams();
+    //[PrivateIdentifier, PublicIdentifier] sequence<MediaStream> getRemoteStreams();
     [JSBuiltin] MediaStream getStreamById(DOMString streamId);
 
-    [JSBuiltin] void addStream(MediaStream stream);
+    //[JSBuiltin] void addStream(MediaStream stream);
     [JSBuiltin] void removeStream(MediaStream stream);
 
     [JSBuiltin] Promise createOffer(optional Dictionary offerOptions);
@@ -125,6 +126,11 @@
     attribute EventHandler oniceconnectionstatechange;
     attribute EventHandler onicegatheringstatechange;
     attribute EventHandler ondatachannel;
+
+    // Deprecated or removed from spec
+    [RaisesException] void addStream(MediaStream stream);
+    sequence<MediaStream> getLocalStreams();
+    sequence<MediaStream> getRemoteStreams();
 
     // Legacy event handler (MediaStream-based API)
     attribute EventHandler onaddstream;

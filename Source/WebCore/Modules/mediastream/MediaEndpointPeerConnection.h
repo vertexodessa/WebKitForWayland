@@ -68,12 +68,12 @@ public:
     RefPtr<RTCSessionDescription> currentRemoteDescription() const override;
     RefPtr<RTCSessionDescription> pendingRemoteDescription() const override;
 
-    void setConfiguration(RTCConfiguration&) override;
+    void setConfiguration(RTCConfiguration&, const MediaConstraints&) override;
     void addIceCandidate(RTCIceCandidate&, PeerConnection::VoidPromise&&) override;
 
     void getStats(MediaStreamTrack*, PeerConnection::StatsPromise&&) override;
 
-    Vector<RefPtr<MediaStream>> getRemoteStreams() const override;
+    //Vector<RefPtr<MediaStream>> getRemoteStreams() const override;
 
     RefPtr<RTCRtpReceiver> createReceiver(const String& transceiverMid, const String& trackKind, const String& trackId) override;
     void replaceTrack(RTCRtpSender&, RefPtr<MediaStreamTrack>&&, PeerConnection::VoidPromise&&) override;
@@ -83,6 +83,9 @@ public:
     bool isNegotiationNeeded() const override { return m_negotiationNeeded; };
     void markAsNeedingNegotiation();
     void clearNegotiationNeededState() override { m_negotiationNeeded = false; };
+
+    std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String&, const Dictionary&) override;
+    Vector<RefPtr<MediaStream>> getRemoteStreams() const override;
 
 private:
     void runTask(Function<void ()>&&);

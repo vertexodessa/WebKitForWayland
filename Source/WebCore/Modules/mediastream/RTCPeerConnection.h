@@ -63,14 +63,14 @@ public:
     static Ref<RTCPeerConnection> create(ScriptExecutionContext&);
     ~RTCPeerConnection();
 
-    void initializeWith(Document&, const Dictionary&, ExceptionCode&);
+    void initializeWith(Document&, const Dictionary&, const Dictionary&, ExceptionCode&);
 
     const Vector<RefPtr<RTCRtpSender>>& getSenders() const { return m_transceiverSet->getSenders(); }
     const Vector<RefPtr<RTCRtpReceiver>>& getReceivers() const { return m_transceiverSet->getReceivers(); }
     const Vector<RefPtr<RTCRtpTransceiver>>& getTransceivers() const override { return m_transceiverSet->list(); }
 
     // Part of legacy MediaStream-based API (mostly implemented as JS built-ins)
-    Vector<RefPtr<MediaStream>> getRemoteStreams() const { return m_backend->getRemoteStreams(); }
+    //Vector<RefPtr<MediaStream>> getRemoteStreams() const { return m_backend->getRemoteStreams(); }
 
     RefPtr<RTCRtpSender> addTrack(Ref<MediaStreamTrack>&&, const Vector<MediaStream*>&, ExceptionCode&);
     void removeTrack(RTCRtpSender&, ExceptionCode&);
@@ -121,6 +121,10 @@ public:
     using RefCounted<RTCPeerConnection>::ref;
     using RefCounted<RTCPeerConnection>::deref;
 
+    // Deprecated or removed from spec
+    void addStream(Ref<MediaStream>&&, ExceptionCode&);
+    Vector<RefPtr<MediaStream>> getRemoteStreams() const;
+    Vector<RefPtr<MediaStream>> getLocalStreams() const {return m_localStreams; }
 private:
     RTCPeerConnection(ScriptExecutionContext&);
 
@@ -163,6 +167,10 @@ private:
     std::unique_ptr<PeerConnectionBackend> m_backend;
 
     RefPtr<RTCConfiguration> m_configuration;
+    RefPtr<MediaConstraints> m_constraints;
+
+    // Deprecated or removed from spec
+    Vector<RefPtr<MediaStream>> m_localStreams;
 };
 
 } // namespace WebCore

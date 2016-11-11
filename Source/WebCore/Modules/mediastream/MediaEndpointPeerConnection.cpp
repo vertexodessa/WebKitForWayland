@@ -41,6 +41,7 @@
 #include "MediaStreamTrack.h"
 #include "PeerMediaDescription.h"
 #include "RTCConfiguration.h"
+#include "RTCDataChannelHandler.h"
 #include "RTCIceCandidate.h"
 #include "RTCOfferAnswerOptions.h"
 #include "RTCRtpTransceiver.h"
@@ -61,12 +62,14 @@ static const size_t iceUfragSize = 6;
 // Size range from 22 to 256 ice-chars defined in RFC 5245.
 static const size_t icePasswordSize = 24;
 
+#if !USE(QT5WEBRTC)
 static std::unique_ptr<PeerConnectionBackend> createMediaEndpointPeerConnection(PeerConnectionBackendClient* client)
 {
     return std::unique_ptr<PeerConnectionBackend>(new MediaEndpointPeerConnection(client));
 }
 
 CreatePeerConnectionBackend PeerConnectionBackend::create = createMediaEndpointPeerConnection;
+#endif
 
 static String randomString(size_t size)
 {
@@ -608,7 +611,7 @@ RefPtr<RTCSessionDescription> MediaEndpointPeerConnection::pendingRemoteDescript
     return createRTCSessionDescription(m_pendingRemoteDescription.get());
 }
 
-void MediaEndpointPeerConnection::setConfiguration(RTCConfiguration& configuration)
+void MediaEndpointPeerConnection::setConfiguration(RTCConfiguration& configuration, const MediaConstraints&)
 {
     Vector<RefPtr<IceServerInfo>> iceServers;
     for (auto& server : configuration.iceServers())
@@ -835,6 +838,22 @@ void MediaEndpointPeerConnection::doneGatheringCandidates(unsigned mdescIndex)
     UNUSED_PARAM(mdescIndex);
 
     notImplemented();
+}
+
+/*void MediaEndpointPeerConnection::gotRemoteSource(unsigned mdescIndex, RefPtr<RealtimeMediaSource>&& source)
+{
+    ASSERT(isMainThread());
+
+    UNUSED_PARAM(mdescIndex);
+    UNUSED_PARAM(source);
+
+    notImplemented();
+}*/
+
+std::unique_ptr<RTCDataChannelHandler> MediaEndpointPeerConnection::createDataChannel(const String&, const Dictionary&)
+{
+    notImplemented();
+    return nullptr;
 }
 
 } // namespace WebCore

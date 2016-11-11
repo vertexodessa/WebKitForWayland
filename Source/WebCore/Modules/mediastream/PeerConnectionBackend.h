@@ -38,13 +38,16 @@
 
 namespace WebCore {
 
+class Dictionary;
 class DOMError;
 class Event;
+class MediaConstraints;
 class MediaStream;
 class MediaStreamTrack;
 class PeerConnectionBackend;
 class RTCAnswerOptions;
 class RTCConfiguration;
+class RTCDataChannelHandler;
 class RTCIceCandidate;
 class RTCOfferOptions;
 class RTCRtpReceiver;
@@ -102,12 +105,13 @@ public:
     virtual RefPtr<RTCSessionDescription> currentRemoteDescription() const = 0;
     virtual RefPtr<RTCSessionDescription> pendingRemoteDescription() const = 0;
 
-    virtual void setConfiguration(RTCConfiguration&) = 0;
+    virtual void setConfiguration(RTCConfiguration&, const MediaConstraints&) = 0;
     virtual void addIceCandidate(RTCIceCandidate&, PeerConnection::VoidPromise&&) = 0;
 
     virtual void getStats(MediaStreamTrack*, PeerConnection::StatsPromise&&) = 0;
 
     virtual Vector<RefPtr<MediaStream>> getRemoteStreams() const = 0;
+    virtual std::unique_ptr<RTCDataChannelHandler> createDataChannel(const String&, const Dictionary&) = 0;
 
     virtual RefPtr<RTCRtpReceiver> createReceiver(const String& transceiverMid, const String& trackKind, const String& trackId) = 0;
     virtual void replaceTrack(RTCRtpSender&, RefPtr<MediaStreamTrack>&&, PeerConnection::VoidPromise&&) = 0;
