@@ -147,7 +147,7 @@ bool CompositingRunLoop::isActive()
 void CompositingRunLoop::scheduleUpdate()
 {
     if (m_updateState.compareExchangeStrong(UpdateState::Completed, UpdateState::InProgress)) {
-        m_updateTimer.startOneShot(0);
+        startTimer(0);
         return;
     }
 
@@ -157,7 +157,7 @@ void CompositingRunLoop::scheduleUpdate()
 
 void CompositingRunLoop::stopUpdates()
 {
-    m_updateTimer.stop();
+    stopTimer();
     m_updateState.store(UpdateState::Completed);
 }
 
@@ -167,16 +167,26 @@ void CompositingRunLoop::updateCompleted()
         return;
 
     if (m_updateState.compareExchangeStrong(UpdateState::PendingAfterCompletion, UpdateState::InProgress)) {
-        m_updateTimer.startOneShot(0);
+        startTimer(0);
         return;
     }
-
-    ASSERT_NOT_REACHED();
 }
 
 void CompositingRunLoop::updateTimerFired()
 {
     m_updateFunction();
+}
+
+void CompositingRunLoop::startTimer(double interval)
+{
+    MutexLocker lock(m_timerMutex);
+    m_updateTimer.startOneShot(interval);
+}
+
+void CompositingRunLoop::stopTimer()
+{
+    MutexLocker lock(m_timerMutex);
+    m_updateTimer.stop();
 }
 
 } // namespace WebKit

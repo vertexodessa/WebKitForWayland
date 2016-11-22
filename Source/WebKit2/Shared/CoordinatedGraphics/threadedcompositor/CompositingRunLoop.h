@@ -65,7 +65,10 @@ private:
     };
 
     void updateTimerFired();
+    void startTimer(double interval);
+    void stopTimer();
 
+    Mutex m_timerMutex;
     RunLoop::Timer<CompositingRunLoop> m_updateTimer;
     std::function<void ()> m_updateFunction;
     Atomic<UpdateState> m_updateState;
