@@ -24,17 +24,17 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MediaPlayerPrivateHolePunchDummy_h
-#define MediaPlayerPrivateHolePunchDummy_h
+#ifndef MediaPlayerPrivateHolePunch_h
+#define MediaPlayerPrivateHolePunch_h
 
 #include "MediaPlayerPrivateHolePunchBase.h"
 
 namespace WebCore {
 
-class MediaPlayerPrivateHolePunchDummy : public MediaPlayerPrivateHolePunchBase {
+class MediaPlayerPrivateHolePunch : public MediaPlayerPrivateHolePunchBase {
 public:
-    explicit MediaPlayerPrivateHolePunchDummy(MediaPlayer*);
-    ~MediaPlayerPrivateHolePunchDummy();
+    explicit MediaPlayerPrivateHolePunch(MediaPlayer*);
+    ~MediaPlayerPrivateHolePunch();
 
     static void registerMediaEngine(MediaEngineRegistrar);
 

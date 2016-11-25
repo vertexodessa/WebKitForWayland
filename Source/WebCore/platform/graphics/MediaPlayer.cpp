@@ -91,7 +91,7 @@
 #endif
 
 #if USE(HOLE_PUNCH_EXTERNAL)
-#include "MediaPlayerPrivateHolePunchDummy.h"
+#include "MediaPlayerPrivateHolePunch.h"
 #endif
 
 #if ENABLE(MEDIA_STREAM) && USE(QT5WEBRTC)
@@ -242,10 +242,6 @@ static void buildMediaEnginesVector()
     MediaPlayerPrivateQt5WebRTC::registerMediaEngine(addMediaEngine);
 #endif
 
-#if USE(HOLE_PUNCH_EXTERNAL)
-    MediaPlayerPrivateHolePunchDummy::registerMediaEngine(addMediaEngine);
-#endif
-
 #if ENABLE(MEDIA_STREAM) && USE(GSTREAMER) && USE(OPENWEBRTC)
     MediaPlayerPrivateGStreamerOwr::registerMediaEngine(addMediaEngine);
 #endif
@@ -256,6 +252,10 @@ static void buildMediaEnginesVector()
 
 #if ENABLE(VIDEO) && USE(GSTREAMER) && ENABLE(MEDIA_SOURCE) && ENABLE(VIDEO_TRACK)
     MediaPlayerPrivateGStreamerMSE::registerMediaEngine(addMediaEngine);
+#endif
+
+#if USE(HOLE_PUNCH_EXTERNAL)
+    MediaPlayerPrivateHolePunch::registerMediaEngine(addMediaEngine);
 #endif
 
     haveMediaEnginesVector() = true;
