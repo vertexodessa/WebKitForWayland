@@ -25,7 +25,7 @@
  */
 
 #include "config.h"
-#include "MediaPlayerPrivateHolePunchDummy.h"
+#include "MediaPlayerPrivateHolePunch.h"
 
 #include "MediaPlayer.h"
 #include "NotImplemented.h"
@@ -89,12 +89,12 @@ static HashSet<String, ASCIICaseInsensitiveHash>& mimeTypeCache()
     return cache;
 }
 
-void MediaPlayerPrivateHolePunchDummy::getSupportedTypes(HashSet<String, ASCIICaseInsensitiveHash>& types)
+void MediaPlayerPrivateHolePunch::getSupportedTypes(HashSet<String, ASCIICaseInsensitiveHash>& types)
 {
     types = mimeTypeCache();
 }
 
-MediaPlayer::SupportsType MediaPlayerPrivateHolePunchDummy::supportsType(const MediaEngineSupportParameters& parameters)
+MediaPlayer::SupportsType MediaPlayerPrivateHolePunch::supportsType(const MediaEngineSupportParameters& parameters)
 {
     if (parameters.type.isNull() || parameters.type.isEmpty())
         return MediaPlayer::IsNotSupported;
@@ -102,19 +102,19 @@ MediaPlayer::SupportsType MediaPlayerPrivateHolePunchDummy::supportsType(const M
     return mimeTypeCache().contains(parameters.type) ? MediaPlayer::IsSupported : MediaPlayer::IsNotSupported;
 }
 
-void MediaPlayerPrivateHolePunchDummy::registerMediaEngine(MediaEngineRegistrar registrar)
+void MediaPlayerPrivateHolePunch::registerMediaEngine(MediaEngineRegistrar registrar)
 {
-    registrar([](MediaPlayer* player) { return std::make_unique<MediaPlayerPrivateHolePunchDummy>(player); },
+    registrar([](MediaPlayer* player) { return std::make_unique<MediaPlayerPrivateHolePunch>(player); },
             getSupportedTypes, supportsType, 0, 0, 0,
               [](const String&, const String&) { return false; });
 }
 
-MediaPlayerPrivateHolePunchDummy::MediaPlayerPrivateHolePunchDummy(MediaPlayer* player)
+MediaPlayerPrivateHolePunch::MediaPlayerPrivateHolePunch(MediaPlayer* player)
     : MediaPlayerPrivateHolePunchBase(player)
 {
 }
 
-MediaPlayerPrivateHolePunchDummy::~MediaPlayerPrivateHolePunchDummy()
+MediaPlayerPrivateHolePunch::~MediaPlayerPrivateHolePunch()
 {
 }
 

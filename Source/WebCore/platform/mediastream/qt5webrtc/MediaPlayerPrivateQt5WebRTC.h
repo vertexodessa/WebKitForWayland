@@ -29,9 +29,9 @@ public:
     bool hasVideo() const override { return true; }
     bool hasAudio() const override { return true; }
 
-    void load(const String&) override { }
+    void load(const String&) override { notifyLoadFailed(); }
 #if ENABLE(MEDIA_SOURCE)
-    void load(const String&, MediaSourcePrivateClient*) override { }
+    void load(const String&, MediaSourcePrivateClient*) override { notifyLoadFailed(); }
 #endif
 #if ENABLE(MEDIA_STREAM)
     void load(MediaStreamPrivate&) override;
@@ -54,8 +54,8 @@ public:
     void setPosition(const IntPoint&) override;
     void paint(GraphicsContext&, const FloatRect&) override { }
 
-    MediaPlayer::NetworkState networkState() const override {return MediaPlayer::Empty; }
-    MediaPlayer::ReadyState readyState() const { return MediaPlayer::HaveEnoughData; }
+    MediaPlayer::NetworkState networkState() const override {return m_networkState; }
+    MediaPlayer::ReadyState readyState() const { return m_readyState; }
 
     FloatSize naturalSize() const override;
 
@@ -80,6 +80,7 @@ public:
     void punchHole(int width, int height) override;
 
   private:
+    void notifyLoadFailed();
     static void getSupportedTypes(HashSet<String, ASCIICaseInsensitiveHash>&);
     static MediaPlayer::SupportsType supportsType(const MediaEngineSupportParameters&);
     void updateVideoRectangle();
@@ -96,6 +97,8 @@ public:
     std::unique_ptr<WRTCInt::RTCVideoRenderer> m_rtcRenderer;
 
     MediaPlayer* m_player;
+    MediaPlayer::NetworkState m_networkState;
+    MediaPlayer::ReadyState m_readyState;
     IntSize m_size;
     IntPoint m_position;
     MediaStreamPrivate* m_stream {nullptr};

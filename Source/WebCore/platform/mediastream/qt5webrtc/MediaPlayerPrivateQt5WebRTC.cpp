@@ -43,6 +43,13 @@ private:
 
 namespace WebCore {
 
+void MediaPlayerPrivateQt5WebRTC::notifyLoadFailed()
+{
+    m_networkState = MediaPlayer::FormatError;
+    m_readyState = MediaPlayer::HaveNothing;
+    m_player->networkStateChanged();
+}
+
 void MediaPlayerPrivateQt5WebRTC::getSupportedTypes(HashSet<String, ASCIICaseInsensitiveHash>& types)
 {
     static NeverDestroyed<HashSet<String, ASCIICaseInsensitiveHash>> cache;
@@ -65,6 +72,8 @@ void MediaPlayerPrivateQt5WebRTC::registerMediaEngine(MediaEngineRegistrar regis
 
 MediaPlayerPrivateQt5WebRTC::MediaPlayerPrivateQt5WebRTC(MediaPlayer* player)
     : m_player(player)
+    , m_networkState(MediaPlayer::Empty)
+    , m_readyState(MediaPlayer::HaveEnoughData)
     , m_size(320, 240)
 {
 #if USE(COORDINATED_GRAPHICS_THREADED)

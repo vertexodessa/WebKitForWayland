@@ -162,7 +162,7 @@ endif ()
 if (USE_HOLE_PUNCH_EXTERNAL)
     list(APPEND WebCore_SOURCES
         platform/graphics/holepunch/MediaPlayerPrivateHolePunchBase.cpp
-        platform/graphics/holepunch/MediaPlayerPrivateHolePunchDummy.cpp
+        platform/graphics/holepunch/MediaPlayerPrivateHolePunch.cpp
     )
 
     list(APPEND WebCore_INCLUDE_DIRECTORIES
