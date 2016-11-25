@@ -70,8 +70,10 @@ public:
     virtual void swapBuffersIfNeeded() override { };
 #endif
 
-private:
+protected:
     MediaPlayer* m_player;
+    MediaPlayer::NetworkState m_networkState;
+private:
     IntSize m_size;
 #if USE(COORDINATED_GRAPHICS_THREADED)
     RefPtr<TextureMapperPlatformLayerProxy> m_platformLayerProxy;

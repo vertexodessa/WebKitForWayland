@@ -42,7 +42,8 @@ using namespace std;
 namespace WebCore {
 
 MediaPlayerPrivateHolePunchBase::MediaPlayerPrivateHolePunchBase(MediaPlayer* player)
-    :m_player(player)
+    : m_player(player)
+    , m_networkState(MediaPlayer::Empty)
 {
 #if USE(COORDINATED_GRAPHICS_THREADED)
     m_platformLayerProxy = adoptRef(new TextureMapperPlatformLayerProxy());

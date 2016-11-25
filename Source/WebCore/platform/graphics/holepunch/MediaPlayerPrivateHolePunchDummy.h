@@ -41,12 +41,12 @@ public:
     bool hasVideo() const override { return false; };
     bool hasAudio() const override { return false; };
 
-    void load(const String&) override { };
+    void load(const String&) override { notifyLoadFailed(); };
 #if ENABLE(MEDIA_SOURCE)
-    void load(const String&, MediaSourcePrivateClient*) override { };
+    void load(const String&, MediaSourcePrivateClient*) override { notifyLoadFailed(); };
 #endif
 #if ENABLE(MEDIA_STREAM)
-    void load(MediaStreamPrivate&) override { };
+    void load(MediaStreamPrivate&) override { notifyLoadFailed(); };
 #endif
     void commitLoad() { };
     void cancelLoad() override { };
@@ -59,6 +59,7 @@ public:
     bool didLoadingProgress() const override { return false; };
 
 private:
+    void notifyLoadFailed();
     static void getSupportedTypes(HashSet<String, ASCIICaseInsensitiveHash>&);
     static MediaPlayer::SupportsType supportsType(const MediaEngineSupportParameters&);
 };

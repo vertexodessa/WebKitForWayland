@@ -89,6 +89,12 @@ static HashSet<String, ASCIICaseInsensitiveHash>& mimeTypeCache()
     return cache;
 }
 
+void MediaPlayerPrivateHolePunchDummy::notifyLoadFailed()
+{
+    m_networkState = MediaPlayer::FormatError;
+    m_player->networkStateChanged();
+}
+
 void MediaPlayerPrivateHolePunchDummy::getSupportedTypes(HashSet<String, ASCIICaseInsensitiveHash>& types)
 {
     types = mimeTypeCache();
