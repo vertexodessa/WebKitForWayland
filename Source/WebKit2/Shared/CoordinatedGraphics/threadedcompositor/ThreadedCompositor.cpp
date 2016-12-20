@@ -221,7 +221,10 @@ GLContext* ThreadedCompositor::glContext()
 #endif
 #if PLATFORM(WPE)
     RELEASE_ASSERT(is<PlatformDisplayWPE>(PlatformDisplay::sharedDisplay()));
-    m_target = downcast<PlatformDisplayWPE>(PlatformDisplay::sharedDisplay()).createEGLTarget(*this, m_compositingManager.releaseConnectionFd());
+    int fd = m_compositingManager.releaseConnectionFd();
+    downcast<PlatformDisplayWPE>(PlatformDisplay::sharedDisplay()).initialize(fd);
+    m_target = downcast<PlatformDisplayWPE>(PlatformDisplay::sharedDisplay()).createEGLTarget(*this, fd);
+
     ASSERT(m_target);
     m_target->initialize(IntSize(m_viewportController->visibleContentsRect().size()));
     m_context = m_target->createGLContext();
