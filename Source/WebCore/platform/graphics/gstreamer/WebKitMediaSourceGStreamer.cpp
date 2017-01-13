@@ -701,6 +701,7 @@ static void notifyReadyForMoreSamplesMainThread(WebKitMediaSrc* source, Stream* 
     }
 
     WebCore::MediaPlayerPrivateGStreamerMSE* mediaPlayerPrivate = source->priv->mediaPlayerPrivate;
+    //if (mediaPlayerPrivate && mediaPlayerPrivate->canPushSamples())
     if (mediaPlayerPrivate && !mediaPlayerPrivate->seeking())
         appsrcStream->sourceBuffer->notifyReadyForMoreSamples();
 

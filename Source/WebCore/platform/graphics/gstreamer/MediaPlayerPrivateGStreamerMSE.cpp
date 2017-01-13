@@ -558,13 +558,18 @@ bool MediaPlayerPrivateGStreamerMSE::seeking() const
     return m_seeking;
 }
 
+bool MediaPlayerPrivateGStreamerMSE::canPushSamples() const
+{
+    return !m_seeking || m_gstSeekCompleted;
+}
+
 // FIXME: MediaPlayerPrivateGStreamer manages the ReadyState on its own. We shouldn't change it manually.
 void MediaPlayerPrivateGStreamerMSE::setReadyState(MediaPlayer::ReadyState readyState)
 {
     if (readyState == m_readyState)
         return;
 
-    if (seeking()) {
+    if (!canPushSamples()) {
         GST_DEBUG("Skip ready state change(%s -> %s) due to seek\n", dumpReadyState(m_readyState), dumpReadyState(readyState));
         return;
     }

@@ -62,6 +62,7 @@ public:
 
     void pause() override;
     bool seeking() const override;
+    bool canPushSamples() const;
     void seek(float) override;
     void configurePlaySink() override;
     bool changePipelineState(GstState) override;
