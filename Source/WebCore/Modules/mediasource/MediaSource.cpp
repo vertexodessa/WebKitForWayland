@@ -200,6 +200,7 @@ void MediaSource::seekToTime(const MediaTime& time)
     // https://dvcs.w3.org/hg/html-media/raw-file/tip/media-source/media-source.html#mediasource-seeking
 
     m_pendingSeekTime = time;
+    LOG(MediaSource, "MediaSource::seekToTime setting seek time to: %f", m_pendingSeekTime.toDouble());
 
     // Run the following steps as part of the "Wait until the user agent has established whether or not the
     // media data for the new playback position is available, and, if it is, until it has decoded enough data
@@ -229,6 +230,7 @@ void MediaSource::seekToTime(const MediaTime& time)
 
 void MediaSource::completeSeek()
 {
+    LOG(MediaSource, "MediaSource::completeSeek entered");
     // 2.4.3 Seeking, ctd.
     // https://dvcs.w3.org/hg/html-media/raw-file/tip/media-source/media-source.html#mediasource-seeking
 
@@ -244,17 +246,20 @@ void MediaSource::completeSeek()
     // 4. Resume the seek algorithm at the "Await a stable state" step.
     m_private->seekCompleted();
 
+    LOG(MediaSource, "MediaSource::completeSeek, setting invalid time");
     m_pendingSeekTime = MediaTime::invalidTime();
     monitorSourceBuffers();
 }
 
 void MediaSource::monitorSourceBuffers()
 {
+    LOG(MediaSource, "MediaSource::monitorSourceBuffers method called");
     // 2.4.4 SourceBuffer Monitoring
     // https://dvcs.w3.org/hg/html-media/raw-file/default/media-source/media-source.html#buffer-monitoring
 
     // Note, the behavior if activeSourceBuffers is empty is undefined.
     if (!m_activeSourceBuffers) {
+        LOG(MediaSource, "MediaSource::monitorSourceBuffers trace: 1");
         m_private->setReadyState(MediaPlayer::HaveNothing);
         return;
     }
@@ -262,6 +267,7 @@ void MediaSource::monitorSourceBuffers()
     // http://w3c.github.io/media-source/#buffer-monitoring, change from 11 December 2014
     // ↳ If the the HTMLMediaElement.readyState attribute equals HAVE_NOTHING:
     if (mediaElement()->readyState() == HTMLMediaElement::HAVE_NOTHING) {
+        LOG(MediaSource, "MediaSource::monitorSourceBuffers trace: 2");
         // 1. Abort these steps.
         return;
     }
@@ -278,6 +284,7 @@ void MediaSource::monitorSourceBuffers()
 #endif
         return !sourceBuffer->hasCurrentTime();
     })) {
+        LOG(MediaSource, "MediaSource::monitorSourceBuffers trace: 3");
         // 1. Set the HTMLMediaElement.readyState attribute to HAVE_METADATA.
         // 2. If this is the first transition to HAVE_METADATA, then queue a task to fire a simple event
         // named loadedmetadata at the media element.
@@ -292,6 +299,7 @@ void MediaSource::monitorSourceBuffers()
     if (std::all_of(begin, end, [](auto& sourceBuffer) {
         return sourceBuffer->hasFutureTime() && sourceBuffer->canPlayThrough();
     })) {
+        LOG(MediaSource, "MediaSource::monitorSourceBuffers trace: 4");
         // 1. Set the HTMLMediaElement.readyState attribute to HAVE_ENOUGH_DATA.
         // 2. Queue a task to fire a simple event named canplaythrough at the media element.
         // 3. Playback may resume at this point if it was previously suspended by a transition to HAVE_CURRENT_DATA.
@@ -309,6 +317,7 @@ void MediaSource::monitorSourceBuffers()
     if (std::all_of(begin, end, [](auto& sourceBuffer) {
         return sourceBuffer->hasFutureTime();
     })) {
+        LOG(MediaSource, "MediaSource::monitorSourceBuffers trace: 5");
         // 1. Set the HTMLMediaElement.readyState attribute to HAVE_FUTURE_DATA.
         // 2. If the previous value of HTMLMediaElement.readyState was less than HAVE_FUTURE_DATA, then queue a task to fire a simple event named canplay at the media element.
         // 3. Playback may resume at this point if it was previously suspended by a transition to HAVE_CURRENT_DATA.
@@ -331,10 +340,13 @@ void MediaSource::monitorSourceBuffers()
     // event named loadeddata at the media element.
     // 3. Playback is suspended at this point since the media element doesn't have enough data to
     // advance the media timeline.
+    LOG(MediaSource, "MediaSource::monitorSourceBuffers trace: 6");
     m_private->setReadyState(MediaPlayer::HaveCurrentData);
 
     if (m_pendingSeekTime.isValid())
         completeSeek();
+    else
+        LOG(MediaSource, "m_pendingSeekTime is not valid. %f", m_pendingSeekTime.toDouble());
 
     // 4. Abort these steps.
 }

@@ -1023,6 +1023,11 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
     const GstStructure* structure = gst_message_get_structure(message);
     GstState requestedState, currentState, newState;
 
+    GstStructure* structure1;
+    GstMessage* message1;
+    GRefPtr<GstBus> bus1;
+
+
     m_canFallBackToLastFinishedSeekPosition = false;
 
     if (structure) {
@@ -1039,7 +1044,7 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
     // We ignore state changes from internal elements. They are forwarded to playbin2 anyway.
     bool messageSourceIsPlaybin = GST_MESSAGE_SRC(message) == reinterpret_cast<GstObject*>(m_pipeline.get());
 
-    GST_TRACE("Message %s received from element %s", GST_MESSAGE_TYPE_NAME(message), GST_MESSAGE_SRC_NAME(message));
+    GST_ERROR("Message %s received from element %s", GST_MESSAGE_TYPE_NAME(message), GST_MESSAGE_SRC_NAME(message));
     switch (GST_MESSAGE_TYPE(message)) {
     case GST_MESSAGE_ERROR:
         if (m_resetPipeline)
@@ -1081,7 +1086,10 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
         break;
     case GST_MESSAGE_ASYNC_DONE:
         if (!messageSourceIsPlaybin || m_delayingLoad)
+        {
+            GST_ERROR("ASYNC_DONE BUT MESSAGE SOURCE IS NOT PLAYBIN");
             break;
+        }
         asyncStateChangeDone();
         break;
     case GST_MESSAGE_STATE_CHANGED: {
@@ -1097,7 +1105,10 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
 #endif
 
         if (!messageSourceIsPlaybin || m_delayingLoad)
+        {
+            GST_WARNING("early return: messageSourceIsPlaybin %d m_delayingLoad %d", messageSourceIsPlaybin, m_delayingLoad);
             break;
+        }
         updateStates();
 
         // Construct a filename for the graphviz dot file output.
@@ -1204,6 +1215,15 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
         gst_tag_list_unref(tags);
         break;
     }
+    case GST_MESSAGE_APPLICATION:
+        GST_DEBUG("III GStreamer Got application message, it looks like %s", gst_structure_to_string(structure));
+//        structure1 = gst_structure_new("ready-for-more-samples", "appsrc-stream", G_TYPE_POINTER, nullptr, nullptr);
+//        message1 = gst_message_new_application(GST_OBJECT(m_pipeline.get()), structure1);
+//        bus1 = adoptGRef(gst_element_get_bus(GST_ELEMENT(m_source.get())));
+//        gst_bus_post(bus1.get(), message1);
+//        GST_TRACE("ready-for-more-samples message posted to the bus");
+        break;
+
     default:
         GST_DEBUG("Unhandled GStreamer message type: %s",
                     GST_MESSAGE_TYPE_NAME(message));
@@ -1499,8 +1519,12 @@ void MediaPlayerPrivateGStreamer::cancelLoad()
 void MediaPlayerPrivateGStreamer::asyncStateChangeDone()
 {
     if (!m_pipeline || m_errorOccured)
+    {
+        GST_WARNING("m_pipeline %d  || m_errorOccured %d", !!m_pipeline,  !!m_errorOccured);
         return;
+    }
 
+    GST_WARNING("m_seeking %d  m_seekIsPending %d", !!m_seeking,  !!m_seekIsPending);
     if (m_seeking) {
         if (m_seekIsPending)
             updateStates();
@@ -1520,8 +1544,10 @@ void MediaPlayerPrivateGStreamer::asyncStateChangeDone()
             m_canFallBackToLastFinishedSeekPosition = true;
             timeChanged();
         }
-    } else
+    } else {
+        GST_WARNING("!m_seeking");
         updateStates();
+    }
 }
 
 void MediaPlayerPrivateGStreamer::updateStates()

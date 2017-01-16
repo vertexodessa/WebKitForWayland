@@ -115,6 +115,8 @@ void SourceBufferPrivateGStreamer::flushAndEnqueueNonDisplayingSamples(Vector<Re
 
 void SourceBufferPrivateGStreamer::enqueueSample(PassRefPtr<MediaSample> prpSample, AtomicString)
 {
+    if(m_notifyWhenReadyForMoreSamples != false)
+        LOG(Media, "%p GStreamer Disabling notification about sample readiness!", this);
     m_notifyWhenReadyForMoreSamples = false;
 
     RefPtr<MediaSample> sample = prpSample;
@@ -130,6 +132,8 @@ bool SourceBufferPrivateGStreamer::isReadyForMoreSamples(AtomicString)
 void SourceBufferPrivateGStreamer::setReadyForMoreSamples(bool isReady)
 {
     ASSERT(WTF::isMainThread());
+    if (m_isReadyForMoreSamples != isReady)
+        LOG(Media, "%p GStreamer is now %s for more samples!", this, isReady ? "READY" : "NOT READY");
     m_isReadyForMoreSamples = isReady;
 }
 
@@ -155,6 +159,9 @@ void SourceBufferPrivateGStreamer::stopAskingForMoreSamples(AtomicString)
 void SourceBufferPrivateGStreamer::notifyClientWhenReadyForMoreSamples(AtomicString trackId)
 {
     ASSERT(WTF::isMainThread());
+    if (m_notifyWhenReadyForMoreSamples != true)
+        LOG(Media, "%p GStreamer enabling notification about sample readiness!", this);
+
     m_notifyWhenReadyForMoreSamples = true;
     m_trackId = trackId;
 }

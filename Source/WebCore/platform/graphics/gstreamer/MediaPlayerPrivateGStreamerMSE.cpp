@@ -388,6 +388,7 @@ bool MediaPlayerPrivateGStreamerMSE::doSeek(gint64, float, GstSeekFlags)
 
 bool MediaPlayerPrivateGStreamerMSE::doSeek()
 {
+    GST_DEBUG("doSeek entered");
     GstClockTime position = toGstClockTime(m_seekTime);
     MediaTime seekTime = MediaTime::createWithDouble(m_seekTime);
     double rate = m_player->rate();
@@ -473,6 +474,7 @@ bool MediaPlayerPrivateGStreamerMSE::doSeek()
 
     // Complete previous MSE seek if needed.
     if (!m_mseSeekCompleted) {
+        GST_WARNING("doSeek !m_mseSeekCompleted returning, no seek");
         m_mediaSource->monitorSourceBuffers();
         ASSERT(m_mseSeekCompleted);
         // Note: seekCompleted will recursively call us.
@@ -516,7 +518,10 @@ bool MediaPlayerPrivateGStreamerMSE::doSeek()
 void MediaPlayerPrivateGStreamerMSE::maybeFinishSeek()
 {
     if (!m_seeking || !m_mseSeekCompleted || !m_gstSeekCompleted)
+    {
+        GST_ERROR("m_seeking %d m_mseSeekCompleted %d m_gstSeekCompleted %d", m_seeking, m_mseSeekCompleted, m_gstSeekCompleted);
         return;
+    }
 
     GstState state, newState;
     GstStateChangeReturn getStateResult = gst_element_get_state(m_pipeline.get(), &state, &newState, 0);
@@ -611,7 +616,10 @@ void MediaPlayerPrivateGStreamerMSE::waitForSeekCompleted()
 void MediaPlayerPrivateGStreamerMSE::seekCompleted()
 {
     if (m_mseSeekCompleted)
+    {
+        GST_WARNING("Early return");
         return;
+    }
 
     GST_DEBUG("MSE seek completed");
     m_mseSeekCompleted = true;
@@ -791,8 +799,12 @@ void MediaPlayerPrivateGStreamerMSE::updateStates()
 void MediaPlayerPrivateGStreamerMSE::asyncStateChangeDone()
 {
     if (!m_pipeline || m_errorOccured)
+    {
+        GST_ERROR("!m_pipeline || m_errorOccured");
         return;
+    }
 
+    GST_DEBUG("m_seeking %d", m_seeking);
     if (m_seeking)
         maybeFinishSeek();
     else
@@ -1475,7 +1487,7 @@ void AppendPipeline::setAppendState(AppendState newAppendState)
     bool ok = false;
 
     if (oldAppendState != newAppendState)
-        GST_TRACE("%s --> %s", dumpAppendState(oldAppendState), dumpAppendState(newAppendState));
+        GST_DEBUG("%s --> %s", dumpAppendState(oldAppendState), dumpAppendState(newAppendState));
 
     switch (oldAppendState) {
     case NotStarted:
@@ -1793,15 +1805,19 @@ void AppendPipeline::appsinkEOS()
     switch (m_appendState) {
     // Ignored. Operation completion will be managed by the Aborting->NotStarted transition.
     case Aborting:
+        GST_WARNING("Aborting");
         return;
     // Finish Ongoing and Sampling states.
     case Ongoing:
+        GST_WARNING("DataStarve");
         setAppendState(DataStarve);
         break;
     case Sampling:
+        GST_WARNING("LastSample");
         setAppendState(LastSample);
         break;
     default:
+        GST_WARNING("DataStarve");
         GST_DEBUG("Unexpected EOS");
         break;
     }
@@ -2393,8 +2409,10 @@ void MediaSourceClientGStreamerMSE::didReceiveAllPendingSamples(SourceBufferPriv
 
     GST_DEBUG("received all pending samples");
 
-    if (m_playerPrivate)
+    if (m_playerPrivate){
         m_playerPrivate->setLoadingProgressed(true);
+//        m_playerPrivate->mseSeekCompleted();
+    }
 
     sourceBuffer->didReceiveAllPendingSamples();
 }

@@ -26,6 +26,8 @@
 #include "config.h"
 #include "SampleMap.h"
 
+#include "Logging.h"
+
 #if ENABLE(MEDIA_SOURCE)
 
 #include "MediaSample.h"
@@ -39,11 +41,13 @@ public:
     bool operator()(const value_type& value, const MediaTime& time)
     {
         MediaTime presentationEndTime = value.second->presentationTime() + value.second->duration();
+        LOG(MediaSource, "III comparing %f and %f, returning %d", presentationEndTime.toDouble(), time.toDouble(), presentationEndTime <= time);
         return presentationEndTime <= time;
     }
     bool operator()(const MediaTime& time, const value_type& value)
     {
         MediaTime presentationStartTime = value.second->presentationTime();
+        LOG(MediaSource, "III 2 comparing %f and %f returning %d", time.toDouble(), presentationStartTime.toDouble(), time < presentationStartTime);
         return time < presentationStartTime;
     }
 };
@@ -144,8 +148,12 @@ PresentationOrderSampleMap::iterator PresentationOrderSampleMap::findSampleWithP
 PresentationOrderSampleMap::iterator PresentationOrderSampleMap::findSampleContainingPresentationTime(const MediaTime& time)
 {
     auto range = std::equal_range(begin(), end(), time, SampleIsLessThanMediaTimeComparator<MapType>());
+    LOG(MediaSource, "findSampleContainingPresentationTime time %f, first %f, second %f", time.toDouble(), range.first->first.toDouble(), range.second->first.toDouble());
     if (range.first == range.second)
+    {
+        LOG(MediaSource, "findSampleContainingPresentationTime returning end()");
         return end();
+    }
     return range.first;
 }
 

@@ -694,13 +694,18 @@ static void notifyReadyForMoreSamplesMainThread(WebKitMediaSrc* source, Stream* 
 {
     GST_OBJECT_LOCK(source);
 
+    GST_DEBUG("notifyReadyForMoreSamplesMainThread(WebKitMediaSrc* source %p, Stream* appsrcStream %p)", source, appsrcStream);
+
     auto it = std::find(source->priv->streams.begin(), source->priv->streams.end(), appsrcStream);
     if (it == source->priv->streams.end()) {
         GST_OBJECT_UNLOCK(source);
+        GST_WARNING("early return; could not find the stream");
         return;
     }
 
     WebCore::MediaPlayerPrivateGStreamerMSE* mediaPlayerPrivate = source->priv->mediaPlayerPrivate;
+    GST_DEBUG("mediaPlayerPrivate %p, mediaPlayerPrivate->seeking %d", mediaPlayerPrivate,  mediaPlayerPrivate ? mediaPlayerPrivate->seeking() : false);
+
     //if (mediaPlayerPrivate && mediaPlayerPrivate->canPushSamples())
     if (mediaPlayerPrivate && !mediaPlayerPrivate->seeking())
         appsrcStream->sourceBuffer->notifyReadyForMoreSamples();
@@ -710,6 +715,7 @@ static void notifyReadyForMoreSamplesMainThread(WebKitMediaSrc* source, Stream* 
 
 static void enabledAppsrcNeedData(GstAppSrc* appsrc, guint, gpointer userData)
 {
+    GST_DEBUG("enabledAppsrcNeedData %p %p called", appsrc, userData);
     WebKitMediaSrc* webKitMediaSrc = static_cast<WebKitMediaSrc*>(userData);
     ASSERT(WEBKIT_IS_MEDIA_SRC(webKitMediaSrc));
 
@@ -717,14 +723,18 @@ static void enabledAppsrcNeedData(GstAppSrc* appsrc, guint, gpointer userData)
 
     GST_OBJECT_LOCK(webKitMediaSrc);
     OnSeekDataAction appsrcSeekDataNextAction = webKitMediaSrc->priv->appsrcSeekDataNextAction;
+    GST_DEBUG("appsrcSeekDataNextAction %s", appsrcSeekDataNextAction == 0 ? "Nothing" : "MediaSourceSeekToTime");
     int numAppsrcs = webKitMediaSrc->priv->streams.size();
     Stream* appsrcStream = getStreamByAppsrc(webKitMediaSrc, GST_ELEMENT(appsrc));
 
     if (webKitMediaSrc->priv->appsrcSeekDataCount > 0) {
+        GST_DEBUG("webKitMediaSrc->priv->appsrcSeekDataCount > 0");
+        GST_DEBUG("appsrcStream %p appsrcStream->appsrcNeedDataFlag %d", appsrcStream, appsrcStream->appsrcNeedDataFlag);
         if (appsrcStream && !appsrcStream->appsrcNeedDataFlag) {
             ++webKitMediaSrc->priv->appsrcNeedDataCount;
             appsrcStream->appsrcNeedDataFlag = true;
         }
+        GST_DEBUG("webKitMediaSrc->priv->appsrcSeekDataCount %d, webKitMediaSrc->priv->appsrcNeedDataCount %d, numAppsrcs %d", webKitMediaSrc->priv->appsrcSeekDataCount, webKitMediaSrc->priv->appsrcNeedDataCount, numAppsrcs);
         if (webKitMediaSrc->priv->appsrcSeekDataCount == numAppsrcs && webKitMediaSrc->priv->appsrcNeedDataCount == numAppsrcs) {
             GST_DEBUG("All needDatas completed");
             allAppsrcNeedDataAfterSeek = true;
@@ -760,11 +770,15 @@ static void enabledAppsrcNeedData(GstAppSrc* appsrc, guint, gpointer userData)
         // Search again for the Stream, just in case it was removed between the previous lock and this one.
         appsrcStream = getStreamByAppsrc(webKitMediaSrc, GST_ELEMENT(appsrc));
 
+        static const char* types[] = {"Invalid", "Unknown", "Audio", "Video", "Text"};
+
+        GST_DEBUG("appsrcStream %p appsrcStream->type %s", appsrcStream, types[appsrcStream ? appsrcStream->type : 0]);
+
         if (appsrcStream && appsrcStream->type != WebCore::Invalid) {
             GstStructure* structure = gst_structure_new("ready-for-more-samples", "appsrc-stream", G_TYPE_POINTER, appsrcStream, nullptr);
             GstMessage* message = gst_message_new_application(GST_OBJECT(appsrc), structure);
             gst_bus_post(webKitMediaSrc->priv->bus.get(), message);
-            GST_TRACE("ready-for-more-samples message posted to the bus");
+            GST_DEBUG("ready-for-more-samples message posted to the bus");
         }
 
         GST_OBJECT_UNLOCK(webKitMediaSrc);
@@ -789,11 +803,12 @@ static void enabledAppsrcEnoughData(GstAppSrc *appsrc, gpointer userData)
     stream->sourceBuffer->setReadyForMoreSamples(false);
 }
 
-static gboolean enabledAppsrcSeekData(GstAppSrc*, guint64, gpointer userData)
+static gboolean enabledAppsrcSeekData(GstAppSrc* appsrc, guint64 i, gpointer userData)
 {
     ASSERT(WTF::isMainThread());
 
     WebKitMediaSrc* webKitMediaSrc = static_cast<WebKitMediaSrc*>(userData);
+    GST_DEBUG("enabledAppsrcSeekData(GstAppSrc* %d, guint64 %llu, gpointer userData %p), stream %p", appsrc, i, userData, getStreamByAppsrc(webKitMediaSrc, GST_ELEMENT(appsrc)));
 
     ASSERT(WEBKIT_IS_MEDIA_SRC(webKitMediaSrc));
 
@@ -1199,6 +1214,19 @@ void PlaybackPipeline::flushAndEnqueueNonDisplayingSamples(Vector<RefPtr<MediaSa
         return;
     }
 
+//    GST_WARNING_OBJECT(pipeline(), "flushing pipeline...");
+//    GstEvent* flush_start = gst_event_new_flush_start();
+//    gboolean ret = FALSE;
+//    ret = gst_element_send_event(GST_ELEMENT(pipeline()), flush_start);
+//    if (!ret)
+//        GST_WARNING_OBJECT(pipeline(), "failed to send flush-start event");
+//
+//    GstEvent* flush_stop = gst_event_new_flush_stop(FALSE);
+//
+//    ret = gst_element_send_event(GST_ELEMENT(pipeline()), flush_stop);
+//    if (!ret)
+//      GST_WARNING_OBJECT(pipeline(), "failed to send flush-stop event");
+
     if (!stream->sourceBuffer->isReadyForMoreSamples(trackId)) {
         GST_DEBUG("flushAndEnqueueNonDisplayingSamples: skip adding new sample for trackId=%s, SB is not ready yet", trackId.string().utf8().data());
         GST_OBJECT_UNLOCK(m_webKitMediaSrc.get());
@@ -1319,6 +1347,8 @@ void webkit_media_src_set_mediaplayerprivate(WebKitMediaSrc* source, WebCore::Me
     if (source->priv->bus) {
         // MediaPlayerPrivateGStreamer has called gst_bus_add_signal_watch() at this point, so we can subscribe.
         g_signal_connect(source->priv->bus.get(), "message::application", G_CALLBACK(applicationMessageCallback), source);
+    } else {
+        GST_WARNING("III: WARNING! Can't get bus from pipeline: mediaPlayerPrivate %p, ppline %p mediaPlayerPrivate %p ", mediaPlayerPrivate, mediaPlayerPrivate ? mediaPlayerPrivate->pipeline() : nullptr, mediaPlayerPrivate);
     }
     GST_OBJECT_UNLOCK(source);
 }
