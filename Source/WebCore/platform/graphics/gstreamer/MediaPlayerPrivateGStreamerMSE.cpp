@@ -851,9 +851,7 @@ static HashSet<String, ASCIICaseInsensitiveHash>& mimeTypeCache()
         initializeGStreamerAndRegisterWebKitMESElement();
         HashSet<String, ASCIICaseInsensitiveHash> set;
         const char* mimeTypes[] = {
-#if !USE(HOLE_PUNCH_EXTERNAL)
             "video/mp4",
-#endif
             "audio/mp4"
         };
         for (auto& type : mimeTypes)
@@ -992,7 +990,7 @@ public:
         GstStructure* structure = gst_caps_get_structure(m_caps.get(), 0);
         const gchar* name = gst_structure_get_name(structure);
 
-#if GST_CHECK_VERSION(1, 5, 3)
+#if GST_CHECK_VERSION(1, 4, 4)
         if (!g_strcmp0(name, "application/x-cenc"))
             return g_str_has_prefix(gst_structure_get_string(structure, "original-media-type"), "video/");
 #endif
@@ -1004,7 +1002,7 @@ public:
         GstStructure* structure = gst_caps_get_structure(m_caps.get(), 0);
         const gchar* name = gst_structure_get_name(structure);
 
-#if GST_CHECK_VERSION(1, 5, 3)
+#if GST_CHECK_VERSION(1, 4, 4)
         if (!g_strcmp0(name, "application/x-cenc"))
             return g_str_has_prefix(gst_structure_get_string(structure, "original-media-type"), "audio/");
 #endif
@@ -1619,7 +1617,7 @@ void AppendPipeline::parseDemuxerSrcPadCaps(GstCaps* demuxerSrcPadCaps)
 
     m_streamType = WebCore::MediaSourceStreamTypeGStreamer::Unknown;
 
-#if GST_CHECK_VERSION(1, 5, 3)
+#if GST_CHECK_VERSION(1, 4, 4)
     if (gst_structure_has_name(structure, "application/x-cenc")) {
         const gchar* originalMediaType = gst_structure_get_string(structure, "original-media-type");
 

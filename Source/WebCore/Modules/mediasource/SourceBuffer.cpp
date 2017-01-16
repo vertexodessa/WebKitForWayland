@@ -822,24 +822,6 @@ void SourceBuffer::removeTimerFired()
     scheduleEvent(eventNames().updateendEvent);
 }
 
-static int getDefaultEvictWindow()
-{
-    // FIXME: make "30 seconds" configurable
-    static const char* evictWindow = getenv("SOURCE_BUFFER_EVICT_WINDOW");
-    static int window = 0;
-    if (evictWindow && window == 0)
-    {
-        window = std::atoi(evictWindow);
-    }
-    if (window == 0)
-    {
-        window = 30;
-        if (evictWindow && evictWindow[0] != '0')
-            LOG(MediaSource, "getDefaultEvictWindow - failed to convert to integer: %s", evictWindow);
-    }
-    return window;
-}
-
 void SourceBuffer::evictCodedFrames(size_t newDataSize)
 {
     // 3.5.13 Coded Frame Eviction Algorithm
@@ -853,21 +835,23 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
     // 2. If the buffer full flag equals false, then abort these steps.
     if (!m_bufferFull)
     {
-        LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p:%s) - buffer is not full, current buffer size %zu", this, hasVideo()? "VIDEO": "AUDIO", extraMemoryCost());
+        LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - buffer is not full, current buffer size %zu", this, extraMemoryCost());
         return;
     }
 
     size_t maximumBufferSize = this->maximumBufferSize();
 
+    // 3. Let removal ranges equal a list of presentation time ranges that can be evicted from
+    // the presentation to make room for the new data.
+
     // NOTE: begin by removing data from the beginning of the buffered ranges, 30 seconds at
     // a time, up to 30 seconds before currentTime.
-
-    MediaTime thirtySeconds = MediaTime(getDefaultEvictWindow(), 1);
+    MediaTime thirtySeconds = MediaTime(30, 1);
     MediaTime currentTime = m_source->currentTime();
     MediaTime maximumRangeEnd = currentTime - thirtySeconds;
 
 #if !LOG_DISABLED
-    LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p:%s) - currentTime = %lf, require %zu bytes, maximum buffer size is %zu", this, hasVideo()? "VIDEO": "AUDIO", m_source->currentTime().toDouble(), extraMemoryCost() + newDataSize, maximumBufferSize);
+    LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - currentTime = %lf, require %zu bytes, maximum buffer size is %zu", this, m_source->currentTime().toDouble(), extraMemoryCost() + newDataSize, maximumBufferSize);
     size_t initialBufferedSize = extraMemoryCost();
 #endif
 
@@ -878,6 +862,7 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
         // end equal to the removal range start and end timestamp respectively.
         removeCodedFrames(rangeStart, std::min(rangeEnd, maximumRangeEnd));
         if (extraMemoryCost() + newDataSize < maximumBufferSize) {
+            LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - the buffer is not full anymore.", this);
             m_bufferFull = false;
             break;
         }
@@ -887,7 +872,7 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
     }
 
     if (!m_bufferFull) {
-        LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p:%s) - evicted %zu bytes", this, hasVideo()? "VIDEO": "AUDIO", initialBufferedSize - extraMemoryCost());
+        LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - evicted %zu bytes", this, initialBufferedSize - extraMemoryCost());
         return;
     }
 
@@ -897,12 +882,12 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
     auto buffered = m_buffered->ranges();
     size_t currentTimeRange = buffered.find(currentTime);
     if (currentTimeRange == buffered.length() - 1) {
-        LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p:%s) - evicted %zu bytes but FAILED to free enough", this, hasVideo()? "VIDEO": "AUDIO", initialBufferedSize - extraMemoryCost());
+        LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - evicted %zu bytes but FAILED to free enough", this, initialBufferedSize - extraMemoryCost());
         return;
     }
 
     MediaTime minimumRangeStart = currentTime + thirtySeconds;
-    LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p:%s) - minimumRangeStart: %f, duration: %f", this, hasVideo()? "VIDEO": "AUDIO", minimumRangeStart.toDouble(), m_source->duration().toDouble());
+    LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - minimumRangeStart: %f, duration: %f", this, minimumRangeStart.toDouble(), m_source->duration().toDouble());
 
     rangeEnd = m_source->duration();
     rangeStart = rangeEnd - thirtySeconds;
@@ -910,25 +895,25 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
     auto removeFramesWhileFull = [&] (PlatformTimeRanges& ranges) {
         for (int i = ranges.length()-1; i >= 0; --i)
         {
-            LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p:%s) - removing coded frames in range [%f, %f)", this, hasVideo()? "VIDEO": "AUDIO", ranges.start(i).toDouble(), ranges.end(i).toDouble());
+            LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - removing coded frames in range [%f, %f)", this, ranges.start(i).toDouble(), ranges.end(i).toDouble());
             removeCodedFrames(ranges.start(i), ranges.end(i));
             if (extraMemoryCost() + newDataSize < maximumBufferSize) {
-                LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p:%s) - buffer is not full anymore.", this, hasVideo()? "VIDEO": "AUDIO");
+                LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - buffer is not full anymore.", this);
                 m_bufferFull = false;
                 break;
             }
         }
     };
 
-    const auto keepRange = PlatformTimeRanges(minimumRangeStart, rangeEnd);
+    const auto safeToRemoveRange = PlatformTimeRanges(minimumRangeStart, rangeEnd);
     while (rangeStart > minimumRangeStart) {
-        LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p:%s) - evicting: extraMemoryCost: %zu, rangeStart: %f, rangeEnd: %f",
-                this, hasVideo()? "VIDEO": "AUDIO", extraMemoryCost(), rangeStart.toDouble(), rangeEnd.toDouble());
+        LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - evicting: extraMemoryCost: %zu, rangeStart: %f, rangeEnd: %f",
+                this, extraMemoryCost(), rangeStart.toDouble(), rangeEnd.toDouble());
 
         auto removalRange = PlatformTimeRanges(rangeStart, rangeEnd);
-        auto intersectedRanges = buffered;
-        removalRange.intersectWith(keepRange);
-        intersectedRanges.intersectWith(removalRange);
+        removalRange.intersectWith(safeToRemoveRange);
+        auto intersectedRanges = removalRange;
+        intersectedRanges.intersectWith(buffered);
 
         removeFramesWhileFull(intersectedRanges);
 
@@ -939,14 +924,13 @@ void SourceBuffer::evictCodedFrames(size_t newDataSize)
         rangeEnd -= thirtySeconds;
     }
 
-    // corner case: seek to unbuffered range, failed to free enough
     if (m_bufferFull && currentTimeRange == notFound)
     {
-        LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p:%s) - We tried hard to evict, but the buffer is still full and current time is unbuffered, let's try to remove more buffered data.", this, hasVideo()? "VIDEO": "AUDIO");
+        LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - We tried hard to evict, but the buffer is still full and current time is unbuffered, let's try to remove more buffered data.", this);
         removeFramesWhileFull(buffered);
     }
 
-    LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p:%s) - evicted %zu bytes%s", this, hasVideo()? "VIDEO": "AUDIO", initialBufferedSize - extraMemoryCost(), m_bufferFull ? " but FAILED to free enough" : "");
+    LOG(MediaSource, "SourceBuffer::evictCodedFrames(%p) - evicted %zu bytes%s", this, initialBufferedSize - extraMemoryCost(), m_bufferFull ? " but FAILED to free enough" : "");
 }
 
 size_t SourceBuffer::maxBufferSizeVideo = 0;
@@ -1869,8 +1853,11 @@ void SourceBuffer::provideMediaData(TrackBuffer& trackBuffer, AtomicString track
     unsigned enqueuedSamples = 0;
 #endif
 
+    LOG(MediaSource, "SourceBuffer::provideMediaData(%p) - trackBuffer.decodeQueue.size: %uz", this, trackBuffer.decodeQueue.size());
     while (!trackBuffer.decodeQueue.empty()) {
         if (!m_private->isReadyForMoreSamples(trackID)) {
+            LOG(MediaSource, "SourceBuffer::provideMediaData(%p) - BUFFER is not ready for samples!", this);
+
             m_private->notifyClientWhenReadyForMoreSamples(trackID);
             break;
         }

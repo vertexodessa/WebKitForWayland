@@ -48,38 +48,7 @@ static HashSet<String, ASCIICaseInsensitiveHash>& mimeTypeCache()
         return cache;
 
     const char* mimeTypes[] = {
-        "application/ogg",
-        "application/vnd.apple.mpegurl",
-        "application/vnd.rn-realmedia",
-        "application/x-3gp",
-        "application/x-pn-realaudio",
-        "application/x-mpegurl",
-        "video/3gpp",
-        "video/flv",
-        "video/mj2",
-        "video/mp2t",
-        "video/mp4",
-        "video/mpeg",
-        "video/mpegts",
-        "video/ogg",
-        "video/quicktime",
-        "video/vivo",
-        "video/webm",
-        "video/x-cdxa",
-        "video/x-dirac",
-        "video/x-dv",
-        "video/x-fli",
-        "video/x-flv",
-        "video/x-h263",
-        "video/x-ivf",
-        "video/x-m4v",
-        "video/x-matroska",
-        "video/x-mng",
-        "video/x-ms-asf",
-        "video/x-msvideo",
-        "video/x-mve",
-        "video/x-nuv",
-        "video/x-vcd"
+        "video/ave"
     };
 
     for (unsigned i = 0; i < (sizeof(mimeTypes) / sizeof(*mimeTypes)); ++i)

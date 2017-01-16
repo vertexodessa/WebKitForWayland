@@ -134,7 +134,8 @@ namespace WebCore {
 
 void registerWebKitGStreamerElements()
 {
-    if (!webkitGstCheckVersion(1, 6, 1))
+//* We are using a patched 1.4.4 GStreamer, bypass version check here.
+    if (!webkitGstCheckVersion(1, 4, 4))
         return;
 
 #if ENABLE(ENCRYPTED_MEDIA)
