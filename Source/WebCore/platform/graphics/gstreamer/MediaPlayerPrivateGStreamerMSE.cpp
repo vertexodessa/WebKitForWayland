@@ -569,7 +569,8 @@ void MediaPlayerPrivateGStreamerMSE::setReadyState(MediaPlayer::ReadyState ready
     if (readyState == m_readyState)
         return;
 
-    if (!canPushSamples()) {
+    //if (!canPushSamples()) {
+    if (seeking()) {
         GST_DEBUG("Skip ready state change(%s -> %s) due to seek\n", dumpReadyState(m_readyState), dumpReadyState(readyState));
         return;
     }
