@@ -723,20 +723,20 @@ static void enabledAppsrcNeedData(GstAppSrc* appsrc, guint, gpointer userData)
 
     GST_OBJECT_LOCK(webKitMediaSrc);
     OnSeekDataAction appsrcSeekDataNextAction = webKitMediaSrc->priv->appsrcSeekDataNextAction;
-    GST_DEBUG("appsrcSeekDataNextAction %s", appsrcSeekDataNextAction == 0 ? "Nothing" : "MediaSourceSeekToTime");
+//    GST_DEBUG("appsrcSeekDataNextAction %s", appsrcSeekDataNextAction == 0 ? "Nothing" : "MediaSourceSeekToTime");
     int numAppsrcs = webKitMediaSrc->priv->streams.size();
     Stream* appsrcStream = getStreamByAppsrc(webKitMediaSrc, GST_ELEMENT(appsrc));
 
     if (webKitMediaSrc->priv->appsrcSeekDataCount > 0) {
-        GST_DEBUG("webKitMediaSrc->priv->appsrcSeekDataCount > 0");
-        GST_DEBUG("appsrcStream %p appsrcStream->appsrcNeedDataFlag %d", appsrcStream, appsrcStream->appsrcNeedDataFlag);
+//        GST_DEBUG("webKitMediaSrc->priv->appsrcSeekDataCount > 0");
+//        GST_DEBUG("appsrcStream %p appsrcStream->appsrcNeedDataFlag %d", appsrcStream, appsrcStream->appsrcNeedDataFlag);
         if (appsrcStream && !appsrcStream->appsrcNeedDataFlag) {
             ++webKitMediaSrc->priv->appsrcNeedDataCount;
             appsrcStream->appsrcNeedDataFlag = true;
         }
-        GST_DEBUG("webKitMediaSrc->priv->appsrcSeekDataCount %d, webKitMediaSrc->priv->appsrcNeedDataCount %d, numAppsrcs %d", webKitMediaSrc->priv->appsrcSeekDataCount, webKitMediaSrc->priv->appsrcNeedDataCount, numAppsrcs);
+//        GST_DEBUG("webKitMediaSrc->priv->appsrcSeekDataCount %d, webKitMediaSrc->priv->appsrcNeedDataCount %d, numAppsrcs %d", webKitMediaSrc->priv->appsrcSeekDataCount, webKitMediaSrc->priv->appsrcNeedDataCount, numAppsrcs);
         if (webKitMediaSrc->priv->appsrcSeekDataCount == numAppsrcs && webKitMediaSrc->priv->appsrcNeedDataCount == numAppsrcs) {
-            GST_DEBUG("All needDatas completed");
+//            GST_DEBUG("All needDatas completed");
             allAppsrcNeedDataAfterSeek = true;
             webKitMediaSrc->priv->appsrcSeekDataCount = 0;
             webKitMediaSrc->priv->appsrcNeedDataCount = 0;
@@ -749,7 +749,7 @@ static void enabledAppsrcNeedData(GstAppSrc* appsrc, guint, gpointer userData)
     GST_OBJECT_UNLOCK(webKitMediaSrc);
 
     if (allAppsrcNeedDataAfterSeek) {
-        GST_DEBUG("All expected appsrcSeekData() and appsrcNeedData() calls performed. Running next action (%d)", static_cast<int>(appsrcSeekDataNextAction));
+//        GST_DEBUG("All expected appsrcSeekData() and appsrcNeedData() calls performed. Running next action (%d)", static_cast<int>(appsrcSeekDataNextAction));
 
         switch (appsrcSeekDataNextAction) {
         case MediaSourceSeekToTime: {
@@ -772,7 +772,7 @@ static void enabledAppsrcNeedData(GstAppSrc* appsrc, guint, gpointer userData)
 
         static const char* types[] = {"Invalid", "Unknown", "Audio", "Video", "Text"};
 
-        GST_DEBUG("appsrcStream %p appsrcStream->type %s", appsrcStream, types[appsrcStream ? appsrcStream->type : 0]);
+//        GST_DEBUG("appsrcStream %p appsrcStream->type %s", appsrcStream, types[appsrcStream ? appsrcStream->type : 0]);
 
         if (appsrcStream && appsrcStream->type != WebCore::Invalid) {
             GstStructure* structure = gst_structure_new("ready-for-more-samples", "appsrc-stream", G_TYPE_POINTER, appsrcStream, nullptr);
@@ -1196,6 +1196,19 @@ void PlaybackPipeline::flushAndEnqueueNonDisplayingSamples(Vector<RefPtr<MediaSa
 {
     ASSERT(WTF::isMainThread());
 
+
+    GstPad* pad = nullptr;
+    GST_WARNING("Pad count %d", pipeline()->srcpads);
+    for (int i=0; i< pipeline()->srcpads; ++i){
+        GstEvent* flush = gst_event_new_flush_start();
+
+        GST_WARNING("Flushing pad %d", i);
+        pad = g_list_nth_data(pipeline()->srcpads, i);
+
+        gst_pad_push_event(pad, flush);
+        GstEvent* stop = gst_event_new_flush_stop(0);
+        gst_pad_push_event(pad, stop);
+    }
     if (!samples.size()) {
         GST_DEBUG("No samples, trackId unknown");
         return;

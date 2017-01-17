@@ -45,6 +45,7 @@ class MediaPlayerPrivateGStreamerMSE : public MediaPlayerPrivateGStreamer {
     friend class MediaSourceClientGStreamerMSE;
 
 public:
+        void flushGstPipeline();
     explicit MediaPlayerPrivateGStreamerMSE(MediaPlayer*);
     virtual ~MediaPlayerPrivateGStreamerMSE();
 
@@ -84,6 +85,8 @@ public:
     MediaSourcePrivateClient* mediaSourcePrivateClient() { return m_mediaSource.get(); }
 
     void markEndOfStream(MediaSourcePrivate::EndOfStreamStatus);
+
+    void asyncChangeDone(){asyncStateChangeDone();};
 
 #if ENABLE(ENCRYPTED_MEDIA) || ENABLE(ENCRYPTED_MEDIA_V2)
     void dispatchDecryptionKey(GstBuffer*) override;

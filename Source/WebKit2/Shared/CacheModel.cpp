@@ -124,8 +124,10 @@ void calculateMemoryCacheSizes(CacheModel cacheModel, unsigned& cacheTotalCapaci
 
 void calculateURLCacheSizes(CacheModel cacheModel, uint64_t diskFreeSize, unsigned& urlCacheMemoryCapacity, uint64_t& urlCacheDiskCapacity)
 {
+    fprintf(stderr, "CACHE: calculateURLCacheSizes enter \n");
     switch (cacheModel) {
     case CacheModelDocumentViewer: {
+        printf("CACHES: DocViewer\n");
         // Foundation memory cache capacity (in bytes)
         urlCacheMemoryCapacity = 0;
 
@@ -135,6 +137,7 @@ void calculateURLCacheSizes(CacheModel cacheModel, uint64_t diskFreeSize, unsign
         break;
     }
     case CacheModelDocumentBrowser: {
+        printf("CACHES: DocBrowser\n");
         uint64_t memorySize = ramSize() / MB;
 
         // Foundation memory cache capacity (in bytes)
@@ -160,6 +163,7 @@ void calculateURLCacheSizes(CacheModel cacheModel, uint64_t diskFreeSize, unsign
         break;
     }
     case CacheModelPrimaryWebBrowser: {
+        printf("CACHES: WebBrowser\n");
         uint64_t memorySize = ramSize() / MB;
 
 #if PLATFORM(IOS)
@@ -214,7 +218,8 @@ void calculateURLCacheSizes(CacheModel cacheModel, uint64_t diskFreeSize, unsign
         size_t size = size_t(value.toUInt64(&ok) * units);
         if (ok)
             urlCacheDiskCapacity = (unsigned long)(size);
-    }
+    } 
+    printf("CACHE: %llu\n", urlCacheDiskCapacity);
 }
 
 } // namespace WebKit

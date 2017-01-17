@@ -4508,7 +4508,9 @@ void HTMLMediaElement::mediaPlayerPlaybackStateChanged(MediaPlayer*)
         return;
 
     beginProcessingMediaPlayerCallback();
-    if (m_player->paused())
+    bool paused = m_player->paused();
+    LOG(Media, "HTMLMediaElement::mediaPlayerPlaybackStateChanged paused: %d", paused);
+    if (paused)
         pauseInternal();
     else
         playInternal();
@@ -4863,8 +4865,10 @@ void HTMLMediaElement::updatePlayState(UpdateState updateState)
     if (!m_player)
         return;
 
+    bool paused = m_player->paused();
+    LOG(Media, "HTMLMediaElement::updatePlayState paused: %d", paused);
     if (m_pausedInternal) {
-        if (!m_player->paused())
+        if (!paused)
             m_player->pause();
         refreshCachedTime();
         m_playbackProgressTimer.stop();
@@ -4875,7 +4879,9 @@ void HTMLMediaElement::updatePlayState(UpdateState updateState)
     }
     
     bool shouldBePlaying = potentiallyPlaying();
-    bool playerPaused = m_player->paused();
+    paused = m_player->paused();
+    LOG(Media, "HTMLMediaElement::updatePlayState paused 1: %d", paused);
+    bool playerPaused = paused;
 
     LOG(Media, "HTMLMediaElement::updatePlayState(%p) - shouldBePlaying = %s, playerPaused = %s", this, boolString(shouldBePlaying), boolString(playerPaused));
 

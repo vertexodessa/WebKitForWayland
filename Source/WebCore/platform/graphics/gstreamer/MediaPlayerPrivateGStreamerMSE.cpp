@@ -126,6 +126,7 @@ public:
 
     void reportAppsrcAtLeastABufferLeft();
     void reportAppsrcNeedDataReceived();
+    MediaPlayerPrivateGStreamerMSE* m_playerPrivate;
 
 private:
     void resetPipeline();
@@ -135,10 +136,10 @@ private:
     void removeAppsrcDataLeavingProbe();
     void setAppsrcDataLeavingProbe();
 
+
 private:
     RefPtr<MediaSourceClientGStreamerMSE> m_mediaSourceClient;
     RefPtr<SourceBufferPrivateGStreamer> m_sourceBufferPrivate;
-    MediaPlayerPrivateGStreamerMSE* m_playerPrivate;
 
     // (m_mediaType, m_id) is unique.
     gint m_id;
@@ -225,6 +226,47 @@ bool MediaPlayerPrivateGStreamerMSE::isAvailable()
 
     GRefPtr<GstElementFactory> factory = gst_element_factory_find("playbin");
     return factory;
+}
+
+void MediaPlayerPrivateGStreamerMSE::flushGstPipeline()
+{
+    return;
+    GstState current, pending;
+    GstStateChangeReturn result = gst_element_get_state(pipeline(), &current, &pending, 0);
+    if (result == GST_STATE_CHANGE_ASYNC)
+    {
+        current = pending;
+    }
+
+    const auto maybeRevertState = [&] {
+        if (current == GST_STATE_PLAYING)
+        {
+            GstStateChangeReturn result = gst_element_set_state(pipeline(), GST_STATE_PLAYING);
+            const char* l[] = { "GST_STATE_CHANGE_FAILURE",
+            "GST_STATE_CHANGE_SUCCESS",
+            "GST_STATE_CHANGE_ASYNC",
+            "GST_STATE_CHANGE_NO_PREROLL"
+            };
+            GST_DEBUG("Set state returned %s", l[result]);
+        }
+    };
+
+    GstElement* src;
+    g_object_get(G_OBJECT(pipeline()), "source", &src, nullptr);
+
+    GST_WARNING("Pad count %d", src->numsrcpads);
+    for (int i=0; i < src->numsrcpads; ++i){
+        GstEvent* flush = gst_event_new_flush_start();
+
+        GST_WARNING("Flushing pad %d", i);
+        GstPad* pad = g_list_nth_data(src->srcpads, i);
+
+        gst_pad_push_event(pad, flush);
+        GstEvent* stop = gst_event_new_flush_stop(0);
+        gst_pad_push_event(pad, stop);
+    }
+
+    maybeRevertState();
 }
 
 MediaPlayerPrivateGStreamerMSE::MediaPlayerPrivateGStreamerMSE(MediaPlayer* player)
@@ -399,6 +441,7 @@ bool MediaPlayerPrivateGStreamerMSE::doSeek()
 
     // Check if playback pipeline is ready for seek.
     GstState state, newState;
+    GST_DEBUG("III, gst_element_get_state");
     GstStateChangeReturn getStateResult = gst_element_get_state(m_pipeline.get(), &state, &newState, 0);
     if (getStateResult == GST_STATE_CHANGE_FAILURE || getStateResult == GST_STATE_CHANGE_NO_PREROLL) {
         GST_DEBUG("[Seek] cannot seek, current state change is %s", gst_element_state_change_return_get_name(getStateResult));
@@ -524,6 +567,7 @@ void MediaPlayerPrivateGStreamerMSE::maybeFinishSeek()
     }
 
     GstState state, newState;
+    GST_DEBUG("III, gst_element_get_state");
     GstStateChangeReturn getStateResult = gst_element_get_state(m_pipeline.get(), &state, &newState, 0);
 
     if (getStateResult == GST_STATE_CHANGE_ASYNC
@@ -592,6 +636,7 @@ void MediaPlayerPrivateGStreamerMSE::setReadyState(MediaPlayer::ReadyState ready
     m_player->readyStateChanged();
 
     GstState pipelineState;
+    GST_DEBUG("III, gst_element_get_state");
     GstStateChangeReturn getStateResult = gst_element_get_state(m_pipeline.get(), &pipelineState, nullptr, 250 * GST_NSECOND);
     bool isPlaying = (getStateResult == GST_STATE_CHANGE_SUCCESS && pipelineState == GST_STATE_PLAYING);
 
@@ -668,6 +713,7 @@ void MediaPlayerPrivateGStreamerMSE::updateStates()
     MediaPlayer::ReadyState oldReadyState = m_readyState;
     GstState state, pending;
 
+    GST_DEBUG("III, gst_element_get_state");
     GstStateChangeReturn getStateResult = gst_element_get_state(m_pipeline.get(), &state, &pending, 250 * GST_NSECOND);
 
     bool shouldUpdatePlaybackState = false;
@@ -1187,6 +1233,11 @@ static void appendPipelineApplicationMessageCallback(GstBus*, GstMessage* messag
     appendPipeline->handleApplicationMessage(message);
 }
 
+static void asyncStateChangeDone(GstBus*, GstMessage* message, AppendPipeline* appendPipeline)
+{
+    appendPipeline->m_playerPrivate->asyncChangeDone();
+}
+
 gint AppendPipeline::totalAudio = 0;
 gint AppendPipeline::totalVideo = 0;
 gint AppendPipeline::totalText = 0;
@@ -1217,6 +1268,7 @@ AppendPipeline::AppendPipeline(PassRefPtr<MediaSourceClientGStreamerMSE> mediaSo
 
     g_signal_connect(m_bus.get(), "sync-message::element", G_CALLBACK(appendPipelineElementMessageCallback), this);
     g_signal_connect(m_bus.get(), "message::application", G_CALLBACK(appendPipelineApplicationMessageCallback), this);
+    g_signal_connect(m_bus.get(), "message::async-done",  G_CALLBACK(asyncStateChangeDone), this);
 
     // We assign the created instances here instead of adoptRef() because gst_bin_add_many()
     // below will already take the initial reference and we need an additional one for us.
@@ -2381,6 +2433,7 @@ void MediaSourceClientGStreamerMSE::flushAndEnqueueNonDisplayingSamples(Vector<R
         return;
 
     m_playerPrivate->m_playbackPipeline->flushAndEnqueueNonDisplayingSamples(samples);
+    m_playerPrivate->flushGstPipeline();
 }
 
 void MediaSourceClientGStreamerMSE::enqueueSample(PassRefPtr<MediaSample> prpSample)

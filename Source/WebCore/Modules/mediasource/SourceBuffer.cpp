@@ -1426,7 +1426,9 @@ void SourceBuffer::sourceBufferPrivateDidReceiveSample(SourceBufferPrivate*, Med
         MediaTime frameDuration = sample.duration();
 
         // 1.3 If mode equals "sequence" and group start timestamp is set, then run the following steps:
+        LOG(MediaSource, "IIIi: m_mode == %s, m_groupStartTimestamp.isValid() %d", m_mode == AppendMode::Segments ? "Segments" : "Sequence", m_groupStartTimestamp.isValid());
         if (m_mode == AppendMode::Sequence && m_groupStartTimestamp.isValid()) {
+
             // 1.3.1 Set timestampOffset equal to group start timestamp - presentation timestamp.
             m_timestampOffset = m_groupStartTimestamp;
 
@@ -1457,6 +1459,11 @@ void SourceBuffer::sourceBufferPrivateDidReceiveSample(SourceBufferPrivate*, Med
             it = m_trackBufferMap.add(trackID, TrackBuffer()).iterator;
         TrackBuffer& trackBuffer = it->value;
 
+        LOG(MediaSource, "IIIi: trackBuffer.lastDecodeTimestamp.isValid() %d, decodeTimestamp %f, trackBuffer.lastDecodeTimestamp %f, abs(decodeTimestamp - trackBuffer.lastDecodeTimestamp) %f, trackBuffer.lastFrameDuration %f)",
+                          trackBuffer.lastDecodeTimestamp.isValid(),    decodeTimestamp.toDouble(),
+                                                                                            trackBuffer.lastDecodeTimestamp.toDouble(),
+                                                                                                                                abs(decodeTimestamp - trackBuffer.lastDecodeTimestamp).toDouble(),
+                                                                                                                                                                                           trackBuffer.lastFrameDuration.toDouble());
         // 1.6 ↳ If last decode timestamp for track buffer is set and decode timestamp is less than last
         // decode timestamp:
         // OR
@@ -1877,7 +1884,10 @@ void SourceBuffer::provideMediaData(TrackBuffer& trackBuffer, AtomicString track
         // FIXME(135867): Make this gap detection logic less arbitrary.
         MediaTime oneSecond(1, 1);
         if (trackBuffer.lastEnqueuedDecodeEndTime.isValid() && sample->decodeTime() - trackBuffer.lastEnqueuedDecodeEndTime > oneSecond)
+        {
+            LOG(MediaSource, "WARNING: trackBuffer.lastEnqueuedDecodeEndTime %f, sample->decodeTime() %f", trackBuffer.lastEnqueuedDecodeEndTime.toDouble(), sample->decodeTime().toDouble());
             break;
+        }
 
         trackBuffer.lastEnqueuedPresentationTime = sample->presentationTime();
         trackBuffer.lastEnqueuedDecodeEndTime = sample->decodeTime() + sample->duration();

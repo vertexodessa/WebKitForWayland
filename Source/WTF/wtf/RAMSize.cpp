@@ -24,6 +24,7 @@
  */
 
 #include "config.h"
+#include <stdio.h>
 #include "RAMSize.h"
 
 #include "StdLibExtras.h"
@@ -123,6 +124,7 @@ size_t ramSize()
     std::call_once(onceFlag, [] {
         ramSize = computeRAMSize();
     });
+    printf("CACHES: ramsize %u\n", ramSize);
     return ramSize;
 }
 

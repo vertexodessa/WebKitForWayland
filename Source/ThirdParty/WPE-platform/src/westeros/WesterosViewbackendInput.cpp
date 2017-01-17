@@ -79,6 +79,8 @@ void WesterosViewbackendInput::keyboardHandleKey( void *userData, uint32_t time,
     // IDK.
     key += 8;
 
+    g_print("III: time: %u, key: %u, state: %u\n", time, key, state);
+
     handleKeyEvent(userData, key, state, time);
 
     if (!handlerData.repeatInfo.rate)
@@ -154,6 +156,7 @@ void WesterosViewbackendInput::handleKeyEvent(void* userData, uint32_t key, uint
         unicode = xkb_keysym_to_utf32(keysym);
     }
 
+    g_print("III: %s time %u, keysym %x, unicode %u, !!state %d, xkb.modifiers %u", __FUNCTION__, time, keysym, unicode, !!state, xkb.modifiers);
     struct wpe_input_keyboard_event event{ time, keysym, unicode, !!state, xkb.modifiers };
     wpe_view_backend_dispatch_keyboard_event(backend_input.m_viewbackend, &event);
 }

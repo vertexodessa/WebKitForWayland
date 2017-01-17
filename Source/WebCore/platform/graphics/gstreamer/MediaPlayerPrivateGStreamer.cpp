@@ -440,6 +440,7 @@ bool MediaPlayerPrivateGStreamer::changePipelineState(GstState newState)
     GstState currentState;
     GstState pending;
 
+    GST_DEBUG("III, gst_element_get_state");
     gst_element_get_state(m_pipeline.get(), &currentState, &pending, 0);
     if (currentState == newState || pending == newState) {
         GST_DEBUG("Rejected state change to %s from %s with %s pending", gst_element_state_get_name(newState),
@@ -502,6 +503,7 @@ void MediaPlayerPrivateGStreamer::pause()
 {
     m_playbackRatePause = false;
     GstState currentState, pendingState;
+    GST_DEBUG("III, gst_element_get_state");
     gst_element_get_state(m_pipeline.get(), &currentState, &pendingState, 0);
     if (currentState < GST_STATE_PAUSED && pendingState <= GST_STATE_PAUSED)
         return;
@@ -594,6 +596,7 @@ void MediaPlayerPrivateGStreamer::seek(float time)
 
     GstState state;
     GstState newState;
+    GST_DEBUG("III, gst_element_get_state");
     GstStateChangeReturn getStateResult = gst_element_get_state(m_pipeline.get(), &state, &newState, 0);
     if (getStateResult == GST_STATE_CHANGE_FAILURE || getStateResult == GST_STATE_CHANGE_NO_PREROLL) {
         GST_DEBUG("[Seek] cannot seek, current state change is %s", gst_element_state_change_return_get_name(getStateResult));
@@ -687,6 +690,7 @@ void MediaPlayerPrivateGStreamer::updatePlaybackRate()
         GstState state;
         GstState pending;
 
+        GST_DEBUG("III, gst_element_get_state");
         gst_element_get_state(m_pipeline.get(), &state, &pending, 0);
         if (state != GST_STATE_PLAYING && pending != GST_STATE_PLAYING)
             changePipelineState(GST_STATE_PLAYING);
@@ -707,9 +711,15 @@ bool MediaPlayerPrivateGStreamer::paused() const
     if (m_playbackRatePause)
         return false;
 
-    GstState state;
-    gst_element_get_state(m_pipeline.get(), &state, nullptr, 0);
-    return state <= GST_STATE_PAUSED;
+    GstState state, pending;
+    GST_DEBUG("III, gst_element_get_state");
+
+    GstStateChangeReturn result = gst_element_get_state(m_pipeline.get(), &state, &pending, 0);
+
+    if (result == GST_STATE_CHANGE_ASYNC)
+        state = pending;
+
+    return state == GST_STATE_PAUSED;
 }
 
 bool MediaPlayerPrivateGStreamer::seeking() const
@@ -950,6 +960,7 @@ void MediaPlayerPrivateGStreamer::setRate(float rate)
     m_playbackRate = rate;
     m_changingRate = true;
 
+    GST_DEBUG("III, gst_element_get_state");
     gst_element_get_state(m_pipeline.get(), &state, &pending, 0);
 
     if (!rate) {
@@ -1044,7 +1055,7 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
     // We ignore state changes from internal elements. They are forwarded to playbin2 anyway.
     bool messageSourceIsPlaybin = GST_MESSAGE_SRC(message) == reinterpret_cast<GstObject*>(m_pipeline.get());
 
-    GST_ERROR("Message %s received from element %s", GST_MESSAGE_TYPE_NAME(message), GST_MESSAGE_SRC_NAME(message));
+    GST_DEBUG("Message %s received from element %s", GST_MESSAGE_TYPE_NAME(message), GST_MESSAGE_SRC_NAME(message));
     switch (GST_MESSAGE_TYPE(message)) {
     case GST_MESSAGE_ERROR:
         if (m_resetPipeline)
@@ -1089,6 +1100,8 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
         {
             GST_ERROR("ASYNC_DONE BUT MESSAGE SOURCE IS NOT PLAYBIN");
             break;
+        } else {
+            GST_DEBUG("ASYNC_DONE AND MESSAGE SOURCE IS PLAYBIN");
         }
         asyncStateChangeDone();
         break;
@@ -1128,6 +1141,7 @@ void MediaPlayerPrivateGStreamer::handleMessage(GstMessage* message)
         break;
     case GST_MESSAGE_REQUEST_STATE:
         gst_message_parse_request_state(message, &requestedState);
+        GST_DEBUG("III, gst_element_get_state");
         gst_element_get_state(m_pipeline.get(), &currentState, nullptr, 250 * GST_NSECOND);
         if (requestedState < currentState) {
             GUniquePtr<gchar> elementName(gst_element_get_name(GST_ELEMENT(message)));
@@ -1563,6 +1577,7 @@ void MediaPlayerPrivateGStreamer::updateStates()
     GstState state;
     GstState pending;
 
+    GST_DEBUG("III, gst_element_get_state");
     GstStateChangeReturn getStateResult = gst_element_get_state(m_pipeline.get(), &state, &pending, 250 * GST_NSECOND);
 
     bool shouldUpdatePlaybackState = false;
@@ -1622,6 +1637,7 @@ void MediaPlayerPrivateGStreamer::updateStates()
 
         // Sync states where needed.
         if (state == GST_STATE_PAUSED) {
+            GST_WARNING("Switching to paused, internal player state: paused %d", m_player->paused());
             if (!m_volumeAndMuteInitialized) {
                 notifyPlayerOfVolumeChange();
                 notifyPlayerOfMute();
@@ -1633,6 +1649,7 @@ void MediaPlayerPrivateGStreamer::updateStates()
                 changePipelineState(GST_STATE_PLAYING);
             }
         } else if (state == GST_STATE_PLAYING) {
+            GST_WARNING("Switching to playing, internal player state: paused %d", m_player->paused());
             m_paused = false;
 
             if ((m_buffering && !isLiveStream()) || !m_playbackRate) {
@@ -1785,6 +1802,7 @@ bool MediaPlayerPrivateGStreamer::loadNextLocation()
             changePipelineState(GST_STATE_READY);
 
             GstState state;
+            GST_DEBUG("III, gst_element_get_state");
             gst_element_get_state(m_pipeline.get(), &state, nullptr, 0);
             if (state <= GST_STATE_READY) {
                 // Set the new uri and start playing.
@@ -1899,7 +1917,7 @@ static HashSet<String, ASCIICaseInsensitiveHash>& mimeTypeSet()
             {AudioDecoder, "audio/x-ac3", { }},
             {AudioDecoder, "audio/x-eac3", {"audio/x-ac3"}},
             {AudioDecoder, "audio/x-dts", { }},
-            {VideoDecoder, "video/x-h264, profile=(string)high", {"video/mp4", "video/x-m4v"}},
+            {VideoDecoder, "video/x-h264, profile=(string)high, width=[0, 1920], height=[0, 1080]", {"video/mp4", "video/x-m4v"}},
             {VideoDecoder, "video/x-msvideocodec", {"video/x-msvideo"}},
             {VideoDecoder, "video/x-h263", { }},
             {VideoDecoder, "video/mpegts", { }},

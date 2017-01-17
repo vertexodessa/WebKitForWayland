@@ -207,6 +207,7 @@ int main(int argc, char* argv[])
     WKPreferencesSetAllowRunningOfInsecureContent(preferences.get(), true);
     WKPreferencesSetAllowDisplayOfInsecureContent(preferences.get(), true);
     WKPreferencesSetLogsPageMessagesToSystemConsoleEnabled(preferences.get(), true);
+    WKPreferencesSetWebSecurityEnabled(preferences.get(), false);
 
     auto view = adoptWK(createView(pageConfiguration.get()));
 
