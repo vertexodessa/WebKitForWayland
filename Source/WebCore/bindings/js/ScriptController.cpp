@@ -57,12 +57,14 @@
 #include <wtf/Threading.h>
 #include <wtf/text/TextPosition.h>
 
+#include <wtf/macros.h>
+
 using namespace JSC;
 
 namespace WebCore {
 
 static void collectGarbageAfterWindowShellDestruction()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Make sure to GC Extra Soon(tm) during memory pressure conditions
     // to soften high peaks of memory usage during navigation.
     if (MemoryPressureHandler::singleton().isUnderMemoryPressure()) {
@@ -74,7 +76,7 @@ static void collectGarbageAfterWindowShellDestruction()
 }
 
 void ScriptController::initializeThreading()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if !PLATFORM(IOS)
     JSC::initializeThreading();
     WTF::initializeMainThread();
@@ -91,11 +93,11 @@ ScriptController::ScriptController(Frame& frame)
 #if PLATFORM(COCOA)
     , m_windowScriptObject(0)
 #endif
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 ScriptController::~ScriptController()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     disconnectPlatformScriptObjects();
 
     if (m_cacheableBindingRootObject) {
@@ -116,14 +118,14 @@ ScriptController::~ScriptController()
 }
 
 void ScriptController::destroyWindowShell(DOMWrapperWorld& world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_windowShells.contains(&world));
     m_windowShells.remove(&world);
     world.didDestroyWindowShell(this);
 }
 
 JSDOMWindowShell& ScriptController::createWindowShell(DOMWrapperWorld& world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_windowShells.contains(&world));
 
     VM& vm = world.vm();
@@ -137,7 +139,7 @@ JSDOMWindowShell& ScriptController::createWindowShell(DOMWrapperWorld& world)
 }
 
 JSValue ScriptController::evaluateInWorld(const ScriptSourceCode& sourceCode, DOMWrapperWorld& world, ExceptionDetails* exceptionDetails)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     JSLockHolder lock(world.vm());
 
     const SourceCode& jsSourceCode = sourceCode.jsSourceCode();
@@ -175,29 +177,29 @@ JSValue ScriptController::evaluateInWorld(const ScriptSourceCode& sourceCode, DO
 }
 
 JSValue ScriptController::evaluate(const ScriptSourceCode& sourceCode, ExceptionDetails* exceptionDetails)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return evaluateInWorld(sourceCode, mainThreadNormalWorld(), exceptionDetails);
 }
 
 Ref<DOMWrapperWorld> ScriptController::createWorld()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return DOMWrapperWorld::create(JSDOMWindow::commonVM());
 }
 
 Vector<JSC::Strong<JSDOMWindowShell>> ScriptController::windowShells()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<JSC::Strong<JSDOMWindowShell>> windowShells;
     copyValuesToVector(m_windowShells, windowShells);
     return windowShells;
 }
 
 void ScriptController::getAllWorlds(Vector<Ref<DOMWrapperWorld>>& worlds)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static_cast<JSVMClientData*>(JSDOMWindow::commonVM().clientData)->getAllWorlds(worlds);
 }
 
 void ScriptController::clearWindowShell(DOMWindow* newDOMWindow, bool goingIntoPageCache)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_windowShells.isEmpty())
         return;
 
@@ -236,7 +238,7 @@ void ScriptController::clearWindowShell(DOMWindow* newDOMWindow, bool goingIntoP
 }
 
 JSDOMWindowShell* ScriptController::initScript(DOMWrapperWorld& world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_windowShells.contains(&world));
 
     JSLockHolder lock(world.vm());
@@ -260,7 +262,7 @@ JSDOMWindowShell* ScriptController::initScript(DOMWrapperWorld& world)
 }
 
 TextPosition ScriptController::eventHandlerPosition() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: If we are not currently parsing, we should use our current location
     // in JavaScript, to cover cases like "element.setAttribute('click', ...)".
 
@@ -273,7 +275,7 @@ TextPosition ScriptController::eventHandlerPosition() const
 }
 
 void ScriptController::enableEval()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     JSDOMWindowShell* windowShell = existingWindowShell(mainThreadNormalWorld());
     if (!windowShell)
         return;
@@ -281,7 +283,7 @@ void ScriptController::enableEval()
 }
 
 void ScriptController::disableEval(const String& errorMessage)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     JSDOMWindowShell* windowShell = existingWindowShell(mainThreadNormalWorld());
     if (!windowShell)
         return;
@@ -289,17 +291,17 @@ void ScriptController::disableEval(const String& errorMessage)
 }
 
 bool ScriptController::processingUserGesture()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return UserGestureIndicator::processingUserGesture();
 }
 
 bool ScriptController::processingUserGestureForMedia()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return UserGestureIndicator::processingUserGestureForMedia();
 }
 
 bool ScriptController::canAccessFromCurrentOrigin(Frame *frame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ExecState* exec = JSMainThreadExecState::currentState();
     if (exec)
         return shouldAllowAccessToFrame(exec, frame);
@@ -309,14 +311,14 @@ bool ScriptController::canAccessFromCurrentOrigin(Frame *frame)
 }
 
 void ScriptController::attachDebugger(JSC::Debugger* debugger)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<JSC::Strong<JSDOMWindowShell>> windowShells = this->windowShells();
     for (size_t i = 0; i < windowShells.size(); ++i)
         attachDebugger(windowShells[i].get(), debugger);
 }
 
 void ScriptController::attachDebugger(JSDOMWindowShell* shell, JSC::Debugger* debugger)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!shell)
         return;
 
@@ -329,7 +331,7 @@ void ScriptController::attachDebugger(JSDOMWindowShell* shell, JSC::Debugger* de
 }
 
 void ScriptController::updateDocument()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<JSC::Strong<JSDOMWindowShell>> windowShells = this->windowShells();
     for (size_t i = 0; i < windowShells.size(); ++i) {
         JSDOMWindowShell* windowShell = windowShells[i].get();
@@ -339,7 +341,7 @@ void ScriptController::updateDocument()
 }
 
 Bindings::RootObject* ScriptController::cacheableBindingRootObject()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!canExecuteScripts(NotAboutToExecuteScript))
         return 0;
 
@@ -351,7 +353,7 @@ Bindings::RootObject* ScriptController::cacheableBindingRootObject()
 }
 
 Bindings::RootObject* ScriptController::bindingRootObject()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!canExecuteScripts(NotAboutToExecuteScript))
         return 0;
 
@@ -363,7 +365,7 @@ Bindings::RootObject* ScriptController::bindingRootObject()
 }
 
 RefPtr<Bindings::RootObject> ScriptController::createRootObject(void* nativeHandle)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RootObjectMap::iterator it = m_rootObjects.find(nativeHandle);
     if (it != m_rootObjects.end())
         return it->value;
@@ -375,7 +377,7 @@ RefPtr<Bindings::RootObject> ScriptController::createRootObject(void* nativeHand
 }
 
 void ScriptController::collectIsolatedContexts(Vector<std::pair<JSC::ExecState*, SecurityOrigin*>>& result)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (ShellMap::iterator iter = m_windowShells.begin(); iter != m_windowShells.end(); ++iter) {
         JSC::ExecState* exec = iter->value->window()->globalExec();
         SecurityOrigin* origin = iter->value->window()->wrapped().document()->securityOrigin();
@@ -385,7 +387,7 @@ void ScriptController::collectIsolatedContexts(Vector<std::pair<JSC::ExecState*,
 
 #if ENABLE(NETSCAPE_PLUGIN_API)
 NPObject* ScriptController::windowScriptNPObject()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_windowScriptNPObject) {
         JSLockHolder lock(JSDOMWindowBase::commonVM());
         if (canExecuteScripts(NotAboutToExecuteScript)) {
@@ -408,7 +410,7 @@ NPObject* ScriptController::windowScriptNPObject()
 
 #if !PLATFORM(COCOA)
 RefPtr<JSC::Bindings::Instance> ScriptController::createScriptInstanceForWidget(Widget* widget)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!is<PluginViewBase>(*widget))
         return nullptr;
 
@@ -417,7 +419,7 @@ RefPtr<JSC::Bindings::Instance> ScriptController::createScriptInstanceForWidget(
 #endif
 
 JSObject* ScriptController::jsObjectForPluginElement(HTMLPlugInElement* plugin)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Can't create JSObjects when JavaScript is disabled
     if (!canExecuteScripts(NotAboutToExecuteScript))
         return 0;
@@ -437,17 +439,17 @@ JSObject* ScriptController::jsObjectForPluginElement(HTMLPlugInElement* plugin)
 #if !PLATFORM(COCOA)
 
 void ScriptController::updatePlatformScriptObjects()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void ScriptController::disconnectPlatformScriptObjects()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 #endif
 
 void ScriptController::cleanupScriptObjectsForPlugin(void* nativeHandle)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RootObjectMap::iterator it = m_rootObjects.find(nativeHandle);
 
     if (it == m_rootObjects.end())
@@ -458,7 +460,7 @@ void ScriptController::cleanupScriptObjectsForPlugin(void* nativeHandle)
 }
 
 void ScriptController::clearScriptObjects()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     JSLockHolder lock(JSDOMWindowBase::commonVM());
 
     RootObjectMap::const_iterator end = m_rootObjects.end();
@@ -484,7 +486,7 @@ void ScriptController::clearScriptObjects()
 }
 
 JSValue ScriptController::executeScriptInWorld(DOMWrapperWorld& world, const String& script, bool forceUserGesture)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     UserGestureIndicator gestureIndicator(forceUserGesture ? Optional<ProcessingUserGestureState>(ProcessingUserGesture) : Nullopt);
     ScriptSourceCode sourceCode(script, m_frame.document()->url());
 
@@ -495,7 +497,7 @@ JSValue ScriptController::executeScriptInWorld(DOMWrapperWorld& world, const Str
 }
 
 bool ScriptController::canExecuteScripts(ReasonForCallingCanExecuteScripts reason)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_frame.document() && m_frame.document()->isSandboxed(SandboxScripts)) {
         // FIXME: This message should be moved off the console once a solution to https://bugs.webkit.org/show_bug.cgi?id=103274 exists.
         if (reason == AboutToExecuteScript)
@@ -510,13 +512,13 @@ bool ScriptController::canExecuteScripts(ReasonForCallingCanExecuteScripts reaso
 }
 
 JSValue ScriptController::executeScript(const String& script, bool forceUserGesture, ExceptionDetails* exceptionDetails)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     UserGestureIndicator gestureIndicator(forceUserGesture ? Optional<ProcessingUserGestureState>(ProcessingUserGesture) : Nullopt);
     return executeScript(ScriptSourceCode(script, m_frame.document()->url()), exceptionDetails);
 }
 
 JSValue ScriptController::executeScript(const ScriptSourceCode& sourceCode, ExceptionDetails* exceptionDetails)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!canExecuteScripts(AboutToExecuteScript) || isPaused())
         return { }; // FIXME: Would jsNull be better?
 
@@ -526,7 +528,7 @@ JSValue ScriptController::executeScript(const ScriptSourceCode& sourceCode, Exce
 }
 
 bool ScriptController::executeIfJavaScriptURL(const URL& url, ShouldReplaceDocumentIfJavaScriptURL shouldReplaceDocumentIfJavaScriptURL)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!protocolIsJavaScript(url))
         return false;
 

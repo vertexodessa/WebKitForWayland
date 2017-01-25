@@ -61,18 +61,20 @@
 #include <wtf/StdLibExtras.h>
 #include <wtf/text/CString.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 using namespace HTMLNames;
 using namespace WTF;
 
 Ref<HTMLElement> HTMLElement::create(const QualifiedName& tagName, Document& document)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return adoptRef(*new HTMLElement(tagName, document));
 }
 
 String HTMLElement::nodeName() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Would be nice to have an AtomicString lookup based off uppercase
     // ASCII characters that does not have to copy the string on a hit in the hash.
     if (document().isHTMLDocument()) {
@@ -84,7 +86,7 @@ String HTMLElement::nodeName() const
 }
 
 static inline CSSValueID unicodeBidiAttributeForDirAuto(HTMLElement& element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (element.hasTagName(preTag) || element.hasTagName(textareaTag))
         return CSSValueWebkitPlaintext;
     // FIXME: For bdo element, dir="auto" should result in "bidi-override isolate" but we don't support having multiple values in unicode-bidi yet.
@@ -93,7 +95,7 @@ static inline CSSValueID unicodeBidiAttributeForDirAuto(HTMLElement& element)
 }
 
 unsigned HTMLElement::parseBorderWidthAttribute(const AtomicString& value) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Optional<int> borderWidth = parseHTMLNonNegativeInteger(value))
         return borderWidth.value();
 
@@ -101,13 +103,13 @@ unsigned HTMLElement::parseBorderWidthAttribute(const AtomicString& value) const
 }
 
 void HTMLElement::applyBorderAttributeToStyle(const AtomicString& value, MutableStyleProperties& style)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     addPropertyToPresentationAttributeStyle(style, CSSPropertyBorderWidth, parseBorderWidthAttribute(value), CSSPrimitiveValue::CSS_PX);
     addPropertyToPresentationAttributeStyle(style, CSSPropertyBorderStyle, CSSValueSolid);
 }
 
 void HTMLElement::mapLanguageAttributeToLocale(const AtomicString& value, MutableStyleProperties& style)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!value.isEmpty()) {
         // Have to quote so the locale id is treated as a string instead of as a CSS keyword.
         addPropertyToPresentationAttributeStyle(style, CSSPropertyWebkitLocale, quoteCSSString(value));
@@ -118,14 +120,14 @@ void HTMLElement::mapLanguageAttributeToLocale(const AtomicString& value, Mutabl
 }
 
 bool HTMLElement::isPresentationAttribute(const QualifiedName& name) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (name == alignAttr || name == contenteditableAttr || name == hiddenAttr || name == langAttr || name.matches(XMLNames::langAttr) || name == draggableAttr || name == dirAttr)
         return true;
     return StyledElement::isPresentationAttribute(name);
 }
 
 static bool isLTROrRTLIgnoringCase(const AtomicString& dirAttributeValue)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return equalLettersIgnoringASCIICase(dirAttributeValue, "rtl") || equalLettersIgnoringASCIICase(dirAttributeValue, "ltr");
 }
 
@@ -137,7 +139,7 @@ enum class ContentEditableType {
 };
 
 static inline ContentEditableType contentEditableType(const AtomicString& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (value.isNull())
         return ContentEditableType::Inherit;
     if (value.isEmpty() || equalLettersIgnoringASCIICase(value, "true"))
@@ -151,12 +153,12 @@ static inline ContentEditableType contentEditableType(const AtomicString& value)
 }
 
 static ContentEditableType contentEditableType(const HTMLElement& element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return contentEditableType(element.attributeWithoutSynchronization(contenteditableAttr));
 }
 
 void HTMLElement::collectStyleForPresentationAttribute(const QualifiedName& name, const AtomicString& value, MutableStyleProperties& style)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (name == alignAttr) {
         if (equalLettersIgnoringASCIICase(value, "middle"))
             addPropertyToPresentationAttributeStyle(style, CSSPropertyTextAlign, CSSValueCenter);
@@ -211,7 +213,7 @@ void HTMLElement::collectStyleForPresentationAttribute(const QualifiedName& name
 }
 
 HTMLElement::EventHandlerNameMap HTMLElement::createEventHandlerNameMap()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     EventHandlerNameMap map;
 
     static const QualifiedName* const table[] = {
@@ -337,7 +339,7 @@ HTMLElement::EventHandlerNameMap HTMLElement::createEventHandlerNameMap()
 }
 
 void HTMLElement::populateEventHandlerNameMap(EventHandlerNameMap& map, const QualifiedName* const table[], size_t tableSize)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (size_t i = 0; i < tableSize; ++i) {
         auto* entry = table[i];
 
@@ -354,7 +356,7 @@ void HTMLElement::populateEventHandlerNameMap(EventHandlerNameMap& map, const Qu
 }
 
 const AtomicString& HTMLElement::eventNameForEventHandlerAttribute(const QualifiedName& attributeName, const EventHandlerNameMap& map)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!attributeName.localName().isNull());
 
     // Event handler attributes have no namespace.
@@ -371,13 +373,13 @@ const AtomicString& HTMLElement::eventNameForEventHandlerAttribute(const Qualifi
 }
 
 const AtomicString& HTMLElement::eventNameForEventHandlerAttribute(const QualifiedName& attributeName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<EventHandlerNameMap> map = createEventHandlerNameMap();
     return eventNameForEventHandlerAttribute(attributeName, map.get());
 }
 
 Node::Editability HTMLElement::editabilityFromContentEditableAttr(const Node& node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (auto* startElement = is<Element>(node) ? &downcast<Element>(node) : node.parentElement()) {
         for (auto& element : lineageOfType<HTMLElement>(*startElement)) {
             switch (contentEditableType(element)) {
@@ -401,12 +403,12 @@ Node::Editability HTMLElement::editabilityFromContentEditableAttr(const Node& no
 }
 
 bool HTMLElement::matchesReadWritePseudoClass() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return editabilityFromContentEditableAttr(*this) != Editability::ReadOnly;
 }
 
 void HTMLElement::parseAttribute(const QualifiedName& name, const AtomicString& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (name == dirAttr) {
         dirAttributeChanged(value);
         return;
@@ -426,7 +428,7 @@ void HTMLElement::parseAttribute(const QualifiedName& name, const AtomicString& 
 }
 
 Ref<DocumentFragment> HTMLElement::textToFragment(const String& text, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ec = 0;
 
     auto fragment = DocumentFragment::create(document());
@@ -464,7 +466,7 @@ Ref<DocumentFragment> HTMLElement::textToFragment(const String& text, ExceptionC
 }
 
 static inline bool shouldProhibitSetInnerOuterText(const HTMLElement& element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return element.hasTagName(colTag)
         || element.hasTagName(colgroupTag)
         || element.hasTagName(framesetTag)
@@ -482,7 +484,7 @@ static inline bool shouldProhibitSetInnerOuterText(const HTMLElement& element)
 // not in a defined state (e.g. the attribute is missing and there is no missing value default).
 // http://www.whatwg.org/specs/web-apps/current-work/multipage/common-dom-interfaces.html#limited-to-only-known-values
 static inline const AtomicString& toValidDirValue(const AtomicString& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<AtomicString> ltrValue("ltr", AtomicString::ConstructFromLiteral);
     static NeverDestroyed<AtomicString> rtlValue("rtl", AtomicString::ConstructFromLiteral);
     static NeverDestroyed<AtomicString> autoValue("auto", AtomicString::ConstructFromLiteral);
@@ -496,17 +498,17 @@ static inline const AtomicString& toValidDirValue(const AtomicString& value)
 }
 
 const AtomicString& HTMLElement::dir() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return toValidDirValue(attributeWithoutSynchronization(dirAttr));
 }
 
 void HTMLElement::setDir(const AtomicString& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setAttributeWithoutSynchronization(dirAttr, value);
 }
 
 void HTMLElement::setInnerText(const String& text, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (ieForbidsInsertHTML()) {
         ec = NO_MODIFICATION_ALLOWED_ERR;
         return;
@@ -551,7 +553,7 @@ void HTMLElement::setInnerText(const String& text, ExceptionCode& ec)
 }
 
 void HTMLElement::setOuterText(const String& text, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (ieForbidsInsertHTML()) {
         ec = NO_MODIFICATION_ALLOWED_ERR;
         return;
@@ -592,7 +594,7 @@ void HTMLElement::setOuterText(const String& text, ExceptionCode& ec)
 }
 
 void HTMLElement::applyAlignmentAttributeToStyle(const AtomicString& alignment, MutableStyleProperties& style)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Vertical alignment with respect to the current baseline of the text
     // right or left means floating images.
     CSSValueID floatValue = CSSValueInvalid;
@@ -627,17 +629,17 @@ void HTMLElement::applyAlignmentAttributeToStyle(const AtomicString& alignment, 
 }
 
 bool HTMLElement::hasCustomFocusLogic() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return false;
 }
 
 bool HTMLElement::supportsFocus() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return Element::supportsFocus() || (hasEditableStyle() && parentNode() && !parentNode()->hasEditableStyle());
 }
 
 String HTMLElement::contentEditable() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (contentEditableType(*this)) {
     case ContentEditableType::Inherit:
         return ASCIILiteral("inherit");
@@ -652,7 +654,7 @@ String HTMLElement::contentEditable() const
 }
 
 void HTMLElement::setContentEditable(const String& enabled, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (equalLettersIgnoringASCIICase(enabled, "true"))
         setAttributeWithoutSynchronization(contenteditableAttr, AtomicString("true", AtomicString::ConstructFromLiteral));
     else if (equalLettersIgnoringASCIICase(enabled, "false"))
@@ -666,53 +668,53 @@ void HTMLElement::setContentEditable(const String& enabled, ExceptionCode& ec)
 }
 
 bool HTMLElement::draggable() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return equalLettersIgnoringASCIICase(attributeWithoutSynchronization(draggableAttr), "true");
 }
 
 void HTMLElement::setDraggable(bool value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setAttributeWithoutSynchronization(draggableAttr, value
         ? AtomicString("true", AtomicString::ConstructFromLiteral)
         : AtomicString("false", AtomicString::ConstructFromLiteral));
 }
 
 bool HTMLElement::spellcheck() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return isSpellCheckingEnabled();
 }
 
 void HTMLElement::setSpellcheck(bool enable)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setAttributeWithoutSynchronization(spellcheckAttr, enable
         ? AtomicString("true", AtomicString::ConstructFromLiteral)
         : AtomicString("false", AtomicString::ConstructFromLiteral));
 }
 
 void HTMLElement::click()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     dispatchSimulatedClickForBindings(nullptr);
 }
 
 void HTMLElement::accessKeyAction(bool sendMouseEvents)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     dispatchSimulatedClick(nullptr, sendMouseEvents ? SendMouseUpDownEvents : SendNoEvents);
 }
 
 String HTMLElement::title() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return attributeWithoutSynchronization(titleAttr);
 }
 
 int HTMLElement::tabIndex() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (supportsFocus())
         return Element::tabIndex();
     return -1;
 }
 
 TranslateAttributeMode HTMLElement::translateAttributeMode() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const AtomicString& value = attributeWithoutSynchronization(translateAttr);
 
     if (value.isNull())
@@ -726,7 +728,7 @@ TranslateAttributeMode HTMLElement::translateAttributeMode() const
 }
 
 bool HTMLElement::translate() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& element : lineageOfType<HTMLElement>(*this)) {
         TranslateAttributeMode mode = element.translateAttributeMode();
         if (mode == TranslateAttributeInherit)
@@ -740,12 +742,12 @@ bool HTMLElement::translate() const
 }
 
 void HTMLElement::setTranslate(bool enable)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setAttributeWithoutSynchronization(translateAttr, enable ? "yes" : "no");
 }
 
 bool HTMLElement::rendererIsNeeded(const RenderStyle& style)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (hasTagName(noscriptTag)) {
         Frame* frame = document().frame();
         if (frame && frame->script().canExecuteScripts(NotAboutToExecuteScript))
@@ -759,17 +761,17 @@ bool HTMLElement::rendererIsNeeded(const RenderStyle& style)
 }
 
 RenderPtr<RenderElement> HTMLElement::createElementRenderer(RenderStyle&& style, const RenderTreePosition&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return RenderElement::createFor(*this, WTFMove(style));
 }
 
 HTMLFormElement* HTMLElement::virtualForm() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return HTMLFormElement::findClosestFormAncestor(*this);
 }
 
 static inline bool elementAffectsDirectionality(const Node& node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!is<HTMLElement>(node))
         return false;
     const HTMLElement& element = downcast<HTMLElement>(node);
@@ -777,7 +779,7 @@ static inline bool elementAffectsDirectionality(const Node& node)
 }
 
 static void setHasDirAutoFlagRecursively(Node* firstNode, bool flag, Node* lastNode = nullptr)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     firstNode->setSelfOrAncestorHasDirAutoAttribute(flag);
 
     Node* node = firstNode->firstChild();
@@ -800,19 +802,19 @@ static void setHasDirAutoFlagRecursively(Node* firstNode, bool flag, Node* lastN
 }
 
 void HTMLElement::childrenChanged(const ChildChange& change)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     StyledElement::childrenChanged(change);
     adjustDirectionalityIfNeededAfterChildrenChanged(change.previousSiblingElement, change.type);
 }
 
 bool HTMLElement::hasDirectionAuto() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const AtomicString& direction = attributeWithoutSynchronization(dirAttr);
     return (hasTagName(bdiTag) && direction.isNull()) || equalLettersIgnoringASCIICase(direction, "auto");
 }
 
 TextDirection HTMLElement::directionalityIfhasDirAutoAttribute(bool& isAuto) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!(selfOrAncestorHasDirAutoAttribute() && hasDirectionAuto())) {
         isAuto = false;
         return LTR;
@@ -823,7 +825,7 @@ TextDirection HTMLElement::directionalityIfhasDirAutoAttribute(bool& isAuto) con
 }
 
 TextDirection HTMLElement::directionality(Node** strongDirectionalityTextNode) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (is<HTMLTextFormControlElement>(*this)) {
         HTMLTextFormControlElement& textElement = downcast<HTMLTextFormControlElement>(const_cast<HTMLElement&>(*this));
         bool hasStrongDirectionality;
@@ -868,7 +870,7 @@ TextDirection HTMLElement::directionality(Node** strongDirectionalityTextNode) c
 }
 
 void HTMLElement::dirAttributeChanged(const AtomicString& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Element* parent = parentElement();
 
     if (is<HTMLElement>(parent) && parent->selfOrAncestorHasDirAutoAttribute())
@@ -879,7 +881,7 @@ void HTMLElement::dirAttributeChanged(const AtomicString& value)
 }
 
 void HTMLElement::adjustDirectionalityIfNeededAfterChildAttributeChanged(Element* child)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(selfOrAncestorHasDirAutoAttribute());
     Node* strongDirectionalityTextNode;
     TextDirection textDirection = directionality(&strongDirectionalityTextNode);
@@ -895,7 +897,7 @@ void HTMLElement::adjustDirectionalityIfNeededAfterChildAttributeChanged(Element
 }
 
 void HTMLElement::calculateAndAdjustDirectionality()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Node* strongDirectionalityTextNode;
     TextDirection textDirection = directionality(&strongDirectionalityTextNode);
     setHasDirAutoFlagRecursively(this, true, strongDirectionalityTextNode);
@@ -904,7 +906,7 @@ void HTMLElement::calculateAndAdjustDirectionality()
 }
 
 void HTMLElement::adjustDirectionalityIfNeededAfterChildrenChanged(Element* beforeChange, ChildChangeType changeType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: This function looks suspicious.
 
     if (!selfOrAncestorHasDirAutoAttribute())
@@ -928,7 +930,7 @@ void HTMLElement::adjustDirectionalityIfNeededAfterChildrenChanged(Element* befo
 }
 
 void HTMLElement::addHTMLLengthToStyle(MutableStyleProperties& style, CSSPropertyID propertyID, const String& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: This function should not spin up the CSS parser, but should instead just figure out the correct
     // length unit and make the appropriate parsed value.
 
@@ -960,7 +962,7 @@ void HTMLElement::addHTMLLengthToStyle(MutableStyleProperties& style, CSSPropert
 }
 
 static RGBA32 parseColorStringWithCrazyLegacyRules(const String& colorString)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Per spec, only look at the first 128 digits of the string.
     const size_t maxColorLength = 128;
     // We'll pad the buffer with two extra 0s later, so reserve two more than the max.
@@ -1017,7 +1019,7 @@ static RGBA32 parseColorStringWithCrazyLegacyRules(const String& colorString)
 
 // Color parsing that matches HTML's "rules for parsing a legacy color value"
 void HTMLElement::addHTMLColorToStyle(MutableStyleProperties& style, CSSPropertyID propertyID, const String& attributeValue)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // An empty string doesn't apply a color. (One containing only whitespace does, which is why this check occurs before stripping.)
     if (attributeValue.isEmpty())
         return;
@@ -1045,17 +1047,17 @@ void HTMLElement::addHTMLColorToStyle(MutableStyleProperties& style, CSSProperty
 }
 
 bool HTMLElement::willRespondToMouseMoveEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !isDisabledFormControl() && Element::willRespondToMouseMoveEvents();
 }
 
 bool HTMLElement::willRespondToMouseWheelEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !isDisabledFormControl() && Element::willRespondToMouseWheelEvents();
 }
 
 bool HTMLElement::willRespondToMouseClickEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !isDisabledFormControl() && Element::willRespondToMouseClickEvents();
 }
 
@@ -1067,7 +1069,7 @@ bool HTMLElement::willRespondToMouseClickEvents()
 void dumpInnerHTML(WebCore::HTMLElement*);
 
 void dumpInnerHTML(WebCore::HTMLElement* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     printf("%s\n", element->innerHTML().ascii().data());
 }
 

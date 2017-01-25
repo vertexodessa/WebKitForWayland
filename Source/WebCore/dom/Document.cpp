@@ -271,6 +271,9 @@
 #include "XSLTProcessor.h"
 #endif
 
+
+#include <wtf/macros.h>
+
 using namespace WTF;
 using namespace Unicode;
 
@@ -298,7 +301,7 @@ static const unsigned cMaxWriteRecursionDepth = 21;
 // It also contains complete tables. If we decide it's better, we could include those instead of the following code.
 
 static inline bool isValidNameStart(UChar32 c)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // rule (e) above
     if ((c >= 0x02BB && c <= 0x02C1) || c == 0x559 || c == 0x6E5 || c == 0x6E6)
         return true;
@@ -324,7 +327,7 @@ static inline bool isValidNameStart(UChar32 c)
 }
 
 static inline bool isValidNamePart(UChar32 c)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // rules (a), (e), and (i) above
     if (isValidNameStart(c))
         return true;
@@ -354,7 +357,7 @@ static inline bool isValidNamePart(UChar32 c)
 }
 
 static Widget* widgetForElement(Element* focusedElement)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!focusedElement)
         return nullptr;
     auto* renderer = focusedElement->renderer();
@@ -364,7 +367,7 @@ static Widget* widgetForElement(Element* focusedElement)
 }
 
 static bool acceptsEditingFocus(Node* node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(node);
     ASSERT(node->hasEditableStyle());
 
@@ -377,7 +380,7 @@ static bool acceptsEditingFocus(Node* node)
 }
 
 static bool canAccessAncestor(const SecurityOrigin* activeSecurityOrigin, Frame* targetFrame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // targetFrame can be 0 when we're trying to navigate a top-level frame
     // that has a 0 opener.
     if (!targetFrame)
@@ -405,7 +408,7 @@ static bool canAccessAncestor(const SecurityOrigin* activeSecurityOrigin, Frame*
 }
 
 static void printNavigationErrorMessage(Frame* frame, const URL& activeURL, const char* reason)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String message = "Unsafe JavaScript attempt to initiate navigation for frame with URL '" + frame->document()->url().string() + "' from frame with URL '" + activeURL.string() + "'. " + reason + "\n";
 
     // FIXME: should we print to the console of the document performing the navigation instead?
@@ -415,12 +418,12 @@ static void printNavigationErrorMessage(Frame* frame, const URL& activeURL, cons
 #if ENABLE(IOS_TEXT_AUTOSIZING)
 
 void TextAutoSizingTraits::constructDeletedValue(TextAutoSizingKey& slot)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     new (NotNull, &slot) TextAutoSizingKey(TextAutoSizingKey::Deleted);
 }
 
 bool TextAutoSizingTraits::isDeletedValue(const TextAutoSizingKey& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return value.isDeleted();
 }
 
@@ -429,7 +432,7 @@ bool TextAutoSizingTraits::isDeletedValue(const TextAutoSizingKey& value)
 uint64_t Document::s_globalTreeVersion = 0;
 
 HashSet<Document*>& Document::allDocuments()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<HashSet<Document*>> documents;
     return documents;
 }
@@ -546,7 +549,7 @@ Document::Document(Frame* frame, const URL& url, unsigned documentClasses, unsig
 #if ENABLE(WEB_SOCKETS)
     , m_socketProvider(page() ? &page()->socketProvider() : nullptr)
 #endif
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     allDocuments().add(this);
 
     // We depend on the url getting immediately set in subframes, but we
@@ -578,7 +581,7 @@ Document::Document(Frame* frame, const URL& url, unsigned documentClasses, unsig
 
 #if ENABLE(FULLSCREEN_API)
 static bool isAttributeOnAllOwners(const WebCore::QualifiedName& attribute, const WebCore::QualifiedName& prefixedAttribute, const HTMLFrameOwnerElement* owner)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!owner)
         return true;
     do {
@@ -590,7 +593,7 @@ static bool isAttributeOnAllOwners(const WebCore::QualifiedName& attribute, cons
 #endif
 
 Ref<Document> Document::create(ScriptExecutionContext& context)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<Document> document = adoptRef(*new Document(nullptr, URL()));
     document->setSecurityOriginPolicy(context.securityOriginPolicy());
 
@@ -598,7 +601,7 @@ Ref<Document> Document::create(ScriptExecutionContext& context)
 }
 
 Document::~Document()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     allDocuments().remove(this);
 
     ASSERT(!renderView());
@@ -672,7 +675,7 @@ Document::~Document()
 }
 
 void Document::removedLastRef()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_deletionHasBegun);
     if (m_referencingNodeCount) {
         // If removing a child removes the last node reference, we don't want the scope to be destroyed
@@ -725,7 +728,7 @@ void Document::removedLastRef()
 }
 
 void Document::commonTeardown()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (svgExtensions())
         accessSVGExtensions().pauseAnimations();
 
@@ -735,7 +738,7 @@ void Document::commonTeardown()
 }
 
 Element* Document::getElementByAccessKey(const String& key)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (key.isEmpty())
         return nullptr;
     if (!m_accessKeyMapValid) {
@@ -746,7 +749,7 @@ Element* Document::getElementByAccessKey(const String& key)
 }
 
 void Document::buildAccessKeyMap(TreeScope* scope)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(scope);
     for (auto& element : descendantsOfType<Element>(scope->rootNode())) {
         const AtomicString& accessKey = element.attributeWithoutSynchronization(accesskeyAttr);
@@ -759,28 +762,28 @@ void Document::buildAccessKeyMap(TreeScope* scope)
 }
 
 void Document::invalidateAccessKeyMap()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_accessKeyMapValid = false;
     m_elementsByAccessKey.clear();
 }
 
 void Document::addImageElementByCaseFoldedUsemap(const AtomicStringImpl& name, HTMLImageElement& element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_imagesByUsemap.add(name, element, *this);
 }
 
 void Document::removeImageElementByCaseFoldedUsemap(const AtomicStringImpl& name, HTMLImageElement& element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_imagesByUsemap.remove(name, element);
 }
 
 HTMLImageElement* Document::imageElementByCaseFoldedUsemap(const AtomicStringImpl& name) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_imagesByUsemap.getElementByCaseFoldedUsemap(name, *this);
 }
 
 SelectorQuery* Document::selectorQueryForString(const String& selectorString, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (selectorString.isEmpty()) {
         ec = SYNTAX_ERR;
         return nullptr;
@@ -792,19 +795,19 @@ SelectorQuery* Document::selectorQueryForString(const String& selectorString, Ex
 }
 
 void Document::clearSelectorQueryCache()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_selectorQueryCache = nullptr;
 }
 
 MediaQueryMatcher& Document::mediaQueryMatcher()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_mediaQueryMatcher)
         m_mediaQueryMatcher = MediaQueryMatcher::create(*this);
     return *m_mediaQueryMatcher;
 }
 
 void Document::setCompatibilityMode(DocumentCompatibilityMode mode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_compatibilityModeLocked || mode == m_compatibilityMode)
         return;
     bool wasInQuirksMode = inQuirksMode();
@@ -820,39 +823,39 @@ void Document::setCompatibilityMode(DocumentCompatibilityMode mode)
 }
 
 String Document::compatMode() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return inQuirksMode() ? "BackCompat" : "CSS1Compat";
 }
 
 void Document::resetLinkColor()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_linkColor = Color(0, 0, 238);
 }
 
 void Document::resetVisitedLinkColor()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_visitedLinkColor = Color(85, 26, 139);    
 }
 
 void Document::resetActiveLinkColor()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_activeLinkColor.setNamedColor("red");
 }
 
 DOMImplementation& Document::implementation()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_implementation)
         m_implementation = std::make_unique<DOMImplementation>(*this);
     return *m_implementation;
 }
 
 bool Document::hasManifest() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return documentElement() && documentElement()->hasTagName(htmlTag) && documentElement()->hasAttributeWithoutSynchronization(manifestAttr);
 }
 
 DocumentType* Document::doctype() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Node* node = firstChild(); node; node = node->nextSibling()) {
         if (node->isDocumentTypeNode())
             return static_cast<DocumentType*>(node);
@@ -861,7 +864,7 @@ DocumentType* Document::doctype() const
 }
 
 void Document::childrenChanged(const ChildChange& change)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ContainerNode::childrenChanged(change);
 
 #if PLATFORM(IOS)
@@ -882,7 +885,7 @@ void Document::childrenChanged(const ChildChange& change)
 
 #if ENABLE(CUSTOM_ELEMENTS)
 static ALWAYS_INLINE RefPtr<HTMLElement> createUpgradeCandidateElement(Document& document, DOMWindow* window, const QualifiedName& name)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!window || !RuntimeEnabledFeatures::sharedFeatures().customElementsEnabled())
         return nullptr;
 
@@ -897,7 +900,7 @@ static ALWAYS_INLINE RefPtr<HTMLElement> createUpgradeCandidateElement(Document&
 #endif
 
 static RefPtr<Element> createHTMLElementWithNameValidation(Document& document, const AtomicString& localName, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<HTMLElement> element = HTMLElementFactory::createKnownElement(localName, document);
     if (LIKELY(element))
         return element;
@@ -929,7 +932,7 @@ static RefPtr<Element> createHTMLElementWithNameValidation(Document& document, c
 }
 
 RefPtr<Element> Document::createElementForBindings(const AtomicString& name, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isHTMLDocument())
         return createHTMLElementWithNameValidation(*this, name.convertToASCIILowercase(), ec);
 
@@ -945,22 +948,22 @@ RefPtr<Element> Document::createElementForBindings(const AtomicString& name, Exc
 }
 
 Ref<DocumentFragment> Document::createDocumentFragment()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return DocumentFragment::create(document());
 }
 
 Ref<Text> Document::createTextNode(const String& data)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return Text::create(*this, data);
 }
 
 Ref<Comment> Document::createComment(const String& data)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return Comment::create(*this, data);
 }
 
 RefPtr<CDATASection> Document::createCDATASection(const String& data, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isHTMLDocument()) {
         ec = NOT_SUPPORTED_ERR;
         return nullptr;
@@ -969,7 +972,7 @@ RefPtr<CDATASection> Document::createCDATASection(const String& data, ExceptionC
 }
 
 RefPtr<ProcessingInstruction> Document::createProcessingInstruction(const String& target, const String& data, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isValidName(target)) {
         ec = INVALID_CHARACTER_ERR;
         return nullptr;
@@ -984,18 +987,18 @@ RefPtr<ProcessingInstruction> Document::createProcessingInstruction(const String
 }
 
 Ref<Text> Document::createEditingTextNode(const String& text)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return Text::createEditingText(*this, text);
 }
 
 Ref<CSSStyleDeclaration> Document::createCSSStyleDeclaration()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<MutableStyleProperties> propertySet(MutableStyleProperties::create());
     return *propertySet->ensureCSSStyleDeclaration();
 }
 
 RefPtr<Node> Document::importNode(Node& nodeToImport, bool deep, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (nodeToImport.nodeType()) {
     case DOCUMENT_FRAGMENT_NODE:
         if (nodeToImport.isShadowRoot())
@@ -1023,7 +1026,7 @@ RefPtr<Node> Document::importNode(Node& nodeToImport, bool deep, ExceptionCode& 
 
 
 RefPtr<Node> Document::adoptNode(Node& source, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     EventQueueScope scope;
 
     switch (source.nodeType()) {
@@ -1062,7 +1065,7 @@ RefPtr<Node> Document::adoptNode(Node& source, ExceptionCode& ec)
 }
 
 bool Document::hasValidNamespaceForElements(const QualifiedName& qName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // These checks are from DOM Core Level 2, createElementNS
     // http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-DocCrElNS
     if (!qName.prefix().isEmpty() && qName.namespaceURI().isNull()) // createElementNS(null, "html:div")
@@ -1079,12 +1082,12 @@ bool Document::hasValidNamespaceForElements(const QualifiedName& qName)
 }
 
 bool Document::hasValidNamespaceForAttributes(const QualifiedName& qName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return hasValidNamespaceForElements(qName);
 }
 
 static Ref<HTMLElement> createFallbackHTMLElement(Document& document, const QualifiedName& name)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(CUSTOM_ELEMENTS)
     auto* window = document.domWindow();
     if (window) {
@@ -1107,7 +1110,7 @@ static Ref<HTMLElement> createFallbackHTMLElement(Document& document, const Qual
 
 // FIXME: This should really be in a possible ElementFactory class.
 Ref<Element> Document::createElement(const QualifiedName& name, bool createdByParser)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<Element> element;
 
     // FIXME: Use registered namespaces and look up in a hash to find the right factory.
@@ -1134,7 +1137,7 @@ Ref<Element> Document::createElement(const QualifiedName& name, bool createdByPa
 }
 
 CustomElementNameValidationStatus Document::validateCustomElementName(const AtomicString& localName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool containsHyphen = false;
     for (auto character : StringView(localName).codeUnits()) {
         if (isASCIIUpper(character))
@@ -1167,14 +1170,14 @@ CustomElementNameValidationStatus Document::validateCustomElementName(const Atom
 
 #if ENABLE(CSS_GRID_LAYOUT)
 bool Document::isCSSGridLayoutEnabled() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return RuntimeEnabledFeatures::sharedFeatures().isCSSGridLayoutEnabled();
 }
 #endif
 
 #if ENABLE(CSS_REGIONS)
 RefPtr<DOMNamedFlowCollection> Document::webkitGetNamedFlows()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!renderView())
         return nullptr;
 
@@ -1185,7 +1188,7 @@ RefPtr<DOMNamedFlowCollection> Document::webkitGetNamedFlows()
 #endif
 
 NamedFlowCollection& Document::namedFlows()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_namedFlows)
         m_namedFlows = NamedFlowCollection::create(this);
 
@@ -1193,7 +1196,7 @@ NamedFlowCollection& Document::namedFlows()
 }
 
 RefPtr<Element> Document::createElementNS(const String& namespaceURI, const String& qualifiedName, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String prefix, localName;
     if (!parseQualifiedName(qualifiedName, prefix, localName, ec))
         return nullptr;
@@ -1208,7 +1211,7 @@ RefPtr<Element> Document::createElementNS(const String& namespaceURI, const Stri
 }
 
 String Document::readyState() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<const String> loading(ASCIILiteral("loading"));
     static NeverDestroyed<const String> interactive(ASCIILiteral("interactive"));
     static NeverDestroyed<const String> complete(ASCIILiteral("complete"));
@@ -1227,7 +1230,7 @@ String Document::readyState() const
 }
 
 void Document::setReadyState(ReadyState readyState)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (readyState == m_readyState)
         return;
 
@@ -1256,7 +1259,7 @@ void Document::setReadyState(ReadyState readyState)
 }
 
 void Document::setVisualUpdatesAllowed(ReadyState readyState)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(settings() && settings()->suppressesIncrementalRendering());
     switch (readyState) {
     case Loading:
@@ -1282,7 +1285,7 @@ void Document::setVisualUpdatesAllowed(ReadyState readyState)
 }
     
 void Document::setVisualUpdatesAllowed(bool visualUpdatesAllowed)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_visualUpdatesAllowed == visualUpdatesAllowed)
         return;
 
@@ -1320,7 +1323,7 @@ void Document::setVisualUpdatesAllowed(bool visualUpdatesAllowed)
 }
 
 void Document::visualUpdatesSuppressionTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_visualUpdatesAllowed);
 
     // If the client is extending the visual update suppression period explicitly, the
@@ -1332,7 +1335,7 @@ void Document::visualUpdatesSuppressionTimerFired()
 }
 
 void Document::setVisualUpdatesAllowedByClient(bool visualUpdatesAllowedByClient)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We should only re-enable visual updates if ReadyState is Completed or the watchdog timer has fired,
     // both of which we can determine by looking at the timer.
 
@@ -1341,7 +1344,7 @@ void Document::setVisualUpdatesAllowedByClient(bool visualUpdatesAllowedByClient
 }
 
 String Document::characterSetWithUTF8Fallback() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     AtomicString name = encoding();
     if (!name.isNull())
         return name;
@@ -1349,21 +1352,21 @@ String Document::characterSetWithUTF8Fallback() const
 }
 
 String Document::defaultCharsetForBindings() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Settings* settings = this->settings())
         return settings->defaultTextEncodingName();
     return UTF8Encoding().domName();
 }
 
 void Document::setCharset(const String& charset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!decoder())
         return;
     decoder()->setEncoding(charset, TextResourceDecoder::UserChosenEncoding);
 }
 
 void Document::setContentLanguage(const String& language)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_contentLanguage == language)
         return;
     m_contentLanguage = language;
@@ -1373,7 +1376,7 @@ void Document::setContentLanguage(const String& language)
 }
 
 void Document::setXMLVersion(const String& version, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!implementation().hasFeature("XML", String())) {
         ec = NOT_SUPPORTED_ERR;
         return;
@@ -1388,7 +1391,7 @@ void Document::setXMLVersion(const String& version, ExceptionCode& ec)
 }
 
 void Document::setXMLStandalone(bool standalone, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!implementation().hasFeature("XML", String())) {
         ec = NOT_SUPPORTED_ERR;
         return;
@@ -1398,14 +1401,14 @@ void Document::setXMLStandalone(bool standalone, ExceptionCode& ec)
 }
 
 void Document::setDocumentURI(const String& uri)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // This property is read-only from JavaScript, but writable from Objective-C.
     m_documentURI = uri;
     updateBaseURL();
 }
 
 void Document::setContent(const String& content)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     open();
     // FIXME: This should probably use insert(), but that's (intentionally)
     // not implemented for the XML parser as it's normally synonymous with
@@ -1416,7 +1419,7 @@ void Document::setContent(const String& content)
 }
 
 String Document::suggestedMIMEType() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isXHTMLDocument())
         return ASCIILiteral("application/xhtml+xml");
     if (isSVGDocument())
@@ -1431,12 +1434,12 @@ String Document::suggestedMIMEType() const
 }
 
 void Document::overrideMIMEType(const String& mimeType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_overriddenMIMEType = mimeType;
 }
 
 String Document::contentType() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_overriddenMIMEType.isNull())
         return m_overriddenMIMEType;
 
@@ -1451,7 +1454,7 @@ String Document::contentType() const
 }
 
 Node* Document::nodeFromPoint(const LayoutPoint& clientPoint, LayoutPoint* localPoint)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!frame() || !view())
         return nullptr;
     
@@ -1482,7 +1485,7 @@ Node* Document::nodeFromPoint(const LayoutPoint& clientPoint, LayoutPoint* local
 }
 
 Element* Document::elementFromPoint(const LayoutPoint& clientPoint)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!hasLivingRenderTree())
         return nullptr;
 
@@ -1497,12 +1500,12 @@ Element* Document::elementFromPoint(const LayoutPoint& clientPoint)
 }
 
 RefPtr<Range> Document::caretRangeFromPoint(int x, int y)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return caretRangeFromPoint(LayoutPoint(x, y));
 }
 
 RefPtr<Range> Document::caretRangeFromPoint(const LayoutPoint& clientPoint)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!hasLivingRenderTree())
         return nullptr;
 
@@ -1530,7 +1533,7 @@ RefPtr<Range> Document::caretRangeFromPoint(const LayoutPoint& clientPoint)
 }
 
 Element* Document::scrollingElement()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: When we fix https://bugs.webkit.org/show_bug.cgi?id=106133, this should be replaced with the full implementation
     // of Document.scrollingElement() as specified at http://dev.w3.org/csswg/cssom-view/#dom-document-scrollingelement.
 
@@ -1545,7 +1548,7 @@ Element* Document::scrollingElement()
  */
 template <typename CharacterType>
 static inline StringWithDirection canonicalizedTitle(Document* document, const StringWithDirection& titleWithDirection)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const String& title = titleWithDirection.string();
     const CharacterType* characters = title.characters<CharacterType>();
     unsigned length = title.length();
@@ -1598,7 +1601,7 @@ static inline StringWithDirection canonicalizedTitle(Document* document, const S
 }
 
 void Document::updateTitle(const StringWithDirection& title)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_rawTitle == title)
         return;
 
@@ -1617,7 +1620,7 @@ void Document::updateTitle(const StringWithDirection& title)
 }
 
 void Document::updateTitleFromTitleElement()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_titleElement) {
         updateTitle(StringWithDirection());
         return;
@@ -1632,7 +1635,7 @@ void Document::updateTitleFromTitleElement()
 }
 
 void Document::setTitle(const String& title, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_titleElement) {
         if (isHTMLDocument() || isXHTMLDocument()) {
             auto* headElement = head();
@@ -1660,7 +1663,7 @@ void Document::setTitle(const String& title, ExceptionCode& ec)
 }
 
 void Document::updateTitleElement(Element* newTitleElement)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (is<SVGSVGElement>(documentElement()))
         m_titleElement = childrenOfType<SVGTitleElement>(*documentElement()).first();
     else {
@@ -1675,7 +1678,7 @@ void Document::updateTitleElement(Element* newTitleElement)
 }
 
 void Document::titleElementAdded(Element& titleElement)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_titleElement == &titleElement)
         return;
 
@@ -1683,7 +1686,7 @@ void Document::titleElementAdded(Element& titleElement)
 }
 
 void Document::titleElementRemoved(Element& titleElement)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_titleElement != &titleElement)
         return;
 
@@ -1691,7 +1694,7 @@ void Document::titleElementRemoved(Element& titleElement)
 }
 
 void Document::titleElementTextChanged(Element& titleElement)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_titleElement != &titleElement)
         return;
 
@@ -1699,24 +1702,24 @@ void Document::titleElementTextChanged(Element& titleElement)
 }
 
 void Document::registerForVisibilityStateChangedCallbacks(Element* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_visibilityStateCallbackElements.add(element);
 }
 
 void Document::unregisterForVisibilityStateChangedCallbacks(Element* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_visibilityStateCallbackElements.remove(element);
 }
 
 void Document::visibilityStateChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     dispatchEvent(Event::create(eventNames().visibilitychangeEvent, false, false));
     for (auto* element : m_visibilityStateCallbackElements)
         element->visibilityStateChanged();
 }
 
 PageVisibilityState Document::pageVisibilityState() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // The visibility of the document is inherited from the visibility of the
     // page. If there is no page associated with the document, we will assume
     // that the page is hidden, as specified by the spec:
@@ -1727,103 +1730,103 @@ PageVisibilityState Document::pageVisibilityState() const
 }
 
 String Document::visibilityState() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return pageVisibilityStateString(pageVisibilityState());
 }
 
 bool Document::hidden() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return pageVisibilityState() != PageVisibilityStateVisible;
 }
 
 
 #if ENABLE(VIDEO)
 void Document::registerForAllowsMediaDocumentInlinePlaybackChangedCallbacks(HTMLMediaElement& element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_allowsMediaDocumentInlinePlaybackElements.add(&element);
 }
 
 void Document::unregisterForAllowsMediaDocumentInlinePlaybackChangedCallbacks(HTMLMediaElement& element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_allowsMediaDocumentInlinePlaybackElements.remove(&element);
 }
 
 void Document::allowsMediaDocumentInlinePlaybackChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* element : m_allowsMediaDocumentInlinePlaybackElements)
         element->allowsMediaDocumentInlinePlaybackChanged();
 }
 #endif
 
 String Document::nodeName() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ASCIILiteral("#document");
 }
 
 Node::NodeType Document::nodeType() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return DOCUMENT_NODE;
 }
 
 FormController& Document::formController()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_formController)
         m_formController = std::make_unique<FormController>();
     return *m_formController;
 }
 
 Vector<String> Document::formElementsState() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_formController)
         return Vector<String>();
     return m_formController->formElementsState();
 }
 
 void Document::setStateForNewFormElements(const Vector<String>& stateVector)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!stateVector.size() && !m_formController)
         return;
     formController().setStateForNewFormElements(stateVector);
 }
 
 FrameView* Document::view() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_frame ? m_frame->view() : nullptr;
 }
 
 Page* Document::page() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_frame ? m_frame->page() : nullptr;
 }
 
 Settings* Document::settings() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_frame ? &m_frame->settings() : nullptr;
 }
 
 Ref<Range> Document::createRange()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return Range::create(*this);
 }
 
 Ref<NodeIterator> Document::createNodeIterator(Node& root, unsigned long whatToShow, RefPtr<NodeFilter>&& filter, bool)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return NodeIterator::create(root, whatToShow, WTFMove(filter));
 }
 
 Ref<TreeWalker> Document::createTreeWalker(Node& root, unsigned long whatToShow, RefPtr<NodeFilter>&& filter, bool)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return TreeWalker::create(root, whatToShow, WTFMove(filter));
 }
 
 void Document::scheduleForcedStyleRecalc()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_pendingStyleRecalcShouldForce = true;
     scheduleStyleRecalc();
 }
 
 void Document::scheduleStyleRecalc()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_styleRecalcTimer.isActive() || inPageCache())
         return;
 
@@ -1838,7 +1841,7 @@ void Document::scheduleStyleRecalc()
 }
 
 void Document::unscheduleStyleRecalc()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!childNeedsStyleRecalc());
 
     m_styleRecalcTimer.stop();
@@ -1846,17 +1849,17 @@ void Document::unscheduleStyleRecalc()
 }
 
 bool Document::hasPendingStyleRecalc() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_styleRecalcTimer.isActive() && !m_inStyleRecalc;
 }
 
 bool Document::hasPendingForcedStyleRecalc() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_styleRecalcTimer.isActive() && m_pendingStyleRecalcShouldForce;
 }
 
 void Document::recalcStyle(Style::Change change)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!view() || !view()->isPainting());
 
     // NOTE: XSL code seems to be the only client stumbling in here without a RenderView.
@@ -1968,7 +1971,7 @@ void Document::recalcStyle(Style::Change change)
 }
 
 void Document::updateStyleIfNeeded()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     ASSERT(!view() || !view()->isPainting());
 
@@ -1985,7 +1988,7 @@ void Document::updateStyleIfNeeded()
 }
 
 void Document::updateLayout()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
 
     FrameView* frameView = view();
@@ -2016,7 +2019,7 @@ void Document::updateLayout()
 // lets us get reasonable answers. The long term solution to this problem is
 // to instead suspend JavaScript execution.
 void Document::updateLayoutIgnorePendingStylesheets(Document::RunPostLayoutTasks runPostLayoutTasks)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool oldIgnore = m_ignorePendingStylesheets;
 
     if (!haveStylesheetsLoaded()) {
@@ -2047,7 +2050,7 @@ void Document::updateLayoutIgnorePendingStylesheets(Document::RunPostLayoutTasks
 }
 
 std::unique_ptr<RenderStyle> Document::styleForElementIgnoringPendingStylesheets(Element& element, const RenderStyle* parentStyle)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(&element.document() == this);
 
     // On iOS request delegates called during styleForElement may result in re-entering WebKit and killing the style resolver.
@@ -2065,7 +2068,7 @@ std::unique_ptr<RenderStyle> Document::styleForElementIgnoringPendingStylesheets
 }
 
 bool Document::updateLayoutIfDimensionsOutOfDate(Element& element, DimensionsCheck dimensionsCheck)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     
     // If the stylesheets haven't loaded, just give up and do a full layout ignoring pending stylesheets.
@@ -2165,13 +2168,13 @@ bool Document::updateLayoutIfDimensionsOutOfDate(Element& element, DimensionsChe
 }
 
 bool Document::isPageBoxVisible(int pageIndex)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     std::unique_ptr<RenderStyle> pageStyle(ensureStyleResolver().styleForPage(pageIndex));
     return pageStyle->visibility() != HIDDEN; // display property doesn't apply to @page.
 }
 
 void Document::pageSizeAndMarginsInPixels(int pageIndex, IntSize& pageSize, int& marginTop, int& marginRight, int& marginBottom, int& marginLeft)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     std::unique_ptr<RenderStyle> style = ensureStyleResolver().styleForPage(pageIndex);
 
     int width = pageSize.width();
@@ -2209,13 +2212,13 @@ void Document::pageSizeAndMarginsInPixels(int pageIndex, IntSize& pageSize, int&
 }
 
 void Document::createStyleResolver()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_styleResolver = std::make_unique<StyleResolver>(*this);
     m_styleResolver->appendAuthorStyleSheets(authorStyleSheets().activeStyleSheets());
 }
 
 StyleResolver& Document::userAgentShadowTreeStyleResolver()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_userAgentShadowTreeStyleResolver) {
         m_userAgentShadowTreeStyleResolver = std::make_unique<StyleResolver>(*this);
 
@@ -2229,7 +2232,7 @@ StyleResolver& Document::userAgentShadowTreeStyleResolver()
 }
 
 void Document::fontsNeedUpdate(FontSelector&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_styleResolver)
         m_styleResolver->invalidateMatchedPropertiesCache();
     if (inPageCache() || !renderView())
@@ -2238,7 +2241,7 @@ void Document::fontsNeedUpdate(FontSelector&)
 }
 
 void Document::clearStyleResolver()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_styleResolver = nullptr;
     m_userAgentShadowTreeStyleResolver = nullptr;
 
@@ -2246,7 +2249,7 @@ void Document::clearStyleResolver()
 }
 
 void Document::createRenderTree()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!renderView());
     ASSERT(!m_inPageCache);
     ASSERT(!m_axObjectCache || this != &topDocument());
@@ -2264,7 +2267,7 @@ void Document::createRenderTree()
 }
 
 void Document::didBecomeCurrentDocumentInFrame()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Are there cases where the document can be dislodged from the frame during the event handling below?
     // If so, then m_frame could become 0, and we need to do something about that.
 
@@ -2305,12 +2308,12 @@ void Document::didBecomeCurrentDocumentInFrame()
 }
 
 void Document::disconnectFromFrame()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frame = nullptr;
 }
 
 void Document::destroyRenderTree()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(hasLivingRenderTree());
     ASSERT(!m_inPageCache);
 
@@ -2351,7 +2354,7 @@ void Document::destroyRenderTree()
 }
 
 void Document::prepareForDestruction()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_hasPreparedForDestruction)
         return;
 
@@ -2419,7 +2422,7 @@ void Document::prepareForDestruction()
 }
 
 void Document::removeAllEventListeners()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     EventTarget::removeAllEventListeners();
 
     if (m_domWindow)
@@ -2432,7 +2435,7 @@ void Document::removeAllEventListeners()
 }
 
 void Document::suspendDeviceMotionAndOrientationUpdates()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_areDeviceMotionAndOrientationUpdatesSuspended)
         return;
     m_areDeviceMotionAndOrientationUpdatesSuspended = true;
@@ -2445,7 +2448,7 @@ void Document::suspendDeviceMotionAndOrientationUpdates()
 }
 
 void Document::resumeDeviceMotionAndOrientationUpdates()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_areDeviceMotionAndOrientationUpdatesSuspended)
         return;
     m_areDeviceMotionAndOrientationUpdatesSuspended = false;
@@ -2458,7 +2461,7 @@ void Document::resumeDeviceMotionAndOrientationUpdates()
 }
 
 bool Document::shouldBypassMainWorldContentSecurityPolicy() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     JSC::CallFrame* callFrame = JSDOMWindow::commonVM().topCallFrame;
     if (callFrame == JSC::CallFrame::noCaller())
         return false;
@@ -2469,7 +2472,7 @@ bool Document::shouldBypassMainWorldContentSecurityPolicy() const
 }
 
 void Document::platformSuspendOrStopActiveDOMObjects()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(IOS)
     if (WebThreadCountOfObservedContentModifiers() > 0) {
         Frame* frame = this->frame();
@@ -2480,27 +2483,27 @@ void Document::platformSuspendOrStopActiveDOMObjects()
 }
 
 void Document::suspendActiveDOMObjects(ActiveDOMObject::ReasonForSuspension why)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ScriptExecutionContext::suspendActiveDOMObjects(why);
     suspendDeviceMotionAndOrientationUpdates();
     platformSuspendOrStopActiveDOMObjects();
 }
 
 void Document::resumeActiveDOMObjects(ActiveDOMObject::ReasonForSuspension why)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ScriptExecutionContext::resumeActiveDOMObjects(why);
     resumeDeviceMotionAndOrientationUpdates();
     // FIXME: For iOS, do we need to add content change observers that were removed in Document::suspendActiveDOMObjects()?
 }
 
 void Document::stopActiveDOMObjects()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ScriptExecutionContext::stopActiveDOMObjects();
     platformSuspendOrStopActiveDOMObjects();
 }
 
 void Document::clearAXObjectCache()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(&topDocument() == this);
     // Clear the cache member variable before calling delete because attempts
     // are made to access it during destruction.
@@ -2508,7 +2511,7 @@ void Document::clearAXObjectCache()
 }
 
 AXObjectCache* Document::existingAXObjectCache() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Document& topDocument = this->topDocument();
     if (!topDocument.hasLivingRenderTree())
         return nullptr;
@@ -2516,7 +2519,7 @@ AXObjectCache* Document::existingAXObjectCache() const
 }
 
 AXObjectCache* Document::axObjectCache() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!AXObjectCache::accessibilityEnabled())
         return nullptr;
     
@@ -2537,25 +2540,25 @@ AXObjectCache* Document::axObjectCache() const
 }
 
 void Document::setVisuallyOrdered()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_visuallyOrdered = true;
     if (renderView())
         renderView()->mutableStyle().setRTLOrdering(VisualOrder);
 }
 
 Ref<DocumentParser> Document::createParser()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: this should probably pass the frame instead
     return XMLDocumentParser::create(*this, view());
 }
 
 ScriptableDocumentParser* Document::scriptableDocumentParser() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return parser() ? parser()->asScriptableDocumentParser() : nullptr;
 }
 
 void Document::open(Document* ownerDocument)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_ignoreOpensDuringUnloadCount)
         return;
 
@@ -2591,7 +2594,7 @@ void Document::open(Document* ownerDocument)
 }
 
 void Document::detachParser()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_parser)
         return;
     m_parser->detach();
@@ -2599,7 +2602,7 @@ void Document::detachParser()
 }
 
 void Document::cancelParsing()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_parser)
         return;
 
@@ -2612,7 +2615,7 @@ void Document::cancelParsing()
 }
 
 void Document::implicitOpen()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     cancelParsing();
 
     removeChildren();
@@ -2625,7 +2628,7 @@ void Document::implicitOpen()
 }
 
 HTMLBodyElement* Document::body() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* element = documentElement();
     if (!element)
         return nullptr;
@@ -2633,7 +2636,7 @@ HTMLBodyElement* Document::body() const
 }
 
 HTMLElement* Document::bodyOrFrameset() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Return the first body or frameset child of the html element.
     auto* element = documentElement();
     if (!is<HTMLHtmlElement>(element))
@@ -2646,7 +2649,7 @@ HTMLElement* Document::bodyOrFrameset() const
 }
 
 void Document::setBodyOrFrameset(RefPtr<HTMLElement>&& newBody, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!is<HTMLBodyElement>(newBody.get()) && !is<HTMLFrameSetElement>(newBody.get())) {
         ec = HIERARCHY_REQUEST_ERR;
         return;
@@ -2670,7 +2673,7 @@ void Document::setBodyOrFrameset(RefPtr<HTMLElement>&& newBody, ExceptionCode& e
 }
 
 Location* Document::location() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* window = domWindow();
     if (!window)
         return nullptr;
@@ -2679,14 +2682,14 @@ Location* Document::location() const
 }
 
 HTMLHeadElement* Document::head()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (auto element = documentElement())
         return childrenOfType<HTMLHeadElement>(*element).first();
     return nullptr;
 }
 
 void Document::close()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: We should follow the specification more closely:
     //        http://www.whatwg.org/specs/web-apps/current-work/#dom-document-close
 
@@ -2697,7 +2700,7 @@ void Document::close()
 }
 
 void Document::explicitClose()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (RefPtr<DocumentParser> parser = m_parser)
         parser->finish();
 
@@ -2713,7 +2716,7 @@ void Document::explicitClose()
 }
 
 void Document::implicitClose()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If we're in the middle of recalcStyle, we need to defer the close until the style information is accurate and all elements are re-attached.
     if (m_inStyleRecalc) {
         m_closeAfterStyleRecalc = true;
@@ -2837,7 +2840,7 @@ void Document::implicitClose()
 }
 
 void Document::setParsing(bool b)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_bParsing = b;
 
     if (m_bParsing && !m_sharedObjectPool)
@@ -2853,7 +2856,7 @@ void Document::setParsing(bool b)
 }
 
 bool Document::shouldScheduleLayout()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // This function will only be called when FrameView thinks a layout is needed.
     // This enforces a couple extra rules.
     //
@@ -2865,12 +2868,12 @@ bool Document::shouldScheduleLayout()
 }
     
 bool Document::isLayoutTimerActive()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return view() && view()->layoutPending() && !minimumLayoutDelay().count();
 }
 
 std::chrono::milliseconds Document::minimumLayoutDelay()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_overMinimumLayoutThreshold)
         return 0ms;
     
@@ -2882,14 +2885,14 @@ std::chrono::milliseconds Document::minimumLayoutDelay()
 }
 
 std::chrono::milliseconds Document::elapsedTime() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto elapsedTime = std::chrono::steady_clock::now() - m_startTime;
 
     return std::chrono::duration_cast<std::chrono::milliseconds>(elapsedTime);
 }
 
 void Document::write(const SegmentedString& text, Document* ownerDocument)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     NestingLevelIncrementer nestingLevelIncrementer(m_writeRecursionDepth);
 
     m_writeRecursionIsTooDeep = (m_writeRecursionDepth > 1) && m_writeRecursionIsTooDeep;
@@ -2920,18 +2923,18 @@ void Document::write(const SegmentedString& text, Document* ownerDocument)
 }
 
 void Document::write(const String& text, Document* ownerDocument)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     write(SegmentedString(text), ownerDocument);
 }
 
 void Document::writeln(const String& text, Document* ownerDocument)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     write(text, ownerDocument);
     write("\n", ownerDocument);
 }
 
 std::chrono::milliseconds Document::minimumTimerInterval() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* page = this->page();
     if (!page)
         return ScriptExecutionContext::minimumTimerInterval();
@@ -2939,7 +2942,7 @@ std::chrono::milliseconds Document::minimumTimerInterval() const
 }
 
 void Document::setTimerThrottlingEnabled(bool shouldThrottle)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_isTimerThrottlingEnabled == shouldThrottle)
         return;
 
@@ -2948,7 +2951,7 @@ void Document::setTimerThrottlingEnabled(bool shouldThrottle)
 }
 
 std::chrono::milliseconds Document::timerAlignmentInterval(bool hasReachedMaxNestingLevel) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto alignmentInterval = ScriptExecutionContext::timerAlignmentInterval(hasReachedMaxNestingLevel);
 
     // Apply Document-level DOMTimer throttling only if timers have reached their maximum nesting level as the Page may still be visible.
@@ -2962,17 +2965,17 @@ std::chrono::milliseconds Document::timerAlignmentInterval(bool hasReachedMaxNes
 }
 
 EventTarget* Document::errorEventTarget()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_domWindow.get();
 }
 
 void Document::logExceptionToConsole(const String& errorMessage, const String& sourceURL, int lineNumber, int columnNumber, RefPtr<Inspector::ScriptCallStack>&& callStack)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     addMessage(MessageSource::JS, MessageLevel::Error, errorMessage, sourceURL, lineNumber, columnNumber, WTFMove(callStack));
 }
 
 void Document::setURL(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const URL& newURL = url.isEmpty() ? blankURL() : url;
     if (newURL == m_url)
         return;
@@ -2983,7 +2986,7 @@ void Document::setURL(const URL& url)
 }
 
 void Document::updateBaseURL()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     URL oldBaseURL = m_baseURL;
     // DOM 3 Core: When the Document supports the feature "HTML" [DOM Level 2 HTML], the base URI is computed using
     // first the value of the href attribute of the HTML BASE element if any, and the value of the documentURI attribute
@@ -3026,13 +3029,13 @@ void Document::updateBaseURL()
 }
 
 void Document::setBaseURLOverride(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_baseURLOverride = url;
     updateBaseURL();
 }
 
 void Document::processBaseElement()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Find the first href attribute in a base element and the first target attribute in a base element.
     const AtomicString* href = nullptr;
     const AtomicString* target = nullptr;
@@ -3072,12 +3075,12 @@ void Document::processBaseElement()
 }
 
 String Document::userAgent(const URL& url) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return frame() ? frame()->loader().userAgent(url) : String();
 }
 
 void Document::disableEval(const String& errorMessage)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!frame())
         return;
 
@@ -3086,7 +3089,7 @@ void Document::disableEval(const String& errorMessage)
 
 #if ENABLE(INDEXED_DATABASE)
 IDBClient::IDBConnectionProxy* Document::idbConnectionProxy()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_idbConnectionProxy) {
         Page* currentPage = page();
         if (!currentPage)
@@ -3101,13 +3104,13 @@ IDBClient::IDBConnectionProxy* Document::idbConnectionProxy()
 
 #if ENABLE(WEB_SOCKETS)
 SocketProvider* Document::socketProvider()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_socketProvider.get();
 }
 #endif
     
 bool Document::canNavigate(Frame* targetFrame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return false;
 
@@ -3167,7 +3170,7 @@ bool Document::canNavigate(Frame* targetFrame)
 }
 
 Frame* Document::findUnsafeParentScrollPropagationBoundary()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Frame* currentFrame = m_frame;
     if (!currentFrame)
         return nullptr;
@@ -3184,7 +3187,7 @@ Frame* Document::findUnsafeParentScrollPropagationBoundary()
 }
 
 void Document::didRemoveAllPendingStylesheet()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_needsNotifyRemoveAllPendingStylesheet = false;
 
     styleResolverChanged(DeferRecalcStyleIfNeeded);
@@ -3203,14 +3206,14 @@ void Document::didRemoveAllPendingStylesheet()
 }
 
 CSSStyleSheet& Document::elementSheet()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_elementSheet)
         m_elementSheet = CSSStyleSheet::createInline(*this, m_baseURL);
     return *m_elementSheet;
 }
 
 bool Document::usesStyleBasedEditability() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_elementSheet && m_elementSheet->contents().usesStyleBasedEditability())
         return true;
 
@@ -3223,7 +3226,7 @@ bool Document::usesStyleBasedEditability() const
 }
 
 void Document::processHttpEquiv(const String& equiv, const String& content, bool isInDocumentHead)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!equiv.isNull());
     ASSERT(!content.isNull());
 
@@ -3329,7 +3332,7 @@ void Document::processHttpEquiv(const String& equiv, const String& content, bool
 }
 
 void Document::processViewport(const String& features, ViewportArguments::Type origin)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!features.isNull());
 
     if (origin < m_viewportArguments.type)
@@ -3345,7 +3348,7 @@ void Document::processViewport(const String& features, ViewportArguments::Type o
 }
 
 void Document::updateViewportArguments()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (page() && frame()->isMainFrame()) {
 #ifndef NDEBUG
         m_didDispatchViewportPropertiesChanged = true;
@@ -3360,7 +3363,7 @@ void Document::updateViewportArguments()
 #if PLATFORM(IOS)
 
 void Document::processFormatDetection(const String& features)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Find a better place for this function.
     processFeaturesString(features, [this](StringView key, StringView value) {
         if (equalLettersIgnoringASCIICase(key, "telephone") && equalLettersIgnoringASCIICase(value, "no"))
@@ -3369,7 +3372,7 @@ void Document::processFormatDetection(const String& features)
 }
 
 void Document::processWebAppOrientations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Page* page = this->page())
         page->chrome().client().webAppOrientationsUpdated();
 }
@@ -3377,7 +3380,7 @@ void Document::processWebAppOrientations()
 #endif
 
 void Document::processReferrerPolicy(const String& policy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!policy.isNull());
 
     // Documents in a Content-Disposition: attachment sandbox should never send a Referer header,
@@ -3402,7 +3405,7 @@ void Document::processReferrerPolicy(const String& policy)
 }
 
 MouseEventWithHitTestResults Document::prepareMouseEvent(const HitTestRequest& request, const LayoutPoint& documentPoint, const PlatformMouseEvent& event)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!hasLivingRenderTree())
         return MouseEventWithHitTestResults(event, HitTestResult(LayoutPoint()));
 
@@ -3417,7 +3420,7 @@ MouseEventWithHitTestResults Document::prepareMouseEvent(const HitTestRequest& r
 
 // DOM Section 1.1.1
 bool Document::childTypeAllowed(NodeType type) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (type) {
     case ATTRIBUTE_NODE:
     case CDATA_SECTION_NODE:
@@ -3441,7 +3444,7 @@ bool Document::childTypeAllowed(NodeType type) const
 }
 
 bool Document::canAcceptChild(const Node& newChild, const Node* refChild, AcceptChildOperation operation) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (operation == AcceptChildOperation::Replace && refChild->nodeType() == newChild.nodeType())
         return true;
 
@@ -3509,7 +3512,7 @@ bool Document::canAcceptChild(const Node& newChild, const Node* refChild, Accept
 }
 
 Ref<Node> Document::cloneNodeInternal(Document&, CloningOperation type)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<Document> clone = cloneDocumentWithoutChildren();
     clone->cloneDataFromDocument(*this);
     switch (type) {
@@ -3524,7 +3527,7 @@ Ref<Node> Document::cloneNodeInternal(Document&, CloningOperation type)
 }
 
 Ref<Document> Document::cloneDocumentWithoutChildren() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isXMLDocument()) {
         if (isXHTMLDocument())
             return XMLDocument::createXHTML(nullptr, url());
@@ -3534,7 +3537,7 @@ Ref<Document> Document::cloneDocumentWithoutChildren() const
 }
 
 void Document::cloneDataFromDocument(const Document& other)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_url == other.url());
     m_baseURL = other.baseURL();
     m_baseURLOverride = other.baseURLOverride();
@@ -3547,30 +3550,30 @@ void Document::cloneDataFromDocument(const Document& other)
 }
 
 StyleSheetList& Document::styleSheets()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_styleSheetList)
         m_styleSheetList = StyleSheetList::create(this);
     return *m_styleSheetList;
 }
 
 String Document::preferredStylesheetSet() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return authorStyleSheets().preferredStylesheetSetName();
 }
 
 String Document::selectedStylesheetSet() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return authorStyleSheets().selectedStylesheetSetName();
 }
 
 void Document::setSelectedStylesheetSet(const String& aString)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     authorStyleSheets().setSelectedStylesheetSetName(aString);
     styleResolverChanged(DeferRecalcStyle);
 }
 
 void Document::evaluateMediaQueryList()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_mediaQueryMatcher)
         m_mediaQueryMatcher->styleResolverChanged();
     
@@ -3578,7 +3581,7 @@ void Document::evaluateMediaQueryList()
 }
 
 void Document::checkViewportDependentPictures()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<HTMLPictureElement*, 16> changedPictures;
     HashSet<HTMLPictureElement*>::iterator end = m_viewportDependentPictures.end();
     for (HashSet<HTMLPictureElement*>::iterator it = m_viewportDependentPictures.begin(); it != end; ++it) {
@@ -3590,12 +3593,12 @@ void Document::checkViewportDependentPictures()
 }
 
 void Document::optimizedStyleSheetUpdateTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     styleResolverChanged(RecalcStyleIfNeeded);
 }
 
 void Document::scheduleOptimizedStyleSheetUpdate()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_optimizedStyleSheetUpdateTimer.isActive())
         return;
     authorStyleSheets().setPendingUpdateType(AuthorStyleSheets::OptimizedUpdate);
@@ -3603,7 +3606,7 @@ void Document::scheduleOptimizedStyleSheetUpdate()
 }
 
 void Document::updateViewportUnitsOnResize()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!hasStyleWithViewportUnits())
         return;
 
@@ -3618,19 +3621,19 @@ void Document::updateViewportUnitsOnResize()
 }
 
 void Document::addAudioProducer(MediaProducer* audioProducer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_audioProducers.add(audioProducer);
     updateIsPlayingMedia();
 }
 
 void Document::removeAudioProducer(MediaProducer* audioProducer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_audioProducers.remove(audioProducer);
     updateIsPlayingMedia();
 }
 
 void Document::updateIsPlayingMedia(uint64_t sourceElementID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     MediaProducer::MediaStateFlags state = MediaProducer::IsNotPlaying;
     for (auto* audioProducer : m_audioProducers)
         state |= audioProducer->mediaState();
@@ -3661,13 +3664,13 @@ void Document::updateIsPlayingMedia(uint64_t sourceElementID)
 }
 
 void Document::pageMutedStateDidChange()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* audioProducer : m_audioProducers)
         audioProducer->pageMutedStateDidChange();
 }
 
 void Document::styleResolverChanged(StyleResolverUpdateFlag updateFlag)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_optimizedStyleSheetUpdateTimer.isActive())
         m_optimizedStyleSheetUpdateTimer.stop();
 
@@ -3725,7 +3728,7 @@ void Document::styleResolverChanged(StyleResolverUpdateFlag updateFlag)
 }
 
 static bool isNodeInSubtree(Node* node, Node* container, bool amongChildrenOnly)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool nodeInSubtree = false;
     if (amongChildrenOnly)
         nodeInSubtree = node->isDescendantOf(container);
@@ -3736,7 +3739,7 @@ static bool isNodeInSubtree(Node* node, Node* container, bool amongChildrenOnly)
 }
 
 void Document::removeFocusedNodeOfSubtree(Node* node, bool amongChildrenOnly)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_focusedElement || this->inPageCache()) // If the document is in the page cache, then we don't need to clear out the focused node.
         return;
 
@@ -3755,7 +3758,7 @@ void Document::removeFocusedNodeOfSubtree(Node* node, bool amongChildrenOnly)
 }
 
 void Document::hoveredElementDidDetach(Element* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_hoveredElement || element != m_hoveredElement)
         return;
 
@@ -3767,7 +3770,7 @@ void Document::hoveredElementDidDetach(Element* element)
 }
 
 void Document::elementInActiveChainDidDetach(Element* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_activeElement || element != m_activeElement)
         return;
 
@@ -3778,19 +3781,19 @@ void Document::elementInActiveChainDidDetach(Element* element)
 
 #if ENABLE(DASHBOARD_SUPPORT)
 const Vector<AnnotatedRegionValue>& Document::annotatedRegions() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_annotatedRegions;
 }
 
 void Document::setAnnotatedRegions(const Vector<AnnotatedRegionValue>& regions)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_annotatedRegions = regions;
     setAnnotatedRegionsDirty(false);
 }
 #endif
 
 bool Document::setFocusedElement(Element* element, FocusDirection direction, FocusRemovalEventsMode eventsMode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<Element> newFocusedElement = element;
     // Make sure newFocusedElement is actually in this document
     if (newFocusedElement && (&newFocusedElement->document() != this))
@@ -3930,14 +3933,14 @@ SetFocusedNodeDone:
 }
 
 static bool shouldResetFocusNavigationStartingNode(Node& node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Setting focus navigation starting node to the following nodes means that we should start
     // the search from the beginning of the document.
     return is<HTMLHtmlElement>(node) || is<HTMLDocument>(node);
 }
 
 void Document::setFocusNavigationStartingNode(Node* node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
 
@@ -3951,7 +3954,7 @@ void Document::setFocusNavigationStartingNode(Node* node)
 }
 
 Element* Document::focusNavigationStartingNode(FocusDirection direction) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_focusedElement) {
         if (!m_focusNavigationStartingNode || !m_focusNavigationStartingNode->isDescendantOf(m_focusedElement.get()))
             return m_focusedElement.get();
@@ -3985,7 +3988,7 @@ Element* Document::focusNavigationStartingNode(FocusDirection direction) const
 }
 
 void Document::setCSSTarget(Element* n)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_cssTarget)
         m_cssTarget->setNeedsStyleRecalc();
     m_cssTarget = n;
@@ -3994,7 +3997,7 @@ void Document::setCSSTarget(Element* n)
 }
 
 void Document::registerNodeListForInvalidation(LiveNodeList& list)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_nodeListAndCollectionCounts[list.invalidationType()]++;
     if (!list.isRootedAtDocument())
         return;
@@ -4004,7 +4007,7 @@ void Document::registerNodeListForInvalidation(LiveNodeList& list)
 }
 
 void Document::unregisterNodeListForInvalidation(LiveNodeList& list)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_nodeListAndCollectionCounts[list.invalidationType()]--;
     if (!list.isRegisteredForInvalidationAtDocument())
         return;
@@ -4017,14 +4020,14 @@ void Document::unregisterNodeListForInvalidation(LiveNodeList& list)
 }
 
 void Document::registerCollection(HTMLCollection& collection)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_nodeListAndCollectionCounts[collection.invalidationType()]++;
     if (collection.isRootedAtDocument())
         m_collectionsInvalidatedAtDocument.add(&collection);
 }
 
 void Document::unregisterCollection(HTMLCollection& collection)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_nodeListAndCollectionCounts[collection.invalidationType()]);
     m_nodeListAndCollectionCounts[collection.invalidationType()]--;
     if (!collection.isRootedAtDocument())
@@ -4034,32 +4037,32 @@ void Document::unregisterCollection(HTMLCollection& collection)
 }
 
 void Document::collectionCachedIdNameMap(const HTMLCollection& collection)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT_UNUSED(collection, collection.hasNamedElementCache());
     m_nodeListAndCollectionCounts[InvalidateOnIdNameAttrChange]++;
 }
 
 void Document::collectionWillClearIdNameMap(const HTMLCollection& collection)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT_UNUSED(collection, collection.hasNamedElementCache());
     ASSERT(m_nodeListAndCollectionCounts[InvalidateOnIdNameAttrChange]);
     m_nodeListAndCollectionCounts[InvalidateOnIdNameAttrChange]--;
 }
 
 void Document::attachNodeIterator(NodeIterator* ni)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_nodeIterators.add(ni);
 }
 
 void Document::detachNodeIterator(NodeIterator* ni)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // The node iterator can be detached without having been attached if its root node didn't have a document
     // when the iterator was created, but has it now.
     m_nodeIterators.remove(ni);
 }
 
 void Document::moveNodeIteratorsToNewDocument(Node* node, Document* newDocument)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<NodeIterator*> nodeIterators;
     copyToVector(m_nodeIterators, nodeIterators);
     for (auto* it : nodeIterators) {
@@ -4071,13 +4074,13 @@ void Document::moveNodeIteratorsToNewDocument(Node* node, Document* newDocument)
 }
 
 void Document::updateRangesAfterChildrenChanged(ContainerNode& container)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* range : m_ranges)
         range->nodeChildrenChanged(container);
 }
 
 void Document::nodeChildrenWillBeRemoved(ContainerNode& container)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     NoEventDispatchAssertion assertNoEventDispatch;
 
     removeFocusedNodeOfSubtree(&container, true /* amongChildrenOnly */);
@@ -4110,7 +4113,7 @@ void Document::nodeChildrenWillBeRemoved(ContainerNode& container)
 }
 
 void Document::nodeWillBeRemoved(Node& n)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     NoEventDispatchAssertion assertNoEventDispatch;
 
     removeFocusedNodeOfSubtree(&n);
@@ -4137,12 +4140,12 @@ void Document::nodeWillBeRemoved(Node& n)
 }
 
 static Node* fallbackFocusNavigationStartingNodeAfterRemoval(Node& node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return node.previousSibling() ? node.previousSibling() : node.parentNode();
 }
 
 void Document::removeFocusNavigationNodeOfSubtree(Node& node, bool amongChildrenOnly)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_focusNavigationStartingNode)
         return;
 
@@ -4153,7 +4156,7 @@ void Document::removeFocusNavigationNodeOfSubtree(Node& node, bool amongChildren
 }
 
 void Document::textInserted(Node* text, unsigned offset, unsigned length)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_ranges.isEmpty()) {
         for (auto* range : m_ranges)
             range->textInserted(text, offset, length);
@@ -4164,7 +4167,7 @@ void Document::textInserted(Node* text, unsigned offset, unsigned length)
 }
 
 void Document::textRemoved(Node* text, unsigned offset, unsigned length)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_ranges.isEmpty()) {
         for (auto* range : m_ranges)
             range->textRemoved(text, offset, length);
@@ -4176,7 +4179,7 @@ void Document::textRemoved(Node* text, unsigned offset, unsigned length)
 }
 
 void Document::textNodesMerged(Text* oldNode, unsigned offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_ranges.isEmpty()) {
         NodeWithIndex oldNodeWithIndex(oldNode);
         for (auto* range : m_ranges)
@@ -4187,7 +4190,7 @@ void Document::textNodesMerged(Text* oldNode, unsigned offset)
 }
 
 void Document::textNodeSplit(Text* oldNode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* range : m_ranges)
         range->textNodeSplit(oldNode);
 
@@ -4195,7 +4198,7 @@ void Document::textNodeSplit(Text* oldNode)
 }
 
 void Document::createDOMWindow()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_frame);
     ASSERT(!m_domWindow);
 
@@ -4206,7 +4209,7 @@ void Document::createDOMWindow()
 }
 
 void Document::takeDOMWindowFrom(Document* document)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_frame);
     ASSERT(!m_domWindow);
     ASSERT(document->m_domWindow);
@@ -4221,33 +4224,33 @@ void Document::takeDOMWindowFrom(Document* document)
 }
 
 void Document::setAttributeEventListener(const AtomicString& eventType, const QualifiedName& attributeName, const AtomicString& attributeValue)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setAttributeEventListener(eventType, JSLazyEventListener::create(*this, attributeName, attributeValue));
 }
 
 void Document::setWindowAttributeEventListener(const AtomicString& eventType, PassRefPtr<EventListener> listener)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_domWindow)
         return;
     m_domWindow->setAttributeEventListener(eventType, listener);
 }
 
 void Document::setWindowAttributeEventListener(const AtomicString& eventType, const QualifiedName& attributeName, const AtomicString& attributeValue)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_domWindow)
         return;
     setWindowAttributeEventListener(eventType, JSLazyEventListener::create(*m_domWindow, attributeName, attributeValue));
 }
 
 EventListener* Document::getWindowAttributeEventListener(const AtomicString& eventType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_domWindow)
         return nullptr;
     return m_domWindow->getAttributeEventListener(eventType);
 }
 
 void Document::dispatchWindowEvent(Event& event, EventTarget* target)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT_WITH_SECURITY_IMPLICATION(!NoEventDispatchAssertion::isEventDispatchForbidden());
     if (!m_domWindow)
         return;
@@ -4255,7 +4258,7 @@ void Document::dispatchWindowEvent(Event& event, EventTarget* target)
 }
 
 void Document::dispatchWindowLoadEvent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT_WITH_SECURITY_IMPLICATION(!NoEventDispatchAssertion::isEventDispatchForbidden());
     if (!m_domWindow)
         return;
@@ -4265,24 +4268,24 @@ void Document::dispatchWindowLoadEvent()
 }
 
 void Document::enqueueWindowEvent(Ref<Event>&& event)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     event->setTarget(m_domWindow.get());
     m_eventQueue.enqueueEvent(WTFMove(event));
 }
 
 void Document::enqueueDocumentEvent(Ref<Event>&& event)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     event->setTarget(this);
     m_eventQueue.enqueueEvent(WTFMove(event));
 }
 
 void Document::enqueueOverflowEvent(Ref<Event>&& event)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_eventQueue.enqueueEvent(WTFMove(event));
 }
 
 RefPtr<Event> Document::createEvent(const String& type, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Please do *not* add new event classes to this function unless they are
     // required for compatibility of some actual legacy web content.
 
@@ -4353,7 +4356,7 @@ RefPtr<Event> Document::createEvent(const String& type, ExceptionCode& ec)
 }
 
 bool Document::hasListenerTypeForEventType(PlatformEvent::Type eventType) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (eventType) {
     case PlatformEvent::MouseForceChanged:
         return m_listenerTypes & Document::FORCECHANGED_LISTENER;
@@ -4369,7 +4372,7 @@ bool Document::hasListenerTypeForEventType(PlatformEvent::Type eventType) const
 }
 
 void Document::addListenerTypeIfNeeded(const AtomicString& eventType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (eventType == eventNames().DOMSubtreeModifiedEvent)
         addListenerType(DOMSUBTREEMODIFIED_LISTENER);
     else if (eventType == eventNames().DOMNodeInsertedEvent)
@@ -4407,19 +4410,19 @@ void Document::addListenerTypeIfNeeded(const AtomicString& eventType)
 }
 
 CSSStyleDeclaration* Document::getOverrideStyle(Element*, const String&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return nullptr;
 }
 
 HTMLFrameOwnerElement* Document::ownerElement() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!frame())
         return nullptr;
     return frame()->ownerElement();
 }
 
 String Document::cookie(ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (page() && !page()->settings().cookieEnabled())
         return String();
 
@@ -4443,7 +4446,7 @@ String Document::cookie(ExceptionCode& ec)
 }
 
 void Document::setCookie(const String& value, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (page() && !page()->settings().cookieEnabled())
         return;
 
@@ -4465,24 +4468,24 @@ void Document::setCookie(const String& value, ExceptionCode& ec)
 }
 
 String Document::referrer() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (frame())
         return frame()->loader().referrer();
     return String();
 }
 
 String Document::origin() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return securityOrigin()->databaseIdentifier();
 }
 
 String Document::domain() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return securityOrigin()->domain();
 }
 
 void Document::setDomain(const String& newDomain, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (SchemeRegistry::isDomainRelaxationForbiddenForURLScheme(securityOrigin()->protocol())) {
         ec = SECURITY_ERR;
         return;
@@ -4539,7 +4542,7 @@ void Document::setDomain(const String& newDomain, ExceptionCode& ec)
 
 // http://www.whatwg.org/specs/web-apps/current-work/#dom-document-lastmodified
 String Document::lastModified() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     using namespace std::chrono;
     Optional<system_clock::time_point> dateTime;
     if (m_frame && loader())
@@ -4567,7 +4570,7 @@ String Document::lastModified() const
 }
 
 void Document::setCookieURL(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_cookieURL == url)
         return;
     m_cookieURL = url;
@@ -4575,7 +4578,7 @@ void Document::setCookieURL(const URL& url)
 }
 
 static bool isValidNameNonASCII(const LChar* characters, unsigned length)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isValidNameStart(characters[0]))
         return false;
 
@@ -4588,7 +4591,7 @@ static bool isValidNameNonASCII(const LChar* characters, unsigned length)
 }
 
 static bool isValidNameNonASCII(const UChar* characters, unsigned length)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     unsigned i = 0;
 
     UChar32 c;
@@ -4607,7 +4610,7 @@ static bool isValidNameNonASCII(const UChar* characters, unsigned length)
 
 template<typename CharType>
 static inline bool isValidNameASCII(const CharType* characters, unsigned length)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     CharType c = characters[0];
     if (!(isASCIIAlpha(c) || c == ':' || c == '_'))
         return false;
@@ -4622,7 +4625,7 @@ static inline bool isValidNameASCII(const CharType* characters, unsigned length)
 }
 
 bool Document::isValidName(const String& name)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     unsigned length = name.length();
     if (!length)
         return false;
@@ -4645,7 +4648,7 @@ bool Document::isValidName(const String& name)
 }
 
 bool Document::parseQualifiedName(const String& qualifiedName, String& prefix, String& localName, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     unsigned length = qualifiedName.length();
 
     if (!length) {
@@ -4703,12 +4706,12 @@ bool Document::parseQualifiedName(const String& qualifiedName, String& prefix, S
 }
 
 void Document::setDecoder(RefPtr<TextResourceDecoder>&& decoder)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_decoder = WTFMove(decoder);
 }
 
 URL Document::completeURL(const String& url, const URL& baseURLOverride) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Always return a null URL when passed a null string.
     // FIXME: Should we change the URL constructor to have this behavior?
     // See also [CSS]StyleSheet::completeURL(const String&)
@@ -4721,12 +4724,12 @@ URL Document::completeURL(const String& url, const URL& baseURLOverride) const
 }
 
 URL Document::completeURL(const String& url) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return completeURL(url, m_baseURL);
 }
 
 void Document::setInPageCache(bool flag)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_inPageCache == flag)
         return;
 
@@ -4762,13 +4765,13 @@ void Document::setInPageCache(bool flag)
 }
 
 void Document::documentWillBecomeInactive()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (renderView())
         renderView()->setIsInWindow(false);
 }
 
 void Document::suspend(ActiveDOMObject::ReasonForSuspension reason)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_isSuspended)
         return;
 
@@ -4804,7 +4807,7 @@ void Document::suspend(ActiveDOMObject::ReasonForSuspension reason)
 }
 
 void Document::resume(ActiveDOMObject::ReasonForSuspension reason)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_isSuspended)
         return;
 
@@ -4832,56 +4835,56 @@ void Document::resume(ActiveDOMObject::ReasonForSuspension reason)
 }
 
 void Document::registerForDocumentSuspensionCallbacks(Element* e)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_documentSuspensionCallbackElements.add(e);
 }
 
 void Document::unregisterForDocumentSuspensionCallbacks(Element* e)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_documentSuspensionCallbackElements.remove(e);
 }
 
 void Document::mediaVolumeDidChange() 
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* element : m_mediaVolumeCallbackElements)
         element->mediaVolumeDidChange();
 }
 
 void Document::registerForMediaVolumeCallbacks(Element* e)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_mediaVolumeCallbackElements.add(e);
 }
 
 void Document::unregisterForMediaVolumeCallbacks(Element* e)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_mediaVolumeCallbackElements.remove(e);
 }
 
 void Document::storageBlockingStateDidChange()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Settings* settings = this->settings())
         securityOrigin()->setStorageBlockingPolicy(settings->storageBlockingPolicy());
 }
 
 void Document::privateBrowsingStateDidChange() 
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* element : m_privateBrowsingStateChangedElements)
         element->privateBrowsingStateDidChange();
 }
 
 void Document::registerForPrivateBrowsingStateChangedCallbacks(Element* e)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_privateBrowsingStateChangedElements.add(e);
 }
 
 void Document::unregisterForPrivateBrowsingStateChangedCallbacks(Element* e)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_privateBrowsingStateChangedElements.remove(e);
 }
 
 #if ENABLE(VIDEO_TRACK)
 void Document::registerForCaptionPreferencesChangedCallbacks(Element* e)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (page())
         page()->group().captionPreferences().setInterestedInCaptionPreferenceChanges();
 
@@ -4889,12 +4892,12 @@ void Document::registerForCaptionPreferencesChangedCallbacks(Element* e)
 }
 
 void Document::unregisterForCaptionPreferencesChangedCallbacks(Element* e)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_captionPreferencesChangedElements.remove(e);
 }
 
 void Document::captionPreferencesChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* element : m_captionPreferencesChangedElements)
         element->captionPreferencesChanged();
 }
@@ -4902,52 +4905,52 @@ void Document::captionPreferencesChanged()
 
 #if ENABLE(MEDIA_CONTROLS_SCRIPT)
 void Document::registerForPageScaleFactorChangedCallbacks(HTMLMediaElement* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_pageScaleFactorChangedElements.add(element);
 }
 
 void Document::unregisterForPageScaleFactorChangedCallbacks(HTMLMediaElement* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_pageScaleFactorChangedElements.remove(element);
 }
 
 void Document::pageScaleFactorChangedAndStable()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (HTMLMediaElement* mediaElement : m_pageScaleFactorChangedElements)
         mediaElement->pageScaleFactorChanged();
 }
 
 void Document::registerForUserInterfaceLayoutDirectionChangedCallbacks(HTMLMediaElement& element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_userInterfaceLayoutDirectionChangedElements.add(&element);
 }
 
 void Document::unregisterForUserInterfaceLayoutDirectionChangedCallbacks(HTMLMediaElement& element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_userInterfaceLayoutDirectionChangedElements.remove(&element);
 }
 
 void Document::userInterfaceLayoutDirectionChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* mediaElement : m_userInterfaceLayoutDirectionChangedElements)
         mediaElement->userInterfaceLayoutDirectionChanged();
 }
 #endif
 
 void Document::setShouldCreateRenderers(bool f)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_createRenderers = f;
 }
 
 bool Document::shouldCreateRenderers()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_createRenderers;
 }
 
 // Support for Javascript execCommand, and related methods
 
 static Editor::Command command(Document* document, const String& commandName, bool userInterface = false)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Frame* frame = document->frame();
     if (!frame || frame->document() != document)
         return Editor::Command();
@@ -4959,44 +4962,44 @@ static Editor::Command command(Document* document, const String& commandName, bo
 }
 
 bool Document::execCommand(const String& commandName, bool userInterface, const String& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     EventQueueScope eventQueueScope;
     return command(this, commandName, userInterface).execute(value);
 }
 
 bool Document::queryCommandEnabled(const String& commandName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return command(this, commandName).isEnabled();
 }
 
 bool Document::queryCommandIndeterm(const String& commandName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return command(this, commandName).state() == MixedTriState;
 }
 
 bool Document::queryCommandState(const String& commandName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return command(this, commandName).state() == TrueTriState;
 }
 
 bool Document::queryCommandSupported(const String& commandName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return command(this, commandName).isSupported();
 }
 
 String Document::queryCommandValue(const String& commandName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return command(this, commandName).value();
 }
 
 void Document::pushCurrentScript(HTMLScriptElement* newCurrentScript)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(newCurrentScript);
     m_currentScriptStack.append(newCurrentScript);
 }
 
 void Document::popCurrentScript()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_currentScriptStack.isEmpty());
     m_currentScriptStack.removeLast();
 }
@@ -5004,7 +5007,7 @@ void Document::popCurrentScript()
 #if ENABLE(XSLT)
 
 void Document::applyXSLTransform(ProcessingInstruction* pi)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<XSLTProcessor> processor = XSLTProcessor::create();
     processor->setXSLStyleSheet(downcast<XSLStyleSheet>(pi->sheet()));
     String resultMIMEType;
@@ -5018,26 +5021,26 @@ void Document::applyXSLTransform(ProcessingInstruction* pi)
 }
 
 void Document::setTransformSource(std::unique_ptr<TransformSource> source)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_transformSource = WTFMove(source);
 }
 
 #endif
 
 void Document::setDesignMode(InheritedBool value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_designMode = value;
     for (Frame* frame = m_frame; frame && frame->document(); frame = frame->tree().traverseNext(m_frame))
         frame->document()->scheduleForcedStyleRecalc();
 }
 
 String Document::designMode() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return inDesignMode() ? ASCIILiteral("on") : ASCIILiteral("off");
 }
 
 void Document::setDesignMode(const String& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     InheritedBool mode;
     if (equalLettersIgnoringASCIICase(value, "on"))
         mode = on;
@@ -5049,12 +5052,12 @@ void Document::setDesignMode(const String& value)
 }
 
 auto Document::getDesignMode() const -> InheritedBool
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_designMode;
 }
 
 bool Document::inDesignMode() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (const Document* d = this; d; d = d->parentDocument()) {
         if (d->m_designMode != inherit)
             return d->m_designMode;
@@ -5063,7 +5066,7 @@ bool Document::inDesignMode() const
 }
 
 Document* Document::parentDocument() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return nullptr;
     Frame* parent = m_frame->tree().parent();
@@ -5073,7 +5076,7 @@ Document* Document::parentDocument() const
 }
 
 Document& Document::topDocument() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: This special-casing avoids incorrectly determined top documents during the process
     // of AXObjectCache teardown or notification posting for cached or being-destroyed documents.
     if (!m_inPageCache && !m_renderTreeBeingDestroyed) {
@@ -5091,12 +5094,12 @@ Document& Document::topDocument() const
 }
 
 RefPtr<Attr> Document::createAttribute(const String& name, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return createAttributeNS(String(), isHTMLDocument() ? name.convertToASCIILowercase() : name, ec, true);
 }
 
 RefPtr<Attr> Document::createAttributeNS(const String& namespaceURI, const String& qualifiedName, ExceptionCode& ec, bool shouldIgnoreNamespaceChecks)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String prefix, localName;
     if (!parseQualifiedName(qualifiedName, prefix, localName, ec))
         return nullptr;
@@ -5112,86 +5115,86 @@ RefPtr<Attr> Document::createAttributeNS(const String& namespaceURI, const Strin
 }
 
 const SVGDocumentExtensions* Document::svgExtensions()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_svgExtensions.get();
 }
 
 SVGDocumentExtensions& Document::accessSVGExtensions()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_svgExtensions)
         m_svgExtensions = std::make_unique<SVGDocumentExtensions>(this);
     return *m_svgExtensions;
 }
 
 bool Document::hasSVGRootNode() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return documentElement() && documentElement()->hasTagName(SVGNames::svgTag);
 }
 
 template <CollectionType collectionType>
 Ref<HTMLCollection> Document::ensureCachedCollection()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureRareData().ensureNodeLists().addCachedCollection<GenericCachedHTMLCollection<CollectionTypeTraits<collectionType>::traversalType>>(*this, collectionType);
 }
 
 Ref<HTMLCollection> Document::images()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureCachedCollection<DocImages>();
 }
 
 Ref<HTMLCollection> Document::applets()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureCachedCollection<DocApplets>();
 }
 
 Ref<HTMLCollection> Document::embeds()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureCachedCollection<DocEmbeds>();
 }
 
 Ref<HTMLCollection> Document::plugins()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // This is an alias for embeds() required for the JS DOM bindings.
     return ensureCachedCollection<DocEmbeds>();
 }
 
 Ref<HTMLCollection> Document::scripts()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureCachedCollection<DocScripts>();
 }
 
 Ref<HTMLCollection> Document::links()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureCachedCollection<DocLinks>();
 }
 
 Ref<HTMLCollection> Document::forms()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureCachedCollection<DocForms>();
 }
 
 Ref<HTMLCollection> Document::anchors()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureCachedCollection<DocAnchors>();
 }
 
 Ref<HTMLCollection> Document::all()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureRareData().ensureNodeLists().addCachedCollection<HTMLAllCollection>(*this, DocAll);
 }
 
 Ref<HTMLCollection> Document::windowNamedItems(const AtomicString& name)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureRareData().ensureNodeLists().addCachedCollection<WindowNameCollection>(*this, WindowNamedItems, name);
 }
 
 Ref<HTMLCollection> Document::documentNamedItems(const AtomicString& name)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ensureRareData().ensureNodeLists().addCachedCollection<DocumentNameCollection>(*this, DocumentNamedItems, name);
 }
 
 void Document::finishedParsing()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!scriptableDocumentParser() || !m_parser->isParsing());
     ASSERT(!scriptableDocumentParser() || m_readyState != Loading);
     setParsing(false);
@@ -5235,7 +5238,7 @@ void Document::finishedParsing()
 }
 
 void Document::clearSharedObjectPool()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_sharedObjectPool = nullptr;
     m_sharedObjectPoolClearTimer.stop();
 }
@@ -5243,45 +5246,45 @@ void Document::clearSharedObjectPool()
 #if ENABLE(TELEPHONE_NUMBER_DETECTION)
 // FIXME: Find a better place for this functionality.
 bool Document::isTelephoneNumberParsingEnabled() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Settings* settings = this->settings();
     return settings && settings->telephoneNumberParsingEnabled() && m_isTelephoneNumberParsingAllowed;
 }
 
 void Document::setIsTelephoneNumberParsingAllowed(bool isTelephoneNumberParsingAllowed)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_isTelephoneNumberParsingAllowed = isTelephoneNumberParsingAllowed;
 }
 
 bool Document::isTelephoneNumberParsingAllowed() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_isTelephoneNumberParsingAllowed;
 }
 #endif
 
 RefPtr<XPathExpression> Document::createExpression(const String& expression, RefPtr<XPathNSResolver>&& resolver, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_xpathEvaluator)
         m_xpathEvaluator = XPathEvaluator::create();
     return m_xpathEvaluator->createExpression(expression, WTFMove(resolver), ec);
 }
 
 RefPtr<XPathNSResolver> Document::createNSResolver(Node* nodeResolver)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_xpathEvaluator)
         m_xpathEvaluator = XPathEvaluator::create();
     return m_xpathEvaluator->createNSResolver(nodeResolver);
 }
 
 RefPtr<XPathResult> Document::evaluate(const String& expression, Node* contextNode, RefPtr<XPathNSResolver>&& resolver, unsigned short type, XPathResult* result, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_xpathEvaluator)
         m_xpathEvaluator = XPathEvaluator::create();
     return m_xpathEvaluator->evaluate(expression, contextNode, WTFMove(resolver), type, result, ec);
 }
 
 static bool shouldInheritSecurityOriginFromOwner(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Paraphrased from <https://html.spec.whatwg.org/multipage/browsers.html#origin> (8 July 2016)
     //
     // If a Document has the address "about:blank"
@@ -5295,7 +5298,7 @@ static bool shouldInheritSecurityOriginFromOwner(const URL& url)
 }
 
 void Document::initSecurityContext()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (haveInitializedSecurityOrigin()) {
         ASSERT(securityOrigin());
         return;
@@ -5388,7 +5391,7 @@ void Document::initSecurityContext()
 }
 
 void Document::initContentSecurityPolicy()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame->tree().parent())
         return;
 
@@ -5405,12 +5408,12 @@ void Document::initContentSecurityPolicy()
 }
 
 bool Document::isContextThread() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return isMainThread();
 }
 
 void Document::updateURLForPushOrReplaceState(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Frame* f = frame();
     if (!f)
         return;
@@ -5423,7 +5426,7 @@ void Document::updateURLForPushOrReplaceState(const URL& url)
 }
 
 void Document::statePopped(PassRefPtr<SerializedScriptValue> stateObject)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!frame())
         return;
     
@@ -5436,19 +5439,19 @@ void Document::statePopped(PassRefPtr<SerializedScriptValue> stateObject)
 }
 
 void Document::updateFocusAppearanceSoon(SelectionRestorationMode mode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_updateFocusAppearanceRestoresSelection = mode;
     if (!m_updateFocusAppearanceTimer.isActive())
         m_updateFocusAppearanceTimer.startOneShot(0);
 }
 
 void Document::cancelFocusAppearanceUpdate()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_updateFocusAppearanceTimer.stop();
 }
 
 void Document::updateFocusAppearanceTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Element* element = focusedElement();
     if (!element)
         return;
@@ -5459,20 +5462,20 @@ void Document::updateFocusAppearanceTimerFired()
 }
 
 void Document::attachRange(Range* range)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_ranges.contains(range));
     m_ranges.add(range);
 }
 
 void Document::detachRange(Range* range)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We don't ASSERT m_ranges.contains(range) to allow us to call this
     // unconditionally to fix: https://bugs.webkit.org/show_bug.cgi?id=26044
     m_ranges.remove(range);
 }
 
 CanvasRenderingContext* Document::getCSSCanvasContext(const String& type, const String& name, int width, int height)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     HTMLCanvasElement* element = getCSSCanvasElement(name);
     if (!element)
         return nullptr;
@@ -5481,7 +5484,7 @@ CanvasRenderingContext* Document::getCSSCanvasContext(const String& type, const 
 }
 
 HTMLCanvasElement* Document::getCSSCanvasElement(const String& name)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<HTMLCanvasElement>& element = m_cssCanvasElements.add(name, nullptr).iterator->value;
     if (!element)
         element = HTMLCanvasElement::create(*this);
@@ -5491,7 +5494,7 @@ HTMLCanvasElement* Document::getCSSCanvasElement(const String& name)
 #if ENABLE(IOS_TEXT_AUTOSIZING)
 
 void Document::addAutoSizedNode(Text& node, float candidateSize)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(TextAutosizing, " addAutoSizedNode %p candidateSize=%f", &node, candidateSize);
     auto addResult = m_textAutoSizedNodes.add<TextAutoSizingHashTranslator>(node.renderer()->style(), nullptr);
     if (addResult.isNewEntry)
@@ -5500,21 +5503,21 @@ void Document::addAutoSizedNode(Text& node, float candidateSize)
 }
 
 void Document::updateAutoSizedNodes()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_textAutoSizedNodes.removeIf([](auto& keyAndValue) {
         return keyAndValue.value->adjustTextNodeSizes() == TextAutoSizingValue::StillHasNodes::No;
     });
 }
     
 void Document::clearAutoSizedNodes()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_textAutoSizedNodes.clear();
 }
 
 #endif // ENABLE(IOS_TEXT_AUTOSIZING)
 
 void Document::initDNSPrefetch()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Settings* settings = this->settings();
 
     m_haveExplicitlyDisabledDNSPrefetch = false;
@@ -5528,7 +5531,7 @@ void Document::initDNSPrefetch()
 }
 
 void Document::parseDNSPrefetchControlHeader(const String& dnsPrefetchControl)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (equalLettersIgnoringASCIICase(dnsPrefetchControl, "on") && !m_haveExplicitlyDisabledDNSPrefetch) {
         m_isDNSPrefetchEnabled = true;
         return;
@@ -5539,7 +5542,7 @@ void Document::parseDNSPrefetchControlHeader(const String& dnsPrefetchControl)
 }
 
 void Document::addConsoleMessage(MessageSource source, MessageLevel level, const String& message, unsigned long requestIdentifier)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isContextThread()) {
         postTask(AddConsoleMessageTask(source, level, message));
         return;
@@ -5550,7 +5553,7 @@ void Document::addConsoleMessage(MessageSource source, MessageLevel level, const
 }
 
 void Document::addMessage(MessageSource source, MessageLevel level, const String& message, const String& sourceURL, unsigned lineNumber, unsigned columnNumber, RefPtr<Inspector::ScriptCallStack>&& callStack, JSC::ExecState* state, unsigned long requestIdentifier)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isContextThread()) {
         postTask(AddConsoleMessageTask(source, level, message));
         return;
@@ -5561,12 +5564,12 @@ void Document::addMessage(MessageSource source, MessageLevel level, const String
 }
 
 SecurityOrigin* Document::topOrigin() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return topDocument().securityOrigin();
 }
 
 void Document::postTask(Task&& task)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     callOnMainThread([documentReference = m_weakFactory.createWeakPtr(), task = WTFMove(task)]() mutable {
         ASSERT(isMainThread());
 
@@ -5583,14 +5586,14 @@ void Document::postTask(Task&& task)
 }
 
 void Document::pendingTasksTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<Task> pendingTasks = WTFMove(m_pendingTasks);
     for (auto& task : pendingTasks)
         task.performTask(*this);
 }
 
 void Document::suspendScheduledTasks(ActiveDOMObject::ReasonForSuspension reason)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_scheduledTasksAreSuspended) {
         // A page may subsequently suspend DOM objects, say as part of handling a scroll or zoom gesture, after the
         // embedding client requested the page be suspended. We ignore such requests so long as the embedding client
@@ -5615,7 +5618,7 @@ void Document::suspendScheduledTasks(ActiveDOMObject::ReasonForSuspension reason
 }
 
 void Document::resumeScheduledTasks(ActiveDOMObject::ReasonForSuspension reason)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (reasonForSuspendingActiveDOMObjects() != reason)
         return;
 
@@ -5633,7 +5636,7 @@ void Document::resumeScheduledTasks(ActiveDOMObject::ReasonForSuspension reason)
 }
 
 void Document::suspendScriptedAnimationControllerCallbacks()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(REQUEST_ANIMATION_FRAME)
     if (m_scriptedAnimationController)
         m_scriptedAnimationController->suspend();
@@ -5641,7 +5644,7 @@ void Document::suspendScriptedAnimationControllerCallbacks()
 }
 
 void Document::resumeScriptedAnimationControllerCallbacks()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(REQUEST_ANIMATION_FRAME)
     if (m_scriptedAnimationController)
         m_scriptedAnimationController->resume();
@@ -5649,7 +5652,7 @@ void Document::resumeScriptedAnimationControllerCallbacks()
 }
 
 void Document::scriptedAnimationControllerSetThrottled(bool isThrottled)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(REQUEST_ANIMATION_FRAME)
     if (m_scriptedAnimationController)
         m_scriptedAnimationController->setThrottled(isThrottled);
@@ -5659,7 +5662,7 @@ void Document::scriptedAnimationControllerSetThrottled(bool isThrottled)
 }
 
 void Document::windowScreenDidChange(PlatformDisplayID displayID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     UNUSED_PARAM(displayID);
 
 #if ENABLE(REQUEST_ANIMATION_FRAME)
@@ -5674,14 +5677,14 @@ void Document::windowScreenDidChange(PlatformDisplayID displayID)
 }
 
 String Document::displayStringModifiedByEncoding(const String& str) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_decoder)
         return m_decoder->encoding().displayString(str.impl()).get();
     return str;
 }
 
 RefPtr<StringImpl> Document::displayStringModifiedByEncoding(PassRefPtr<StringImpl> str) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_decoder)
         return m_decoder->encoding().displayString(str);
     return str;
@@ -5689,7 +5692,7 @@ RefPtr<StringImpl> Document::displayStringModifiedByEncoding(PassRefPtr<StringIm
 
 template <typename CharacterType>
 void Document::displayBufferModifiedByEncodingInternal(CharacterType* buffer, unsigned len) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_decoder)
         m_decoder->encoding().displayBuffer(buffer, len);
 }
@@ -5699,59 +5702,59 @@ template void Document::displayBufferModifiedByEncodingInternal<LChar>(LChar*, u
 template void Document::displayBufferModifiedByEncodingInternal<UChar>(UChar*, unsigned) const;
 
 void Document::enqueuePageshowEvent(PageshowEventPersistence persisted)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: https://bugs.webkit.org/show_bug.cgi?id=36334 Pageshow event needs to fire asynchronously.
     dispatchWindowEvent(PageTransitionEvent::create(eventNames().pageshowEvent, persisted), this);
 }
 
 void Document::enqueueHashchangeEvent(const String& oldURL, const String& newURL)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     enqueueWindowEvent(HashChangeEvent::create(oldURL, newURL));
 }
 
 void Document::enqueuePopstateEvent(RefPtr<SerializedScriptValue>&& stateObject)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     dispatchWindowEvent(PopStateEvent::create(WTFMove(stateObject), m_domWindow ? m_domWindow->history() : nullptr));
 }
 
 void Document::addMediaCanStartListener(MediaCanStartListener* listener)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_mediaCanStartListeners.contains(listener));
     m_mediaCanStartListeners.add(listener);
 }
 
 void Document::removeMediaCanStartListener(MediaCanStartListener* listener)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_mediaCanStartListeners.contains(listener));
     m_mediaCanStartListeners.remove(listener);
 }
 
 MediaCanStartListener* Document::takeAnyMediaCanStartListener()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_mediaCanStartListeners.takeAny();
 }
 
 #if ENABLE(DEVICE_ORIENTATION) && PLATFORM(IOS)
 DeviceMotionController* Document::deviceMotionController() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_deviceMotionController.get();
 }
 
 DeviceOrientationController* Document::deviceOrientationController() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_deviceOrientationController.get();
 }
 #endif
 
 #if ENABLE(FULLSCREEN_API)
 bool Document::fullScreenIsAllowedForElement(Element* element) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(element);
     return isAttributeOnAllOwners(allowfullscreenAttr, webkitallowfullscreenAttr, element->document().ownerElement());
 }
 
 void Document::requestFullScreenForElement(Element* element, unsigned short flags, FullScreenCheckType checkType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // The Mozilla Full Screen API <https://wiki.mozilla.org/Gecko:FullScreenAPI> has different requirements
     // for full screen mode, and do not have the concept of a full screen element stack.
     bool inLegacyMozillaMode = (flags & Element::LEGACY_MOZILLA_REQUEST);
@@ -5872,7 +5875,7 @@ void Document::requestFullScreenForElement(Element* element, unsigned short flag
 }
 
 void Document::webkitCancelFullScreen()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // The Mozilla "cancelFullScreen()" API behaves like the W3C "fully exit fullscreen" behavior, which
     // is defined as: 
     // "To fully exit fullscreen act as if the exitFullscreen() method was invoked on the top-level browsing
@@ -5891,7 +5894,7 @@ void Document::webkitCancelFullScreen()
 }
 
 void Document::webkitExitFullscreen()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // The exitFullscreen() method must run these steps:
     
     // 1. Let doc be the context object. (i.e. "this")
@@ -5962,7 +5965,7 @@ void Document::webkitExitFullscreen()
 }
 
 bool Document::webkitFullscreenEnabled() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // 4. The fullscreenEnabled attribute must return true if the context object and all ancestor
     // browsing context's documents have their fullscreen enabled flag set, or false otherwise.
 
@@ -5971,7 +5974,7 @@ bool Document::webkitFullscreenEnabled() const
 }
 
 static void unwrapFullScreenRenderer(RenderFullScreen* fullScreenRenderer, Element* fullScreenElement)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!fullScreenRenderer)
         return;
     bool requiresRenderTreeRebuild;
@@ -5982,7 +5985,7 @@ static void unwrapFullScreenRenderer(RenderFullScreen* fullScreenRenderer, Eleme
 }
 
 void Document::webkitWillEnterFullScreenForElement(Element* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!hasLivingRenderTree() || inPageCache())
         return;
 
@@ -6026,7 +6029,7 @@ void Document::webkitWillEnterFullScreenForElement(Element* element)
 }
 
 void Document::webkitDidEnterFullScreenForElement(Element*)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_fullScreenElement)
         return;
 
@@ -6039,7 +6042,7 @@ void Document::webkitDidEnterFullScreenForElement(Element*)
 }
 
 void Document::webkitWillExitFullScreenForElement(Element*)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_fullScreenElement)
         return;
 
@@ -6050,7 +6053,7 @@ void Document::webkitWillExitFullScreenForElement(Element*)
 }
 
 void Document::webkitDidExitFullScreenForElement(Element*)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_fullScreenElement)
         return;
 
@@ -6076,7 +6079,7 @@ void Document::webkitDidExitFullScreenForElement(Element*)
 }
 
 void Document::setFullScreenRenderer(RenderFullScreen* renderer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (renderer == m_fullScreenRenderer)
         return;
 
@@ -6095,12 +6098,12 @@ void Document::setFullScreenRenderer(RenderFullScreen* renderer)
 }
 
 void Document::fullScreenRendererDestroyed()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_fullScreenRenderer = nullptr;
 }
 
 void Document::fullScreenChangeDelayTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Since we dispatch events in this function, it's possible that the
     // document will be detached and GC'd. We protect it here to make sure we
     // can finish the function successfully.
@@ -6114,7 +6117,7 @@ void Document::fullScreenChangeDelayTimerFired()
 }
 
 void Document::dispatchFullScreenChangeOrErrorEvent(Deque<RefPtr<Node>>& queue, const AtomicString& eventName, bool shouldNotifyMediaElement)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     while (!queue.isEmpty()) {
         RefPtr<Node> node = queue.takeFirst();
         if (!node)
@@ -6137,13 +6140,13 @@ void Document::dispatchFullScreenChangeOrErrorEvent(Deque<RefPtr<Node>>& queue, 
 }
 
 void Document::fullScreenElementRemoved()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_fullScreenElement->setContainsFullScreenElementOnAncestorsCrossingFrameBoundaries(false);
     webkitCancelFullScreen();
 }
 
 void Document::removeFullScreenElementOfSubtree(Node* node, bool amongChildrenOnly)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_fullScreenElement)
         return;
     
@@ -6158,12 +6161,12 @@ void Document::removeFullScreenElementOfSubtree(Node* node, bool amongChildrenOn
 }
 
 bool Document::isAnimatingFullScreen() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_isAnimatingFullScreen;
 }
 
 void Document::setAnimatingFullScreen(bool flag)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_isAnimatingFullScreen == flag)
         return;
     m_isAnimatingFullScreen = flag;
@@ -6175,12 +6178,12 @@ void Document::setAnimatingFullScreen(bool flag)
 }
 
 void Document::clearFullscreenElementStack()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_fullScreenElementStack.clear();
 }
 
 void Document::popFullscreenElementStack()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_fullScreenElementStack.isEmpty())
         return;
 
@@ -6188,12 +6191,12 @@ void Document::popFullscreenElementStack()
 }
 
 void Document::pushFullscreenElementStack(Element* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_fullScreenElementStack.append(element);
 }
 
 void Document::addDocumentToFullScreenChangeEventQueue(Document* doc)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(doc);
     Node* target = doc->webkitFullscreenElement();
     if (!target)
@@ -6206,7 +6209,7 @@ void Document::addDocumentToFullScreenChangeEventQueue(Document* doc)
 
 #if ENABLE(POINTER_LOCK)
 void Document::exitPointerLock()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!page())
         return;
     if (Element* target = page()->pointerLockController().element()) {
@@ -6217,7 +6220,7 @@ void Document::exitPointerLock()
 }
 
 Element* Document::pointerLockElement() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!page() || page()->pointerLockController().lockPending())
         return nullptr;
     if (Element* element = page()->pointerLockController().element()) {
@@ -6229,7 +6232,7 @@ Element* Document::pointerLockElement() const
 #endif
 
 void Document::decrementLoadEventDelayCount()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_loadEventDelayCount);
     --m_loadEventDelayCount;
 
@@ -6238,20 +6241,20 @@ void Document::decrementLoadEventDelayCount()
 }
 
 void Document::loadEventDelayTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (frame())
         frame()->loader().checkCompleted();
 }
 
 double Document::monotonicTimestamp() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* loader = this->loader();
     return loader ? loader->timing().monotonicTimeToZeroBasedDocumentTime(monotonicallyIncreasingTime()) : 0;
 }
 
 #if ENABLE(REQUEST_ANIMATION_FRAME)
 int Document::requestAnimationFrame(PassRefPtr<RequestAnimationFrameCallback> callback)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_scriptedAnimationController) {
 #if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
         m_scriptedAnimationController = ScriptedAnimationController::create(this, page() ? page()->chrome().displayID() : 0);
@@ -6269,21 +6272,21 @@ int Document::requestAnimationFrame(PassRefPtr<RequestAnimationFrameCallback> ca
 }
 
 void Document::cancelAnimationFrame(int id)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_scriptedAnimationController)
         return;
     m_scriptedAnimationController->cancelCallback(id);
 }
 
 void Document::serviceScriptedAnimations(double timestamp)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_scriptedAnimationController)
         return;
     m_scriptedAnimationController->serviceScriptedAnimations(timestamp);
 }
 
 void Document::clearScriptedAnimationController()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: consider using ActiveDOMObject.
     if (m_scriptedAnimationController)
         m_scriptedAnimationController->clearDocumentPointer();
@@ -6292,7 +6295,7 @@ void Document::clearScriptedAnimationController()
 #endif
     
 void Document::sendWillRevealEdgeEventsIfNeeded(const IntPoint& oldPosition, const IntPoint& newPosition, const IntRect& visibleRect, const IntSize& contentsSize, Element* target)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // For each edge (top, bottom, left and right), send the will reveal edge event for that direction
     // if newPosition is at or beyond the notification point, if the scroll direction is heading in the
     // direction of that edge point, and if oldPosition is before the notification point (which indicates
@@ -6365,7 +6368,7 @@ void Document::sendWillRevealEdgeEventsIfNeeded(const IntPoint& oldPosition, con
 #if !PLATFORM(IOS)
 #if ENABLE(TOUCH_EVENTS)
 RefPtr<Touch> Document::createTouch(DOMWindow* window, EventTarget* target, int identifier, int pageX, int pageY, int screenX, int screenY, int radiusX, int radiusY, float rotationAngle, float force, ExceptionCode&) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: It's not clear from the documentation at
     // http://developer.apple.com/library/safari/#documentation/UserExperience/Reference/DocumentAdditionsReference/DocumentAdditions/DocumentAdditions.html
     // when this method should throw and nor is it by inspection of iOS behavior. It would be nice to verify any cases where it throws under iOS
@@ -6377,7 +6380,7 @@ RefPtr<Touch> Document::createTouch(DOMWindow* window, EventTarget* target, int 
 #endif // !PLATFORM(IOS)
 
 void Document::wheelEventHandlersChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Page* page = this->page();
     if (!page)
         return;
@@ -6392,7 +6395,7 @@ void Document::wheelEventHandlersChanged()
 }
 
 void Document::didAddWheelEventHandler(Node& node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_wheelEventTargets)
         m_wheelEventTargets = std::make_unique<EventTargetSet>();
 
@@ -6405,7 +6408,7 @@ void Document::didAddWheelEventHandler(Node& node)
 }
 
 HttpEquivPolicy Document::httpEquivPolicy() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (shouldEnforceContentDispositionAttachmentSandbox())
         return HttpEquivPolicy::DisabledByContentDispositionAttachmentSandbox;
     if (page() && !page()->settings().httpEquivEnabled())
@@ -6414,7 +6417,7 @@ HttpEquivPolicy Document::httpEquivPolicy() const
 }
 
 static bool removeHandlerFromSet(EventTargetSet& handlerSet, Node& node, EventHandlerRemoval removal)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (removal) {
     case EventHandlerRemoval::One:
         return handlerSet.remove(&node);
@@ -6425,7 +6428,7 @@ static bool removeHandlerFromSet(EventTargetSet& handlerSet, Node& node, EventHa
 }
 
 void Document::didRemoveWheelEventHandler(Node& node, EventHandlerRemoval removal)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_wheelEventTargets)
         return;
 
@@ -6439,7 +6442,7 @@ void Document::didRemoveWheelEventHandler(Node& node, EventHandlerRemoval remova
 }
 
 unsigned Document::wheelEventHandlerCount() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_wheelEventTargets)
         return 0;
 
@@ -6451,7 +6454,7 @@ unsigned Document::wheelEventHandlerCount() const
 }
 
 void Document::didAddTouchEventHandler(Node& handler)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(TOUCH_EVENTS)
     if (!m_touchEventTargets)
         m_touchEventTargets = std::make_unique<EventTargetSet>();
@@ -6473,7 +6476,7 @@ void Document::didAddTouchEventHandler(Node& handler)
 }
 
 void Document::didRemoveTouchEventHandler(Node& handler, EventHandlerRemoval removal)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(TOUCH_EVENTS)
     if (!m_touchEventTargets)
         return;
@@ -6504,7 +6507,7 @@ void Document::didRemoveTouchEventHandler(Node& handler, EventHandlerRemoval rem
 }
 
 void Document::didRemoveEventTargetNode(Node& handler)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(TOUCH_EVENTS)
     if (m_touchEventTargets) {
         m_touchEventTargets->removeAll(&handler);
@@ -6521,7 +6524,7 @@ void Document::didRemoveEventTargetNode(Node& handler)
 }
 
 unsigned Document::touchEventHandlerCount() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(TOUCH_EVENTS)
     if (!m_touchEventTargets)
         return 0;
@@ -6537,7 +6540,7 @@ unsigned Document::touchEventHandlerCount() const
 }
 
 LayoutRect Document::absoluteEventHandlerBounds(bool& includesFixedPositionElements)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     includesFixedPositionElements = false;
     if (RenderView* renderView = this->renderView())
         return renderView->documentRect();
@@ -6546,7 +6549,7 @@ LayoutRect Document::absoluteEventHandlerBounds(bool& includesFixedPositionEleme
 }
 
 Document::RegionFixedPair Document::absoluteRegionForEventTargets(const EventTargetSet* targets)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!targets)
         return RegionFixedPair(Region(), false);
 
@@ -6580,7 +6583,7 @@ Document::RegionFixedPair Document::absoluteRegionForEventTargets(const EventTar
 }
 
 void Document::updateLastHandledUserGestureTimestamp()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_lastHandledUserGestureTimestamp)
         ResourceLoadObserver::sharedObserver().logUserInteraction(*this);
 
@@ -6588,17 +6591,17 @@ void Document::updateLastHandledUserGestureTimestamp()
 }
 
 void Document::startTrackingStyleRecalcs()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_styleRecalcCount = 0;
 }
 
 unsigned Document::styleRecalcCount() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_styleRecalcCount;
 }
 
 DocumentLoader* Document::loader() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return nullptr;
     
@@ -6614,7 +6617,7 @@ DocumentLoader* Document::loader() const
 
 #if ENABLE(CSS_DEVICE_ADAPTATION)
 IntSize Document::initialViewportSize() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!view())
         return IntSize();
     return view()->initialViewportSize();
@@ -6622,7 +6625,7 @@ IntSize Document::initialViewportSize() const
 #endif
 
 Element* eventTargetElementForDocument(Document* document)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!document)
         return nullptr;
     Element* element = document->focusedElement();
@@ -6636,7 +6639,7 @@ Element* eventTargetElementForDocument(Document* document)
 }
 
 void Document::adjustFloatQuadsForScrollAndAbsoluteZoomAndFrameScale(Vector<FloatQuad>& quads, const RenderStyle& style)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!view())
         return;
 
@@ -6656,7 +6659,7 @@ void Document::adjustFloatQuadsForScrollAndAbsoluteZoomAndFrameScale(Vector<Floa
 }
 
 void Document::adjustFloatRectForScrollAndAbsoluteZoomAndFrameScale(FloatRect& rect, const RenderStyle& style)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!view())
         return;
 
@@ -6674,12 +6677,12 @@ void Document::adjustFloatRectForScrollAndAbsoluteZoomAndFrameScale(FloatRect& r
 }
 
 bool Document::hasActiveParser()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_activeParserCount || (m_parser && m_parser->processingData());
 }
 
 void Document::decrementActiveParserCount()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     --m_activeParserCount;
     if (!frame())
         return;
@@ -6691,7 +6694,7 @@ void Document::decrementActiveParserCount()
 }
 
 static RenderElement* nearestCommonHoverAncestor(RenderElement* obj1, RenderElement* obj2)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!obj1 || !obj2)
         return nullptr;
 
@@ -6706,7 +6709,7 @@ static RenderElement* nearestCommonHoverAncestor(RenderElement* obj1, RenderElem
 }
 
 void Document::updateHoverActiveState(const HitTestRequest& request, Element* innerElement, StyleResolverUpdateFlag updateFlag)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!request.readOnly());
 
     Element* innerElementInDocument = innerElement;
@@ -6828,12 +6831,12 @@ void Document::updateHoverActiveState(const HitTestRequest& request, Element* in
 }
 
 bool Document::haveStylesheetsLoaded() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !authorStyleSheets().hasPendingSheets() || m_ignorePendingStylesheets;
 }
 
 Locale& Document::getCachedLocale(const AtomicString& locale)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     AtomicString localeKey = locale;
     if (locale.isEmpty() || !RuntimeEnabledFeatures::sharedFeatures().langAttributeAwareFormControlUIEnabled())
         localeKey = defaultLanguage();
@@ -6844,7 +6847,7 @@ Locale& Document::getCachedLocale(const AtomicString& locale)
 }
 
 Document& Document::ensureTemplateDocument()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (const Document* document = templateDocument())
         return const_cast<Document&>(*document);
 
@@ -6859,20 +6862,20 @@ Document& Document::ensureTemplateDocument()
 }
 
 Ref<FontFaceSet> Document::fonts()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     updateStyleIfNeeded();
     return fontSelector().fontFaceSet();
 }
 
 float Document::deviceScaleFactor() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     float deviceScaleFactor = 1.0;
     if (Page* documentPage = page())
         deviceScaleFactor = documentPage->deviceScaleFactor();
     return deviceScaleFactor;
 }
 void Document::didAssociateFormControl(Element* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!frame() || !frame()->page() || !frame()->page()->chrome().client().shouldNotifyOnFormChanges())
         return;
     m_associatedFormControls.add(element);
@@ -6881,7 +6884,7 @@ void Document::didAssociateFormControl(Element* element)
 }
 
 void Document::didAssociateFormControlsTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!frame() || !frame()->page())
         return;
 
@@ -6893,7 +6896,7 @@ void Document::didAssociateFormControlsTimerFired()
 }
 
 void Document::setCachedDOMCookies(const String& cookies)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!isDOMCookieCacheValid());
     m_cachedDOMCookies = cookies;
     // The cookie cache is valid at most until we go back to the event loop.
@@ -6901,20 +6904,20 @@ void Document::setCachedDOMCookies(const String& cookies)
 }
 
 void Document::invalidateDOMCookieCache()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_cookieCacheExpiryTimer.stop();
     m_cachedDOMCookies = String();
 }
 
 void Document::didLoadResourceSynchronously()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Synchronous resources loading can set cookies so we invalidate the cookies cache
     // in this case, to be safe.
     invalidateDOMCookieCache();
 }
 
 void Document::ensurePlugInsInjectedScript(DOMWrapperWorld& world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_hasInjectedPlugInsScript)
         return;
 
@@ -6930,7 +6933,7 @@ void Document::ensurePlugInsInjectedScript(DOMWrapperWorld& world)
 
 #if ENABLE(SUBTLE_CRYPTO)
 bool Document::wrapCryptoKey(const Vector<uint8_t>& key, Vector<uint8_t>& wrappedKey)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Page* page = this->page();
     if (!page)
         return false;
@@ -6938,7 +6941,7 @@ bool Document::wrapCryptoKey(const Vector<uint8_t>& key, Vector<uint8_t>& wrappe
 }
 
 bool Document::unwrapCryptoKey(const Vector<uint8_t>& wrappedKey, Vector<uint8_t>& key)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Page* page = this->page();
     if (!page)
         return false;
@@ -6947,14 +6950,14 @@ bool Document::unwrapCryptoKey(const Vector<uint8_t>& wrappedKey, Vector<uint8_t
 #endif // ENABLE(SUBTLE_CRYPTO)
 
 Element* Document::activeElement()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Element* element = treeScope().focusedElement())
         return element;
     return bodyOrFrameset();
 }
 
 bool Document::hasFocus() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Page* page = this->page();
     if (!page || !page->focusController().isActive())
         return false;
@@ -6967,20 +6970,20 @@ bool Document::hasFocus() const
 
 #if ENABLE(WEB_REPLAY)
 void Document::setInputCursor(PassRefPtr<InputCursor> cursor)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_inputCursor = WTFMove(cursor);
 }
 #endif
 
 #if ENABLE(WIRELESS_PLAYBACK_TARGET)
 static uint64_t nextPlaybackTargetClientContextId()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static uint64_t contextId = 0;
     return ++contextId;
 }
 
 void Document::addPlaybackTargetPickerClient(MediaPlaybackTargetClient& client)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Page* page = this->page();
     if (!page)
         return;
@@ -6996,7 +6999,7 @@ void Document::addPlaybackTargetPickerClient(MediaPlaybackTargetClient& client)
 }
 
 void Document::removePlaybackTargetPickerClient(MediaPlaybackTargetClient& client)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto it = m_clientToIDMap.find(&client);
     if (it == m_clientToIDMap.end())
         return;
@@ -7012,7 +7015,7 @@ void Document::removePlaybackTargetPickerClient(MediaPlaybackTargetClient& clien
 }
 
 void Document::showPlaybackTargetPicker(MediaPlaybackTargetClient& client, bool isVideo)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Page* page = this->page();
     if (!page)
         return;
@@ -7025,7 +7028,7 @@ void Document::showPlaybackTargetPicker(MediaPlaybackTargetClient& client, bool 
 }
 
 void Document::playbackTargetPickerClientStateDidChange(MediaPlaybackTargetClient& client, MediaProducer::MediaStateFlags state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Page* page = this->page();
     if (!page)
         return;
@@ -7038,7 +7041,7 @@ void Document::playbackTargetPickerClientStateDidChange(MediaPlaybackTargetClien
 }
 
 void Document::playbackTargetAvailabilityDidChange(uint64_t clientId, bool available)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto it = m_idToClientMap.find(clientId);
     if (it == m_idToClientMap.end())
         return;
@@ -7047,7 +7050,7 @@ void Document::playbackTargetAvailabilityDidChange(uint64_t clientId, bool avail
 }
 
 void Document::setPlaybackTarget(uint64_t clientId, Ref<MediaPlaybackTarget>&& target)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto it = m_idToClientMap.find(clientId);
     if (it == m_idToClientMap.end())
         return;
@@ -7056,7 +7059,7 @@ void Document::setPlaybackTarget(uint64_t clientId, Ref<MediaPlaybackTarget>&& t
 }
 
 void Document::setShouldPlayToPlaybackTarget(uint64_t clientId, bool shouldPlay)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto it = m_idToClientMap.find(clientId);
     if (it == m_idToClientMap.end())
         return;
@@ -7067,7 +7070,7 @@ void Document::setShouldPlayToPlaybackTarget(uint64_t clientId, bool shouldPlay)
 
 #if ENABLE(MEDIA_SESSION)
 MediaSession& Document::defaultMediaSession()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_defaultMediaSession)
         m_defaultMediaSession = MediaSession::create(*scriptExecutionContext());
 
@@ -7076,7 +7079,7 @@ MediaSession& Document::defaultMediaSession()
 #endif
 
 ShouldOpenExternalURLsPolicy Document::shouldOpenExternalURLsPolicyToPropagate() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (DocumentLoader* documentLoader = loader())
         return documentLoader->shouldOpenExternalURLsPolicyToPropagate();
 
@@ -7084,7 +7087,7 @@ ShouldOpenExternalURLsPolicy Document::shouldOpenExternalURLsPolicyToPropagate()
 }
 
 bool Document::shouldEnforceContentDispositionAttachmentSandbox() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_isSynthesized)
         return false;
 
@@ -7097,7 +7100,7 @@ bool Document::shouldEnforceContentDispositionAttachmentSandbox() const
 }
 
 void Document::applyContentDispositionAttachmentSandbox()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(shouldEnforceContentDispositionAttachmentSandbox());
 
     setReferrerPolicy(ReferrerPolicy::Never);
@@ -7108,17 +7111,17 @@ void Document::applyContentDispositionAttachmentSandbox()
 }
 
 void Document::addViewportDependentPicture(HTMLPictureElement& picture)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_viewportDependentPictures.add(&picture);
 }
 
 void Document::removeViewportDependentPicture(HTMLPictureElement& picture)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_viewportDependentPictures.remove(&picture);
 }
 
 const AtomicString& Document::dir() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* documentElement = this->documentElement();
     if (!is<HTMLHtmlElement>(documentElement))
         return nullAtom;
@@ -7126,7 +7129,7 @@ const AtomicString& Document::dir() const
 }
 
 void Document::setDir(const AtomicString& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* documentElement = this->documentElement();
     if (is<HTMLHtmlElement>(documentElement))
         downcast<HTMLHtmlElement>(*documentElement).setDir(value);

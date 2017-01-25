@@ -40,6 +40,10 @@
 #include <wtf/HashMap.h>
 #include <wtf/NeverDestroyed.h>
 
+#include <wtf/macros.h>
+
+
+
 using namespace WebCore;
 
 namespace WebKit {
@@ -56,13 +60,13 @@ struct ItemAndPageID {
 typedef HashMap<RefPtr<HistoryItem>, ItemAndPageID> HistoryItemToIDMap;
 
 static IDToHistoryItemMap& idToHistoryItemMap()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<IDToHistoryItemMap> map;
     return map;
 }
 
 static HistoryItemToIDMap& historyItemToIDMap()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<HistoryItemToIDMap> map;
     return map;
 }
@@ -70,7 +74,7 @@ static HistoryItemToIDMap& historyItemToIDMap()
 static uint64_t uniqueHistoryItemID = 1;
 
 static uint64_t generateHistoryItemID()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // These IDs exist in the WebProcess for items created by the WebProcess.
     // The IDs generated here need to never collide with the IDs created in WebBackForwardList in the UIProcess.
     // We accomplish this by starting from 3, and only ever using odd ids.
@@ -79,7 +83,7 @@ static uint64_t generateHistoryItemID()
 }
 
 void WebBackForwardListProxy::setHighestItemIDFromUIProcess(uint64_t itemID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (itemID <= uniqueHistoryItemID)
         return;
     
@@ -90,12 +94,12 @@ void WebBackForwardListProxy::setHighestItemIDFromUIProcess(uint64_t itemID)
 }
 
 static void updateBackForwardItem(uint64_t itemID, uint64_t pageID, HistoryItem* item)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().parentProcessConnection()->send(Messages::WebProcessProxy::AddBackForwardItem(itemID, pageID, toPageState(*item)), 0);
 }
 
 void WebBackForwardListProxy::addItemFromUIProcess(uint64_t itemID, Ref<HistoryItem>&& item, uint64_t pageID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // This item/itemID pair should not already exist in our maps.
     ASSERT(!historyItemToIDMap().contains(item.ptr()));
     ASSERT(!idToHistoryItemMap().contains(itemID));
@@ -105,7 +109,7 @@ void WebBackForwardListProxy::addItemFromUIProcess(uint64_t itemID, Ref<HistoryI
 }
 
 static void WK2NotifyHistoryItemChanged(HistoryItem* item)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ItemAndPageID ids = historyItemToIDMap().get(item);
     if (!ids.itemID)
         return;
@@ -114,18 +118,18 @@ static void WK2NotifyHistoryItemChanged(HistoryItem* item)
 }
 
 HistoryItem* WebBackForwardListProxy::itemForID(uint64_t itemID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return idToHistoryItemMap().get(itemID);
 }
 
 uint64_t WebBackForwardListProxy::idForItem(HistoryItem* item)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(item);
     return historyItemToIDMap().get(item).itemID;
 }
 
 void WebBackForwardListProxy::removeItem(uint64_t itemID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<HistoryItem> item = idToHistoryItemMap().take(itemID);
     if (!item)
         return;
@@ -137,12 +141,12 @@ void WebBackForwardListProxy::removeItem(uint64_t itemID)
 
 WebBackForwardListProxy::WebBackForwardListProxy(WebPage* page)
     : m_page(page)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebCore::notifyHistoryItemChanged = WK2NotifyHistoryItemChanged;
 }
 
 void WebBackForwardListProxy::addItem(Ref<HistoryItem>&& item)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!historyItemToIDMap().contains(item.ptr()));
 
     if (!m_page)
@@ -162,7 +166,7 @@ void WebBackForwardListProxy::addItem(Ref<HistoryItem>&& item)
 }
 
 void WebBackForwardListProxy::goToItem(HistoryItem* item)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_page)
         return;
 
@@ -172,7 +176,7 @@ void WebBackForwardListProxy::goToItem(HistoryItem* item)
 }
 
 HistoryItem* WebBackForwardListProxy::itemAtIndex(int itemIndex)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_page)
         return 0;
 
@@ -187,7 +191,7 @@ HistoryItem* WebBackForwardListProxy::itemAtIndex(int itemIndex)
 }
 
 int WebBackForwardListProxy::backListCount()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_page)
         return 0;
 
@@ -199,7 +203,7 @@ int WebBackForwardListProxy::backListCount()
 }
 
 int WebBackForwardListProxy::forwardListCount()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_page)
         return 0;
 
@@ -211,7 +215,7 @@ int WebBackForwardListProxy::forwardListCount()
 }
 
 void WebBackForwardListProxy::close()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& itemID : m_associatedItemIDs) {
         if (HistoryItem* item = itemForID(itemID))
             WebCore::PageCache::singleton().remove(*item);
@@ -222,13 +226,13 @@ void WebBackForwardListProxy::close()
 }
 
 bool WebBackForwardListProxy::isActive()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Should check the the list is enabled and has non-zero capacity.
     return true;
 }
 
 void WebBackForwardListProxy::clear()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_page->send(Messages::WebPageProxy::BackForwardClear());
 }
 

@@ -33,33 +33,35 @@
 #include <ResourceResponse.h>
 #include <libsoup/soup.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 CertificateInfo::CertificateInfo()
     : m_tlsErrors(static_cast<GTlsCertificateFlags>(0))
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 CertificateInfo::CertificateInfo(const ResourceResponse& response)
     : m_certificate(response.soupMessageCertificate())
     , m_tlsErrors(response.soupMessageTLSErrors())
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 CertificateInfo::CertificateInfo(const ResourceError& resourceError)
     : m_certificate(resourceError.certificate())
     , m_tlsErrors(static_cast<GTlsCertificateFlags>(resourceError.tlsErrors()))
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 CertificateInfo::CertificateInfo(GTlsCertificate* certificate, GTlsCertificateFlags tlsErrors)
     : m_certificate(certificate)
     , m_tlsErrors(tlsErrors)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 CertificateInfo::~CertificateInfo()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 } // namespace WebCore

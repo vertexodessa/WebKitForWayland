@@ -44,6 +44,8 @@ extern int xpathyyparse(Parser&);
 
 #include "XPathGrammar.h"
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 namespace XPath {
 
@@ -64,7 +66,7 @@ struct Parser::Token {
 enum XMLCat { NameStart, NameCont, NotPartOfName };
 
 static XMLCat charCat(UChar character)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (character == '_')
         return NameStart;
 
@@ -79,7 +81,7 @@ static XMLCat charCat(UChar character)
 }
 
 static void populateAxisNamesMap(HashMap<String, Step::Axis>& axisNames)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     struct AxisName {
         const char* name;
         Step::Axis axis;
@@ -104,7 +106,7 @@ static void populateAxisNamesMap(HashMap<String, Step::Axis>& axisNames)
 }
 
 static bool parseAxisName(const String& name, Step::Axis& type)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<HashMap<String, Step::Axis>> axisNames;
     if (axisNames.get().isEmpty())
         populateAxisNamesMap(axisNames);
@@ -121,7 +123,7 @@ static bool parseAxisName(const String& name, Step::Axis& type)
 // (* (multiply), div, and, or, mod) in the [32] Operator rule
 // (check http://www.w3.org/TR/xpath#exprlex).
 bool Parser::isBinaryOperatorContext() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (m_lastTokenType) {
     case 0:
     case '@': case AXISNAME: case '(': case '[': case ',':
@@ -135,32 +137,32 @@ bool Parser::isBinaryOperatorContext() const
 }
 
 void Parser::skipWS()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     while (m_nextPos < m_data.length() && isSpaceOrNewline(m_data[m_nextPos]))
         ++m_nextPos;
 }
 
 Parser::Token Parser::makeTokenAndAdvance(int code, int advance)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_nextPos += advance;
     return Token(code);
 }
 
 Parser::Token Parser::makeTokenAndAdvance(int code, NumericOp::Opcode val, int advance)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_nextPos += advance;
     return Token(code, val);
 }
 
 Parser::Token Parser::makeTokenAndAdvance(int code, EqTestOp::Opcode val, int advance)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_nextPos += advance;
     return Token(code, val);
 }
 
 // Returns next char if it's there and interesting, 0 otherwise.
 char Parser::peekAheadHelper()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_nextPos + 1 >= m_data.length())
         return 0;
     UChar next = m_data[m_nextPos + 1];
@@ -170,7 +172,7 @@ char Parser::peekAheadHelper()
 }
 
 char Parser::peekCurHelper()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_nextPos >= m_data.length())
         return 0;
     UChar next = m_data[m_nextPos];
@@ -180,7 +182,7 @@ char Parser::peekCurHelper()
 }
 
 Parser::Token Parser::lexString()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     UChar delimiter = m_data[m_nextPos];
     int startPos = m_nextPos + 1;
 
@@ -199,7 +201,7 @@ Parser::Token Parser::lexString()
 }
 
 Parser::Token Parser::lexNumber()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     int startPos = m_nextPos;
     bool seenDot = false;
 
@@ -220,7 +222,7 @@ Parser::Token Parser::lexNumber()
 }
 
 bool Parser::lexNCName(String& name)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     int startPos = m_nextPos;
     if (m_nextPos >= m_data.length())
         return false;
@@ -238,7 +240,7 @@ bool Parser::lexNCName(String& name)
 }
 
 bool Parser::lexQName(String& name)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String n1;
     if (!lexNCName(n1))
         return false;
@@ -261,7 +263,7 @@ bool Parser::lexQName(String& name)
 }
 
 inline Parser::Token Parser::nextTokenInternal()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     skipWS();
 
     if (m_nextPos >= m_data.length())
@@ -393,7 +395,7 @@ inline Parser::Token Parser::nextTokenInternal()
 }
 
 inline Parser::Token Parser::nextToken()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Token token = nextTokenInternal();
     m_lastTokenType = token.type;
     return token;
@@ -405,11 +407,11 @@ Parser::Parser(const String& statement, RefPtr<XPathNSResolver>&& resolver)
     , m_nextPos(0)
     , m_lastTokenType(0)
     , m_sawNamespaceError(false)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 int Parser::lex(YYSTYPE& yylval)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Token token = nextToken();
 
     switch (token.type) {
@@ -437,7 +439,7 @@ int Parser::lex(YYSTYPE& yylval)
 }
 
 bool Parser::expandQualifiedName(const String& qualifiedName, String& localName, String& namespaceURI)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     size_t colon = qualifiedName.find(':');
     if (colon != notFound) {
         if (!m_resolver) {
@@ -457,7 +459,7 @@ bool Parser::expandQualifiedName(const String& qualifiedName, String& localName,
 }
 
 std::unique_ptr<Expression> Parser::parseStatement(const String& statement, RefPtr<XPathNSResolver>&& resolver, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Parser parser(statement, WTFMove(resolver));
 
     int parseError = xpathyyparse(parser);

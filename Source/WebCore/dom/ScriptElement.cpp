@@ -54,6 +54,8 @@
 #include <wtf/text/StringBuilder.h>
 #include <wtf/text/StringHash.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 ScriptElement::ScriptElement(Element& element, bool parserInserted, bool alreadyStarted)
@@ -69,35 +71,35 @@ ScriptElement::ScriptElement(Element& element, bool parserInserted, bool already
     , m_forceAsync(!parserInserted)
     , m_willExecuteInOrder(false)
     , m_requestUsesAccessControl(false)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (parserInserted && m_element.document().scriptableDocumentParser() && !m_element.document().isInDocumentWrite())
         m_startLineNumber = m_element.document().scriptableDocumentParser()->textPosition().m_line;
 }
 
 ScriptElement::~ScriptElement()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     stopLoadRequest();
 }
 
 bool ScriptElement::shouldCallFinishedInsertingSubtree(ContainerNode& insertionPoint)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return insertionPoint.inDocument() && !m_parserInserted;
 }
 
 void ScriptElement::finishedInsertingSubtree()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_parserInserted);
     prepareScript(); // FIXME: Provide a real starting line number here.
 }
 
 void ScriptElement::childrenChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_parserInserted && m_element.inDocument())
         prepareScript(); // FIXME: Provide a real starting line number here.
 }
 
 void ScriptElement::handleSourceAttribute(const String& sourceUrl)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (ignoresLoadRequest() || sourceUrl.isEmpty())
         return;
 
@@ -105,13 +107,13 @@ void ScriptElement::handleSourceAttribute(const String& sourceUrl)
 }
 
 void ScriptElement::handleAsyncAttribute()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_forceAsync = false;
 }
 
 // Helper function
 static bool isLegacySupportedJavaScriptLanguage(const String& language)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Mozilla 1.8 accepts javascript1.0 - javascript1.7, but WinIE 7 accepts only javascript1.1 - javascript1.3.
     // Mozilla 1.8 and WinIE 7 both accept javascript and livescript.
     // WinIE 7 accepts ecmascript and jscript, but Mozilla 1.8 doesn't.
@@ -141,12 +143,12 @@ static bool isLegacySupportedJavaScriptLanguage(const String& language)
 }
 
 void ScriptElement::dispatchErrorEvent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_element.dispatchEvent(Event::create(eventNames().errorEvent, false, false));
 }
 
 Optional<ScriptElement::ScriptType> ScriptElement::determineScriptType(LegacyTypeSupport supportLegacyTypes) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: isLegacySupportedJavaScriptLanguage() is not valid HTML5. It is used here to maintain backwards compatibility with existing layout tests. The specific violations are:
     // - Allowing type=javascript. type= should only support MIME types, such as text/javascript.
     // - Allowing a different set of languages for language= and type=. language= supports Javascript 1.1 and 1.4-1.6, but type= does not.
@@ -176,7 +178,7 @@ Optional<ScriptElement::ScriptType> ScriptElement::determineScriptType(LegacyTyp
 
 // http://dev.w3.org/html5/spec/Overview.html#prepare-a-script
 bool ScriptElement::prepareScript(const TextPosition& scriptStartPosition, LegacyTypeSupport supportLegacyTypes)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_alreadyStarted)
         return false;
 
@@ -256,7 +258,7 @@ bool ScriptElement::prepareScript(const TextPosition& scriptStartPosition, Legac
 }
 
 bool ScriptElement::requestScript(const String& sourceUrl)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<Document> originalDocument(m_element.document());
     if (!m_element.dispatchBeforeLoadEvent(sourceUrl))
         return false;
@@ -297,7 +299,7 @@ bool ScriptElement::requestScript(const String& sourceUrl)
 }
 
 void ScriptElement::executeScript(const ScriptSourceCode& sourceCode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_alreadyStarted);
 
     if (sourceCode.isEmpty())
@@ -331,7 +333,7 @@ void ScriptElement::executeScript(const ScriptSourceCode& sourceCode)
 }
 
 void ScriptElement::stopLoadRequest()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_cachedScript) {
         if (!m_willBeParserExecuted)
             m_cachedScript->removeClient(this);
@@ -340,7 +342,7 @@ void ScriptElement::stopLoadRequest()
 }
 
 void ScriptElement::execute(CachedScript* cachedScript)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_willBeParserExecuted);
     ASSERT(cachedScript);
     if (cachedScript->errorOccurred())
@@ -353,7 +355,7 @@ void ScriptElement::execute(CachedScript* cachedScript)
 }
 
 void ScriptElement::notifyFinished(CachedResource* resource)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_willBeParserExecuted);
 
     // CachedResource possibly invokes this notifyFinished() more than
@@ -380,12 +382,12 @@ void ScriptElement::notifyFinished(CachedResource* resource)
 }
 
 bool ScriptElement::ignoresLoadRequest() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_alreadyStarted || m_isExternalScript || m_parserInserted || !m_element.inDocument();
 }
 
 bool ScriptElement::isScriptForEventSupported() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String eventAttribute = eventAttributeValue();
     String forAttribute = forAttributeValue();
     if (!eventAttribute.isNull() && !forAttribute.isNull()) {
@@ -401,7 +403,7 @@ bool ScriptElement::isScriptForEventSupported() const
 }
 
 String ScriptElement::scriptContent() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     StringBuilder result;
     for (auto* text = TextNodeTraversal::firstChild(m_element); text; text = TextNodeTraversal::nextSibling(*text))
         result.append(text->data());
@@ -409,7 +411,7 @@ String ScriptElement::scriptContent() const
 }
 
 ScriptElement* toScriptElementIfPossible(Element* element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (is<HTMLScriptElement>(*element))
         return downcast<HTMLScriptElement>(element);
 

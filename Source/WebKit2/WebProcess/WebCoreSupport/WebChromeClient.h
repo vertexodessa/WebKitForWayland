@@ -31,6 +31,8 @@
 #include <WebCore/ViewportArguments.h>
 #include <wtf/text/WTFString.h>
 
+#include <wtf/macros.h>
+
 namespace WebKit {
 
 class WebPage;
@@ -41,7 +43,7 @@ public:
         : m_cachedMainFrameHasHorizontalScrollbar(false)
         , m_cachedMainFrameHasVerticalScrollbar(false)
         , m_page(page)
-    {
+    { WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     }
     
     WebPage* page() const { return m_page; }

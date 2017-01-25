@@ -55,6 +55,8 @@ OBJC_CLASS NSArray;
 typedef struct HBITMAP__* HBITMAP;
 #endif
 
+#include <wtf/macros.h>
+
 namespace JSC { namespace Yarr {
 class RegularExpression;
 } }
@@ -326,6 +328,7 @@ namespace WebCore {
 
     inline void Frame::init()
     {
+        WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
         m_loader.init();
     }
 

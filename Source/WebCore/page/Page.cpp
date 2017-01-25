@@ -121,6 +121,8 @@
 #include "InProcessIDBServer.h"
 #endif
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 static HashSet<Page*>* allPages;
@@ -128,7 +130,7 @@ static HashSet<Page*>* allPages;
 DEFINE_DEBUG_ONLY_GLOBAL(WTF::RefCountedLeakCounter, pageCounter, ("Page"));
 
 void Page::forEachPage(std::function<void(Page&)> function)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!allPages)
         return;
     for (Page* page : *allPages)
@@ -136,7 +138,7 @@ void Page::forEachPage(std::function<void(Page&)> function)
 }
 
 static void networkStateChanged(bool isOnLine)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<Ref<Frame>> frames;
     
     // Get all the frames of all the pages in all the page groups
@@ -239,7 +241,7 @@ Page::Page(PageConfiguration&& pageConfiguration)
     , m_visitedLinkStore(*WTFMove(pageConfiguration.visitedLinkStore))
     , m_sessionID(SessionID::defaultSessionID())
     , m_isClosing(false)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     updateTimerThrottlingState();
 
     m_pluginInfoProvider->addPage(*this);
@@ -270,7 +272,7 @@ Page::Page(PageConfiguration&& pageConfiguration)
 }
 
 Page::~Page()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_diagnosticLoggingClient = nullptr;
     m_mainFrame->setView(nullptr);
     setGroupName(String());
@@ -306,7 +308,7 @@ Page::~Page()
 }
 
 void Page::clearPreviousItemFromAllPages(HistoryItem* item)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!allPages)
         return;
 
@@ -320,7 +322,7 @@ void Page::clearPreviousItemFromAllPages(HistoryItem* item)
 }
 
 uint64_t Page::renderTreeSize() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     uint64_t total = 0;
     for (const Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document() || !frame->document()->renderView())
@@ -331,12 +333,12 @@ uint64_t Page::renderTreeSize() const
 }
 
 ViewportArguments Page::viewportArguments() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return mainFrame().document() ? mainFrame().document()->viewportArguments() : ViewportArguments();
 }
 
 ScrollingCoordinator* Page::scrollingCoordinator()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_scrollingCoordinator && m_settings->scrollingCoordinatorEnabled()) {
         m_scrollingCoordinator = chrome().client().createScrollingCoordinator(this);
         if (!m_scrollingCoordinator)
@@ -347,7 +349,7 @@ ScrollingCoordinator* Page::scrollingCoordinator()
 }
 
 String Page::scrollingStateTreeAsText()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Document* document = m_mainFrame->document())
         document->updateLayout();
 
@@ -358,7 +360,7 @@ String Page::scrollingStateTreeAsText()
 }
 
 String Page::synchronousScrollingReasonsAsText()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Document* document = m_mainFrame->document())
         document->updateLayout();
 
@@ -369,7 +371,7 @@ String Page::synchronousScrollingReasonsAsText()
 }
 
 Ref<ClientRectList> Page::nonFastScrollableRects()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Document* document = m_mainFrame->document())
         document->updateLayout();
 
@@ -402,7 +404,7 @@ static const ViewModeInfo viewModeMap[viewModeMapSize] = {
 };
 
 Page::ViewMode Page::stringToViewMode(const String& text)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& mode : viewModeMap) {
         if (text == mode.name)
             return mode.type;
@@ -411,7 +413,7 @@ Page::ViewMode Page::stringToViewMode(const String& text)
 }
 
 void Page::setViewMode(ViewMode viewMode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (viewMode == m_viewMode || viewMode == ViewModeInvalid)
         return;
 
@@ -427,17 +429,17 @@ void Page::setViewMode(ViewMode viewMode)
 #endif // ENABLE(VIEW_MODE_CSS_MEDIA)
 
 bool Page::openedByDOM() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_openedByDOM;
 }
 
 void Page::setOpenedByDOM()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_openedByDOM = true;
 }
 
 void Page::goToItem(HistoryItem& item, FrameLoadType type)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // stopAllLoaders may end up running onload handlers, which could cause further history traversals that may lead to the passed in HistoryItem
     // being deref()-ed. Make sure we can still use it with HistoryController::goToItem later.
     Ref<HistoryItem> protector(item);
@@ -449,7 +451,7 @@ void Page::goToItem(HistoryItem& item, FrameLoadType type)
 }
 
 void Page::setGroupName(const String& name)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_group && !m_group->name().isEmpty()) {
         ASSERT(m_group != m_singlePageGroup.get());
         ASSERT(!m_singlePageGroup);
@@ -466,12 +468,12 @@ void Page::setGroupName(const String& name)
 }
 
 const String& Page::groupName() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_group ? m_group->name() : nullAtom.string();
 }
 
 void Page::initGroup()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_singlePageGroup);
     ASSERT(!m_group);
     m_singlePageGroup = std::make_unique<PageGroup>(*this);
@@ -479,7 +481,7 @@ void Page::initGroup()
 }
 
 void Page::updateStyleForAllPagesAfterGlobalChangeInEnvironment()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!allPages)
         return;
     for (auto& page : *allPages) {
@@ -497,7 +499,7 @@ void Page::updateStyleForAllPagesAfterGlobalChangeInEnvironment()
 }
 
 void Page::setNeedsRecalcStyleInAllFrames()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (Document* document = frame->document())
             document->styleResolverChanged(DeferRecalcStyle);
@@ -505,7 +507,7 @@ void Page::setNeedsRecalcStyleInAllFrames()
 }
 
 void Page::refreshPlugins(bool reload)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!allPages)
         return;
 
@@ -534,14 +536,14 @@ void Page::refreshPlugins(bool reload)
 }
 
 PluginData& Page::pluginData()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_pluginData)
         m_pluginData = PluginData::create(*this);
     return *m_pluginData;
 }
 
 bool Page::showAllPlugins() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_showAllPlugins)
         return true;
 
@@ -554,7 +556,7 @@ bool Page::showAllPlugins() const
 }
 
 inline MediaCanStartListener* Page::takeAnyMediaCanStartListener()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document())
             continue;
@@ -565,7 +567,7 @@ inline MediaCanStartListener* Page::takeAnyMediaCanStartListener()
 }
 
 void Page::setCanStartMedia(bool canStartMedia)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_canStartMedia == canStartMedia)
         return;
 
@@ -580,20 +582,20 @@ void Page::setCanStartMedia(bool canStartMedia)
 }
 
 bool Page::inPageCache() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* document = mainFrame().document();
     return document && document->inPageCache();
 }
 
 static Frame* incrementFrame(Frame* curr, bool forward, bool wrapFlag)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return forward
         ? curr->tree().traverseNextWithWrap(wrapFlag)
         : curr->tree().traversePreviousWithWrap(wrapFlag);
 }
 
 bool Page::findString(const String& target, FindOptions options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (target.isEmpty())
         return false;
 
@@ -622,7 +624,7 @@ bool Page::findString(const String& target, FindOptions options)
 }
 
 void Page::findStringMatchingRanges(const String& target, FindOptions options, int limit, Vector<RefPtr<Range>>& matchRanges, int& indexForSelection)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     indexForSelection = 0;
 
     Frame* frame = &mainFrame();
@@ -664,7 +666,7 @@ void Page::findStringMatchingRanges(const String& target, FindOptions options, i
 }
 
 RefPtr<Range> Page::rangeOfString(const String& target, Range* referenceRange, FindOptions options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (target.isEmpty())
         return nullptr;
 
@@ -692,7 +694,7 @@ RefPtr<Range> Page::rangeOfString(const String& target, Range* referenceRange, F
 }
 
 unsigned Page::findMatchesForText(const String& target, FindOptions options, unsigned maxMatchCount, ShouldHighlightMatches shouldHighlightMatches, ShouldMarkMatches shouldMarkMatches)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (target.isEmpty())
         return 0;
 
@@ -710,17 +712,17 @@ unsigned Page::findMatchesForText(const String& target, FindOptions options, uns
 }
 
 unsigned Page::markAllMatchesForText(const String& target, FindOptions options, bool shouldHighlight, unsigned maxMatchCount)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return findMatchesForText(target, options, maxMatchCount, shouldHighlight ? HighlightMatches : DoNotHighlightMatches, MarkMatches);
 }
 
 unsigned Page::countFindMatches(const String& target, FindOptions options, unsigned maxMatchCount)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return findMatchesForText(target, options, maxMatchCount, DoNotHighlightMatches, DoNotMarkMatches);
 }
 
 void Page::unmarkAllTextMatches()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Frame* frame = &mainFrame();
     do {
         frame->document()->markers().removeMarkers(DocumentMarker::TextMatch);
@@ -729,12 +731,12 @@ void Page::unmarkAllTextMatches()
 }
 
 const VisibleSelection& Page::selection() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return focusController().focusedOrMainFrame().selection().selection();
 }
 
 void Page::setDefersLoading(bool defers)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_settings->loadDeferringEnabled())
         return;
 
@@ -756,22 +758,22 @@ void Page::setDefersLoading(bool defers)
 }
 
 void Page::clearUndoRedoOperations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_editorClient->clearUndoRedoOperations();
 }
 
 bool Page::inLowQualityImageInterpolationMode() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_inLowQualityInterpolationMode;
 }
 
 void Page::setInLowQualityImageInterpolationMode(bool mode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_inLowQualityInterpolationMode = mode;
 }
 
 DiagnosticLoggingClient& Page::diagnosticLoggingClient() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<EmptyDiagnosticLoggingClient> dummyClient;
     if (!settings().diagnosticLoggingEnabled() || !m_diagnosticLoggingClient)
         return dummyClient;
@@ -780,7 +782,7 @@ DiagnosticLoggingClient& Page::diagnosticLoggingClient() const
 }
 
 void Page::setMediaVolume(float volume)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (volume < 0 || volume > 1)
         return;
 
@@ -796,7 +798,7 @@ void Page::setMediaVolume(float volume)
 }
 
 void Page::setZoomedOutPageScaleFactor(float scale)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_zoomedOutPageScaleFactor == scale)
         return;
     m_zoomedOutPageScaleFactor = scale;
@@ -805,7 +807,7 @@ void Page::setZoomedOutPageScaleFactor(float scale)
 }
 
 void Page::setPageScaleFactor(float scale, const IntPoint& origin, bool inStableState)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Document* document = mainFrame().document();
     FrameView* view = document->view();
 
@@ -876,7 +878,7 @@ void Page::setPageScaleFactor(float scale, const IntPoint& origin, bool inStable
 }
 
 void Page::setViewScaleFactor(float scale)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_viewScaleFactor == scale)
         return;
 
@@ -886,7 +888,7 @@ void Page::setViewScaleFactor(float scale)
 }
 
 void Page::setDeviceScaleFactor(float scaleFactor)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(scaleFactor > 0);
     if (scaleFactor <= 0)
         return;
@@ -907,7 +909,7 @@ void Page::setDeviceScaleFactor(float scaleFactor)
 }
 
 void Page::setUserInterfaceLayoutDirection(UserInterfaceLayoutDirection userInterfaceLayoutDirection)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_userInterfaceLayoutDirection == userInterfaceLayoutDirection)
         return;
 
@@ -922,7 +924,7 @@ void Page::setUserInterfaceLayoutDirection(UserInterfaceLayoutDirection userInte
 }
 
 void Page::setTopContentInset(float contentInset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_topContentInset == contentInset)
         return;
     
@@ -933,7 +935,7 @@ void Page::setTopContentInset(float contentInset)
 }
 
 void Page::setShouldSuppressScrollbarAnimations(bool suppressAnimations)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (suppressAnimations == m_suppressScrollbarAnimations)
         return;
 
@@ -942,7 +944,7 @@ void Page::setShouldSuppressScrollbarAnimations(bool suppressAnimations)
 }
 
 void Page::lockAllOverlayScrollbarsToHidden(bool lockOverlayScrollbars)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     FrameView* view = mainFrame().view();
     if (!view)
         return;
@@ -964,7 +966,7 @@ void Page::lockAllOverlayScrollbarsToHidden(bool lockOverlayScrollbars)
 }
     
 void Page::setVerticalScrollElasticity(ScrollElasticity elasticity)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_verticalScrollElasticity == elasticity)
         return;
     
@@ -975,7 +977,7 @@ void Page::setVerticalScrollElasticity(ScrollElasticity elasticity)
 }
     
 void Page::setHorizontalScrollElasticity(ScrollElasticity elasticity)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_horizontalScrollElasticity == elasticity)
         return;
     
@@ -986,7 +988,7 @@ void Page::setHorizontalScrollElasticity(ScrollElasticity elasticity)
 }
 
 void Page::setPagination(const Pagination& pagination)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_pagination == pagination)
         return;
 
@@ -997,7 +999,7 @@ void Page::setPagination(const Pagination& pagination)
 }
 
 void Page::setPaginationLineGridEnabled(bool enabled)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_paginationLineGridEnabled == enabled)
         return;
     
@@ -1008,7 +1010,7 @@ void Page::setPaginationLineGridEnabled(bool enabled)
 }
 
 unsigned Page::pageCount() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_pagination.mode == Pagination::Unpaginated)
         return 0;
 
@@ -1020,12 +1022,12 @@ unsigned Page::pageCount() const
 }
 
 void Page::setIsInWindow(bool isInWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setViewState(isInWindow ? m_viewState | ViewState::IsInWindow : m_viewState & ~ViewState::IsInWindow);
 }
 
 void Page::setIsInWindowInternal(bool isInWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (FrameView* frameView = frame->view())
             frameView->setIsInWindow(isInWindow);
@@ -1036,17 +1038,17 @@ void Page::setIsInWindowInternal(bool isInWindow)
 }
 
 void Page::addViewStateChangeObserver(ViewStateChangeObserver& observer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_viewStateChangeObservers.add(&observer);
 }
 
 void Page::removeViewStateChangeObserver(ViewStateChangeObserver& observer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_viewStateChangeObservers.remove(&observer);
 }
 
 void Page::suspendScriptedAnimations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_scriptedAnimationsSuspended = true;
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (frame->document())
@@ -1055,7 +1057,7 @@ void Page::suspendScriptedAnimations()
 }
 
 void Page::resumeScriptedAnimations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_scriptedAnimationsSuspended = false;
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (frame->document())
@@ -1064,7 +1066,7 @@ void Page::resumeScriptedAnimations()
 }
 
 void Page::setIsVisuallyIdleInternal(bool isVisuallyIdle)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (frame->document())
             frame->document()->scriptedAnimationControllerSetThrottled(isVisuallyIdle);
@@ -1072,7 +1074,7 @@ void Page::setIsVisuallyIdleInternal(bool isVisuallyIdle)
 }
 
 void Page::userStyleSheetLocationChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Eventually we will move to a model of just being handed the sheet
     // text instead of loading the URL ourselves.
     URL url = m_settings->userStyleSheetLocation();
@@ -1104,7 +1106,7 @@ void Page::userStyleSheetLocationChanged()
 }
 
 const String& Page::userStyleSheet() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_userStyleSheetPath.isEmpty())
         return m_userStyleSheet;
 
@@ -1143,7 +1145,7 @@ const String& Page::userStyleSheet() const
 }
 
 void Page::invalidateStylesForAllLinks()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &m_mainFrame.get(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document())
             continue;
@@ -1152,7 +1154,7 @@ void Page::invalidateStylesForAllLinks()
 }
 
 void Page::invalidateStylesForLink(LinkHash linkHash)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &m_mainFrame.get(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document())
             continue;
@@ -1161,7 +1163,7 @@ void Page::invalidateStylesForLink(LinkHash linkHash)
 }
 
 void Page::invalidateInjectedStyleSheetCacheInAllFrames()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &m_mainFrame.get(); frame; frame = frame->tree().traverseNext()) {
         Document* document = frame->document();
         if (!document)
@@ -1172,7 +1174,7 @@ void Page::invalidateInjectedStyleSheetCacheInAllFrames()
 }
 
 void Page::setDebugger(JSC::Debugger* debugger)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_debugger == debugger)
         return;
 
@@ -1183,7 +1185,7 @@ void Page::setDebugger(JSC::Debugger* debugger)
 }
 
 StorageNamespace* Page::sessionStorage(bool optionalCreate)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_sessionStorage && optionalCreate)
         m_sessionStorage = m_storageNamespaceProvider->createSessionStorageNamespace(*this, m_settings->sessionStorageQuota());
 
@@ -1191,23 +1193,23 @@ StorageNamespace* Page::sessionStorage(bool optionalCreate)
 }
 
 void Page::setSessionStorage(RefPtr<StorageNamespace>&& newStorage)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_sessionStorage = WTFMove(newStorage);
 }
 
 bool Page::hasCustomHTMLTokenizerTimeDelay() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_settings->maxParseDuration() != -1;
 }
 
 double Page::customHTMLTokenizerTimeDelay() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_settings->maxParseDuration() != -1);
     return m_settings->maxParseDuration();
 }
 
 void Page::setMemoryCacheClientCallsEnabled(bool enabled)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_areMemoryCacheClientCallsEnabled == enabled)
         return;
 
@@ -1220,14 +1222,14 @@ void Page::setMemoryCacheClientCallsEnabled(bool enabled)
 }
 
 void Page::hiddenPageDOMTimerThrottlingStateChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Disable & reengage to ensure state is updated.
     setTimerThrottlingState(TimerThrottlingState::Disabled);
     updateTimerThrottlingState();
 }
 
 void Page::updateTimerThrottlingState()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Timer throttling disabled if page is visually active, or disabled by setting.
     if (!m_settings->hiddenPageDOMTimerThrottlingEnabled() || !(m_viewState & ViewState::IsVisuallyIdle)) {
         setTimerThrottlingState(TimerThrottlingState::Disabled);
@@ -1246,7 +1248,7 @@ void Page::updateTimerThrottlingState()
 }
 
 void Page::setTimerThrottlingState(TimerThrottlingState state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (state == m_timerThrottlingState)
         return;
 
@@ -1265,7 +1267,7 @@ void Page::setTimerThrottlingState(TimerThrottlingState state)
 }
 
 void Page::setTimerAlignmentIntervalIncreaseLimit(std::chrono::milliseconds limit)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_timerAlignmentIntervalIncreaseLimit = limit;
 
     // If (m_timerAlignmentIntervalIncreaseLimit < m_timerAlignmentInterval) then we need
@@ -1275,7 +1277,7 @@ void Page::setTimerAlignmentIntervalIncreaseLimit(std::chrono::milliseconds limi
 }
 
 void Page::updateDOMTimerAlignmentInterval()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool needsIncreaseTimer = false;
 
     switch (m_timerThrottlingState) {
@@ -1315,7 +1317,7 @@ void Page::updateDOMTimerAlignmentInterval()
 }
 
 void Page::timerAlignmentIntervalIncreaseTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_settings->hiddenPageDOMTimerThrottlingAutoIncreases());
     ASSERT(m_timerThrottlingState == TimerThrottlingState::EnabledIncreasing);
     ASSERT(m_timerAlignmentInterval < m_timerAlignmentIntervalIncreaseLimit);
@@ -1325,7 +1327,7 @@ void Page::timerAlignmentIntervalIncreaseTimerFired()
 }
 
 void Page::dnsPrefetchingStateChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document())
             continue;
@@ -1334,7 +1336,7 @@ void Page::dnsPrefetchingStateChanged()
 }
 
 Vector<Ref<PluginViewBase>> Page::pluginViews()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<Ref<PluginViewBase>> views;
 
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
@@ -1352,7 +1354,7 @@ Vector<Ref<PluginViewBase>> Page::pluginViews()
 }
 
 void Page::storageBlockingStateChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document())
             continue;
@@ -1366,7 +1368,7 @@ void Page::storageBlockingStateChanged()
 }
 
 void Page::enableLegacyPrivateBrowsing(bool privateBrowsingEnabled)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Don't allow changing the legacy private browsing state if we have set a session ID.
     ASSERT(m_sessionID == SessionID::defaultSessionID() || m_sessionID == SessionID::legacyPrivateSessionID());
 
@@ -1374,7 +1376,7 @@ void Page::enableLegacyPrivateBrowsing(bool privateBrowsingEnabled)
 }
 
 void Page::updateIsPlayingMedia(uint64_t sourceElementID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     MediaProducer::MediaStateFlags state = MediaProducer::IsNotPlaying;
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (Document* document = frame->document())
@@ -1390,7 +1392,7 @@ void Page::updateIsPlayingMedia(uint64_t sourceElementID)
 }
 
 void Page::setMuted(bool muted)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_muted == muted)
         return;
 
@@ -1405,7 +1407,7 @@ void Page::setMuted(bool muted)
 
 #if ENABLE(MEDIA_SESSION)
 void Page::handleMediaEvent(MediaEventType eventType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (eventType) {
     case MediaEventType::PlayPause:
         MediaSessionManager::singleton().togglePlayback();
@@ -1420,7 +1422,7 @@ void Page::handleMediaEvent(MediaEventType eventType)
 }
 
 void Page::setVolumeOfMediaElement(double volume, uint64_t elementID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (HTMLMediaElement* element = HTMLMediaElement::elementWithID(elementID))
         element->setVolume(volume, ASSERT_NO_EXCEPTION);
 }
@@ -1428,7 +1430,7 @@ void Page::setVolumeOfMediaElement(double volume, uint64_t elementID)
 
 #if !ASSERT_DISABLED
 void Page::checkSubframeCountConsistency() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_subframeCount >= 0);
 
     int subframeCount = 0;
@@ -1440,7 +1442,7 @@ void Page::checkSubframeCountConsistency() const
 #endif
 
 void Page::resumeAnimatingImages()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Drawing models which cache painted content while out-of-window (WebKit2's composited drawing areas, etc.)
     // require that we repaint animated images to kickstart the animation loop.
     if (FrameView* view = mainFrame().view())
@@ -1448,7 +1450,7 @@ void Page::resumeAnimatingImages()
 }
 
 void Page::setViewState(ViewState::Flags viewState)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ViewState::Flags changed = m_viewState ^ viewState;
     if (!changed)
         return;
@@ -1473,13 +1475,13 @@ void Page::setViewState(ViewState::Flags viewState)
 }
 
 void Page::setPageActivityState(PageActivityState::Flags activityState)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     chrome().client().setPageActivityState(activityState);
     updateTimerThrottlingState();
 }
 
 void Page::setIsVisible(bool isVisible)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isVisible)
         setViewState((m_viewState & ~ViewState::IsVisuallyIdle) | ViewState::IsVisible | ViewState::IsVisibleOrOccluded);
     else
@@ -1487,7 +1489,7 @@ void Page::setIsVisible(bool isVisible)
 }
 
 void Page::setIsVisibleInternal(bool isVisible)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: The visibility state should be stored on the top-level document.
     // https://bugs.webkit.org/show_bug.cgi?id=116769
 
@@ -1530,13 +1532,13 @@ void Page::setIsVisibleInternal(bool isVisible)
 }
 
 void Page::setIsPrerender()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_isPrerender = true;
     updateDOMTimerAlignmentInterval();
 }
 
 PageVisibilityState Page::visibilityState() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isVisible())
         return PageVisibilityStateVisible;
     if (m_isPrerender)
@@ -1546,7 +1548,7 @@ PageVisibilityState Page::visibilityState() const
 
 #if ENABLE(RUBBER_BANDING)
 void Page::addHeaderWithHeight(int headerHeight)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_headerHeight = headerHeight;
 
     FrameView* frameView = mainFrame().view();
@@ -1562,7 +1564,7 @@ void Page::addHeaderWithHeight(int headerHeight)
 }
 
 void Page::addFooterWithHeight(int footerHeight)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_footerHeight = footerHeight;
 
     FrameView* frameView = mainFrame().view();
@@ -1580,44 +1582,44 @@ void Page::addFooterWithHeight(int footerHeight)
 
 #if ENABLE(REMOTE_INSPECTOR)
 bool Page::remoteInspectionAllowed() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_inspectorDebuggable->remoteDebuggingAllowed();
 }
 
 void Page::setRemoteInspectionAllowed(bool allowed)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_inspectorDebuggable->setRemoteDebuggingAllowed(allowed);
 }
 
 String Page::remoteInspectionNameOverride() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_inspectorDebuggable->nameOverride();
 }
 
 void Page::setRemoteInspectionNameOverride(const String& name)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_inspectorDebuggable->setNameOverride(name);
 }
 
 void Page::remoteInspectorInformationDidChange() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_inspectorDebuggable->update();
 }
 #endif
 
 void Page::addLayoutMilestones(LayoutMilestones milestones)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // In the future, we may want a function that replaces m_layoutMilestones instead of just adding to it.
     m_requestedLayoutMilestones |= milestones;
 }
 
 void Page::removeLayoutMilestones(LayoutMilestones milestones)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_requestedLayoutMilestones &= ~milestones;
 }
 
 Color Page::pageExtendedBackgroundColor() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     FrameView* frameView = mainFrame().view();
     if (!frameView)
         return Color();
@@ -1634,12 +1636,12 @@ static const double gMinimumPaintedAreaRatio = 0.1;
 static const double gMaximumUnpaintedAreaRatio = 0.04;
 
 bool Page::isCountingRelevantRepaintedObjects() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_isCountingRelevantRepaintedObjects && (m_requestedLayoutMilestones & DidHitRelevantRepaintedObjectsAreaThreshold);
 }
 
 void Page::startCountingRelevantRepaintedObjects()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Reset everything in case we didn't hit the threshold last time.
     resetRelevantPaintedObjectCounter();
 
@@ -1647,7 +1649,7 @@ void Page::startCountingRelevantRepaintedObjects()
 }
 
 void Page::resetRelevantPaintedObjectCounter()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_isCountingRelevantRepaintedObjects = false;
     m_relevantUnpaintedRenderObjects.clear();
     m_topRelevantPaintedRegion = Region();
@@ -1656,7 +1658,7 @@ void Page::resetRelevantPaintedObjectCounter()
 }
 
 static LayoutRect relevantViewRect(RenderView* view)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // DidHitRelevantRepaintedObjectsAreaThreshold is a LayoutMilestone intended to indicate that
     // a certain relevant amount of content has been drawn to the screen. This is the rect that
     // has been determined to be relevant in the context of this goal. We may choose to tweak
@@ -1673,7 +1675,7 @@ static LayoutRect relevantViewRect(RenderView* view)
 }
 
 void Page::addRelevantRepaintedObject(RenderObject* object, const LayoutRect& objectPaintRect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCountingRelevantRepaintedObjects())
         return;
 
@@ -1734,7 +1736,7 @@ void Page::addRelevantRepaintedObject(RenderObject* object, const LayoutRect& ob
 }
 
 void Page::addRelevantUnpaintedObject(RenderObject* object, const LayoutRect& objectPaintRect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCountingRelevantRepaintedObjects())
         return;
 
@@ -1747,7 +1749,7 @@ void Page::addRelevantUnpaintedObject(RenderObject* object, const LayoutRect& ob
 }
 
 void Page::suspendDeviceMotionAndOrientationUpdates()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (Document* document = frame->document())
             document->suspendDeviceMotionAndOrientationUpdates();
@@ -1755,7 +1757,7 @@ void Page::suspendDeviceMotionAndOrientationUpdates()
 }
 
 void Page::resumeDeviceMotionAndOrientationUpdates()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (Document* document = frame->document())
             document->resumeDeviceMotionAndOrientationUpdates();
@@ -1763,13 +1765,13 @@ void Page::resumeDeviceMotionAndOrientationUpdates()
 }
 
 void Page::suspendActiveDOMObjectsAndAnimations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext())
         frame->suspendActiveDOMObjectsAndAnimations();
 }
 
 void Page::resumeActiveDOMObjectsAndAnimations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext())
         frame->resumeActiveDOMObjectsAndAnimations();
 
@@ -1777,47 +1779,47 @@ void Page::resumeActiveDOMObjectsAndAnimations()
 }
 
 bool Page::hasSeenAnyPlugin() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !m_seenPlugins.isEmpty();
 }
 
 bool Page::hasSeenPlugin(const String& serviceType) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_seenPlugins.contains(serviceType);
 }
 
 void Page::sawPlugin(const String& serviceType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_seenPlugins.add(serviceType);
 }
 
 void Page::resetSeenPlugins()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_seenPlugins.clear();
 }
 
 bool Page::hasSeenAnyMediaEngine() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !m_seenMediaEngines.isEmpty();
 }
 
 bool Page::hasSeenMediaEngine(const String& engineDescription) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_seenMediaEngines.contains(engineDescription);
 }
 
 void Page::sawMediaEngine(const String& engineDescription)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_seenMediaEngines.add(engineDescription);
 }
 
 void Page::resetSeenMediaEngines()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_seenMediaEngines.clear();
 }
 
 void Page::hiddenPageCSSAnimationSuspensionStateChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isVisible()) {
         if (m_settings->hiddenPageCSSAnimationSuspensionEnabled())
             mainFrame().animation().suspendAnimations();
@@ -1828,7 +1830,7 @@ void Page::hiddenPageCSSAnimationSuspensionStateChanged()
 
 #if ENABLE(VIDEO_TRACK)
 void Page::captionPreferencesChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document())
             continue;
@@ -1838,33 +1840,33 @@ void Page::captionPreferencesChanged()
 #endif
 
 void Page::forbidPrompts()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ++m_forbidPromptsDepth;
 }
 
 void Page::allowPrompts()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_forbidPromptsDepth);
     --m_forbidPromptsDepth;
 }
 
 bool Page::arePromptsAllowed()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !m_forbidPromptsDepth;
 }
 
 PluginInfoProvider& Page::pluginInfoProvider()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_pluginInfoProvider;
 }
 
 UserContentProvider& Page::userContentProvider()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_userContentProvider;
 }
 
 void Page::setUserContentProvider(Ref<UserContentProvider>&& userContentProvider)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_userContentProvider->removePage(*this);
     m_userContentProvider = WTFMove(userContentProvider);
     m_userContentProvider->addPage(*this);
@@ -1873,7 +1875,7 @@ void Page::setUserContentProvider(Ref<UserContentProvider>&& userContentProvider
 }
 
 void Page::setStorageNamespaceProvider(Ref<StorageNamespaceProvider>&& storageNamespaceProvider)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_storageNamespaceProvider->removePage(*this);
     m_storageNamespaceProvider = WTFMove(storageNamespaceProvider);
     m_storageNamespaceProvider->addPage(*this);
@@ -1882,12 +1884,12 @@ void Page::setStorageNamespaceProvider(Ref<StorageNamespaceProvider>&& storageNa
 }
 
 VisitedLinkStore& Page::visitedLinkStore()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_visitedLinkStore;
 }
 
 void Page::setVisitedLinkStore(Ref<VisitedLinkStore>&& visitedLinkStore)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_visitedLinkStore->removePage(*this);
     m_visitedLinkStore = WTFMove(visitedLinkStore);
     m_visitedLinkStore->addPage(*this);
@@ -1897,12 +1899,12 @@ void Page::setVisitedLinkStore(Ref<VisitedLinkStore>&& visitedLinkStore)
 }
 
 SessionID Page::sessionID() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_sessionID;
 }
 
 void Page::setSessionID(SessionID sessionID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(sessionID.isValid());
 
 #if ENABLE(INDEXED_DATABASE)
@@ -1932,17 +1934,17 @@ void Page::setSessionID(SessionID sessionID)
 
 #if ENABLE(WIRELESS_PLAYBACK_TARGET)
 void Page::addPlaybackTargetPickerClient(uint64_t contextId)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     chrome().client().addPlaybackTargetPickerClient(contextId);
 }
 
 void Page::removePlaybackTargetPickerClient(uint64_t contextId)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     chrome().client().removePlaybackTargetPickerClient(contextId);
 }
 
 void Page::showPlaybackTargetPicker(uint64_t contextId, const WebCore::IntPoint& location, bool isVideo)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(IOS)
     // FIXME: refactor iOS implementation.
     UNUSED_PARAM(contextId);
@@ -1954,22 +1956,22 @@ void Page::showPlaybackTargetPicker(uint64_t contextId, const WebCore::IntPoint&
 }
 
 void Page::playbackTargetPickerClientStateDidChange(uint64_t contextId, MediaProducer::MediaStateFlags state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     chrome().client().playbackTargetPickerClientStateDidChange(contextId, state);
 }
 
 void Page::setMockMediaPlaybackTargetPickerEnabled(bool enabled)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     chrome().client().setMockMediaPlaybackTargetPickerEnabled(enabled);
 }
 
 void Page::setMockMediaPlaybackTargetPickerState(const String& name, MediaPlaybackTargetContext::State state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     chrome().client().setMockMediaPlaybackTargetPickerState(name, state);
 }
 
 void Page::setPlaybackTarget(uint64_t contextId, Ref<MediaPlaybackTarget>&& target)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document())
             continue;
@@ -1978,7 +1980,7 @@ void Page::setPlaybackTarget(uint64_t contextId, Ref<MediaPlaybackTarget>&& targ
 }
 
 void Page::playbackTargetAvailabilityDidChange(uint64_t contextId, bool available)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document())
             continue;
@@ -1987,7 +1989,7 @@ void Page::playbackTargetAvailabilityDidChange(uint64_t contextId, bool availabl
 }
 
 void Page::setShouldPlayToPlaybackTarget(uint64_t clientId, bool shouldPlay)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (!frame->document())
             continue;
@@ -1997,7 +1999,7 @@ void Page::setShouldPlayToPlaybackTarget(uint64_t clientId, bool shouldPlay)
 #endif
 
 WheelEventTestTrigger& Page::ensureTestTrigger()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_testTrigger)
         m_testTrigger = adoptRef(new WheelEventTestTrigger());
 
@@ -2006,7 +2008,7 @@ WheelEventTestTrigger& Page::ensureTestTrigger()
 
 #if ENABLE(VIDEO)
 void Page::setAllowsMediaDocumentInlinePlayback(bool flag)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_allowsMediaDocumentInlinePlayback == flag)
         return;
     m_allowsMediaDocumentInlinePlayback = flag;
@@ -2022,7 +2024,7 @@ void Page::setAllowsMediaDocumentInlinePlayback(bool flag)
 
 #if ENABLE(INDEXED_DATABASE)
 IDBClient::IDBConnectionToServer& Page::idbConnection()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_idbIDBConnectionToServer)
         m_idbIDBConnectionToServer = &databaseProvider().idbConnectionToServerForSession(m_sessionID);
     
@@ -2032,7 +2034,7 @@ IDBClient::IDBConnectionToServer& Page::idbConnection()
 
 #if ENABLE(RESOURCE_USAGE)
 void Page::setResourceUsageOverlayVisible(bool visible)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!visible) {
         m_resourceUsageOverlay = nullptr;
         return;
@@ -2044,17 +2046,17 @@ void Page::setResourceUsageOverlayVisible(bool visible)
 #endif
 
 bool Page::isAlwaysOnLoggingAllowed() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_sessionID.isAlwaysOnLoggingAllowed();
 }
 
 String Page::captionUserPreferencesStyleSheet()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_captionUserPreferencesStyleSheet;
 }
 
 void Page::setCaptionUserPreferencesStyleSheet(const String& styleSheet)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_captionUserPreferencesStyleSheet == styleSheet)
         return;
 

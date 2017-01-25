@@ -42,39 +42,41 @@
 #include <wtf/text/StringBuilder.h>
 #include <gwildcardproxyresolver.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 #if !LOG_DISABLED
 inline static void soupLogPrinter(SoupLogger*, SoupLoggerLogLevel, char direction, const char* data, gpointer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Network, "%c %s", direction, data);
 }
 #endif
 
 SoupNetworkSession& SoupNetworkSession::defaultSession()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<SoupNetworkSession> networkSession(soupCookieJar());
     return networkSession;
 }
 
 std::unique_ptr<SoupNetworkSession> SoupNetworkSession::createPrivateBrowsingSession()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return std::unique_ptr<SoupNetworkSession>(new SoupNetworkSession(soupCookieJar()));
 }
 
 std::unique_ptr<SoupNetworkSession> SoupNetworkSession::createTestingSession()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     GRefPtr<SoupCookieJar> cookieJar = adoptGRef(createPrivateBrowsingCookieJar());
     return std::unique_ptr<SoupNetworkSession>(new SoupNetworkSession(cookieJar.get()));
 }
 
 std::unique_ptr<SoupNetworkSession> SoupNetworkSession::createForSoupSession(SoupSession* soupSession)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return std::unique_ptr<SoupNetworkSession>(new SoupNetworkSession(soupSession));
 }
 
 static void authenticateCallback(SoupSession* session, SoupMessage* soupMessage, SoupAuth* soupAuth, gboolean retrying)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<ResourceHandle> handle = static_cast<ResourceHandle*>(g_object_get_data(G_OBJECT(soupMessage), "handle"));
     if (!handle)
         return;
@@ -83,7 +85,7 @@ static void authenticateCallback(SoupSession* session, SoupMessage* soupMessage,
 
 #if ENABLE(WEB_TIMING) && !SOUP_CHECK_VERSION(2, 49, 91)
 static void requestStartedCallback(SoupSession*, SoupMessage* soupMessage, SoupSocket*, gpointer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<ResourceHandle> handle = static_cast<ResourceHandle*>(g_object_get_data(G_OBJECT(soupMessage), "handle"));
     if (!handle)
         return;
@@ -93,7 +95,7 @@ static void requestStartedCallback(SoupSession*, SoupMessage* soupMessage, SoupS
 
 SoupNetworkSession::SoupNetworkSession(SoupCookieJar* cookieJar)
     : m_soupSession(adoptGRef(soup_session_async_new()))
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Values taken from http://www.browserscope.org/ following
     // the rule "Do What Every Other Modern Browser Is Doing". They seem
     // to significantly improve page loading time compared to soup's
@@ -129,16 +131,16 @@ SoupNetworkSession::SoupNetworkSession(SoupCookieJar* cookieJar)
 
 SoupNetworkSession::SoupNetworkSession(SoupSession* soupSession)
     : m_soupSession(soupSession)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setupLogger();
 }
 
 SoupNetworkSession::~SoupNetworkSession()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void SoupNetworkSession::setupLogger()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if !LOG_DISABLED
     if (LogNetwork.state != WTFLogChannelOn || soup_session_get_feature(m_soupSession.get(), SOUP_TYPE_LOGGER))
         return;
@@ -150,31 +152,31 @@ void SoupNetworkSession::setupLogger()
 }
 
 void SoupNetworkSession::setCookieJar(SoupCookieJar* jar)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (SoupCookieJar* currentJar = cookieJar())
         soup_session_remove_feature(m_soupSession.get(), SOUP_SESSION_FEATURE(currentJar));
     soup_session_add_feature(m_soupSession.get(), SOUP_SESSION_FEATURE(jar));
 }
 
 SoupCookieJar* SoupNetworkSession::cookieJar() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return SOUP_COOKIE_JAR(soup_session_get_feature(m_soupSession.get(), SOUP_TYPE_COOKIE_JAR));
 }
 
 void SoupNetworkSession::setCache(SoupCache* cache)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!soup_session_get_feature(m_soupSession.get(), SOUP_TYPE_CACHE));
     soup_session_add_feature(m_soupSession.get(), SOUP_SESSION_FEATURE(cache));
 }
 
 SoupCache* SoupNetworkSession::cache() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SoupSessionFeature* soupCache = soup_session_get_feature(m_soupSession.get(), SOUP_TYPE_CACHE);
     return soupCache ? SOUP_CACHE(soupCache) : nullptr;
 }
 
 static inline bool stringIsNumeric(const char* str)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     while (*str) {
         if (!g_ascii_isdigit(*str))
             return false;
@@ -184,7 +186,7 @@ static inline bool stringIsNumeric(const char* str)
 }
 
 void SoupNetworkSession::clearCache(const String& cacheDirectory)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     CString cachePath = fileSystemRepresentation(cacheDirectory);
     GUniquePtr<char> cacheFile(g_build_filename(cachePath.data(), "soup.cache2", nullptr));
     if (!g_file_test(cacheFile.get(), G_FILE_TEST_IS_REGULAR))
@@ -205,7 +207,7 @@ void SoupNetworkSession::clearCache(const String& cacheDirectory)
 }
 
 void SoupNetworkSession::setSSLPolicy(SSLPolicy flags)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     g_object_set(m_soupSession.get(),
         SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, flags & SSLUseSystemCAFile ? TRUE : FALSE,
         SOUP_SESSION_SSL_STRICT, flags & SSLStrict ? TRUE : FALSE,
@@ -213,7 +215,7 @@ void SoupNetworkSession::setSSLPolicy(SSLPolicy flags)
 }
 
 SoupNetworkSession::SSLPolicy SoupNetworkSession::sslPolicy() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     gboolean useSystemCAFile, strict;
     g_object_get(m_soupSession.get(),
         SOUP_SESSION_SSL_USE_SYSTEM_CA_FILE, &useSystemCAFile,
@@ -229,7 +231,7 @@ SoupNetworkSession::SSLPolicy SoupNetworkSession::sslPolicy() const
 }
 
 void SoupNetworkSession::setHTTPProxy(const char* httpProxy, const char* httpProxyExceptions)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(EFL) || PLATFORM(WPE)
     // Only for EFL because GTK port uses the default resolver, which uses GIO's proxy resolver.
     GProxyResolver* resolver = nullptr;
@@ -251,7 +253,7 @@ void SoupNetworkSession::setHTTPProxy(const char* httpProxy, const char* httpPro
 }
 
 void SoupNetworkSession::setProxies(const Vector<WebCore::Proxy>& proxies)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(WPE)
     const char* httpProxy = getenv("http_proxy");
     GProxyResolver* resolver = g_wildcard_proxy_resolver_new(httpProxy);
@@ -274,7 +276,7 @@ void SoupNetworkSession::setProxies(const Vector<WebCore::Proxy>& proxies)
 }
 
 void SoupNetworkSession::setupHTTPProxyFromEnvironment()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(EFL) || PLATFORM(WPE)
     const char* httpProxy = getenv("http_proxy");
     if (!httpProxy)
@@ -285,7 +287,7 @@ void SoupNetworkSession::setupHTTPProxyFromEnvironment()
 }
 
 static CString buildAcceptLanguages(const Vector<String>& languages)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     size_t languagesCount = languages.size();
 
     // Ignore "C" locale.
@@ -329,7 +331,7 @@ static CString buildAcceptLanguages(const Vector<String>& languages)
 }
 
 void SoupNetworkSession::setAcceptLanguages(const Vector<String>& languages)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     g_object_set(m_soupSession.get(), "accept-language", buildAcceptLanguages(languages).data(), nullptr);
 }
 

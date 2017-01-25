@@ -55,6 +55,8 @@
 #endif
 #endif // SOCK_SEQPACKET
 
+#include <wtf/macros.h>
+
 namespace IPC {
 
 static const size_t messageMaxSize = 4096;
@@ -130,14 +132,14 @@ private:
 };
 
 void Connection::platformInitialize(Identifier identifier)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_socketDescriptor = identifier;
     m_readBuffer.reserveInitialCapacity(messageMaxSize);
     m_fileDescriptors.reserveInitialCapacity(attachmentMaxAmount);
 }
 
 void Connection::platformInvalidate()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // In GTK+ platform the socket is closed by the work queue.
 #if !PLATFORM(GTK) && !PLATFORM(WPE)
     if (m_socketDescriptor != -1)
@@ -158,7 +160,7 @@ void Connection::platformInvalidate()
 }
 
 bool Connection::processMessage()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_readBuffer.size() < sizeof(MessageInfo))
         return false;
 
@@ -268,7 +270,7 @@ bool Connection::processMessage()
 }
 
 static ssize_t readBytesFromSocket(int socketDescriptor, Vector<uint8_t>& buffer, Vector<int>& fileDescriptors)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     struct msghdr message;
     memset(&message, 0, sizeof(message));
 
@@ -325,7 +327,7 @@ static ssize_t readBytesFromSocket(int socketDescriptor, Vector<uint8_t>& buffer
 }
 
 void Connection::readyReadHandler()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     while (true) {
         ssize_t bytesRead = readBytesFromSocket(m_socketDescriptor, m_readBuffer, m_fileDescriptors);
 
@@ -355,7 +357,7 @@ void Connection::readyReadHandler()
 }
 
 bool Connection::open()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     int flags = fcntl(m_socketDescriptor, F_GETFL, 0);
     while (fcntl(m_socketDescriptor, F_SETFL, flags | O_NONBLOCK) == -1) {
         if (errno != EINTR) {
@@ -398,12 +400,12 @@ bool Connection::open()
 }
 
 bool Connection::platformCanSendOutgoingMessages() const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_isConnected;
 }
 
 bool Connection::sendOutgoingMessage(std::unique_ptr<Encoder> encoder)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     COMPILE_ASSERT(sizeof(MessageInfo) + attachmentMaxAmount * sizeof(size_t) <= messageMaxSize, AttachmentsFitToMessageInline);
 
     Vector<Attachment> attachments = encoder->releaseAttachments();
@@ -524,7 +526,7 @@ bool Connection::sendOutgoingMessage(std::unique_ptr<Encoder> encoder)
 }
 
 Connection::SocketPair Connection::createPlatformConnection(unsigned options)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     int sockets[2];
     RELEASE_ASSERT(socketpair(AF_UNIX, SOCKET_TYPE, 0, sockets) != -1);
 
@@ -545,12 +547,12 @@ Connection::SocketPair Connection::createPlatformConnection(unsigned options)
 }
     
 void Connection::willSendSyncMessage(unsigned flags)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     UNUSED_PARAM(flags);
 }
     
 void Connection::didReceiveSyncReply(unsigned flags)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     UNUSED_PARAM(flags);    
 }
 

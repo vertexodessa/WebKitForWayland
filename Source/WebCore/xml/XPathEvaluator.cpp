@@ -33,22 +33,24 @@
 #include "XPathResult.h"
 #include "XPathUtil.h"
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 using namespace XPath;
 
 RefPtr<XPathExpression> XPathEvaluator::createExpression(const String& expression, RefPtr<XPathNSResolver>&& resolver, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return XPathExpression::createExpression(expression, WTFMove(resolver), ec);
 }
 
 Ref<XPathNSResolver> XPathEvaluator::createNSResolver(Node* nodeResolver)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return NativeXPathNSResolver::create(nodeResolver);
 }
 
 RefPtr<XPathResult> XPathEvaluator::evaluate(const String& expression, Node* contextNode, RefPtr<XPathNSResolver>&& resolver, unsigned short type, XPathResult* result, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isValidContextNode(contextNode)) {
         ec = NOT_SUPPORTED_ERR;
         return nullptr;

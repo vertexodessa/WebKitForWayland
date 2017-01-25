@@ -137,6 +137,8 @@
 #include "WKContentObservation.h"
 #endif
 
+#include <wtf/macros.h>
+
 using namespace Inspector;
 
 namespace WebCore {
@@ -186,55 +188,55 @@ private:
 typedef HashCountedSet<DOMWindow*> DOMWindowSet;
 
 static DOMWindowSet& windowsWithUnloadEventListeners()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<DOMWindowSet> windowsWithUnloadEventListeners;
     return windowsWithUnloadEventListeners;
 }
 
 static DOMWindowSet& windowsWithBeforeUnloadEventListeners()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<DOMWindowSet> windowsWithBeforeUnloadEventListeners;
     return windowsWithBeforeUnloadEventListeners;
 }
 
 static void addUnloadEventListener(DOMWindow* domWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (windowsWithUnloadEventListeners().add(domWindow).isNewEntry)
         domWindow->disableSuddenTermination();
 }
 
 static void removeUnloadEventListener(DOMWindow* domWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (windowsWithUnloadEventListeners().remove(domWindow))
         domWindow->enableSuddenTermination();
 }
 
 static void removeAllUnloadEventListeners(DOMWindow* domWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (windowsWithUnloadEventListeners().removeAll(domWindow))
         domWindow->enableSuddenTermination();
 }
 
 static void addBeforeUnloadEventListener(DOMWindow* domWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (windowsWithBeforeUnloadEventListeners().add(domWindow).isNewEntry)
         domWindow->disableSuddenTermination();
 }
 
 static void removeBeforeUnloadEventListener(DOMWindow* domWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (windowsWithBeforeUnloadEventListeners().remove(domWindow))
         domWindow->enableSuddenTermination();
 }
 
 static void removeAllBeforeUnloadEventListeners(DOMWindow* domWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (windowsWithBeforeUnloadEventListeners().removeAll(domWindow))
         domWindow->enableSuddenTermination();
 }
 
 static bool allowsBeforeUnloadListeners(DOMWindow* window)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT_ARG(window, window);
     Frame* frame = window->frame();
     if (!frame)
@@ -245,7 +247,7 @@ static bool allowsBeforeUnloadListeners(DOMWindow* window)
 }
 
 bool DOMWindow::dispatchAllPendingBeforeUnloadEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     DOMWindowSet& set = windowsWithBeforeUnloadEventListeners();
     if (set.isEmpty())
         return true;
@@ -279,12 +281,12 @@ bool DOMWindow::dispatchAllPendingBeforeUnloadEvents()
 }
 
 unsigned DOMWindow::pendingUnloadEventListeners() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return windowsWithUnloadEventListeners().count(const_cast<DOMWindow*>(this));
 }
 
 void DOMWindow::dispatchAllPendingUnloadEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     DOMWindowSet& set = windowsWithUnloadEventListeners();
     if (set.isEmpty())
         return;
@@ -319,7 +321,7 @@ void DOMWindow::dispatchAllPendingUnloadEvents()
 // 4) Constrains the window rect to within the bottom and right boundaries of the available screen rect.
 // 5) Translate the window rect coordinates to be within the coordinate space of the screen.
 FloatRect DOMWindow::adjustWindowRect(Page* page, const FloatRect& pendingChanges)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(page);
 
     FloatRect screen = screenAvailableRect(page->mainFrame().view());
@@ -357,7 +359,7 @@ FloatRect DOMWindow::adjustWindowRect(Page* page, const FloatRect& pendingChange
 }
 
 bool DOMWindow::allowPopUp(Frame* firstFrame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(firstFrame);
     
     auto& settings = firstFrame->settings();
@@ -369,12 +371,12 @@ bool DOMWindow::allowPopUp(Frame* firstFrame)
 }
 
 bool DOMWindow::allowPopUp()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_frame && allowPopUp(m_frame);
 }
 
 bool DOMWindow::canShowModalDialog(const Frame* frame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!frame)
         return false;
 
@@ -391,7 +393,7 @@ bool DOMWindow::canShowModalDialog(const Frame* frame)
 }
 
 void DOMWindow::setCanShowModalDialogOverride(bool allow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_canShowModalDialogOverride = allow;
 }
 
@@ -411,18 +413,18 @@ DOMWindow::DOMWindow(Document* document)
 #if ENABLE(GAMEPAD)
     , m_gamepadEventListenerCount(0)
 #endif
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(frame());
     ASSERT(DOMWindow::document());
 }
 
 void DOMWindow::didSecureTransitionTo(Document* document)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     observeContext(document);
 }
 
 DOMWindow::~DOMWindow()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #ifndef NDEBUG
     if (!m_suspendedForDocumentSuspension) {
         ASSERT(!m_screen);
@@ -465,22 +467,22 @@ DOMWindow::~DOMWindow()
 }
 
 DOMWindow* DOMWindow::toDOMWindow()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return this;
 }
 
 RefPtr<MediaQueryList> DOMWindow::matchMedia(const String& media)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return document() ? document()->mediaQueryMatcher().matchMedia(media) : nullptr;
 }
 
 Page* DOMWindow::page()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return frame() ? frame()->page() : 0;
 }
 
 void DOMWindow::frameDestroyed()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<DOMWindow> protectedThis(*this);
 
     willDestroyDocumentInFrame();
@@ -490,12 +492,12 @@ void DOMWindow::frameDestroyed()
 }
 
 void DOMWindow::willDetachPage()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     InspectorInstrumentation::frameWindowDiscarded(m_frame, this);
 }
 
 void DOMWindow::willDestroyCachedFrame()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // It is necessary to copy m_properties to a separate vector because the DOMWindowProperties may
     // unregister themselves from the DOMWindow as a result of the call to willDestroyGlobalObjectInCachedFrame.
     Vector<DOMWindowProperty*> properties;
@@ -505,7 +507,7 @@ void DOMWindow::willDestroyCachedFrame()
 }
 
 void DOMWindow::willDestroyDocumentInFrame()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // It is necessary to copy m_properties to a separate vector because the DOMWindowProperties may
     // unregister themselves from the DOMWindow as a result of the call to willDestroyGlobalObjectInFrame.
     Vector<DOMWindowProperty*> properties;
@@ -515,7 +517,7 @@ void DOMWindow::willDestroyDocumentInFrame()
 }
 
 void DOMWindow::willDetachDocumentFromFrame()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // It is necessary to copy m_properties to a separate vector because the DOMWindowProperties may
     // unregister themselves from the DOMWindow as a result of the call to willDetachGlobalObjectFromFrame.
     Vector<DOMWindowProperty*> properties;
@@ -526,13 +528,13 @@ void DOMWindow::willDetachDocumentFromFrame()
 
 #if ENABLE(GAMEPAD)
 void DOMWindow::incrementGamepadEventListenerCount()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (++m_gamepadEventListenerCount == 1)
         GamepadManager::singleton().registerDOMWindow(this);
 }
 
 void DOMWindow::decrementGamepadEventListenerCount()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_gamepadEventListenerCount);
 
     if (!--m_gamepadEventListenerCount)
@@ -541,17 +543,17 @@ void DOMWindow::decrementGamepadEventListenerCount()
 #endif
 
 void DOMWindow::registerProperty(DOMWindowProperty* property)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_properties.add(property);
 }
 
 void DOMWindow::unregisterProperty(DOMWindowProperty* property)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_properties.remove(property);
 }
 
 void DOMWindow::resetUnlessSuspendedForDocumentSuspension()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_suspendedForDocumentSuspension)
         return;
     willDestroyDocumentInFrame();
@@ -559,19 +561,19 @@ void DOMWindow::resetUnlessSuspendedForDocumentSuspension()
 }
 
 void DOMWindow::suspendForDocumentSuspension()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     disconnectDOMWindowProperties();
     m_suspendedForDocumentSuspension = true;
 }
 
 void DOMWindow::resumeFromDocumentSuspension()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     reconnectDOMWindowProperties();
     m_suspendedForDocumentSuspension = false;
 }
 
 void DOMWindow::disconnectDOMWindowProperties()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // It is necessary to copy m_properties to a separate vector because the DOMWindowProperties may
     // unregister themselves from the DOMWindow as a result of the call to disconnectFrameForDocumentSuspension.
     Vector<DOMWindowProperty*> properties;
@@ -581,7 +583,7 @@ void DOMWindow::disconnectDOMWindowProperties()
 }
 
 void DOMWindow::reconnectDOMWindowProperties()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_suspendedForDocumentSuspension);
     // It is necessary to copy m_properties to a separate vector because the DOMWindowProperties may
     // unregister themselves from the DOMWindow as a result of the call to reconnectFromPageCache.
@@ -592,7 +594,7 @@ void DOMWindow::reconnectDOMWindowProperties()
 }
 
 void DOMWindow::resetDOMWindowProperties()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_properties.clear();
 
     m_screen = nullptr;
@@ -616,13 +618,13 @@ void DOMWindow::resetDOMWindowProperties()
 }
 
 bool DOMWindow::isCurrentlyDisplayedInFrame() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_frame && m_frame->document()->domWindow() == this;
 }
 
 #if ENABLE(CUSTOM_ELEMENTS)
 CustomElementRegistry& DOMWindow::ensureCustomElementRegistry()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_customElementRegistry)
         m_customElementRegistry = CustomElementRegistry::create();
     return *m_customElementRegistry;
@@ -631,7 +633,7 @@ CustomElementRegistry& DOMWindow::ensureCustomElementRegistry()
 
 #if ENABLE(ORIENTATION_EVENTS)
 int DOMWindow::orientation() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -640,7 +642,7 @@ int DOMWindow::orientation() const
 #endif
 
 Screen* DOMWindow::screen() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
     if (!m_screen)
@@ -649,7 +651,7 @@ Screen* DOMWindow::screen() const
 }
 
 History* DOMWindow::history() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
     if (!m_history)
@@ -658,7 +660,7 @@ History* DOMWindow::history() const
 }
 
 Crypto* DOMWindow::crypto() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Why is crypto not available when the window is not currently displayed in a frame?
     if (!isCurrentlyDisplayedInFrame())
         return 0;
@@ -668,7 +670,7 @@ Crypto* DOMWindow::crypto() const
 }
 
 BarProp* DOMWindow::locationbar() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
     if (!m_locationbar)
@@ -677,7 +679,7 @@ BarProp* DOMWindow::locationbar() const
 }
 
 BarProp* DOMWindow::menubar() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
     if (!m_menubar)
@@ -686,7 +688,7 @@ BarProp* DOMWindow::menubar() const
 }
 
 BarProp* DOMWindow::personalbar() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
     if (!m_personalbar)
@@ -695,7 +697,7 @@ BarProp* DOMWindow::personalbar() const
 }
 
 BarProp* DOMWindow::scrollbars() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
     if (!m_scrollbars)
@@ -704,7 +706,7 @@ BarProp* DOMWindow::scrollbars() const
 }
 
 BarProp* DOMWindow::statusbar() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
     if (!m_statusbar)
@@ -713,7 +715,7 @@ BarProp* DOMWindow::statusbar() const
 }
 
 BarProp* DOMWindow::toolbar() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
     if (!m_toolbar)
@@ -722,14 +724,14 @@ BarProp* DOMWindow::toolbar() const
 }
 
 PageConsoleClient* DOMWindow::console() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return nullptr;
     return m_frame->page() ? &m_frame->page()->console() : nullptr;
 }
 
 DOMApplicationCache* DOMWindow::applicationCache() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
     if (!m_applicationCache)
@@ -738,7 +740,7 @@ DOMApplicationCache* DOMWindow::applicationCache() const
 }
 
 Navigator* DOMWindow::navigator() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return nullptr;
     if (!m_navigator)
@@ -748,7 +750,7 @@ Navigator* DOMWindow::navigator() const
 
 #if ENABLE(WEB_TIMING)
 Performance* DOMWindow::performance() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return nullptr;
     if (!m_performance)
@@ -758,7 +760,7 @@ Performance* DOMWindow::performance() const
 #endif
 
 double DOMWindow::nowTimestamp() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(WEB_TIMING)
     return performance() ? performance()->now() / 1000 : 0;
 #else
@@ -767,7 +769,7 @@ double DOMWindow::nowTimestamp() const
 }
 
 Location* DOMWindow::location() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return nullptr;
     if (!m_location)
@@ -777,7 +779,7 @@ Location* DOMWindow::location() const
 
 #if ENABLE(USER_MESSAGE_HANDLERS)
 bool DOMWindow::shouldHaveWebKitNamespaceForWorld(DOMWrapperWorld& world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return false;
 
@@ -797,7 +799,7 @@ bool DOMWindow::shouldHaveWebKitNamespaceForWorld(DOMWrapperWorld& world)
 }
 
 WebKitNamespace* DOMWindow::webkitNamespace() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return nullptr;
     auto* page = m_frame->page();
@@ -810,7 +812,7 @@ WebKitNamespace* DOMWindow::webkitNamespace() const
 #endif
 
 Storage* DOMWindow::sessionStorage(ExceptionCode& ec) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
 
@@ -846,7 +848,7 @@ Storage* DOMWindow::sessionStorage(ExceptionCode& ec) const
 }
 
 Storage* DOMWindow::localStorage(ExceptionCode& ec) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return nullptr;
 
@@ -893,7 +895,7 @@ Storage* DOMWindow::localStorage(ExceptionCode& ec) const
 }
 
 void DOMWindow::postMessage(PassRefPtr<SerializedScriptValue> message, const MessagePortArray* ports, const String& targetOrigin, DOMWindow& source, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return;
 
@@ -937,7 +939,7 @@ void DOMWindow::postMessage(PassRefPtr<SerializedScriptValue> message, const Mes
 }
 
 void DOMWindow::postMessageTimerFired(PostMessageTimer& timer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!document() || !isCurrentlyDisplayedInFrame())
         return;
 
@@ -945,7 +947,7 @@ void DOMWindow::postMessageTimerFired(PostMessageTimer& timer)
 }
 
 void DOMWindow::dispatchMessageEventWithOriginCheck(SecurityOrigin* intendedTargetOrigin, Event& event, PassRefPtr<ScriptCallStack> stackTrace)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (intendedTargetOrigin) {
         // Check target origin now since the target document may have changed since the timer was scheduled.
         if (!intendedTargetOrigin->isSameSchemeHostPort(document()->securityOrigin())) {
@@ -961,7 +963,7 @@ void DOMWindow::dispatchMessageEventWithOriginCheck(SecurityOrigin* intendedTarg
 }
 
 DOMSelection* DOMWindow::getSelection()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame() || !m_frame)
         return 0;
 
@@ -969,7 +971,7 @@ DOMSelection* DOMWindow::getSelection()
 }
 
 Element* DOMWindow::frameElement() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -977,12 +979,12 @@ Element* DOMWindow::frameElement() const
 }
 
 void DOMWindow::focus(DOMWindow& callerWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     focus(opener() && opener() != this && &callerWindow == opener());
 }
 
 void DOMWindow::focus(bool allowFocus)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
 
@@ -1008,7 +1010,7 @@ void DOMWindow::focus(bool allowFocus)
 }
 
 void DOMWindow::blur()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
 
@@ -1026,14 +1028,14 @@ void DOMWindow::blur()
 }
 
 void DOMWindow::close(Document& document)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!document.canNavigate(m_frame))
         return;
     close();
 }
 
 void DOMWindow::close()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
 
@@ -1059,7 +1061,7 @@ void DOMWindow::close()
 }
 
 void DOMWindow::print()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
 
@@ -1081,7 +1083,7 @@ void DOMWindow::print()
 }
 
 void DOMWindow::stop()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
 
@@ -1091,7 +1093,7 @@ void DOMWindow::stop()
 }
 
 void DOMWindow::alert(const String& message)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
 
@@ -1110,7 +1112,7 @@ void DOMWindow::alert(const String& message)
 }
 
 bool DOMWindow::confirm(const String& message)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return false;
     
@@ -1129,7 +1131,7 @@ bool DOMWindow::confirm(const String& message)
 }
 
 String DOMWindow::prompt(const String& message, const String& defaultValue)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
 
@@ -1152,7 +1154,7 @@ String DOMWindow::prompt(const String& message, const String& defaultValue)
 }
 
 bool DOMWindow::find(const String& string, bool caseSensitive, bool backwards, bool wrap, bool /*wholeWord*/, bool /*searchInFrames*/, bool /*showDialog*/) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return false;
 
@@ -1162,12 +1164,12 @@ bool DOMWindow::find(const String& string, bool caseSensitive, bool backwards, b
 }
 
 bool DOMWindow::offscreenBuffering() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return true;
 }
 
 int DOMWindow::outerHeight() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(IOS)
     return 0;
 #else
@@ -1183,7 +1185,7 @@ int DOMWindow::outerHeight() const
 }
 
 int DOMWindow::outerWidth() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(IOS)
     return 0;
 #else
@@ -1199,7 +1201,7 @@ int DOMWindow::outerWidth() const
 }
 
 int DOMWindow::innerHeight() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -1211,7 +1213,7 @@ int DOMWindow::innerHeight() const
 }
 
 int DOMWindow::innerWidth() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -1223,7 +1225,7 @@ int DOMWindow::innerWidth() const
 }
 
 int DOMWindow::screenX() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -1235,7 +1237,7 @@ int DOMWindow::screenX() const
 }
 
 int DOMWindow::screenY() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -1247,7 +1249,7 @@ int DOMWindow::screenY() const
 }
 
 int DOMWindow::scrollX() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -1265,7 +1267,7 @@ int DOMWindow::scrollX() const
 }
 
 int DOMWindow::scrollY() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -1283,12 +1285,12 @@ int DOMWindow::scrollY() const
 }
 
 bool DOMWindow::closed() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !m_frame;
 }
 
 unsigned DOMWindow::length() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return 0;
 
@@ -1296,7 +1298,7 @@ unsigned DOMWindow::length() const
 }
 
 String DOMWindow::name() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
 
@@ -1304,7 +1306,7 @@ String DOMWindow::name() const
 }
 
 void DOMWindow::setName(const String& string)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
 
@@ -1312,7 +1314,7 @@ void DOMWindow::setName(const String& string)
 }
 
 void DOMWindow::setStatus(const String& string) 
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_status = string;
 
     if (!m_frame)
@@ -1327,7 +1329,7 @@ void DOMWindow::setStatus(const String& string)
 } 
     
 void DOMWindow::setDefaultStatus(const String& string) 
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_defaultStatus = string;
 
     if (!m_frame)
@@ -1342,7 +1344,7 @@ void DOMWindow::setDefaultStatus(const String& string)
 }
 
 DOMWindow* DOMWindow::self() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -1350,7 +1352,7 @@ DOMWindow* DOMWindow::self() const
 }
 
 DOMWindow* DOMWindow::opener() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -1362,7 +1364,7 @@ DOMWindow* DOMWindow::opener() const
 }
 
 DOMWindow* DOMWindow::parent() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -1374,7 +1376,7 @@ DOMWindow* DOMWindow::parent() const
 }
 
 DOMWindow* DOMWindow::top() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0;
 
@@ -1386,13 +1388,13 @@ DOMWindow* DOMWindow::top() const
 }
 
 Document* DOMWindow::document() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ScriptExecutionContext* context = ContextDestructionObserver::scriptExecutionContext();
     return downcast<Document>(context);
 }
 
 RefPtr<StyleMedia> DOMWindow::styleMedia() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return nullptr;
     if (!m_media)
@@ -1401,12 +1403,12 @@ RefPtr<StyleMedia> DOMWindow::styleMedia() const
 }
 
 RefPtr<CSSStyleDeclaration> DOMWindow::getComputedStyle(Element& element, const String& pseudoElt) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return CSSComputedStyleDeclaration::create(element, false, pseudoElt);
 }
 
 RefPtr<CSSRuleList> DOMWindow::getMatchedCSSRules(Element* element, const String& pseudoElement, bool authorOnly) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return nullptr;
 
@@ -1435,7 +1437,7 @@ RefPtr<CSSRuleList> DOMWindow::getMatchedCSSRules(Element* element, const String
 }
 
 RefPtr<WebKitPoint> DOMWindow::webkitConvertPointFromNodeToPage(Node* node, const WebKitPoint* p) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!node || !p)
         return nullptr;
 
@@ -1450,7 +1452,7 @@ RefPtr<WebKitPoint> DOMWindow::webkitConvertPointFromNodeToPage(Node* node, cons
 }
 
 RefPtr<WebKitPoint> DOMWindow::webkitConvertPointFromPageToNode(Node* node, const WebKitPoint* p) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!node || !p)
         return nullptr;
 
@@ -1465,7 +1467,7 @@ RefPtr<WebKitPoint> DOMWindow::webkitConvertPointFromPageToNode(Node* node, cons
 }
 
 double DOMWindow::devicePixelRatio() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return 0.0;
 
@@ -1477,12 +1479,12 @@ double DOMWindow::devicePixelRatio() const
 }
 
 void DOMWindow::scrollBy(const ScrollToOptions& options) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return scrollBy(options.left.valueOr(0), options.top.valueOr(0));
 }
 
 void DOMWindow::scrollBy(double x, double y) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return;
 
@@ -1501,7 +1503,7 @@ void DOMWindow::scrollBy(double x, double y) const
 }
 
 void DOMWindow::scrollTo(const ScrollToOptions& options) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<FrameView> view = m_frame->view();
     if (!view)
         return;
@@ -1512,7 +1514,7 @@ void DOMWindow::scrollTo(const ScrollToOptions& options) const
 }
 
 void DOMWindow::scrollTo(double x, double y) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return;
 
@@ -1534,7 +1536,7 @@ void DOMWindow::scrollTo(double x, double y) const
 }
 
 bool DOMWindow::allowedToChangeWindowGeometry() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return false;
     if (!m_frame->page())
@@ -1548,7 +1550,7 @@ bool DOMWindow::allowedToChangeWindowGeometry() const
 }
 
 void DOMWindow::moveBy(float x, float y) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!allowedToChangeWindowGeometry())
         return;
 
@@ -1561,7 +1563,7 @@ void DOMWindow::moveBy(float x, float y) const
 }
 
 void DOMWindow::moveTo(float x, float y) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!allowedToChangeWindowGeometry())
         return;
 
@@ -1576,7 +1578,7 @@ void DOMWindow::moveTo(float x, float y) const
 }
 
 void DOMWindow::resizeBy(float x, float y) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!allowedToChangeWindowGeometry())
         return;
 
@@ -1588,7 +1590,7 @@ void DOMWindow::resizeBy(float x, float y) const
 }
 
 void DOMWindow::resizeTo(float width, float height) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!allowedToChangeWindowGeometry())
         return;
 
@@ -1600,7 +1602,7 @@ void DOMWindow::resizeTo(float width, float height) const
 }
 
 int DOMWindow::setTimeout(std::unique_ptr<ScheduledAction> action, int timeout, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ScriptExecutionContext* context = scriptExecutionContext();
     if (!context) {
         ec = INVALID_ACCESS_ERR;
@@ -1610,7 +1612,7 @@ int DOMWindow::setTimeout(std::unique_ptr<ScheduledAction> action, int timeout, 
 }
 
 void DOMWindow::clearTimeout(int timeoutId)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(IOS)
     if (m_frame) {
         Document* document = m_frame->document();
@@ -1634,7 +1636,7 @@ void DOMWindow::clearTimeout(int timeoutId)
 }
 
 int DOMWindow::setInterval(std::unique_ptr<ScheduledAction> action, int timeout, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ScriptExecutionContext* context = scriptExecutionContext();
     if (!context) {
         ec = INVALID_ACCESS_ERR;
@@ -1644,7 +1646,7 @@ int DOMWindow::setInterval(std::unique_ptr<ScheduledAction> action, int timeout,
 }
 
 void DOMWindow::clearInterval(int timeoutId)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ScriptExecutionContext* context = scriptExecutionContext();
     if (!context)
         return;
@@ -1653,7 +1655,7 @@ void DOMWindow::clearInterval(int timeoutId)
 
 #if ENABLE(REQUEST_ANIMATION_FRAME)
 int DOMWindow::requestAnimationFrame(PassRefPtr<RequestAnimationFrameCallback> callback)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     callback->m_useLegacyTimeBase = false;
     if (Document* d = document())
         return d->requestAnimationFrame(callback);
@@ -1661,7 +1663,7 @@ int DOMWindow::requestAnimationFrame(PassRefPtr<RequestAnimationFrameCallback> c
 }
 
 int DOMWindow::webkitRequestAnimationFrame(PassRefPtr<RequestAnimationFrameCallback> callback)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     callback->m_useLegacyTimeBase = true;
     if (Document* d = document())
         return d->requestAnimationFrame(callback);
@@ -1669,14 +1671,14 @@ int DOMWindow::webkitRequestAnimationFrame(PassRefPtr<RequestAnimationFrameCallb
 }
 
 void DOMWindow::cancelAnimationFrame(int id)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Document* d = document())
         d->cancelAnimationFrame(id);
 }
 #endif
 
 static void didAddStorageEventListener(DOMWindow* window)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Creating these WebCore::Storage objects informs the system that we'd like to receive
     // notifications about storage events that might be triggered in other processes. Rather
     // than subscribe to these notifications explicitly, we subscribe to them implicitly to
@@ -1686,7 +1688,7 @@ static void didAddStorageEventListener(DOMWindow* window)
 }
 
 bool DOMWindow::isSameSecurityOriginAsMainFrame() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame || !m_frame->page() || !document())
         return false;
 
@@ -1702,7 +1704,7 @@ bool DOMWindow::isSameSecurityOriginAsMainFrame() const
 }
 
 bool DOMWindow::addEventListener(const AtomicString& eventType, Ref<EventListener>&& listener, const AddEventListenerOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!EventTarget::addEventListener(eventType, WTFMove(listener), options))
         return false;
 
@@ -1775,7 +1777,7 @@ bool DOMWindow::addEventListener(const AtomicString& eventType, Ref<EventListene
 
 #if PLATFORM(IOS)
 void DOMWindow::incrementScrollEventListenersCount()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Document* document = this->document();
     if (++m_scrollEventListenerCount == 1 && document == &document->topDocument()) {
         Frame* frame = this->frame();
@@ -1785,7 +1787,7 @@ void DOMWindow::incrementScrollEventListenersCount()
 }
 
 void DOMWindow::decrementScrollEventListenersCount()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Document* document = this->document();
     if (!--m_scrollEventListenerCount && document == &document->topDocument()) {
         Frame* frame = this->frame();
@@ -1796,7 +1798,7 @@ void DOMWindow::decrementScrollEventListenersCount()
 #endif
 
 void DOMWindow::resetAllGeolocationPermission()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Remove PLATFORM(IOS)-guard once we upstream the iOS changes to Geolocation.cpp.
 #if ENABLE(GEOLOCATION) && PLATFORM(IOS)
     if (m_navigator)
@@ -1805,7 +1807,7 @@ void DOMWindow::resetAllGeolocationPermission()
 }
 
 bool DOMWindow::removeEventListener(const AtomicString& eventType, EventListener& listener, const ListenerOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!EventTarget::removeEventListener(eventType, listener, options.capture))
         return false;
 
@@ -1867,7 +1869,7 @@ bool DOMWindow::removeEventListener(const AtomicString& eventType, EventListener
 }
 
 void DOMWindow::dispatchLoadEvent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<Event> loadEvent = Event::create(eventNames().loadEvent, false, false);
     if (m_frame && m_frame->loader().documentLoader() && !m_frame->loader().documentLoader()->timing().loadEventStart()) {
         // The DocumentLoader (and thus its LoadTiming) might get destroyed while dispatching
@@ -1891,7 +1893,7 @@ void DOMWindow::dispatchLoadEvent()
 }
 
 bool DOMWindow::dispatchEvent(Event& event, EventTarget* target)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<EventTarget> protectedThis(*this);
 
     // Pausing a page may trigger pagehide and pageshow events. WebCore also implicitly fires these
@@ -1924,7 +1926,7 @@ bool DOMWindow::dispatchEvent(Event& event, EventTarget* target)
 }
 
 void DOMWindow::removeAllEventListeners()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     EventTarget::removeAllEventListeners();
 
 #if ENABLE(DEVICE_ORIENTATION)
@@ -1967,17 +1969,17 @@ void DOMWindow::removeAllEventListeners()
 }
 
 void DOMWindow::captureEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Not implemented.
 }
 
 void DOMWindow::releaseEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Not implemented.
 }
 
 void DOMWindow::finishedLoading()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_shouldPrintWhenFinishedLoading) {
         m_shouldPrintWhenFinishedLoading = false;
         if (m_frame->loader().activeDocumentLoader()->mainDocumentError().isNull())
@@ -1986,7 +1988,7 @@ void DOMWindow::finishedLoading()
 }
 
 void DOMWindow::setLocation(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& urlString, SetLocationLocking locking)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return;
 
@@ -2018,7 +2020,7 @@ void DOMWindow::setLocation(DOMWindow& activeWindow, DOMWindow& firstWindow, con
 }
 
 void DOMWindow::printErrorMessage(const String& message)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (message.isEmpty())
         return;
 
@@ -2027,7 +2029,7 @@ void DOMWindow::printErrorMessage(const String& message)
 }
 
 String DOMWindow::crossDomainAccessErrorMessage(const DOMWindow& activeWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const URL& activeWindowURL = activeWindow.document()->url();
     if (activeWindowURL.isNull())
         return String();
@@ -2068,7 +2070,7 @@ String DOMWindow::crossDomainAccessErrorMessage(const DOMWindow& activeWindow)
 }
 
 bool DOMWindow::isInsecureScriptAccess(DOMWindow& activeWindow, const String& urlString)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!protocolIsJavaScript(urlString))
         return false;
 
@@ -2092,7 +2094,7 @@ bool DOMWindow::isInsecureScriptAccess(DOMWindow& activeWindow, const String& ur
 }
 
 RefPtr<Frame> DOMWindow::createWindow(const String& urlString, const AtomicString& frameName, const WindowFeatures& windowFeatures, DOMWindow& activeWindow, Frame& firstFrame, Frame& openerFrame, std::function<void (DOMWindow&)> prepareDialogFunction)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Frame* activeFrame = activeWindow.frame();
     if (!activeFrame)
         return nullptr;
@@ -2149,7 +2151,7 @@ RefPtr<Frame> DOMWindow::createWindow(const String& urlString, const AtomicStrin
 
 RefPtr<DOMWindow> DOMWindow::open(const String& urlString, const AtomicString& frameName, const String& windowFeaturesString,
     DOMWindow& activeWindow, DOMWindow& firstWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return nullptr;
 
@@ -2218,7 +2220,7 @@ RefPtr<DOMWindow> DOMWindow::open(const String& urlString, const AtomicString& f
 }
 
 void DOMWindow::showModalDialog(const String& urlString, const String& dialogFeaturesString, DOMWindow& activeWindow, DOMWindow& firstWindow, std::function<void (DOMWindow&)> prepareDialogFunction)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isCurrentlyDisplayedInFrame())
         return;
     Frame* activeFrame = activeWindow.frame();
@@ -2247,13 +2249,13 @@ void DOMWindow::showModalDialog(const String& urlString, const String& dialogFea
 }
 
 void DOMWindow::enableSuddenTermination()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Page* page = this->page())
         page->chrome().enableSuddenTermination();
 }
 
 void DOMWindow::disableSuddenTermination()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Page* page = this->page())
         page->chrome().disableSuddenTermination();
 }

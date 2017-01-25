@@ -39,6 +39,8 @@
 #include <wtf/TemporaryChange.h>
 #include "Extensions3DCache.h"
 
+#include <wtf/macros.h>
+
 using namespace WebCore;
 
 namespace WebKit {
@@ -47,11 +49,11 @@ CompositingCoordinator::CompositingCoordinator(Page* page, CompositingCoordinato
     : m_page(page)
     , m_client(client)
     , m_releaseInactiveAtlasesTimer(*this, &CompositingCoordinator::releaseInactiveAtlasesTimerFired)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 CompositingCoordinator::~CompositingCoordinator()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_isDestructing = true;
 
     purgeBackingStores();
@@ -61,13 +63,13 @@ CompositingCoordinator::~CompositingCoordinator()
 }
 
 void CompositingCoordinator::invalidate()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_rootLayer = nullptr;
     purgeBackingStores();
 }
 
 void CompositingCoordinator::setRootCompositingLayer(GraphicsLayer* graphicsLayer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_rootCompositingLayer == graphicsLayer)
         return;
 
@@ -80,7 +82,7 @@ void CompositingCoordinator::setRootCompositingLayer(GraphicsLayer* graphicsLaye
 }
 
 void CompositingCoordinator::setViewOverlayRootLayer(GraphicsLayer* graphicsLayer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_overlayCompositingLayer == graphicsLayer)
         return;
 
@@ -93,13 +95,13 @@ void CompositingCoordinator::setViewOverlayRootLayer(GraphicsLayer* graphicsLaye
 }
 
 void CompositingCoordinator::sizeDidChange(const IntSize& newSize)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_rootLayer->setSize(newSize);
     notifyFlushRequired(m_rootLayer.get());
 }
 
 bool CompositingCoordinator::flushPendingLayerChanges()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     TemporaryChange<bool> protector(m_isFlushingLayerChanges, true);
 
     initializeRootCompositingLayerIfNeeded();
@@ -139,7 +141,7 @@ bool CompositingCoordinator::flushPendingLayerChanges()
 }
 
 double CompositingCoordinator::timestamp() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* document = m_page->mainFrame().document();
     if (!document)
         return 0;
@@ -147,7 +149,7 @@ double CompositingCoordinator::timestamp() const
 }
 
 void CompositingCoordinator::syncDisplayState()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER) && !USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
     // Make sure that any previously registered animation callbacks are being executed before we flush the layers.
     m_lastAnimationServiceTime = timestamp();
@@ -158,7 +160,7 @@ void CompositingCoordinator::syncDisplayState()
 
 #if ENABLE(REQUEST_ANIMATION_FRAME)
 double CompositingCoordinator::nextAnimationServiceTime() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // According to the requestAnimationFrame spec, rAF callbacks should not be faster than 60FPS.
     static const double MinimalTimeoutForAnimations = 1. / 60.;
     return std::max<double>(0., MinimalTimeoutForAnimations - timestamp() + m_lastAnimationServiceTime);
@@ -166,7 +168,7 @@ double CompositingCoordinator::nextAnimationServiceTime() const
 #endif
 
 void CompositingCoordinator::clearPendingStateChanges()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.layersToCreate.clear();
     m_state.layersToUpdate.clear();
     m_state.layersToRemove.clear();
@@ -181,7 +183,7 @@ void CompositingCoordinator::clearPendingStateChanges()
 }
 
 void CompositingCoordinator::initializeRootCompositingLayerIfNeeded()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_didInitializeRootCompositingLayer)
         return;
 
@@ -191,7 +193,7 @@ void CompositingCoordinator::initializeRootCompositingLayerIfNeeded()
 }
 
 void CompositingCoordinator::createRootLayer(const IntSize& size)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_rootLayer);
     // Create a root layer.
     m_rootLayer = GraphicsLayer::create(this, *this);
@@ -203,13 +205,13 @@ void CompositingCoordinator::createRootLayer(const IntSize& size)
 }
 
 void CompositingCoordinator::syncLayerState(CoordinatedLayerID id, CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldSyncFrame = true;
     m_state.layersToUpdate.append(std::make_pair(id, state));
 }
 
 Ref<CoordinatedImageBacking> CompositingCoordinator::createImageBackingIfNeeded(Image* image)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     CoordinatedImageBackingID imageID = CoordinatedImageBacking::getCoordinatedImageBackingID(image);
     auto addResult = m_imageBackings.ensure(imageID, [this, image] {
         return CoordinatedImageBacking::create(this, image);
@@ -218,24 +220,24 @@ Ref<CoordinatedImageBacking> CompositingCoordinator::createImageBackingIfNeeded(
 }
 
 void CompositingCoordinator::createImageBacking(CoordinatedImageBackingID imageID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.imagesToCreate.append(imageID);
 }
 
 void CompositingCoordinator::updateImageBacking(CoordinatedImageBackingID imageID, RefPtr<CoordinatedSurface>&& coordinatedSurface)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldSyncFrame = true;
     m_state.imagesToUpdate.append(std::make_pair(imageID, WTFMove(coordinatedSurface)));
 }
 
 void CompositingCoordinator::clearImageBackingContents(CoordinatedImageBackingID imageID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldSyncFrame = true;
     m_state.imagesToClear.append(imageID);
 }
 
 void CompositingCoordinator::removeImageBacking(CoordinatedImageBackingID imageID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_isPurging)
         return;
 
@@ -250,28 +252,28 @@ void CompositingCoordinator::removeImageBacking(CoordinatedImageBackingID imageI
 }
 
 void CompositingCoordinator::flushPendingImageBackingChanges()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& imageBacking : m_imageBackings.values())
         imageBacking->update();
 }
 
 void CompositingCoordinator::notifyAnimationStarted(const GraphicsLayer*, const String&, double /* time */)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void CompositingCoordinator::notifyFlushRequired(const GraphicsLayer*)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_isDestructing && !isFlushingLayerChanges())
         m_client.notifyFlushRequired();
 }
 
 void CompositingCoordinator::paintContents(const GraphicsLayer* graphicsLayer, GraphicsContext& graphicsContext, GraphicsLayerPaintingPhase, const FloatRect& clipRect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_client.paintLayerContents(graphicsLayer, graphicsContext, enclosingIntRect(clipRect));
 }
 
 std::unique_ptr<GraphicsLayer> CompositingCoordinator::createGraphicsLayer(GraphicsLayer::Type layerType, GraphicsLayerClient& client)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     CoordinatedGraphicsLayer* layer = new CoordinatedGraphicsLayer(layerType, client);
     layer->setCoordinator(this);
     m_registeredLayers.add(layer->id(), layer);
@@ -282,34 +284,34 @@ std::unique_ptr<GraphicsLayer> CompositingCoordinator::createGraphicsLayer(Graph
 }
 
 float CompositingCoordinator::deviceScaleFactor() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_page->deviceScaleFactor();
 }
 
 float CompositingCoordinator::pageScaleFactor() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_page->pageScaleFactor();
 }
 
 void CompositingCoordinator::createUpdateAtlas(uint32_t atlasID, RefPtr<CoordinatedSurface>&& coordinatedSurface)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.updateAtlasesToCreate.append(std::make_pair(atlasID, WTFMove(coordinatedSurface)));
 }
 
 void CompositingCoordinator::removeUpdateAtlas(uint32_t atlasID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_isPurging)
         return;
     m_state.updateAtlasesToRemove.append(atlasID);
 }
 
 FloatRect CompositingCoordinator::visibleContentsRect() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_visibleContentsRect;
 }
 
 CoordinatedGraphicsLayer* CompositingCoordinator::mainContentsLayer()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!is<CoordinatedGraphicsLayer>(m_rootCompositingLayer))
         return nullptr;
 
@@ -317,7 +319,7 @@ CoordinatedGraphicsLayer* CompositingCoordinator::mainContentsLayer()
 }
 
 void CompositingCoordinator::setVisibleContentsRect(const FloatRect& rect, const FloatPoint& trajectoryVector)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // A zero trajectoryVector indicates that tiles all around the viewport are requested.
     if (CoordinatedGraphicsLayer* contentsLayer = mainContentsLayer())
         contentsLayer->setVisibleContentRectTrajectoryVector(trajectoryVector);
@@ -339,12 +341,12 @@ void CompositingCoordinator::setVisibleContentsRect(const FloatRect& rect, const
 }
 
 void CompositingCoordinator::deviceOrPageScaleFactorChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_rootLayer->deviceOrPageScaleFactorChanged();
 }
 
 void CompositingCoordinator::detachLayer(CoordinatedGraphicsLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_isPurging)
         return;
 
@@ -361,19 +363,19 @@ void CompositingCoordinator::detachLayer(CoordinatedGraphicsLayer* layer)
 }
 
 void CompositingCoordinator::commitScrollOffset(uint32_t layerID, const WebCore::IntSize& offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (auto* layer = m_registeredLayers.get(layerID))
         layer->commitScrollOffset(offset);
 }
 
 void CompositingCoordinator::renderNextFrame()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& atlas : m_updateAtlases)
         atlas->didSwapBuffers();
 }
 
 void CompositingCoordinator::purgeBackingStores()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     TemporaryChange<bool> purgingToggle(m_isPurging, true);
 
     for (auto& registeredLayer : m_registeredLayers.values())
@@ -384,7 +386,7 @@ void CompositingCoordinator::purgeBackingStores()
 }
 
 bool CompositingCoordinator::paintToSurface(const IntSize& size, CoordinatedSurface::Flags flags, uint32_t& atlasID, IntPoint& offset, CoordinatedSurface::Client& client)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Extensions3DCache::singleton().GL_EXT_unpack_subimage()) {
         for (auto& updateAtlas : m_updateAtlases) {
             UpdateAtlas* atlas = updateAtlas.get();
@@ -408,13 +410,13 @@ bool CompositingCoordinator::paintToSurface(const IntSize& size, CoordinatedSurf
 const double ReleaseInactiveAtlasesTimerInterval = 0.5;
 
 void CompositingCoordinator::scheduleReleaseInactiveAtlases()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_releaseInactiveAtlasesTimer.isActive())
         m_releaseInactiveAtlasesTimer.startRepeating(ReleaseInactiveAtlasesTimerInterval);
 }
 
 void CompositingCoordinator::releaseInactiveAtlasesTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We always want to keep one atlas for root contents layer.
     std::unique_ptr<UpdateAtlas> atlasToKeepAnyway;
     bool foundActiveAtlasForRootContentsLayer = false;

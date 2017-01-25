@@ -147,7 +147,7 @@ static const double nonVisibleProcessCleanupDelay = 10;
 namespace WebKit {
 
 WebProcess& WebProcess::singleton()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static WebProcess& process = *new WebProcess;
     return process;
 }
@@ -179,7 +179,7 @@ WebProcess::WebProcess()
     , m_webSQLiteDatabaseTracker(*this)
 #endif
     , m_resourceLoadStatisticsStorage(WebCore::ResourceLoadStatisticsStore::create())
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Initialize our platform strategies.
     WebPlatformStrategies::initialize();
 
@@ -219,16 +219,16 @@ WebProcess::WebProcess()
 }
 
 WebProcess::~WebProcess()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void WebProcess::initializeProcess(const ChildProcessInitializationParameters& parameters)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     platformInitializeProcess(parameters);
 }
 
 void WebProcess::initializeConnection(IPC::Connection* connection)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ChildProcess::initializeConnection(connection);
 
     connection->setShouldExitOnSyncMessageSendFailure(true);
@@ -263,48 +263,70 @@ void WebProcess::initializeConnection(IPC::Connection* connection)
 }
 
 void WebProcess::initializeWebProcess(WebProcessCreationParameters&& parameters)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_pageMap.isEmpty());
 
+    WTF_EVENT0("III 0");
+
+    
 #if OS(LINUX)
     if (parameters.memoryPressureMonitorHandle.fileDescriptor() != -1)
         MemoryPressureHandler::singleton().setMemoryPressureMonitorHandle(parameters.memoryPressureMonitorHandle.releaseFileDescriptor());
     MemoryPressureHandler::ReliefLogger::setLoggingEnabled(parameters.shouldEnableMemoryPressureReliefLogging);
 #endif
 
+    WTF_EVENT0("III 1");
+
     platformInitializeWebProcess(WTFMove(parameters));
 
     // Match the QoS of the UIProcess and the scrolling thread but use a slightly lower priority.
     WTF::setCurrentThreadIsUserInteractive(-1);
 
+    WTF_EVENT0("III 2");
+
     m_suppressMemoryPressureHandler = parameters.shouldSuppressMemoryPressureHandler;
     if (!m_suppressMemoryPressureHandler)
         MemoryPressureHandler::singleton().install();
 
+    WTF_EVENT0("III 3");
+
     if (!parameters.injectedBundlePath.isEmpty())
         m_injectedBundle = InjectedBundle::create(parameters, transformHandlesToObjects(parameters.initializationUserData.object()).get());
+
+    WTF_EVENT0("III 4");
 
     for (auto& supplement : m_supplements.values())
         supplement->initialize(parameters);
 
+    WTF_EVENT0("III 5");
+
     auto& databaseManager = DatabaseManager::singleton();
     databaseManager.initialize(parameters.webSQLDatabaseDirectory);
 
+    WTF_EVENT0("III 6");
 #if ENABLE(ICONDATABASE)
     m_iconDatabaseProxy.setEnabled(parameters.iconDatabaseEnabled);
 #endif
 
+
+    WTF_EVENT0("III 7");
+
+    
     // FIXME: This should be constructed per data store, not per process.
     m_applicationCacheStorage = ApplicationCacheStorage::create(parameters.applicationCacheDirectory, parameters.applicationCacheFlatFileSubdirectoryName);
 #if PLATFORM(IOS)
     m_applicationCacheStorage->setDefaultOriginQuota(25ULL * 1024 * 1024);
 #endif
+    
+    WTF_EVENT0("III 8");
 
 #if ENABLE(VIDEO)
     if (!parameters.mediaCacheDirectory.isEmpty())
         WebCore::HTMLMediaElement::setMediaCacheDirectory(parameters.mediaCacheDirectory);
 #endif
 
+    WTF_EVENT0("III 9");
+    
     setCacheModel(static_cast<uint32_t>(parameters.cacheModel));
 
     if (!parameters.languages.isEmpty())
@@ -407,7 +429,7 @@ void WebProcess::initializeWebProcess(WebProcessCreationParameters&& parameters)
 }
 
 void WebProcess::ensureNetworkProcessConnection()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_networkProcessConnection)
         return;
 
@@ -430,107 +452,107 @@ void WebProcess::ensureNetworkProcessConnection()
 }
 
 void WebProcess::registerURLSchemeAsEmptyDocument(const String& urlScheme)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SchemeRegistry::registerURLSchemeAsEmptyDocument(urlScheme);
 }
 
 void WebProcess::registerURLSchemeAsSecure(const String& urlScheme) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SchemeRegistry::registerURLSchemeAsSecure(urlScheme);
 }
 
 void WebProcess::registerURLSchemeAsBypassingContentSecurityPolicy(const String& urlScheme) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SchemeRegistry::registerURLSchemeAsBypassingContentSecurityPolicy(urlScheme);
 }
 
 void WebProcess::setDomainRelaxationForbiddenForURLScheme(const String& urlScheme) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SchemeRegistry::setDomainRelaxationForbiddenForURLScheme(true, urlScheme);
 }
 
 void WebProcess::registerURLSchemeAsLocal(const String& urlScheme) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SchemeRegistry::registerURLSchemeAsLocal(urlScheme);
 }
 
 void WebProcess::registerURLSchemeAsNoAccess(const String& urlScheme) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SchemeRegistry::registerURLSchemeAsNoAccess(urlScheme);
 }
 
 void WebProcess::registerURLSchemeAsDisplayIsolated(const String& urlScheme) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SchemeRegistry::registerURLSchemeAsDisplayIsolated(urlScheme);
 }
 
 void WebProcess::registerURLSchemeAsCORSEnabled(const String& urlScheme) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SchemeRegistry::registerURLSchemeAsCORSEnabled(urlScheme);
 }
 
 void WebProcess::registerURLSchemeAsAlwaysRevalidated(const String& urlScheme) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SchemeRegistry::registerURLSchemeAsAlwaysRevalidated(urlScheme);
 }
 
 #if ENABLE(CACHE_PARTITIONING)
 void WebProcess::registerURLSchemeAsCachePartitioned(const String& urlScheme) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SchemeRegistry::registerURLSchemeAsCachePartitioned(urlScheme);
 }
 #endif
 
 void WebProcess::setDefaultRequestTimeoutInterval(double timeoutInterval)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ResourceRequest::setDefaultTimeoutInterval(timeoutInterval);
 }
 
 void WebProcess::setAlwaysUsesComplexTextCodePath(bool alwaysUseComplexText)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebCore::FontCascade::setCodePath(alwaysUseComplexText ? WebCore::FontCascade::Complex : WebCore::FontCascade::Auto);
 }
 
 void WebProcess::setShouldUseFontSmoothing(bool useFontSmoothing)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebCore::FontCascade::setShouldUseSmoothing(useFontSmoothing);
 }
 
 void WebProcess::userPreferredLanguagesChanged(const Vector<String>& languages) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     overrideUserPreferredLanguages(languages);
     languageDidChange();
 }
 
 void WebProcess::fullKeyboardAccessModeChanged(bool fullKeyboardAccessEnabled)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_fullKeyboardAccessEnabled = fullKeyboardAccessEnabled;
 }
 
 void WebProcess::ensurePrivateBrowsingSession(SessionID sessionID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebFrameNetworkingContext::ensurePrivateBrowsingSession(sessionID);
 }
 
 void WebProcess::destroyPrivateBrowsingSession(SessionID sessionID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SessionTracker::destroySession(sessionID);
 }
 
 void WebProcess::ensureLegacyPrivateBrowsingSessionInNetworkProcess()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     networkConnection().connection().send(Messages::NetworkConnectionToWebProcess::EnsureLegacyPrivateBrowsingSession(), 0);
 }
 
 #if ENABLE(NETSCAPE_PLUGIN_API)
 PluginProcessConnectionManager& WebProcess::pluginProcessConnectionManager()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return *m_pluginProcessConnectionManager;
 }
 #endif
 
 void WebProcess::setCacheModel(uint32_t cm)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     CacheModel cacheModel = static_cast<CacheModel>(cm);
 
     if (m_hasSetCacheModel && (cacheModel == m_cacheModel))
@@ -555,7 +577,7 @@ void WebProcess::setCacheModel(uint32_t cm)
 }
 
 void WebProcess::clearCachedCredentials()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     NetworkStorageSession::defaultStorageSession().credentialStorage().clearCredentials();
 #if USE(NETWORK_SESSION)
     NetworkSession::defaultSession().clearCredentials();
@@ -563,7 +585,7 @@ void WebProcess::clearCachedCredentials()
 }
 
 WebPage* WebProcess::focusedWebPage() const
-{    
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);    
     for (auto& page : m_pageMap.values()) {
         if (page->windowAndWebPageAreFocused())
             return page.get();
@@ -572,12 +594,12 @@ WebPage* WebProcess::focusedWebPage() const
 }
     
 WebPage* WebProcess::webPage(uint64_t pageID) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_pageMap.get(pageID);
 }
 
 void WebProcess::createWebPage(uint64_t pageID, const WebPageCreationParameters& parameters)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // It is necessary to check for page existence here since during a window.open() (or targeted
     // link) the WebPage gets created both in the synchronous handler and through the normal way. 
     HashMap<uint64_t, RefPtr<WebPage>>::AddResult result = m_pageMap.add(pageID, nullptr);
@@ -594,7 +616,7 @@ void WebProcess::createWebPage(uint64_t pageID, const WebPageCreationParameters&
 }
 
 void WebProcess::removeWebPage(uint64_t pageID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_pageMap.contains(pageID));
 
     pageWillLeaveWindow(pageID);
@@ -604,7 +626,7 @@ void WebProcess::removeWebPage(uint64_t pageID)
 }
 
 bool WebProcess::shouldTerminate()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_pageMap.isEmpty());
 
     // FIXME: the ShouldTerminate message should also send termination parameters, such as any session cookies that need to be preserved.
@@ -617,7 +639,7 @@ bool WebProcess::shouldTerminate()
 }
 
 void WebProcess::terminate()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #ifndef NDEBUG
     GCController::singleton().garbageCollectNow();
     FontCache::singleton().invalidate();
@@ -633,7 +655,7 @@ void WebProcess::terminate()
 }
 
 void WebProcess::didReceiveSyncMessage(IPC::Connection& connection, IPC::Decoder& decoder, std::unique_ptr<IPC::Encoder>& replyEncoder)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (messageReceiverMap().dispatchSyncMessage(connection, decoder, replyEncoder))
         return;
 
@@ -641,7 +663,7 @@ void WebProcess::didReceiveSyncMessage(IPC::Connection& connection, IPC::Decoder
 }
 
 void WebProcess::didReceiveMessage(IPC::Connection& connection, IPC::Decoder& decoder)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (messageReceiverMap().dispatchMessage(connection, decoder))
         return;
 
@@ -659,7 +681,7 @@ void WebProcess::didReceiveMessage(IPC::Connection& connection, IPC::Decoder& de
 }
 
 void WebProcess::didClose(IPC::Connection&)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #ifndef NDEBUG
     m_inDidClose = true;
 
@@ -686,23 +708,23 @@ void WebProcess::didClose(IPC::Connection&)
 }
 
 void WebProcess::didReceiveInvalidMessage(IPC::Connection&, IPC::StringReference, IPC::StringReference)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We received an invalid message, but since this is from the UI process (which we trust),
     // we'll let it slide.
 }
 
 WebFrame* WebProcess::webFrame(uint64_t frameID) const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_frameMap.get(frameID);
 }
 
 void WebProcess::addWebFrame(uint64_t frameID, WebFrame* frame)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frameMap.set(frameID, frame);
 }
 
 void WebProcess::removeWebFrame(uint64_t frameID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frameMap.remove(frameID);
 
     // We can end up here after our connection has closed when WebCore's frame life-support timer
@@ -715,7 +737,7 @@ void WebProcess::removeWebFrame(uint64_t frameID)
 }
 
 WebPageGroupProxy* WebProcess::webPageGroup(PageGroup* pageGroup)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& page : m_pageGroupMap.values()) {
         if (page->corePageGroup() == pageGroup)
             return page.get();
@@ -725,12 +747,12 @@ WebPageGroupProxy* WebProcess::webPageGroup(PageGroup* pageGroup)
 }
 
 WebPageGroupProxy* WebProcess::webPageGroup(uint64_t pageGroupID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_pageGroupMap.get(pageGroupID);
 }
 
 WebPageGroupProxy* WebProcess::webPageGroup(const WebPageGroupData& pageGroupData)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto result = m_pageGroupMap.add(pageGroupData.pageGroupID, nullptr);
     if (result.isNewEntry) {
         ASSERT(!result.iterator->value);
@@ -741,13 +763,13 @@ WebPageGroupProxy* WebProcess::webPageGroup(const WebPageGroupData& pageGroupDat
 }
 
 static uint64_t nextUserGestureTokenIdentifier()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static uint64_t identifier = 1;
     return identifier++;
 }
 
 uint64_t WebProcess::userGestureTokenIdentifier(RefPtr<UserGestureToken> token)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!token || !token->processingUserGesture())
         return 0;
 
@@ -762,13 +784,13 @@ uint64_t WebProcess::userGestureTokenIdentifier(RefPtr<UserGestureToken> token)
 }
 
 void WebProcess::userGestureTokenDestroyed(UserGestureToken& token)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto identifier = m_userGestureTokens.take(&token);
     parentProcessConnection()->send(Messages::WebProcessProxy::DidDestroyUserGestureToken(identifier), 0);
 }
 
 void WebProcess::clearResourceCaches(ResourceCachesToClear resourceCachesToClear)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Toggling the cache model like this forces the cache to evict all its in-memory resources.
     // FIXME: We need a better way to do this.
     CacheModel cacheModel = m_cacheModel;
@@ -782,7 +804,7 @@ void WebProcess::clearResourceCaches(ResourceCachesToClear resourceCachesToClear
 }
 
 static inline void addCaseFoldedCharacters(StringHasher& hasher, const String& string)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (string.isEmpty())
         return;
     if (string.is8Bit()) {
@@ -793,7 +815,7 @@ static inline void addCaseFoldedCharacters(StringHasher& hasher, const String& s
 }
 
 static unsigned hashForPlugInOrigin(const String& pageOrigin, const String& pluginOrigin, const String& mimeType)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We want to avoid concatenating the strings and then taking the hash, since that could lead to an expensive conversion.
     // We also want to avoid using the hash() function in StringImpl or ASCIICaseInsensitiveHash because that masks out bits for the use of flags.
     StringHasher hasher;
@@ -806,7 +828,7 @@ static unsigned hashForPlugInOrigin(const String& pageOrigin, const String& plug
 }
 
 bool WebProcess::isPlugInAutoStartOriginHash(unsigned plugInOriginHash, SessionID sessionID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     HashMap<WebCore::SessionID, HashMap<unsigned, double>>::const_iterator sessionIterator = m_plugInAutoStartOriginHashes.find(sessionID);
     HashMap<unsigned, double>::const_iterator it;
     bool contains = false;
@@ -825,7 +847,7 @@ bool WebProcess::isPlugInAutoStartOriginHash(unsigned plugInOriginHash, SessionI
 }
 
 bool WebProcess::shouldPlugInAutoStartFromOrigin(WebPage& webPage, const String& pageOrigin, const String& pluginOrigin, const String& mimeType)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!pluginOrigin.isEmpty() && m_plugInAutoStartOrigins.contains(pluginOrigin))
         return true;
 
@@ -842,7 +864,7 @@ bool WebProcess::shouldPlugInAutoStartFromOrigin(WebPage& webPage, const String&
 }
 
 void WebProcess::plugInDidStartFromOrigin(const String& pageOrigin, const String& pluginOrigin, const String& mimeType, SessionID sessionID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (pageOrigin.isEmpty()) {
         LOG(Plugins, "Not adding empty page origin");
         return;
@@ -864,7 +886,7 @@ void WebProcess::plugInDidStartFromOrigin(const String& pageOrigin, const String
 }
 
 void WebProcess::didAddPlugInAutoStartOriginHash(unsigned plugInOriginHash, double expirationTime, SessionID sessionID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // When called, some web process (which also might be this one) added the origin for auto-starting,
     // or received user interaction.
     // Set the bit to avoid having redundantly call into the UI process upon user interaction.
@@ -872,18 +894,18 @@ void WebProcess::didAddPlugInAutoStartOriginHash(unsigned plugInOriginHash, doub
 }
 
 void WebProcess::resetPlugInAutoStartOriginDefaultHashes(const HashMap<unsigned, double>& hashes)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_plugInAutoStartOriginHashes.clear();
     m_plugInAutoStartOriginHashes.add(SessionID::defaultSessionID(), HashMap<unsigned, double>()).iterator->value.swap(const_cast<HashMap<unsigned, double>&>(hashes));
 }
 
 void WebProcess::resetPlugInAutoStartOriginHashes(const HashMap<SessionID, HashMap<unsigned, double>>& hashes)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_plugInAutoStartOriginHashes.swap(const_cast<HashMap<SessionID, HashMap<unsigned, double>>&>(hashes));
 }
 
 void WebProcess::plugInDidReceiveUserInteraction(const String& pageOrigin, const String& pluginOrigin, const String& mimeType, SessionID sessionID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (pageOrigin.isEmpty())
         return;
 
@@ -912,28 +934,28 @@ void WebProcess::plugInDidReceiveUserInteraction(const String& pageOrigin, const
 }
 
 void WebProcess::setPluginLoadClientPolicy(uint8_t policy, const String& host, const String& bundleIdentifier, const String& versionString)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(NETSCAPE_PLUGIN_API) && PLATFORM(MAC)
     WebPluginInfoProvider::singleton().setPluginLoadClientPolicy(static_cast<PluginLoadClientPolicy>(policy), host, bundleIdentifier, versionString);
 #endif
 }
 
 void WebProcess::clearPluginClientPolicies()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(NETSCAPE_PLUGIN_API) && PLATFORM(MAC)
     WebPluginInfoProvider::singleton().clearPluginClientPolicies();
 #endif
 }
 
 static void fromCountedSetToHashMap(TypeCountSet* countedSet, HashMap<String, uint64_t>& map)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     TypeCountSet::const_iterator end = countedSet->end();
     for (TypeCountSet::const_iterator it = countedSet->begin(); it != end; ++it)
         map.set(it->key, it->value);
 }
 
 static void getWebCoreMemoryCacheStatistics(Vector<HashMap<String, uint64_t>>& result)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String imagesString(ASCIILiteral("Images"));
     String cssString(ASCIILiteral("CSS"));
     String xslString(ASCIILiteral("XSL"));
@@ -971,7 +993,7 @@ static void getWebCoreMemoryCacheStatistics(Vector<HashMap<String, uint64_t>>& r
 }
 
 void WebProcess::getWebCoreStatistics(uint64_t callbackID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     StatisticsData data;
     
     // Gather JavaScript statistics.
@@ -1019,41 +1041,41 @@ void WebProcess::getWebCoreStatistics(uint64_t callbackID)
 }
 
 void WebProcess::garbageCollectJavaScriptObjects()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     GCController::singleton().garbageCollectNow();
 }
 
 void WebProcess::mainThreadPing()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     parentProcessConnection()->send(Messages::WebProcessProxy::DidReceiveMainThreadPing(), 0);
 }
 
 #if ENABLE(GAMEPAD)
 
 void WebProcess::setInitialGamepads(const Vector<WebKit::GamepadData>& gamepadDatas)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebGamepadProvider::singleton().setInitialGamepads(gamepadDatas);
 }
 
 void WebProcess::gamepadConnected(const GamepadData& gamepadData)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebGamepadProvider::singleton().gamepadConnected(gamepadData);
 }
 
 void WebProcess::gamepadDisconnected(unsigned index)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebGamepadProvider::singleton().gamepadDisconnected(index);
 }
 
 #endif
 
 void WebProcess::setJavaScriptGarbageCollectorTimerEnabled(bool flag)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     GCController::singleton().setJavaScriptGarbageCollectorTimerEnabled(flag);
 }
 
 void WebProcess::handleInjectedBundleMessage(const String& messageName, const UserData& messageBody)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     InjectedBundle* injectedBundle = WebProcess::singleton().injectedBundle();
     if (!injectedBundle)
         return;
@@ -1062,7 +1084,7 @@ void WebProcess::handleInjectedBundleMessage(const String& messageName, const Us
 }
 
 void WebProcess::setInjectedBundleParameter(const String& key, const IPC::DataReference& value)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     InjectedBundle* injectedBundle = WebProcess::singleton().injectedBundle();
     if (!injectedBundle)
         return;
@@ -1071,7 +1093,7 @@ void WebProcess::setInjectedBundleParameter(const String& key, const IPC::DataRe
 }
 
 void WebProcess::setInjectedBundleParameters(const IPC::DataReference& value)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     InjectedBundle* injectedBundle = WebProcess::singleton().injectedBundle();
     if (!injectedBundle)
         return;
@@ -1080,7 +1102,7 @@ void WebProcess::setInjectedBundleParameters(const IPC::DataReference& value)
 }
 
 NetworkProcessConnection& WebProcess::networkConnection()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If we've lost our connection to the network process (e.g. it crashed) try to re-establish it.
     if (!m_networkProcessConnection)
         ensureNetworkProcessConnection();
@@ -1093,7 +1115,7 @@ NetworkProcessConnection& WebProcess::networkConnection()
 }
 
 void WebProcess::networkProcessConnectionClosed(NetworkProcessConnection* connection)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_networkProcessConnection);
     ASSERT_UNUSED(connection, m_networkProcessConnection == connection);
 
@@ -1103,13 +1125,13 @@ void WebProcess::networkProcessConnectionClosed(NetworkProcessConnection* connec
 }
 
 WebLoaderStrategy& WebProcess::webLoaderStrategy()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_webLoaderStrategy;
 }
 
 #if ENABLE(DATABASE_PROCESS)
 void WebProcess::webToDatabaseProcessConnectionClosed(WebToDatabaseProcessConnection* connection)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_webToDatabaseProcessConnection);
     ASSERT(m_webToDatabaseProcessConnection == connection);
 
@@ -1117,7 +1139,7 @@ void WebProcess::webToDatabaseProcessConnectionClosed(WebToDatabaseProcessConnec
 }
 
 WebToDatabaseProcessConnection* WebProcess::webToDatabaseProcessConnection()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_webToDatabaseProcessConnection)
         ensureWebToDatabaseProcessConnection();
 
@@ -1125,7 +1147,7 @@ WebToDatabaseProcessConnection* WebProcess::webToDatabaseProcessConnection()
 }
 
 void WebProcess::ensureWebToDatabaseProcessConnection()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_webToDatabaseProcessConnection)
         return;
 
@@ -1150,12 +1172,12 @@ void WebProcess::ensureWebToDatabaseProcessConnection()
 #endif // ENABLED(DATABASE_PROCESS)
 
 void WebProcess::setEnhancedAccessibility(bool flag)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebCore::AXObjectCache::setEnhancedUserInterfaceAccessibility(flag);
 }
     
 void WebProcess::startMemorySampler(const SandboxExtension::Handle& sampleLogFileHandle, const String& sampleLogFilePath, const double interval)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(MEMORY_SAMPLER)    
     WebMemorySampler::singleton()->start(sampleLogFileHandle, sampleLogFilePath, interval);
 #else
@@ -1166,14 +1188,14 @@ void WebProcess::startMemorySampler(const SandboxExtension::Handle& sampleLogFil
 }
     
 void WebProcess::stopMemorySampler()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(MEMORY_SAMPLER)
     WebMemorySampler::singleton()->stop();
 #endif
 }
 
 void WebProcess::setTextCheckerState(const TextCheckerState& textCheckerState)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool continuousSpellCheckingTurnedOff = !textCheckerState.isContinuousSpellCheckingEnabled && m_textCheckerState.isContinuousSpellCheckingEnabled;
     bool grammarCheckingTurnedOff = !textCheckerState.isGrammarCheckingEnabled && m_textCheckerState.isGrammarCheckingEnabled;
 
@@ -1191,12 +1213,12 @@ void WebProcess::setTextCheckerState(const TextCheckerState& textCheckerState)
 }
 
 void WebProcess::releasePageCache()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     PageCache::singleton().pruneToSizeNow(0, PruningReason::MemoryPressure);
 }
 
 void WebProcess::fetchWebsiteData(SessionID sessionID, OptionSet<WebsiteDataType> websiteDataTypes, uint64_t callbackID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebsiteData websiteData;
 
     if (websiteDataTypes.contains(WebsiteDataType::MemoryCache)) {
@@ -1208,7 +1230,7 @@ void WebProcess::fetchWebsiteData(SessionID sessionID, OptionSet<WebsiteDataType
 }
 
 void WebProcess::deleteWebsiteData(SessionID sessionID, OptionSet<WebsiteDataType> websiteDataTypes, std::chrono::system_clock::time_point modifiedSince, uint64_t callbackID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     UNUSED_PARAM(modifiedSince);
 
     if (websiteDataTypes.contains(WebsiteDataType::MemoryCache)) {
@@ -1222,7 +1244,7 @@ void WebProcess::deleteWebsiteData(SessionID sessionID, OptionSet<WebsiteDataTyp
 }
 
 void WebProcess::deleteWebsiteDataForOrigins(WebCore::SessionID sessionID, OptionSet<WebsiteDataType> websiteDataTypes, const Vector<WebCore::SecurityOriginData>& originDatas, uint64_t callbackID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (websiteDataTypes.contains(WebsiteDataType::MemoryCache)) {
         HashSet<RefPtr<SecurityOrigin>> origins;
         for (auto& originData : originDatas)
@@ -1235,33 +1257,33 @@ void WebProcess::deleteWebsiteDataForOrigins(WebCore::SessionID sessionID, Optio
 }
 
 void WebProcess::setHiddenPageTimerThrottlingIncreaseLimit(int milliseconds)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& page : m_pageMap.values())
         page->setHiddenPageTimerThrottlingIncreaseLimit(std::chrono::milliseconds(milliseconds));
 }
 
 #if !PLATFORM(COCOA)
 void WebProcess::initializeProcessName(const ChildProcessInitializationParameters&)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void WebProcess::initializeSandbox(const ChildProcessInitializationParameters&, SandboxInitializationParameters&)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void WebProcess::platformInitializeProcess(const ChildProcessInitializationParameters&)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void WebProcess::updateActivePages()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 #endif
 
 #if PLATFORM(IOS)
 void WebProcess::resetAllGeolocationPermissions()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& page : m_pageMap.values()) {
         if (Frame* mainFrame = page->mainFrame())
             mainFrame->resetAllGeolocationPermission();
@@ -1270,7 +1292,7 @@ void WebProcess::resetAllGeolocationPermissions()
 #endif
 
 void WebProcess::actualPrepareToSuspend(ShouldAcknowledgeWhenReadyToSuspend shouldAcknowledgeWhenReadyToSuspend)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_suppressMemoryPressureHandler)
         MemoryPressureHandler::singleton().releaseMemory(Critical::Yes, Synchronous::Yes);
 
@@ -1287,7 +1309,7 @@ void WebProcess::actualPrepareToSuspend(ShouldAcknowledgeWhenReadyToSuspend shou
 }
 
 void WebProcess::processWillSuspendImminently(bool& handled)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (parentProcessConnection()->inSendSync()) {
         // Avoid reentrency bugs such as rdar://problem/21605505 by just bailing
         // if we get an incoming ProcessWillSuspendImminently message when waiting for a
@@ -1303,13 +1325,13 @@ void WebProcess::processWillSuspendImminently(bool& handled)
 }
 
 void WebProcess::prepareToSuspend()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RELEASE_LOG("%p - WebProcess::prepareToSuspend()", this);
     actualPrepareToSuspend(ShouldAcknowledgeWhenReadyToSuspend::Yes);
 }
 
 void WebProcess::cancelPrepareToSuspend()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RELEASE_LOG("%p - WebProcess::cancelPrepareToSuspend()", this);
     setAllLayerTreeStatesFrozen(false);
 
@@ -1325,7 +1347,7 @@ void WebProcess::cancelPrepareToSuspend()
 }
 
 void WebProcess::markAllLayersVolatile(std::function<void()> completionHandler)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RELEASE_LOG("%p - WebProcess::markAllLayersVolatile()", this);
     m_pagesMarkingLayersAsVolatile = m_pageMap.size();
     if (!m_pagesMarkingLayersAsVolatile) {
@@ -1342,7 +1364,7 @@ void WebProcess::markAllLayersVolatile(std::function<void()> completionHandler)
 }
 
 void WebProcess::cancelMarkAllLayersVolatile()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_pagesMarkingLayersAsVolatile)
         return;
 
@@ -1352,13 +1374,13 @@ void WebProcess::cancelMarkAllLayersVolatile()
 }
 
 void WebProcess::setAllLayerTreeStatesFrozen(bool frozen)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& page : m_pageMap.values())
         page->setLayerTreeStateIsFrozen(frozen);
 }
     
 void WebProcess::processDidResume()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RELEASE_LOG("%p - WebProcess::processDidResume()", this);
 
     cancelMarkAllLayersVolatile();
@@ -1366,13 +1388,13 @@ void WebProcess::processDidResume()
 }
 
 void WebProcess::pageDidEnterWindow(uint64_t pageID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_pagesInWindows.add(pageID);
     m_nonVisibleProcessCleanupTimer.stop();
 }
 
 void WebProcess::pageWillLeaveWindow(uint64_t pageID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_pagesInWindows.remove(pageID);
 
     if (m_pagesInWindows.isEmpty() && !m_nonVisibleProcessCleanupTimer.isActive())
@@ -1380,7 +1402,7 @@ void WebProcess::pageWillLeaveWindow(uint64_t pageID)
 }
     
 void WebProcess::nonVisibleProcessCleanupTimerFired()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_pagesInWindows.isEmpty());
     if (!m_pagesInWindows.isEmpty())
         return;
@@ -1391,7 +1413,7 @@ void WebProcess::nonVisibleProcessCleanupTimerFired()
 }
 
 void WebProcess::statisticsChangedTimerFired()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_resourceLoadStatisticsStorage->isEmpty())
         return;
 
@@ -1399,12 +1421,12 @@ void WebProcess::statisticsChangedTimerFired()
 }
 
 void WebProcess::setResourceLoadStatisticsEnabled(bool enabled)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebCore::Settings::setResourceLoadStatisticsEnabled(enabled);
 }
 
 RefPtr<API::Object> WebProcess::transformHandlesToObjects(API::Object* object)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     struct Transformer final : UserData::Transformer {
         Transformer(WebProcess& webProcess)
             : m_webProcess(webProcess)
@@ -1459,7 +1481,7 @@ RefPtr<API::Object> WebProcess::transformHandlesToObjects(API::Object* object)
 }
 
 RefPtr<API::Object> WebProcess::transformObjectsToHandles(API::Object* object)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     struct Transformer final : UserData::Transformer {
         bool shouldTransformObject(const API::Object& object) const override
         {
@@ -1508,7 +1530,7 @@ RefPtr<API::Object> WebProcess::transformObjectsToHandles(API::Object* object)
 }
 
 void WebProcess::setMemoryCacheDisabled(bool disabled)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto& memoryCache = MemoryCache::singleton();
     if (memoryCache.disabled() != disabled)
         memoryCache.setDisabled(disabled);
@@ -1516,7 +1538,7 @@ void WebProcess::setMemoryCacheDisabled(bool disabled)
 
 #if ENABLE(SERVICE_CONTROLS)
 void WebProcess::setEnabledServices(bool hasImageServices, bool hasSelectionServices, bool hasRichContentServices)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_hasImageServices = hasImageServices;
     m_hasSelectionServices = hasSelectionServices;
     m_hasRichContentServices = hasRichContentServices;
@@ -1524,17 +1546,17 @@ void WebProcess::setEnabledServices(bool hasImageServices, bool hasSelectionServ
 #endif
 
 void WebProcess::ensureAutomationSessionProxy(const String& sessionIdentifier)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_automationSessionProxy = std::make_unique<WebAutomationSessionProxy>(sessionIdentifier);
 }
 
 void WebProcess::destroyAutomationSessionProxy()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_automationSessionProxy = nullptr;
 }
 
 void WebProcess::prefetchDNS(const String& hostname)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (hostname.isEmpty())
         return;
 

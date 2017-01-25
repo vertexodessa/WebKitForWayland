@@ -32,6 +32,8 @@
 #include "JSDOMWindow.h"
 #include <runtime/JSProxy.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
     class Frame;
@@ -51,14 +53,14 @@ namespace WebCore {
         static WEBCORE_EXPORT DOMWindow* toWrapped(JSC::JSObject*);
 
         static JSDOMWindowShell* create(JSC::VM& vm, RefPtr<DOMWindow>&& window, JSC::Structure* structure, DOMWrapperWorld& world)
-        {
+        {    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
             JSDOMWindowShell* shell = new (NotNull, JSC::allocateCell<JSDOMWindowShell>(vm.heap)) JSDOMWindowShell(vm, structure, world);
             shell->finishCreation(vm, WTFMove(window));
             return shell; 
         }
 
         static JSC::Structure* createStructure(JSC::VM& vm, JSC::JSValue prototype) 
-        {
+        {    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
             return JSC::Structure::create(vm, 0, prototype, JSC::TypeInfo(JSC::PureForwardingProxyType, StructureFlags), info());
         }
 

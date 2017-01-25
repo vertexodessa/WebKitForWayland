@@ -25,6 +25,8 @@
 #include "Region.h"
 #include <wtf/MathExtras.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 class TextureMapperPaintOptions {
@@ -41,7 +43,7 @@ public:
 };
 
 void TextureMapperLayer::computeTransformsRecursive()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_state.size.isEmpty() && m_state.masksToBounds)
         return;
 
@@ -73,7 +75,7 @@ void TextureMapperLayer::computeTransformsRecursive()
 }
 
 void TextureMapperLayer::paint()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     computeTransformsRecursive();
 
     ASSERT(m_textureMapper);
@@ -84,7 +86,7 @@ void TextureMapperLayer::paint()
 }
 
 static Color blendWithOpacity(const Color& color, float opacity)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RGBA32 rgba = color.rgb();
     // See Color::getRGBA() to know how to extract alpha from color.
     float alpha = alphaChannel(rgba) / 255.;
@@ -93,7 +95,7 @@ static Color blendWithOpacity(const Color& color, float opacity)
 }
 
 void TextureMapperLayer::computePatternTransformIfNeeded()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_patternTransformDirty)
         return;
 
@@ -104,7 +106,7 @@ void TextureMapperLayer::computePatternTransformIfNeeded()
 }
 
 void TextureMapperLayer::paintSelf(const TextureMapperPaintOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_state.visible || !m_state.contentsVisible)
         return;
 
@@ -151,7 +153,7 @@ void TextureMapperLayer::paintSelf(const TextureMapperPaintOptions& options)
 }
 
 void TextureMapperLayer::sortByZOrder(Vector<TextureMapperLayer* >& array)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     std::sort(array.begin(), array.end(),
         [](TextureMapperLayer* a, TextureMapperLayer* b) {
             return a->m_centerZ < b->m_centerZ;
@@ -159,7 +161,7 @@ void TextureMapperLayer::sortByZOrder(Vector<TextureMapperLayer* >& array)
 }
 
 void TextureMapperLayer::paintSelfAndChildren(const TextureMapperPaintOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     paintSelf(options);
 
     if (m_children.isEmpty())
@@ -182,7 +184,7 @@ void TextureMapperLayer::paintSelfAndChildren(const TextureMapperPaintOptions& o
 }
 
 bool TextureMapperLayer::shouldPaintUsingOverlapRegions() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_state.preserves3D)
         return false;
 
@@ -192,7 +194,7 @@ bool TextureMapperLayer::shouldPaintUsingOverlapRegions() const
 }
 
 bool TextureMapperLayer::isVisible() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_state.size.isEmpty() && (m_state.masksToBounds || m_state.maskLayer || m_children.isEmpty()))
         return false;
     if (!m_state.visible && m_children.isEmpty())
@@ -205,7 +207,7 @@ bool TextureMapperLayer::isVisible() const
 }
 
 void TextureMapperLayer::paintSelfAndChildrenWithReplica(const TextureMapperPaintOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_state.replicaLayer) {
         TextureMapperPaintOptions replicaOptions(options);
         replicaOptions.transform
@@ -218,27 +220,27 @@ void TextureMapperLayer::paintSelfAndChildrenWithReplica(const TextureMapperPain
 }
 
 void TextureMapperLayer::setAnimatedTransform(const TransformationMatrix& matrix)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_currentTransform.setLocalTransform(matrix);
 }
 
 void TextureMapperLayer::setAnimatedOpacity(float opacity)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_currentOpacity = opacity;
 }
 
 TransformationMatrix TextureMapperLayer::replicaTransform()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return TransformationMatrix(m_state.replicaLayer->m_currentTransform.combined()).multiply(m_currentTransform.combined().inverse().valueOr(TransformationMatrix()));
 }
 
 void TextureMapperLayer::setAnimatedFilters(const FilterOperations& filters)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_currentFilters = filters;
 }
 
 static void resolveOverlaps(Region& newRegion, Region& overlapRegion, Region& nonOverlapRegion)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Region newOverlapRegion(newRegion);
     newOverlapRegion.intersect(nonOverlapRegion);
     nonOverlapRegion.subtract(newOverlapRegion);
@@ -248,7 +250,7 @@ static void resolveOverlaps(Region& newRegion, Region& overlapRegion, Region& no
 }
 
 void TextureMapperLayer::computeOverlapRegions(Region& overlapRegion, Region& nonOverlapRegion, ResolveSelfOverlapMode mode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_state.visible || !m_state.contentsVisible)
         return;
 
@@ -306,7 +308,7 @@ void TextureMapperLayer::computeOverlapRegions(Region& overlapRegion, Region& no
 }
 
 void TextureMapperLayer::paintUsingOverlapRegions(const TextureMapperPaintOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Region overlapRegion;
     Region nonOverlapRegion;
     computeOverlapRegions(overlapRegion, nonOverlapRegion, ResolveSelfOverlapAlways);
@@ -359,14 +361,14 @@ void TextureMapperLayer::paintUsingOverlapRegions(const TextureMapperPaintOption
 }
 
 void TextureMapperLayer::applyMask(const TextureMapperPaintOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     options.textureMapper.setMaskMode(true);
     paintSelf(options);
     options.textureMapper.setMaskMode(false);
 }
 
 PassRefPtr<BitmapTexture> TextureMapperLayer::paintIntoSurface(const TextureMapperPaintOptions& options, const IntSize& size)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<BitmapTexture> surface = options.textureMapper.acquireTextureFromPool(size, BitmapTexture::SupportsAlpha | BitmapTexture::FBOAttachment);
     TextureMapperPaintOptions paintOptions(options);
     paintOptions.surface = surface;
@@ -380,7 +382,7 @@ PassRefPtr<BitmapTexture> TextureMapperLayer::paintIntoSurface(const TextureMapp
 }
 
 static void commitSurface(const TextureMapperPaintOptions& options, PassRefPtr<BitmapTexture> surface, const IntRect& rect, float opacity)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     options.textureMapper.bindSurface(options.surface.get());
     TransformationMatrix targetTransform;
     targetTransform.translate(options.offset.width(), options.offset.height());
@@ -389,7 +391,7 @@ static void commitSurface(const TextureMapperPaintOptions& options, PassRefPtr<B
 }
 
 void TextureMapperLayer::paintWithIntermediateSurface(const TextureMapperPaintOptions& options, const IntRect& rect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<BitmapTexture> replicaSurface;
     RefPtr<BitmapTexture> mainSurface;
     TextureMapperPaintOptions paintOptions(options);
@@ -420,7 +422,7 @@ void TextureMapperLayer::paintWithIntermediateSurface(const TextureMapperPaintOp
 }
 
 void TextureMapperLayer::paintRecursive(const TextureMapperPaintOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isVisible())
         return;
 
@@ -436,7 +438,7 @@ void TextureMapperLayer::paintRecursive(const TextureMapperPaintOptions& options
 }
 
 TextureMapperLayer::~TextureMapperLayer()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* child : m_children)
         child->m_parent = nullptr;
 
@@ -452,7 +454,7 @@ TextureMapperLayer::~TextureMapperLayer()
 
 #if !USE(COORDINATED_GRAPHICS)
 void TextureMapperLayer::setChildren(const Vector<GraphicsLayer*>& newChildren)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     removeAllChildren();
     for (auto* child : newChildren)
         addChild(&downcast<GraphicsLayerTextureMapper>(child)->layer());
@@ -460,14 +462,14 @@ void TextureMapperLayer::setChildren(const Vector<GraphicsLayer*>& newChildren)
 #endif
 
 void TextureMapperLayer::setChildren(const Vector<TextureMapperLayer*>& newChildren)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     removeAllChildren();
     for (auto* child : newChildren)
         addChild(child);
 }
 
 void TextureMapperLayer::addChild(TextureMapperLayer* childLayer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(childLayer != this);
 
     if (childLayer->m_parent)
@@ -478,7 +480,7 @@ void TextureMapperLayer::addChild(TextureMapperLayer* childLayer)
 }
 
 void TextureMapperLayer::removeFromParent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_parent) {
         size_t index = m_parent->m_children.find(this);
         ASSERT(index != notFound);
@@ -489,64 +491,64 @@ void TextureMapperLayer::removeFromParent()
 }
 
 void TextureMapperLayer::removeAllChildren()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto oldChildren = WTFMove(m_children);
     for (auto* child : oldChildren)
         child->m_parent = nullptr;
 }
 
 void TextureMapperLayer::setMaskLayer(TextureMapperLayer* maskLayer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (maskLayer)
         maskLayer->m_effectTarget = this;
     m_state.maskLayer = maskLayer;
 }
 
 void TextureMapperLayer::setReplicaLayer(TextureMapperLayer* replicaLayer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (replicaLayer)
         replicaLayer->m_effectTarget = this;
     m_state.replicaLayer = replicaLayer;
 }
 
 void TextureMapperLayer::setPosition(const FloatPoint& position)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.pos = position;
     m_currentTransform.setPosition(adjustedPosition());
 }
 
 void TextureMapperLayer::setSize(const FloatSize& size)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.size = size;
     m_currentTransform.setSize(size);
 }
 
 void TextureMapperLayer::setAnchorPoint(const FloatPoint3D& anchorPoint)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.anchorPoint = anchorPoint;
     m_currentTransform.setAnchorPoint(anchorPoint);
 }
 
 void TextureMapperLayer::setPreserves3D(bool preserves3D)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.preserves3D = preserves3D;
     m_currentTransform.setFlattening(!preserves3D);
 }
 
 void TextureMapperLayer::setTransform(const TransformationMatrix& transform)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.transform = transform;
     m_currentTransform.setLocalTransform(transform);
 }
 
 void TextureMapperLayer::setChildrenTransform(const TransformationMatrix& childrenTransform)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.childrenTransform = childrenTransform;
     m_currentTransform.setChildrenTransform(childrenTransform);
 }
 
 void TextureMapperLayer::setContentsRect(const FloatRect& contentsRect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (contentsRect == m_state.contentsRect)
         return;
     m_state.contentsRect = contentsRect;
@@ -554,7 +556,7 @@ void TextureMapperLayer::setContentsRect(const FloatRect& contentsRect)
 }
 
 void TextureMapperLayer::setContentsTileSize(const FloatSize& size)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (size == m_state.contentsTileSize)
         return;
     m_state.contentsTileSize = size;
@@ -562,7 +564,7 @@ void TextureMapperLayer::setContentsTileSize(const FloatSize& size)
 }
 
 void TextureMapperLayer::setContentsTilePhase(const FloatSize& phase)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (phase == m_state.contentsTilePhase)
         return;
     m_state.contentsTilePhase = phase;
@@ -570,47 +572,47 @@ void TextureMapperLayer::setContentsTilePhase(const FloatSize& phase)
 }
 
 void TextureMapperLayer::setMasksToBounds(bool masksToBounds)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.masksToBounds = masksToBounds;
 }
 
 void TextureMapperLayer::setDrawsContent(bool drawsContent)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.drawsContent = drawsContent;
 }
 
 void TextureMapperLayer::setContentsVisible(bool contentsVisible)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.contentsVisible = contentsVisible;
 }
 
 void TextureMapperLayer::setContentsOpaque(bool contentsOpaque)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.contentsOpaque = contentsOpaque;
 }
 
 void TextureMapperLayer::setBackfaceVisibility(bool backfaceVisibility)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.backfaceVisibility = backfaceVisibility;
 }
 
 void TextureMapperLayer::setOpacity(float opacity)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.opacity = opacity;
 }
 
 void TextureMapperLayer::setSolidColor(const Color& color)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.solidColor = color;
 }
 
 void TextureMapperLayer::setFilters(const FilterOperations& filters)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.filters = filters;
 }
 
 void TextureMapperLayer::setDebugVisuals(bool showDebugBorders, const Color& debugBorderColor, float debugBorderWidth, bool showRepaintCounter)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.showDebugBorders = showDebugBorders;
     m_state.debugBorderColor = debugBorderColor;
     m_state.debugBorderWidth = debugBorderWidth;
@@ -618,32 +620,32 @@ void TextureMapperLayer::setDebugVisuals(bool showDebugBorders, const Color& deb
 }
 
 void TextureMapperLayer::setRepaintCount(int repaintCount)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_state.repaintCount = repaintCount;
 }
 
 void TextureMapperLayer::setContentsLayer(TextureMapperPlatformLayer* platformLayer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_contentsLayer = platformLayer;
 }
 
 void TextureMapperLayer::setAnimations(const TextureMapperAnimations& animations)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_animations = animations;
 }
 
 void TextureMapperLayer::setFixedToViewport(bool fixedToViewport)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_fixedToViewport = fixedToViewport;
 }
 
 void TextureMapperLayer::setBackingStore(PassRefPtr<TextureMapperBackingStore> backingStore)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_backingStore = backingStore;
 }
 
 bool TextureMapperLayer::descendantsOrSelfHaveRunningAnimations() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_animations.hasRunningAnimations())
         return true;
 
@@ -654,14 +656,14 @@ bool TextureMapperLayer::descendantsOrSelfHaveRunningAnimations() const
 }
 
 void TextureMapperLayer::applyAnimationsRecursively()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     syncAnimations();
     for (auto* child : m_children)
         child->applyAnimationsRecursively();
 }
 
 void TextureMapperLayer::syncAnimations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_animations.apply(*this);
     if (!m_animations.hasActiveAnimationsOfType(AnimatedPropertyTransform))
         m_currentTransform.setLocalTransform(m_state.transform);
@@ -673,7 +675,7 @@ void TextureMapperLayer::syncAnimations()
 }
 
 bool TextureMapperLayer::isAncestorFixedToViewport() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (TextureMapperLayer* parent = m_parent; parent; parent = parent->m_parent) {
         if (parent->m_fixedToViewport)
             return true;
@@ -683,7 +685,7 @@ bool TextureMapperLayer::isAncestorFixedToViewport() const
 }
 
 void TextureMapperLayer::setScrollPositionDeltaIfNeeded(const FloatSize& delta)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // delta is the difference between the scroll offset in the ui process and the scroll offset
     // in the web process. We add this delta to the position of fixed layers, to make
     // sure that they do not move while scrolling. We need to reset this delta to fixed layers
@@ -696,7 +698,7 @@ void TextureMapperLayer::setScrollPositionDeltaIfNeeded(const FloatSize& delta)
 }
 
 template<class HitTestCondition> TextureMapperLayer* TextureMapperLayer::hitTest(const FloatPoint& point, HitTestCondition condition)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_state.visible || !m_state.contentsVisible)
         return 0;
 
@@ -711,7 +713,7 @@ template<class HitTestCondition> TextureMapperLayer* TextureMapperLayer::hitTest
 }
 
 bool TextureMapperLayer::scrollableLayerHitTestCondition(TextureMapperLayer* layer, const FloatPoint& point)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // scrolling layer's m_parent->m_parent, the parent of the scrolling layes, is the one that defines the
     // rectangle to be used for hit testing.
     if (!layer->isScrollable() || !layer->m_parent || !layer->m_parent->m_parent)
@@ -723,12 +725,12 @@ bool TextureMapperLayer::scrollableLayerHitTestCondition(TextureMapperLayer* lay
 }
 
 TextureMapperLayer* TextureMapperLayer::findScrollableContentsLayerAt(const FloatPoint& point)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return hitTest(point, &TextureMapperLayer::scrollableLayerHitTestCondition);
 }
 
 FloatSize TextureMapperLayer::mapScrollOffset(const FloatSize& offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     double zeroX, zeroY, offsetX, offsetY;
     TransformationMatrix transform = m_currentTransform.combined().inverse().valueOr(TransformationMatrix());
     transform.map(0, 0, zeroX, zeroY);
@@ -737,7 +739,7 @@ FloatSize TextureMapperLayer::mapScrollOffset(const FloatSize& offset)
 }
 
 void TextureMapperLayer::commitScrollOffset(const FloatSize& offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     FloatSize fullOffset = m_accumulatedScrollOffsetFractionalPart + offset;
 
     int intWidth = round(fullOffset.width());
@@ -751,7 +753,7 @@ void TextureMapperLayer::commitScrollOffset(const FloatSize& offset)
 }
 
 void TextureMapperLayer::scrollBy(const FloatSize& offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isScrollable() || !m_scrollClient || offset.isZero())
         return;
 
@@ -763,7 +765,7 @@ void TextureMapperLayer::scrollBy(const FloatSize& offset)
 }
 
 void TextureMapperLayer::didCommitScrollOffset(const IntSize& offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_userScrollOffset = FloatSize(m_userScrollOffset.width() - offset.width(), m_userScrollOffset.height() - offset.height());
     m_currentTransform.setPosition(adjustedPosition());
 }

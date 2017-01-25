@@ -38,6 +38,8 @@
 #include <heap/StrongInlines.h>
 #include <runtime/JSObject.h>
 
+#include <wtf/macros.h>
+
 using namespace JSC;
 
 namespace WebCore {
@@ -47,23 +49,23 @@ const ClassInfo JSDOMWindowShell::s_info = { "JSDOMWindowShell", &Base::s_info, 
 JSDOMWindowShell::JSDOMWindowShell(VM& vm, Structure* structure, DOMWrapperWorld& world)
     : Base(vm, structure)
     , m_world(world)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void JSDOMWindowShell::finishCreation(VM& vm, RefPtr<DOMWindow>&& window)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Base::finishCreation(vm);
     ASSERT(inherits(info()));
     setWindow(WTFMove(window));
 }
 
 void JSDOMWindowShell::destroy(JSCell* cell)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static_cast<JSDOMWindowShell*>(cell)->JSDOMWindowShell::~JSDOMWindowShell();
 }
 
 void JSDOMWindowShell::setWindow(VM& vm, JSDOMWindow* window)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT_ARG(window, window);
     setTarget(vm, window);
     structure()->setGlobalObject(vm, window);
@@ -71,7 +73,7 @@ void JSDOMWindowShell::setWindow(VM& vm, JSDOMWindow* window)
 }
 
 void JSDOMWindowShell::setWindow(RefPtr<DOMWindow>&& domWindow)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Replacing JSDOMWindow via telling JSDOMWindowShell to use the same DOMWindow it already uses makes no sense,
     // so we'd better never try to.
     ASSERT(!window() || domWindow.get() != &window()->wrapped());
@@ -101,12 +103,12 @@ void JSDOMWindowShell::setWindow(RefPtr<DOMWindow>&& domWindow)
 // ----
 
 DOMWindow& JSDOMWindowShell::wrapped() const
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return window()->wrapped();
 }
 
 DOMWindow* JSDOMWindowShell::toWrapped(JSObject* value)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* wrapper = jsDynamicCast<JSDOMWindowShell*>(value);
     if (!wrapper)
         return nullptr;
@@ -118,14 +120,14 @@ DOMWindow* JSDOMWindowShell::toWrapped(JSObject* value)
 // ----
 
 JSValue toJS(ExecState* exec, Frame* frame)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!frame)
         return jsNull();
     return frame->script().windowShell(currentWorld(exec));
 }
 
 JSDOMWindowShell* toJSDOMWindowShell(Frame* frame, DOMWrapperWorld& world)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!frame)
         return 0;
     return frame->script().windowShell(world);

@@ -43,17 +43,19 @@
 #include <stdio.h>
 #endif
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 typedef HashMap<const GraphicsLayer*, Vector<FloatRect>> RepaintMap;
 static RepaintMap& repaintRectMap()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<RepaintMap> map;
     return map;
 }
 
 void KeyframeValueList::insert(std::unique_ptr<const AnimationValue> value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (size_t i = 0; i < m_values.size(); ++i) {
         const AnimationValue* curValue = m_values[i].get();
         if (curValue->keyTime() == value->keyTime()) {
@@ -74,7 +76,7 @@ void KeyframeValueList::insert(std::unique_ptr<const AnimationValue> value)
 
 #if !USE(CA)
 bool GraphicsLayer::supportsLayerType(Type type)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (type) {
     case Type::Normal:
     case Type::PageTiledBacking:
@@ -88,7 +90,7 @@ bool GraphicsLayer::supportsLayerType(Type type)
 }
 
 bool GraphicsLayer::supportsBackgroundColorContent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(TEXTURE_MAPPER)
     return true;
 #else
@@ -99,7 +101,7 @@ bool GraphicsLayer::supportsBackgroundColorContent()
 
 #if !USE(COORDINATED_GRAPHICS)
 bool GraphicsLayer::supportsContentsTiling()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Enable the feature on different ports.
     return false;
 }
@@ -137,20 +139,20 @@ GraphicsLayer::GraphicsLayer(Type type, GraphicsLayerClient& client)
     , m_replicatedLayer(nullptr)
     , m_repaintCount(0)
     , m_customAppearance(NoCustomAppearance)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #ifndef NDEBUG
     m_client.verifyNotPainting();
 #endif
 }
 
 GraphicsLayer::~GraphicsLayer()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     resetTrackedRepaints();
     ASSERT(!m_parent); // willBeDestroyed should have been called already.
 }
 
 void GraphicsLayer::willBeDestroyed()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #ifndef NDEBUG
     m_client.verifyNotPainting();
 #endif
@@ -165,13 +167,13 @@ void GraphicsLayer::willBeDestroyed()
 }
 
 void GraphicsLayer::setParent(GraphicsLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!layer || !layer->hasAncestor(this));
     m_parent = layer;
 }
 
 bool GraphicsLayer::hasAncestor(GraphicsLayer* ancestor) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (GraphicsLayer* curr = parent(); curr; curr = curr->parent()) {
         if (curr == ancestor)
             return true;
@@ -181,7 +183,7 @@ bool GraphicsLayer::hasAncestor(GraphicsLayer* ancestor) const
 }
 
 bool GraphicsLayer::setChildren(const Vector<GraphicsLayer*>& newChildren)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If the contents of the arrays are the same, nothing to do.
     if (newChildren == m_children)
         return false;
@@ -196,7 +198,7 @@ bool GraphicsLayer::setChildren(const Vector<GraphicsLayer*>& newChildren)
 }
 
 void GraphicsLayer::addChild(GraphicsLayer* childLayer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(childLayer != this);
     
     if (childLayer->parent())
@@ -207,7 +209,7 @@ void GraphicsLayer::addChild(GraphicsLayer* childLayer)
 }
 
 void GraphicsLayer::addChildAtIndex(GraphicsLayer* childLayer, int index)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(childLayer != this);
 
     if (childLayer->parent())
@@ -218,7 +220,7 @@ void GraphicsLayer::addChildAtIndex(GraphicsLayer* childLayer, int index)
 }
 
 void GraphicsLayer::addChildBelow(GraphicsLayer* childLayer, GraphicsLayer* sibling)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(childLayer != this);
     childLayer->removeFromParent();
 
@@ -238,7 +240,7 @@ void GraphicsLayer::addChildBelow(GraphicsLayer* childLayer, GraphicsLayer* sibl
 }
 
 void GraphicsLayer::addChildAbove(GraphicsLayer* childLayer, GraphicsLayer* sibling)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     childLayer->removeFromParent();
     ASSERT(childLayer != this);
 
@@ -258,7 +260,7 @@ void GraphicsLayer::addChildAbove(GraphicsLayer* childLayer, GraphicsLayer* sibl
 }
 
 bool GraphicsLayer::replaceChild(GraphicsLayer* oldChild, GraphicsLayer* newChild)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!newChild->parent());
     bool found = false;
     for (unsigned i = 0; i < m_children.size(); i++) {
@@ -279,14 +281,14 @@ bool GraphicsLayer::replaceChild(GraphicsLayer* oldChild, GraphicsLayer* newChil
 }
 
 void GraphicsLayer::removeAllChildren()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto oldChildren = WTFMove(m_children);
     for (auto* child : oldChildren)
         child->setParent(nullptr);
 }
 
 void GraphicsLayer::removeFromParent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_parent) {
         m_parent->m_children.removeFirst(this);
         setParent(nullptr);
@@ -294,7 +296,7 @@ void GraphicsLayer::removeFromParent()
 }
 
 void GraphicsLayer::setMaskLayer(GraphicsLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (layer == m_maskLayer)
         return;
 
@@ -311,7 +313,7 @@ void GraphicsLayer::setMaskLayer(GraphicsLayer* layer)
 }
 
 Path GraphicsLayer::shapeLayerPath() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(CA)
     return m_shapeLayerPath;
 #else
@@ -320,7 +322,7 @@ Path GraphicsLayer::shapeLayerPath() const
 }
 
 void GraphicsLayer::setShapeLayerPath(const Path& path)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(CA)
     m_shapeLayerPath = path;
 #else
@@ -329,7 +331,7 @@ void GraphicsLayer::setShapeLayerPath(const Path& path)
 }
 
 WindRule GraphicsLayer::shapeLayerWindRule() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(CA)
     return m_shapeLayerWindRule;
 #else
@@ -338,7 +340,7 @@ WindRule GraphicsLayer::shapeLayerWindRule() const
 }
 
 void GraphicsLayer::setShapeLayerWindRule(WindRule windRule)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(CA)
     m_shapeLayerWindRule = windRule;
 #else
@@ -347,7 +349,7 @@ void GraphicsLayer::setShapeLayerWindRule(WindRule windRule)
 }
 
 void GraphicsLayer::noteDeviceOrPageScaleFactorChangedIncludingDescendants()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     deviceOrPageScaleFactorChanged();
 
     if (m_maskLayer)
@@ -363,7 +365,7 @@ void GraphicsLayer::noteDeviceOrPageScaleFactorChangedIncludingDescendants()
 }
 
 void GraphicsLayer::setReplicatedByLayer(GraphicsLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_replicaLayer == layer)
         return;
 
@@ -377,7 +379,7 @@ void GraphicsLayer::setReplicatedByLayer(GraphicsLayer* layer)
 }
 
 void GraphicsLayer::setOffsetFromRenderer(const FloatSize& offset, ShouldSetNeedsDisplay shouldSetNeedsDisplay)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (offset == m_offsetFromRenderer)
         return;
 
@@ -389,7 +391,7 @@ void GraphicsLayer::setOffsetFromRenderer(const FloatSize& offset, ShouldSetNeed
 }
 
 void GraphicsLayer::setSize(const FloatSize& size)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (size == m_size)
         return;
     
@@ -400,12 +402,12 @@ void GraphicsLayer::setSize(const FloatSize& size)
 }
 
 void GraphicsLayer::setBackgroundColor(const Color& color)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_backgroundColor = color;
 }
 
 void GraphicsLayer::paintGraphicsLayerContents(GraphicsContext& context, const FloatRect& clip)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     FloatSize offset = offsetFromRenderer();
     context.translate(-offset);
 
@@ -416,7 +418,7 @@ void GraphicsLayer::paintGraphicsLayerContents(GraphicsContext& context, const F
 }
 
 String GraphicsLayer::animationNameForTransition(AnimatedPropertyID property)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // | is not a valid identifier character in CSS, so this can never conflict with a keyframe identifier.
     StringBuilder id;
     id.appendLiteral("-|transition");
@@ -426,15 +428,15 @@ String GraphicsLayer::animationNameForTransition(AnimatedPropertyID property)
 }
 
 void GraphicsLayer::suspendAnimations(double)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void GraphicsLayer::resumeAnimations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void GraphicsLayer::getDebugBorderInfo(Color& color, float& width) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (drawsContent()) {
         if (m_usingTiledBacking) {
             color = Color(255, 128, 0, 128); // tiled layer: orange
@@ -464,7 +466,7 @@ void GraphicsLayer::getDebugBorderInfo(Color& color, float& width) const
 }
 
 void GraphicsLayer::updateDebugIndicators()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isShowingDebugBorder())
         return;
 
@@ -475,12 +477,12 @@ void GraphicsLayer::updateDebugIndicators()
 }
 
 void GraphicsLayer::setZPosition(float position)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_zPosition = position;
 }
 
 float GraphicsLayer::accumulatedOpacity() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!preserves3D())
         return 1;
         
@@ -488,7 +490,7 @@ float GraphicsLayer::accumulatedOpacity() const
 }
 
 void GraphicsLayer::distributeOpacity(float accumulatedOpacity)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If this is a transform layer we need to distribute our opacity to all our children
     
     // Incoming accumulatedOpacity is the contribution from our parent(s). We mutiply this by our own
@@ -505,12 +507,12 @@ void GraphicsLayer::distributeOpacity(float accumulatedOpacity)
 }
 
 static inline const FilterOperations& filterOperationsAt(const KeyframeValueList& valueList, size_t index)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return static_cast<const FilterAnimationValue&>(valueList.at(index)).value();
 }
 
 int GraphicsLayer::validateFilterOperations(const KeyframeValueList& valueList)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(FILTERS_LEVEL_2)
     ASSERT(valueList.property() == AnimatedPropertyFilter || valueList.property() == AnimatedPropertyWebkitBackdropFilter);
 #else
@@ -551,12 +553,12 @@ int GraphicsLayer::validateFilterOperations(const KeyframeValueList& valueList)
 // true if the rotation between any two keyframes is >= 180 degrees.
 
 static inline const TransformOperations& operationsAt(const KeyframeValueList& valueList, size_t index)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return static_cast<const TransformAnimationValue&>(valueList.at(index)).value();
 }
 
 int GraphicsLayer::validateTransformOperations(const KeyframeValueList& valueList, bool& hasBigRotation)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(valueList.property() == AnimatedPropertyTransform);
 
     hasBigRotation = false;
@@ -622,7 +624,7 @@ int GraphicsLayer::validateTransformOperations(const KeyframeValueList& valueLis
 }
 
 double GraphicsLayer::backingStoreMemoryEstimate() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!drawsContent())
         return 0;
     
@@ -631,12 +633,12 @@ double GraphicsLayer::backingStoreMemoryEstimate() const
 }
 
 void GraphicsLayer::resetTrackedRepaints()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     repaintRectMap().remove(this);
 }
 
 void GraphicsLayer::addRepaintRect(const FloatRect& repaintRect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_client.isTrackingRepaints())
         return;
 
@@ -654,7 +656,7 @@ void GraphicsLayer::addRepaintRect(const FloatRect& repaintRect)
 }
 
 void GraphicsLayer::dumpLayer(TextStream& ts, int indent, LayerTreeAsTextBehavior behavior) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     writeIndent(ts, indent);
     ts << "(" << "GraphicsLayer";
 
@@ -670,7 +672,7 @@ void GraphicsLayer::dumpLayer(TextStream& ts, int indent, LayerTreeAsTextBehavio
 }
 
 static void dumpChildren(TextStream& ts, const Vector<GraphicsLayer*>& children, unsigned& totalChildCount, int indent, LayerTreeAsTextBehavior behavior)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     totalChildCount += children.size();
     for (auto* child : children) {
         if (!child->client().shouldSkipLayerInDump(child, behavior)) {
@@ -684,7 +686,7 @@ static void dumpChildren(TextStream& ts, const Vector<GraphicsLayer*>& children,
 }
 
 void GraphicsLayer::dumpProperties(TextStream& ts, int indent, LayerTreeAsTextBehavior behavior) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_position != FloatPoint()) {
         writeIndent(ts, indent + 1);
         ts << "(position " << m_position.x() << " " << m_position.y() << ")\n";
@@ -878,7 +880,7 @@ void GraphicsLayer::dumpProperties(TextStream& ts, int indent, LayerTreeAsTextBe
 }
 
 TextStream& operator<<(TextStream& ts, const Vector<GraphicsLayer::PlatformLayerID>& layers)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (size_t i = 0; i < layers.size(); ++i) {
         if (i)
             ts << " ";
@@ -889,7 +891,7 @@ TextStream& operator<<(TextStream& ts, const Vector<GraphicsLayer::PlatformLayer
 }
 
 TextStream& operator<<(TextStream& ts, const WebCore::GraphicsLayer::CustomAppearance& customAppearance)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (customAppearance) {
     case GraphicsLayer::CustomAppearance::NoCustomAppearance: ts << "none"; break;
     case GraphicsLayer::CustomAppearance::ScrollingOverhang: ts << "scrolling-overhang"; break;
@@ -901,7 +903,7 @@ TextStream& operator<<(TextStream& ts, const WebCore::GraphicsLayer::CustomAppea
 }
 
 String GraphicsLayer::layerTreeAsText(LayerTreeAsTextBehavior behavior) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     TextStream ts;
 
     dumpLayer(ts, 0, behavior);
@@ -912,7 +914,7 @@ String GraphicsLayer::layerTreeAsText(LayerTreeAsTextBehavior behavior) const
 
 #if ENABLE(TREE_DEBUGGING)
 void showGraphicsLayerTree(const WebCore::GraphicsLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!layer)
         return;
 

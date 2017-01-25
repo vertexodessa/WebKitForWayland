@@ -33,22 +33,26 @@
 #include <WebCore/Page.h>
 #include <WebCore/ProgressTracker.h>
 
+#include <wtf/macros.h>
+
+
+
 using namespace WebCore;
 
 namespace WebKit {
 
 WebProgressTrackerClient::WebProgressTrackerClient(WebPage& webPage)
     : m_webPage(webPage)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
     
 void WebProgressTrackerClient::progressTrackerDestroyed()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     delete this;
 }
     
 void WebProgressTrackerClient::progressStarted(Frame& originatingProgressFrame)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!originatingProgressFrame.isMainFrame())
         return;
 
@@ -57,7 +61,7 @@ void WebProgressTrackerClient::progressStarted(Frame& originatingProgressFrame)
 }
 
 void WebProgressTrackerClient::progressEstimateChanged(Frame& originatingProgressFrame)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!originatingProgressFrame.isMainFrame())
         return;
     
@@ -66,7 +70,7 @@ void WebProgressTrackerClient::progressEstimateChanged(Frame& originatingProgres
 }
 
 void WebProgressTrackerClient::progressFinished(Frame& originatingProgressFrame)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!originatingProgressFrame.isMainFrame())
         return;
 

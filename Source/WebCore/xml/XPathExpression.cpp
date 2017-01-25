@@ -36,17 +36,19 @@
 #include "XPathUtil.h"
 #include <wtf/text/WTFString.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 using namespace XPath;
     
 inline XPathExpression::XPathExpression(std::unique_ptr<XPath::Expression> expression)
     : m_topExpression(WTFMove(expression))
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 RefPtr<XPathExpression> XPathExpression::createExpression(const String& expression, RefPtr<XPathNSResolver>&& resolver, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto parsedExpression = Parser::parseStatement(expression, WTFMove(resolver), ec);
     if (!parsedExpression)
         return nullptr;
@@ -55,11 +57,11 @@ RefPtr<XPathExpression> XPathExpression::createExpression(const String& expressi
 }
 
 XPathExpression::~XPathExpression()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 RefPtr<XPathResult> XPathExpression::evaluate(Node* contextNode, unsigned short type, XPathResult*, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isValidContextNode(contextNode)) {
         ec = NOT_SUPPORTED_ERR;
         return nullptr;

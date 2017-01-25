@@ -82,12 +82,14 @@
 #include "UIRequestEvent.h"
 #endif
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 using namespace HTMLNames;
 
 bool Node::isSupportedForBindings(const String& feature, const String& version)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return DOMImplementation::hasFeature(feature, version);
 }
 
@@ -96,7 +98,7 @@ static HashSet<Node*> liveNodeSet;
 #endif
 
 void Node::dumpStatistics()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if DUMP_NODE_STATISTICS
     size_t nodesWithRareData = 0;
 
@@ -229,7 +231,7 @@ DEFINE_DEBUG_ONLY_GLOBAL(WTF::RefCountedLeakCounter, nodeCounter, ("WebCoreNode"
 static bool shouldIgnoreLeaks = false;
 
 static HashSet<Node*>& ignoreSet()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<HashSet<Node*>> ignore;
 
     return ignore;
@@ -238,21 +240,21 @@ static HashSet<Node*>& ignoreSet()
 #endif
 
 void Node::startIgnoringLeaks()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #ifndef NDEBUG
     shouldIgnoreLeaks = true;
 #endif
 }
 
 void Node::stopIgnoringLeaks()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #ifndef NDEBUG
     shouldIgnoreLeaks = false;
 #endif
 }
 
 void Node::trackForDebugging()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #ifndef NDEBUG
     if (shouldIgnoreLeaks)
         ignoreSet().add(this);
@@ -269,7 +271,7 @@ Node::Node(Document& document, ConstructionType type)
     : m_refCount(1)
     , m_nodeFlags(type)
     , m_treeScope(&document)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
 
     document.incrementReferencingNodeCount();
@@ -280,7 +282,7 @@ Node::Node(Document& document, ConstructionType type)
 }
 
 Node::~Node()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     ASSERT(!m_refCount);
     ASSERT(m_deletionHasBegun);
@@ -313,7 +315,7 @@ Node::~Node()
 }
 
 void Node::willBeDeletedFrom(Document& document)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (hasEventTargetData()) {
         document.didRemoveWheelEventHandler(*this, EventHandlerRemoval::All);
 #if ENABLE(TOUCH_EVENTS) && PLATFORM(IOS)
@@ -329,7 +331,7 @@ void Node::willBeDeletedFrom(Document& document)
 }
 
 void Node::materializeRareData()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     NodeRareData* data;
     if (is<Element>(*this))
         data = std::make_unique<ElementRareData>(downcast<RenderElement>(m_data.m_renderer)).release();
@@ -342,7 +344,7 @@ void Node::materializeRareData()
 }
 
 void Node::clearRareData()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(hasRareData());
     ASSERT(!transientMutationObserverRegistry() || transientMutationObserverRegistry()->isEmpty());
 
@@ -356,29 +358,29 @@ void Node::clearRareData()
 }
 
 Node* Node::toNode()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return this;
 }
 
 String Node::nodeValue() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return String();
 }
 
 void Node::setNodeValue(const String& /*nodeValue*/, ExceptionCode&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // By default, setting nodeValue has no effect.
 }
 
 RefPtr<NodeList> Node::childNodes()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (is<ContainerNode>(*this))
         return ensureRareData().ensureNodeLists().ensureChildNodeList(downcast<ContainerNode>(*this));
     return ensureRareData().ensureNodeLists().ensureEmptyChildNodeList(*this);
 }
 
 Node *Node::lastDescendant() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Node *n = const_cast<Node *>(this);
     while (n && n->lastChild())
         n = n->lastChild();
@@ -386,7 +388,7 @@ Node *Node::lastDescendant() const
 }
 
 Node* Node::firstDescendant() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Node *n = const_cast<Node *>(this);
     while (n && n->firstChild())
         n = n->firstChild();
@@ -394,17 +396,17 @@ Node* Node::firstDescendant() const
 }
 
 Element* Node::previousElementSibling() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ElementTraversal::previousSibling(*this);
 }
 
 Element* Node::nextElementSibling() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ElementTraversal::nextSibling(*this);
 }
 
 bool Node::insertBefore(Node& newChild, Node* refChild, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!is<ContainerNode>(*this)) {
         ec = HIERARCHY_REQUEST_ERR;
         return false;
@@ -413,7 +415,7 @@ bool Node::insertBefore(Node& newChild, Node* refChild, ExceptionCode& ec)
 }
 
 bool Node::replaceChild(Node& newChild, Node& oldChild, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!is<ContainerNode>(*this)) {
         ec = HIERARCHY_REQUEST_ERR;
         return false;
@@ -422,7 +424,7 @@ bool Node::replaceChild(Node& newChild, Node& oldChild, ExceptionCode& ec)
 }
 
 bool Node::removeChild(Node& oldChild, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!is<ContainerNode>(*this)) {
         ec = NOT_FOUND_ERR;
         return false;
@@ -431,7 +433,7 @@ bool Node::removeChild(Node& oldChild, ExceptionCode& ec)
 }
 
 bool Node::appendChild(Node& newChild, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!is<ContainerNode>(*this)) {
         ec = HIERARCHY_REQUEST_ERR;
         return false;
@@ -440,7 +442,7 @@ bool Node::appendChild(Node& newChild, ExceptionCode& ec)
 }
 
 static HashSet<RefPtr<Node>> nodeSetPreTransformedFromNodeOrStringVector(const Vector<std::experimental::variant<Ref<Node>, String>>& vector)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     HashSet<RefPtr<Node>> nodeSet;
 
     auto visitor = WTF::makeVisitor(
@@ -455,7 +457,7 @@ static HashSet<RefPtr<Node>> nodeSetPreTransformedFromNodeOrStringVector(const V
 }
 
 static RefPtr<Node> firstPrecedingSiblingNotInNodeSet(Node& context, const HashSet<RefPtr<Node>>& nodeSet)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* sibling = context.previousSibling(); sibling; sibling = sibling->previousSibling()) {
         if (!nodeSet.contains(sibling))
             return sibling;
@@ -464,7 +466,7 @@ static RefPtr<Node> firstPrecedingSiblingNotInNodeSet(Node& context, const HashS
 }
 
 static RefPtr<Node> firstFollowingSiblingNotInNodeSet(Node& context, const HashSet<RefPtr<Node>>& nodeSet)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto* sibling = context.nextSibling(); sibling; sibling = sibling->nextSibling()) {
         if (!nodeSet.contains(sibling))
             return sibling;
@@ -473,7 +475,7 @@ static RefPtr<Node> firstFollowingSiblingNotInNodeSet(Node& context, const HashS
 }
 
 RefPtr<Node> Node::convertNodesOrStringsIntoNode(Vector<std::experimental::variant<Ref<Node>, String>>&& nodeOrStringVector, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (nodeOrStringVector.isEmpty())
         return nullptr;
 
@@ -500,7 +502,7 @@ RefPtr<Node> Node::convertNodesOrStringsIntoNode(Vector<std::experimental::varia
 }
 
 void Node::before(Vector<std::experimental::variant<Ref<Node>, String>>&& nodeOrStringVector, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<ContainerNode> parent = parentNode();
     if (!parent)
         return;
@@ -521,7 +523,7 @@ void Node::before(Vector<std::experimental::variant<Ref<Node>, String>>&& nodeOr
 }
 
 void Node::after(Vector<std::experimental::variant<Ref<Node>, String>>&& nodeOrStringVector, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<ContainerNode> parent = parentNode();
     if (!parent)
         return;
@@ -537,7 +539,7 @@ void Node::after(Vector<std::experimental::variant<Ref<Node>, String>>&& nodeOrS
 }
 
 void Node::replaceWith(Vector<std::experimental::variant<Ref<Node>, String>>&& nodeOrStringVector, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<ContainerNode> parent = parentNode();
     if (!parent)
         return;
@@ -559,13 +561,13 @@ void Node::replaceWith(Vector<std::experimental::variant<Ref<Node>, String>>&& n
 }
 
 void Node::remove(ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (ContainerNode* parent = parentNode())
         parent->removeChild(*this, ec);
 }
 
 void Node::normalize()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Go through the subtree beneath us, normalizing all nodes. This means that
     // any two adjacent text nodes are merged and any empty text nodes are removed.
 
@@ -619,7 +621,7 @@ void Node::normalize()
 }
 
 RefPtr<Node> Node::cloneNodeForBindings(bool deep, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (UNLIKELY(isShadowRoot())) {
         ec = NOT_SUPPORTED_ERR;
         return nullptr;
@@ -628,13 +630,13 @@ RefPtr<Node> Node::cloneNodeForBindings(bool deep, ExceptionCode& ec)
 }
 
 const AtomicString& Node::prefix() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // For nodes other than elements and attributes, the prefix is always null
     return nullAtom;
 }
 
 void Node::setPrefix(const AtomicString& /*prefix*/, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // The spec says that for nodes other than elements and attributes, prefix is always null.
     // It does not say what to do when the user tries to set the prefix on another type of
     // node, however Mozilla throws a NAMESPACE_ERR exception.
@@ -642,33 +644,33 @@ void Node::setPrefix(const AtomicString& /*prefix*/, ExceptionCode& ec)
 }
 
 const AtomicString& Node::localName() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return nullAtom;
 }
 
 const AtomicString& Node::namespaceURI() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return nullAtom;
 }
 
 bool Node::isContentEditable()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return computeEditability(UserSelectAllDoesNotAffectEditability, ShouldUpdateStyle::Update) != Editability::ReadOnly;
 }
 
 bool Node::isContentRichlyEditable()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return computeEditability(UserSelectAllIsAlwaysNonEditable, ShouldUpdateStyle::Update) == Editability::CanEditRichly;
 }
 
 void Node::inspect()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (document().page())
         document().page()->inspectorController().inspect(this);
 }
 
 static Node::Editability computeEditabilityFromComputedStyle(const Node& startNode, Node::UserSelectAllTreatment treatment)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Ideally we'd call ASSERT(!needsStyleRecalc()) here, but
     // ContainerNode::setFocus() calls setNeedsStyleRecalc(), so the assertion
     // would fire in the middle of Document::setFocusedElement().
@@ -702,7 +704,7 @@ static Node::Editability computeEditabilityFromComputedStyle(const Node& startNo
 }
 
 Node::Editability Node::computeEditability(UserSelectAllTreatment treatment, ShouldUpdateStyle shouldUpdateStyle) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!document().hasLivingRenderTree() || isPseudoElement())
         return Editability::ReadOnly;
 
@@ -718,19 +720,19 @@ Node::Editability Node::computeEditability(UserSelectAllTreatment treatment, Sho
 }
 
 RenderBox* Node::renderBox() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RenderObject* renderer = this->renderer();
     return is<RenderBox>(renderer) ? downcast<RenderBox>(renderer) : nullptr;
 }
 
 RenderBoxModelObject* Node::renderBoxModelObject() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RenderObject* renderer = this->renderer();
     return is<RenderBoxModelObject>(renderer) ? downcast<RenderBoxModelObject>(renderer) : nullptr;
 }
     
 LayoutRect Node::renderRect(bool* isReplaced)
-{    
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);    
     RenderObject* hitRenderer = this->renderer();
     ASSERT(hitRenderer);
     RenderObject* renderer = hitRenderer;
@@ -745,17 +747,17 @@ LayoutRect Node::renderRect(bool* isReplaced)
 }
 
 void Node::refEventTarget()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ref();
 }
 
 void Node::derefEventTarget()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     deref();
 }
 
 inline void Node::updateAncestorsForStyleRecalc()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto composedAncestors = composedTreeAncestors(*this);
     auto it = composedAncestors.begin();
     auto end = composedAncestors.end();
@@ -787,7 +789,7 @@ inline void Node::updateAncestorsForStyleRecalc()
 }
 
 void Node::setNeedsStyleRecalc(StyleChangeType changeType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(changeType != NoStyleChange);
     if (!inRenderedDocument())
         return;
@@ -805,7 +807,7 @@ void Node::setNeedsStyleRecalc(StyleChangeType changeType)
 }
 
 unsigned Node::computeNodeIndex() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     unsigned count = 0;
     for (Node* sibling = previousSibling(); sibling; sibling = sibling->previousSibling())
         ++count;
@@ -814,7 +816,7 @@ unsigned Node::computeNodeIndex() const
 
 template<unsigned type>
 bool shouldInvalidateNodeListCachesForAttr(const unsigned nodeListCounts[], const QualifiedName& attrName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (nodeListCounts[type] && shouldInvalidateTypeOnAttributeChange(static_cast<NodeListInvalidationType>(type), attrName))
         return true;
     return shouldInvalidateNodeListCachesForAttr<type + 1>(nodeListCounts, attrName);
@@ -822,12 +824,12 @@ bool shouldInvalidateNodeListCachesForAttr(const unsigned nodeListCounts[], cons
 
 template<>
 bool shouldInvalidateNodeListCachesForAttr<numNodeListInvalidationTypes>(const unsigned[], const QualifiedName&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return false;
 }
 
 bool Document::shouldInvalidateNodeListAndCollectionCaches(const QualifiedName* attrName) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (attrName)
         return shouldInvalidateNodeListCachesForAttr<DoNotInvalidateOnAttributeChanges + 1>(m_nodeListAndCollectionCounts, *attrName);
 
@@ -840,7 +842,7 @@ bool Document::shouldInvalidateNodeListAndCollectionCaches(const QualifiedName* 
 }
 
 void Document::invalidateNodeListAndCollectionCaches(const QualifiedName* attrName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if !ASSERT_DISABLED
     m_inInvalidateNodeListAndCollectionCaches = true;
 #endif
@@ -857,7 +859,7 @@ void Document::invalidateNodeListAndCollectionCaches(const QualifiedName* attrNa
 }
 
 void Node::invalidateNodeListAndCollectionCachesInAncestors(const QualifiedName* attrName, Element* attributeOwnerElement)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (hasRareData() && (!attrName || isAttributeNode())) {
         if (NodeListsNodeData* lists = rareData()->nodeLists())
             lists->clearChildNodeListCache();
@@ -882,17 +884,17 @@ void Node::invalidateNodeListAndCollectionCachesInAncestors(const QualifiedName*
 }
 
 NodeListsNodeData* Node::nodeLists()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return hasRareData() ? rareData()->nodeLists() : nullptr;
 }
 
 void Node::clearNodeLists()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     rareData()->clearNodeLists();
 }
 
 void Node::checkSetPrefix(const AtomicString& prefix, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Perform error checking as required by spec for setting Node.prefix. Used by
     // Element::setPrefix() and Attr::setPrefix()
 
@@ -913,7 +915,7 @@ void Node::checkSetPrefix(const AtomicString& prefix, ExceptionCode& ec)
 }
 
 bool Node::isDescendantOf(const Node* other) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Return true if other is an ancestor of this, otherwise false
     if (!other || !other->hasChildNodes() || inDocument() != other->inDocument())
         return false;
@@ -927,7 +929,7 @@ bool Node::isDescendantOf(const Node* other) const
 }
 
 bool Node::isDescendantOrShadowDescendantOf(const Node* other) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!other) 
         return false;
     if (isDescendantOf(other))
@@ -939,14 +941,14 @@ bool Node::isDescendantOrShadowDescendantOf(const Node* other) const
 }
 
 bool Node::contains(const Node* node) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!node)
         return false;
     return this == node || node->isDescendantOf(this);
 }
 
 bool Node::containsIncludingShadowDOM(const Node* node) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (; node; node = node->parentOrShadowHostNode()) {
         if (node == this)
             return true;
@@ -955,7 +957,7 @@ bool Node::containsIncludingShadowDOM(const Node* node) const
 }
 
 bool Node::containsIncludingHostElements(const Node* node) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     while (node) {
         if (node == this)
             return true;
@@ -968,7 +970,7 @@ bool Node::containsIncludingHostElements(const Node* node) const
 }
 
 Node* Node::pseudoAwarePreviousSibling() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Element* parentOrHost = is<PseudoElement>(*this) ? downcast<PseudoElement>(*this).hostElement() : parentElement();
     if (parentOrHost && !previousSibling()) {
         if (isAfterPseudoElement() && parentOrHost->lastChild())
@@ -980,7 +982,7 @@ Node* Node::pseudoAwarePreviousSibling() const
 }
 
 Node* Node::pseudoAwareNextSibling() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Element* parentOrHost = is<PseudoElement>(*this) ? downcast<PseudoElement>(*this).hostElement() : parentElement();
     if (parentOrHost && !nextSibling()) {
         if (isBeforePseudoElement() && parentOrHost->firstChild())
@@ -992,7 +994,7 @@ Node* Node::pseudoAwareNextSibling() const
 }
 
 Node* Node::pseudoAwareFirstChild() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (is<Element>(*this)) {
         const Element& currentElement = downcast<Element>(*this);
         Node* first = currentElement.beforePseudoElement();
@@ -1007,7 +1009,7 @@ Node* Node::pseudoAwareFirstChild() const
 }
 
 Node* Node::pseudoAwareLastChild() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (is<Element>(*this)) {
         const Element& currentElement = downcast<Element>(*this);
         Node* last = currentElement.afterPseudoElement();
@@ -1022,7 +1024,7 @@ Node* Node::pseudoAwareLastChild() const
 }
 
 const RenderStyle* Node::computedStyle(PseudoId pseudoElementSpecifier)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* composedParent = composedTreeAncestors(*this).first();
     if (!composedParent)
         return nullptr;
@@ -1030,7 +1032,7 @@ const RenderStyle* Node::computedStyle(PseudoId pseudoElementSpecifier)
 }
 
 int Node::maxCharacterOffset() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT_NOT_REACHED();
     return 0;
 }
@@ -1038,7 +1040,7 @@ int Node::maxCharacterOffset() const
 // FIXME: Shouldn't these functions be in the editing code?  Code that asks questions about HTML in the core DOM class
 // is obviously misplaced.
 bool Node::canStartSelection() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (hasEditableStyle())
         return true;
 
@@ -1053,14 +1055,14 @@ bool Node::canStartSelection() const
 }
 
 Element* Node::shadowHost() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (ShadowRoot* root = containingShadowRoot())
         return root->host();
     return nullptr;
 }
 
 Node* Node::deprecatedShadowAncestorNode() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (ShadowRoot* root = containingShadowRoot())
         return root->host();
 
@@ -1068,14 +1070,14 @@ Node* Node::deprecatedShadowAncestorNode() const
 }
 
 ShadowRoot* Node::containingShadowRoot() const
-{
+{//  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ContainerNode& root = treeScope().rootNode();
     return is<ShadowRoot>(root) ? downcast<ShadowRoot>(&root) : nullptr;
 }
 
 // http://w3c.github.io/webcomponents/spec/shadow/#dfn-unclosed-node
 bool Node::isUnclosedNode(const Node& otherNode) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Use Vector instead of HashSet since we expect the number of ancestor tree scopes to be small.
     Vector<TreeScope*, 8> ancestorScopesOfThisNode;
 
@@ -1096,21 +1098,21 @@ bool Node::isUnclosedNode(const Node& otherNode) const
 }
 
 static inline ShadowRoot* parentShadowRoot(const Node& node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (auto* parent = node.parentElement())
         return parent->shadowRoot();
     return nullptr;
 }
 
 HTMLSlotElement* Node::assignedSlot() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (auto* shadowRoot = parentShadowRoot(*this))
         return shadowRoot->findAssignedSlot(*this);
     return nullptr;
 }
 
 HTMLSlotElement* Node::assignedSlotForBindings() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* shadowRoot = parentShadowRoot(*this);
     if (shadowRoot && shadowRoot->mode() == ShadowRoot::Mode::Open)
         return shadowRoot->findAssignedSlot(*this);
@@ -1118,7 +1120,7 @@ HTMLSlotElement* Node::assignedSlotForBindings() const
 }
 
 ContainerNode* Node::parentInComposedTree() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThreadOrGCThread());
     if (auto* slot = assignedSlot())
         return slot;
@@ -1128,13 +1130,13 @@ ContainerNode* Node::parentInComposedTree() const
 }
 
 bool Node::isInUserAgentShadowTree() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* shadowRoot = containingShadowRoot();
     return shadowRoot && shadowRoot->mode() == ShadowRoot::Mode::UserAgent;
 }
 
 Node* Node::nonBoundaryShadowTreeRootNode()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!isShadowRoot());
     Node* root = this;
     while (root) {
@@ -1149,13 +1151,13 @@ Node* Node::nonBoundaryShadowTreeRootNode()
 }
 
 ContainerNode* Node::nonShadowBoundaryParentNode() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ContainerNode* parent = parentNode();
     return parent && !parent->isShadowRoot() ? parent : nullptr;
 }
 
 Element* Node::parentOrShadowHostElement() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ContainerNode* parent = parentOrShadowHostNode();
     if (!parent)
         return nullptr;
@@ -1170,7 +1172,7 @@ Element* Node::parentOrShadowHostElement() const
 }
 
 Node* Node::rootNode() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isInTreeScope())
         return &treeScope().rootNode();
 
@@ -1182,7 +1184,7 @@ Node* Node::rootNode() const
 }
 
 Node::InsertionNotificationRequest Node::insertedInto(ContainerNode& insertionPoint)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(insertionPoint.inDocument() || isContainerNode());
     if (insertionPoint.inDocument())
         setFlag(InDocumentFlag);
@@ -1195,7 +1197,7 @@ Node::InsertionNotificationRequest Node::insertedInto(ContainerNode& insertionPo
 }
 
 void Node::removedFrom(ContainerNode& insertionPoint)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(insertionPoint.inDocument() || isContainerNode());
     if (insertionPoint.inDocument())
         clearFlag(InDocumentFlag);
@@ -1204,13 +1206,13 @@ void Node::removedFrom(ContainerNode& insertionPoint)
 }
 
 bool Node::isRootEditableElement() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return hasEditableStyle() && isElementNode() && (!parentNode() || !parentNode()->hasEditableStyle()
         || !parentNode()->isElementNode() || hasTagName(bodyTag));
 }
 
 Element* Node::rootEditableElement() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Element* result = nullptr;
     for (Node* node = const_cast<Node*>(this); node && node->hasEditableStyle(); node = node->parentNode()) {
         if (is<Element>(*node))
@@ -1224,19 +1226,19 @@ Element* Node::rootEditableElement() const
 // FIXME: End of obviously misplaced HTML editing functions.  Try to move these out of Node.
 
 Document* Node::ownerDocument() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Document* document = &this->document();
     return document == this ? nullptr : document;
 }
 
 const URL& Node::baseURI() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto& url = document().baseURL();
     return url.isNull() ? blankURL() : url;
 }
 
 bool Node::isEqualNode(Node* other) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!other)
         return false;
     
@@ -1316,7 +1318,7 @@ bool Node::isEqualNode(Node* other) const
 
 // https://dom.spec.whatwg.org/#locate-a-namespace
 static const AtomicString& locateDefaultNamespace(const Node& node, const AtomicString& prefix)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (node.nodeType()) {
     case Node::ELEMENT_NODE: {
         auto& element = downcast<Element>(node);
@@ -1358,21 +1360,21 @@ static const AtomicString& locateDefaultNamespace(const Node& node, const Atomic
 
 // https://dom.spec.whatwg.org/#dom-node-isdefaultnamespace
 bool Node::isDefaultNamespace(const AtomicString& potentiallyEmptyNamespace) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const AtomicString& namespaceURI = potentiallyEmptyNamespace.isEmpty() ? nullAtom : potentiallyEmptyNamespace;
     return locateDefaultNamespace(*this, nullAtom) == namespaceURI;
 }
 
 // https://dom.spec.whatwg.org/#dom-node-lookupnamespaceuri
 const AtomicString& Node::lookupNamespaceURI(const AtomicString& potentiallyEmptyPrefix) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const AtomicString& prefix = potentiallyEmptyPrefix.isEmpty() ? nullAtom : potentiallyEmptyPrefix;
     return locateDefaultNamespace(*this, prefix);
 }
 
 // https://dom.spec.whatwg.org/#locate-a-namespace-prefix
 static const AtomicString& locateNamespacePrefix(const Element& element, const AtomicString& namespaceURI)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (element.namespaceURI() == namespaceURI)
         return element.prefix();
 
@@ -1388,7 +1390,7 @@ static const AtomicString& locateNamespacePrefix(const Element& element, const A
 
 // https://dom.spec.whatwg.org/#dom-node-lookupprefix
 const AtomicString& Node::lookupPrefix(const AtomicString& namespaceURI) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (namespaceURI.isEmpty())
         return nullAtom;
     
@@ -1414,7 +1416,7 @@ const AtomicString& Node::lookupPrefix(const AtomicString& namespaceURI) const
 }
 
 static void appendTextContent(const Node* node, bool convertBRsToNewlines, bool& isNullString, StringBuilder& content)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (node->nodeType()) {
     case Node::TEXT_NODE:
     case Node::CDATA_SECTION_NODE:
@@ -1452,7 +1454,7 @@ static void appendTextContent(const Node* node, bool convertBRsToNewlines, bool&
 }
 
 String Node::textContent(bool convertBRsToNewlines) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     StringBuilder content;
     bool isNullString = true;
     appendTextContent(this, convertBRsToNewlines, isNullString, content);
@@ -1460,7 +1462,7 @@ String Node::textContent(bool convertBRsToNewlines) const
 }
 
 void Node::setTextContent(const String& text, ExceptionCode& ec)
-{           
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);           
     switch (nodeType()) {
         case TEXT_NODE:
         case CDATA_SECTION_NODE:
@@ -1487,12 +1489,12 @@ void Node::setTextContent(const String& text, ExceptionCode& ec)
 }
 
 bool Node::offsetInCharacters() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return false;
 }
 
 static SHA1::Digest hashPointer(void* pointer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SHA1 sha1;
     sha1.addBytes(reinterpret_cast<const uint8_t*>(&pointer), sizeof(pointer));
     SHA1::Digest digest;
@@ -1501,7 +1503,7 @@ static SHA1::Digest hashPointer(void* pointer)
 }
 
 static inline unsigned short compareDetachedElementsPosition(Node& firstNode, Node& secondNode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If the 2 nodes are not in the same tree, return the result of adding DOCUMENT_POSITION_DISCONNECTED,
     // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC, and either DOCUMENT_POSITION_PRECEDING or
     // DOCUMENT_POSITION_FOLLOWING, with the constraint that this is to be consistent. Whether to return
@@ -1517,7 +1519,7 @@ static inline unsigned short compareDetachedElementsPosition(Node& firstNode, No
 }
 
 unsigned short Node::compareDocumentPosition(Node& otherNode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (&otherNode == this)
         return DOCUMENT_POSITION_EQUIVALENT;
     
@@ -1612,7 +1614,7 @@ unsigned short Node::compareDocumentPosition(Node& otherNode)
 }
 
 FloatPoint Node::convertToPage(const FloatPoint& p) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If there is a renderer, just ask it to do the conversion
     if (renderer())
         return renderer()->localToAbsolute(p, UseTransforms);
@@ -1626,7 +1628,7 @@ FloatPoint Node::convertToPage(const FloatPoint& p) const
 }
 
 FloatPoint Node::convertFromPage(const FloatPoint& p) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If there is a renderer, just ask it to do the conversion
     if (renderer())
         return renderer()->absoluteToLocal(p, UseTransforms);
@@ -1642,7 +1644,7 @@ FloatPoint Node::convertFromPage(const FloatPoint& p) const
 #if ENABLE(TREE_DEBUGGING)
 
 static void appendAttributeDesc(const Node* node, StringBuilder& stringBuilder, const QualifiedName& name, const char* attrDesc)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!is<Element>(*node))
         return;
 
@@ -1655,7 +1657,7 @@ static void appendAttributeDesc(const Node* node, StringBuilder& stringBuilder, 
 }
 
 void Node::showNode(const char* prefix) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!prefix)
         prefix = "";
     if (isTextNode()) {
@@ -1672,12 +1674,12 @@ void Node::showNode(const char* prefix) const
 }
 
 void Node::showTreeForThis() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     showTreeAndMark(this, "*");
 }
 
 void Node::showNodePathForThis() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<const Node*, 16> chain;
     const Node* node = this;
     while (node->parentOrShadowHostNode()) {
@@ -1728,7 +1730,7 @@ void Node::showNodePathForThis() const
 }
 
 static void traverseTreeAndMark(const String& baseIndent, const Node* rootNode, const Node* markedNode1, const char* markedLabel1, const Node* markedNode2, const char* markedLabel2)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (const Node* node = rootNode; node; node = NodeTraversal::next(*node)) {
         if (node == markedNode1)
             fprintf(stderr, "%s", markedLabel1);
@@ -1750,7 +1752,7 @@ static void traverseTreeAndMark(const String& baseIndent, const Node* rootNode, 
 }
 
 void Node::showTreeAndMark(const Node* markedNode1, const char* markedLabel1, const Node* markedNode2, const char* markedLabel2) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const Node* rootNode;
     const Node* node = this;
     while (node->parentOrShadowHostNode() && !node->hasTagName(bodyTag))
@@ -1762,7 +1764,7 @@ void Node::showTreeAndMark(const Node* markedNode1, const char* markedLabel1, co
 }
 
 void Node::formatForDebugger(char* buffer, unsigned length) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String result;
     String s;
 
@@ -1776,7 +1778,7 @@ void Node::formatForDebugger(char* buffer, unsigned length) const
 }
 
 static ContainerNode* parentOrShadowHostOrFrameOwner(const Node* node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ContainerNode* parent = node->parentOrShadowHostNode();
     if (!parent && node->document().frame())
         parent = node->document().frame()->ownerElement();
@@ -1784,7 +1786,7 @@ static ContainerNode* parentOrShadowHostOrFrameOwner(const Node* node)
 }
 
 static void showSubTreeAcrossFrame(const Node* node, const Node* markedNode, const String& indent)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (node == markedNode)
         fputs("*", stderr);
     fputs(indent.utf8().data(), stderr);
@@ -1800,7 +1802,7 @@ static void showSubTreeAcrossFrame(const Node* node, const Node* markedNode, con
 }
 
 void Node::showTreeForThisAcrossFrame() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Node* rootNode = const_cast<Node*>(this);
     while (parentOrShadowHostOrFrameOwner(rootNode))
         rootNode = parentOrShadowHostOrFrameOwner(rootNode);
@@ -1812,7 +1814,7 @@ void Node::showTreeForThisAcrossFrame() const
 // --------
 
 void NodeListsNodeData::invalidateCaches(const QualifiedName* attrName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& atomicName : m_atomicNameCaches)
         atomicName.value->invalidateCacheForAttribute(attrName);
 
@@ -1827,12 +1829,12 @@ void NodeListsNodeData::invalidateCaches(const QualifiedName* attrName)
 }
 
 void Node::getSubresourceURLs(ListHashSet<URL>& urls) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     addSubresourceAttributeURLs(urls);
 }
 
 Element* Node::enclosingLinkEventParentOrSelf()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Node* node = this; node; node = node->parentOrShadowHostNode()) {
         // For imagemaps, the enclosing link element is the associated area element not the image itself.
         // So we don't let images be the enclosing link element, even though isLink sometimes returns
@@ -1845,12 +1847,12 @@ Element* Node::enclosingLinkEventParentOrSelf()
 }
 
 EventTargetInterface Node::eventTargetInterface() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return NodeEventTargetInterfaceType;
 }
 
 void Node::didMoveToNewDocument(Document* oldDocument)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     TreeScopeAdopter::ensureDidMoveToNewDocumentWasCalled(oldDocument);
 
     if (auto* eventTargetData = this->eventTargetData()) {
@@ -1892,7 +1894,7 @@ void Node::didMoveToNewDocument(Document* oldDocument)
 }
 
 static inline bool tryAddEventListener(Node* targetNode, const AtomicString& eventType, Ref<EventListener>&& listener, const EventTarget::AddEventListenerOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!targetNode->EventTarget::addEventListener(eventType, listener.copyRef(), options))
         return false;
 
@@ -1928,12 +1930,12 @@ static inline bool tryAddEventListener(Node* targetNode, const AtomicString& eve
 }
 
 bool Node::addEventListener(const AtomicString& eventType, Ref<EventListener>&& listener, const AddEventListenerOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return tryAddEventListener(this, eventType, WTFMove(listener), options);
 }
 
 static inline bool tryRemoveEventListener(Node* targetNode, const AtomicString& eventType, EventListener& listener, const EventTarget::ListenerOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!targetNode->EventTarget::removeEventListener(eventType, listener, options))
         return false;
 
@@ -1969,26 +1971,26 @@ static inline bool tryRemoveEventListener(Node* targetNode, const AtomicString& 
 }
 
 bool Node::removeEventListener(const AtomicString& eventType, EventListener& listener, const ListenerOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return tryRemoveEventListener(this, eventType, listener, options);
 }
 
 typedef HashMap<Node*, std::unique_ptr<EventTargetData>> EventTargetDataMap;
 
 static EventTargetDataMap& eventTargetDataMap()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<EventTargetDataMap> map;
 
     return map;
 }
 
 EventTargetData* Node::eventTargetData()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return hasEventTargetData() ? eventTargetDataMap().get(this) : nullptr;
 }
 
 EventTargetData& Node::ensureEventTargetData()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (hasEventTargetData())
         return *eventTargetDataMap().get(this);
 
@@ -1997,12 +1999,12 @@ EventTargetData& Node::ensureEventTargetData()
 }
 
 void Node::clearEventTargetData()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     eventTargetDataMap().remove(this);
 }
 
 Vector<std::unique_ptr<MutationObserverRegistration>>* Node::mutationObserverRegistry()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!hasRareData())
         return 0;
     NodeMutationObserverData* data = rareData()->mutationObserverData();
@@ -2012,7 +2014,7 @@ Vector<std::unique_ptr<MutationObserverRegistration>>* Node::mutationObserverReg
 }
 
 HashSet<MutationObserverRegistration*>* Node::transientMutationObserverRegistry()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!hasRareData())
         return 0;
     NodeMutationObserverData* data = rareData()->mutationObserverData();
@@ -2023,7 +2025,7 @@ HashSet<MutationObserverRegistration*>* Node::transientMutationObserverRegistry(
 
 template<typename Registry>
 static inline void collectMatchingObserversForMutation(HashMap<MutationObserver*, MutationRecordDeliveryOptions>& observers, Registry* registry, Node* target, MutationObserver::MutationType type, const QualifiedName* attributeName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!registry)
         return;
 
@@ -2038,7 +2040,7 @@ static inline void collectMatchingObserversForMutation(HashMap<MutationObserver*
 }
 
 void Node::getRegisteredMutationObserversOfType(HashMap<MutationObserver*, MutationRecordDeliveryOptions>& observers, MutationObserver::MutationType type, const QualifiedName* attributeName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT((type == MutationObserver::Attributes && attributeName) || !attributeName);
     collectMatchingObserversForMutation(observers, mutationObserverRegistry(), this, type, attributeName);
     collectMatchingObserversForMutation(observers, transientMutationObserverRegistry(), this, type, attributeName);
@@ -2049,7 +2051,7 @@ void Node::getRegisteredMutationObserversOfType(HashMap<MutationObserver*, Mutat
 }
 
 void Node::registerMutationObserver(MutationObserver* observer, MutationObserverOptions options, const HashSet<AtomicString>& attributeFilter)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     MutationObserverRegistration* registration = nullptr;
     auto& registry = ensureRareData().ensureMutationObserverData().registry;
 
@@ -2069,7 +2071,7 @@ void Node::registerMutationObserver(MutationObserver* observer, MutationObserver
 }
 
 void Node::unregisterMutationObserver(MutationObserverRegistration* registration)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* registry = mutationObserverRegistry();
     ASSERT(registry);
     if (!registry)
@@ -2081,12 +2083,12 @@ void Node::unregisterMutationObserver(MutationObserverRegistration* registration
 }
 
 void Node::registerTransientMutationObserver(MutationObserverRegistration* registration)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ensureRareData().ensureMutationObserverData().transientRegistry.add(registration);
 }
 
 void Node::unregisterTransientMutationObserver(MutationObserverRegistration* registration)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     HashSet<MutationObserverRegistration*>* transientRegistry = transientMutationObserverRegistry();
     ASSERT(transientRegistry);
     if (!transientRegistry)
@@ -2097,7 +2099,7 @@ void Node::unregisterTransientMutationObserver(MutationObserverRegistration* reg
 }
 
 void Node::notifyMutationObserversNodeWillDetach()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!document().hasMutationObservers())
         return;
 
@@ -2115,7 +2117,7 @@ void Node::notifyMutationObserversNodeWillDetach()
 }
 
 void Node::handleLocalEvents(Event& event)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!hasEventTargetData())
         return;
 
@@ -2127,12 +2129,12 @@ void Node::handleLocalEvents(Event& event)
 }
 
 void Node::dispatchScopedEvent(Event& event)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     EventDispatcher::dispatchScopedEvent(*this, event);
 }
 
 bool Node::dispatchEvent(Event& event)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(TOUCH_EVENTS) && !PLATFORM(IOS)
     if (is<TouchEvent>(event))
         return dispatchTouchEvent(downcast<TouchEvent>(event));
@@ -2141,7 +2143,7 @@ bool Node::dispatchEvent(Event& event)
 }
 
 void Node::dispatchSubtreeModifiedEvent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isInShadowTree())
         return;
 
@@ -2157,7 +2159,7 @@ void Node::dispatchSubtreeModifiedEvent()
 }
 
 bool Node::dispatchDOMActivateEvent(int detail, PassRefPtr<Event> underlyingEvent)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT_WITH_SECURITY_IMPLICATION(!NoEventDispatchAssertion::isEventDispatchForbidden());
     Ref<UIEvent> event = UIEvent::create(eventNames().DOMActivateEvent, true, true, document().defaultView(), detail);
     event->setUnderlyingEvent(underlyingEvent.get());
@@ -2167,21 +2169,21 @@ bool Node::dispatchDOMActivateEvent(int detail, PassRefPtr<Event> underlyingEven
 
 #if ENABLE(TOUCH_EVENTS) && !PLATFORM(IOS)
 bool Node::dispatchTouchEvent(TouchEvent& event)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return EventDispatcher::dispatchEvent(this, event);
 }
 #endif
 
 #if ENABLE(INDIE_UI)
 bool Node::dispatchUIRequestEvent(UIRequestEvent& event)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     EventDispatcher::dispatchEvent(this, event);
     return event.defaultHandled() || event.defaultPrevented();
 }
 #endif
     
 bool Node::dispatchBeforeLoadEvent(const String& sourceURL)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!document().hasListenerType(Document::BEFORELOAD_LISTENER))
         return true;
 
@@ -2192,12 +2194,12 @@ bool Node::dispatchBeforeLoadEvent(const String& sourceURL)
 }
 
 void Node::dispatchInputEvent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     dispatchScopedEvent(Event::create(eventNames().inputEvent, true, false));
 }
 
 void Node::defaultEventHandler(Event* event)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (event->target() != this)
         return;
     const AtomicString& eventType = event->type();
@@ -2264,7 +2266,7 @@ void Node::defaultEventHandler(Event* event)
 }
 
 bool Node::willRespondToMouseMoveEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Why is the iOS code path different from the non-iOS code path?
 #if !PLATFORM(IOS)
     if (!is<Element>(*this))
@@ -2276,7 +2278,7 @@ bool Node::willRespondToMouseMoveEvents()
 }
 
 bool Node::willRespondToMouseClickEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Why is the iOS code path different from the non-iOS code path?
 #if PLATFORM(IOS)
     return isContentEditable() || hasEventListeners(eventNames().mouseupEvent) || hasEventListeners(eventNames().mousedownEvent) || hasEventListeners(eventNames().clickEvent);
@@ -2291,14 +2293,14 @@ bool Node::willRespondToMouseClickEvents()
 }
 
 bool Node::willRespondToMouseWheelEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return hasEventListeners(eventNames().mousewheelEvent);
 }
 
 // It's important not to inline removedLastRef, because we don't want to inline the code to
 // delete a Node at each deref call site.
 void Node::removedLastRef()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // An explicit check for Document here is better than a virtual function since it is
     // faster for non-Document nodes, and because the call to removedLastRef that is inlined
     // at all deref call sites is smaller if it's a non-virtual function.
@@ -2314,30 +2316,30 @@ void Node::removedLastRef()
 }
 
 void Node::textRects(Vector<IntRect>& rects) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<Range> range = Range::create(document());
     range->selectNodeContents(const_cast<Node&>(*this), IGNORE_EXCEPTION);
     range->absoluteTextRects(rects);
 }
 
 unsigned Node::connectedSubframeCount() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return hasRareData() ? rareData()->connectedSubframeCount() : 0;
 }
 
 void Node::incrementConnectedSubframeCount(unsigned amount)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isContainerNode());
     ensureRareData().incrementConnectedSubframeCount(amount);
 }
 
 void Node::decrementConnectedSubframeCount(unsigned amount)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     rareData()->decrementConnectedSubframeCount(amount);
 }
 
 void Node::updateAncestorConnectedSubframeCountForRemoval() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     unsigned count = connectedSubframeCount();
 
     if (!count)
@@ -2348,7 +2350,7 @@ void Node::updateAncestorConnectedSubframeCountForRemoval() const
 }
 
 void Node::updateAncestorConnectedSubframeCountForInsertion() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     unsigned count = connectedSubframeCount();
 
     if (!count)
@@ -2359,7 +2361,7 @@ void Node::updateAncestorConnectedSubframeCountForInsertion() const
 }
 
 bool Node::inRenderedDocument() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return inDocument() && document().hasLivingRenderTree();
 }
 
@@ -2368,13 +2370,13 @@ bool Node::inRenderedDocument() const
 #if ENABLE(TREE_DEBUGGING)
 
 void showTree(const WebCore::Node* node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (node)
         node->showTreeForThis();
 }
 
 void showNodePath(const WebCore::Node* node)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (node)
         node->showNodePathForThis();
 }

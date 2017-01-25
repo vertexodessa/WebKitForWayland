@@ -163,7 +163,7 @@ private:
     explicit InjectedBundle(const WebProcessCreationParameters&);
 
     String m_path;
-    PlatformBundle m_platformBundle; // This is leaked right now, since we never unload the bundle/module.
+    void* m_platformBundle; // This is leaked right now, since we never unload the bundle/module.
 
     RefPtr<SandboxExtension> m_sandboxExtension;
 

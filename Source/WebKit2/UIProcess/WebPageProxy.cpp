@@ -181,6 +181,8 @@
 
 #define RELEASE_LOG_IF_ALLOWED(...) RELEASE_LOG_IF(isAlwaysOnLoggingAllowed(), __VA_ARGS__)
 
+#include <wtf/macros.h>
+
 using namespace WebCore;
 
 // Represents the number of wheel events we can hold in the queue before we start pushing them preemptively.
@@ -916,6 +918,7 @@ void WebPageProxy::addPlatformLoadParameters(LoadParameters&)
 
 RefPtr<API::Navigation> WebPageProxy::loadRequest(const ResourceRequest& request, ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicy, API::Object* userData)
 {
+    WTF_AUTO_THREAD_ENABLE(); WTF_SCOPE0(__FUNCTION__);
     if (m_isClosed)
         return nullptr;
 

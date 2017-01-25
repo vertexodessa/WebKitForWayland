@@ -55,6 +55,8 @@
 #include <WebCore/SubresourceLoader.h>
 #include <wtf/text/CString.h>
 
+#include <wtf/macros.h>
+
 using namespace WebCore;
 
 #define RELEASE_LOG_IF_ALLOWED(...) RELEASE_LOG_IF(loadParameters.sessionID.isAlwaysOnLoggingAllowed(), __VA_ARGS__)
@@ -64,15 +66,15 @@ namespace WebKit {
 
 WebLoaderStrategy::WebLoaderStrategy()
     : m_internallyFailedLoadTimer(RunLoop::main(), this, &WebLoaderStrategy::internallyFailedLoadTimerFired)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 WebLoaderStrategy::~WebLoaderStrategy()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 RefPtr<SubresourceLoader> WebLoaderStrategy::loadResource(Frame& frame, CachedResource& resource, const ResourceRequest& request, const ResourceLoaderOptions& options)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<SubresourceLoader> loader = SubresourceLoader::create(frame, resource, request, options);
     if (loader)
         scheduleLoad(*loader, &resource, frame.document()->referrerPolicy() == ReferrerPolicy::Default);
@@ -80,7 +82,7 @@ RefPtr<SubresourceLoader> WebLoaderStrategy::loadResource(Frame& frame, CachedRe
 }
 
 RefPtr<NetscapePlugInStreamLoader> WebLoaderStrategy::schedulePluginStreamLoad(Frame& frame, NetscapePlugInStreamLoaderClient& client, const ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<NetscapePlugInStreamLoader> loader = NetscapePlugInStreamLoader::create(frame, client, request);
     if (loader)
         scheduleLoad(*loader, 0, frame.document()->referrerPolicy() == ReferrerPolicy::Default);
@@ -88,7 +90,7 @@ RefPtr<NetscapePlugInStreamLoader> WebLoaderStrategy::schedulePluginStreamLoad(F
 }
 
 static std::chrono::milliseconds maximumBufferingTime(CachedResource* resource)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if !ENABLE(NETWORK_CACHE) && !PLATFORM(WPE)
     return 0ms;
 #endif
@@ -129,7 +131,7 @@ static std::chrono::milliseconds maximumBufferingTime(CachedResource* resource)
 }
 
 void WebLoaderStrategy::scheduleLoad(ResourceLoader& resourceLoader, CachedResource* resource, bool shouldClearReferrerOnHTTPSToHTTPRedirect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ResourceLoadIdentifier identifier = resourceLoader.identifier();
     ASSERT(identifier);
 
@@ -216,13 +218,13 @@ void WebLoaderStrategy::scheduleLoad(ResourceLoader& resourceLoader, CachedResou
 }
 
 void WebLoaderStrategy::scheduleInternallyFailedLoad(WebCore::ResourceLoader& resourceLoader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_internallyFailedResourceLoaders.add(&resourceLoader);
     m_internallyFailedLoadTimer.startOneShot(0);
 }
 
 void WebLoaderStrategy::internallyFailedLoadTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<RefPtr<ResourceLoader>> internallyFailedResourceLoaders;
     copyToVector(m_internallyFailedResourceLoaders, internallyFailedResourceLoaders);
     
@@ -231,13 +233,13 @@ void WebLoaderStrategy::internallyFailedLoadTimerFired()
 }
 
 void WebLoaderStrategy::startLocalLoad(WebCore::ResourceLoader& resourceLoader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     resourceLoader.start();
     m_webResourceLoaders.set(resourceLoader.identifier(), WebResourceLoader::create(resourceLoader));
 }
 
 void WebLoaderStrategy::remove(ResourceLoader* resourceLoader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(resourceLoader);
     LOG(NetworkScheduling, "(WebProcess) WebLoaderStrategy::remove, url '%s'", resourceLoader->url().string().utf8().data());
 
@@ -265,35 +267,35 @@ void WebLoaderStrategy::remove(ResourceLoader* resourceLoader)
 }
 
 void WebLoaderStrategy::setDefersLoading(ResourceLoader* resourceLoader, bool defers)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ResourceLoadIdentifier identifier = resourceLoader->identifier();
     WebProcess::singleton().networkConnection().connection().send(Messages::NetworkConnectionToWebProcess::SetDefersLoading(identifier, defers), 0);
 }
 
 void WebLoaderStrategy::crossOriginRedirectReceived(ResourceLoader*, const URL&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We handle cross origin redirects entirely within the NetworkProcess.
     // We override this call in the WebProcess to make it a no-op.
 }
 
 void WebLoaderStrategy::servePendingRequests(ResourceLoadPriority)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // This overrides the base class version.
     // We don't need to do anything as this is handled by the network process.
 }
 
 void WebLoaderStrategy::suspendPendingRequests()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Network process does keep requests in pending state.
 }
 
 void WebLoaderStrategy::resumePendingRequests()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Network process does keep requests in pending state.
 }
 
 void WebLoaderStrategy::networkProcessCrashed()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& loader : m_webResourceLoaders)
         scheduleInternallyFailedLoad(*loader.value->resourceLoader());
 
@@ -301,7 +303,7 @@ void WebLoaderStrategy::networkProcessCrashed()
 }
 
 void WebLoaderStrategy::loadResourceSynchronously(NetworkingContext* context, unsigned long resourceLoadIdentifier, const ResourceRequest& request, StoredCredentials storedCredentials, ClientCredentialPolicy clientCredentialPolicy, ResourceError& error, ResourceResponse& response, Vector<char>& data)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebFrameNetworkingContext* webContext = static_cast<WebFrameNetworkingContext*>(context);
     // FIXME: Some entities in WebCore use WebCore's "EmptyFrameLoaderClient" instead of having a proper WebFrameLoaderClient.
     // EmptyFrameLoaderClient shouldn't exist and everything should be using a WebFrameLoaderClient,
@@ -332,7 +334,7 @@ void WebLoaderStrategy::loadResourceSynchronously(NetworkingContext* context, un
 }
 
 void WebLoaderStrategy::createPingHandle(NetworkingContext* networkingContext, ResourceRequest& request, bool shouldUseCredentialStorage)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // It's possible that call to createPingHandle might be made during initial empty Document creation before a NetworkingContext exists.
     // It is not clear that we should send ping loads during that process anyways.
     if (!networkingContext)

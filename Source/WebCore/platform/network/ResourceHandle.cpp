@@ -38,13 +38,15 @@
 #include <wtf/text/AtomicStringHash.h>
 #include <wtf/text/CString.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 static bool shouldForceContentSniffing;
 
 typedef HashMap<AtomicString, ResourceHandle::BuiltinConstructor> BuiltinResourceHandleConstructorMap;
 static BuiltinResourceHandleConstructorMap& builtinResourceHandleConstructorMap()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(IOS)
     ASSERT(WebThreadIsLockedOrDisabled());
 #else
@@ -55,26 +57,26 @@ static BuiltinResourceHandleConstructorMap& builtinResourceHandleConstructorMap(
 }
 
 void ResourceHandle::registerBuiltinConstructor(const AtomicString& protocol, ResourceHandle::BuiltinConstructor constructor)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     builtinResourceHandleConstructorMap().add(protocol, constructor);
 }
 
 typedef HashMap<AtomicString, ResourceHandle::BuiltinSynchronousLoader> BuiltinResourceHandleSynchronousLoaderMap;
 static BuiltinResourceHandleSynchronousLoaderMap& builtinResourceHandleSynchronousLoaderMap()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     static NeverDestroyed<BuiltinResourceHandleSynchronousLoaderMap> map;
     return map;
 }
 
 void ResourceHandle::registerBuiltinSynchronousLoader(const AtomicString& protocol, ResourceHandle::BuiltinSynchronousLoader loader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     builtinResourceHandleSynchronousLoaderMap().add(protocol, loader);
 }
 
 ResourceHandle::ResourceHandle(NetworkingContext* context, const ResourceRequest& request, ResourceHandleClient* client, bool defersLoading, bool shouldContentSniff)
     : d(std::make_unique<ResourceHandleInternal>(this, context, request, client, defersLoading, shouldContentSniff && shouldContentSniffURL(request.url())))
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!request.url().isValid()) {
         scheduleFailure(InvalidURLFailure);
         return;
@@ -87,7 +89,7 @@ ResourceHandle::ResourceHandle(NetworkingContext* context, const ResourceRequest
 }
 
 RefPtr<ResourceHandle> ResourceHandle::create(NetworkingContext* context, const ResourceRequest& request, ResourceHandleClient* client, bool defersLoading, bool shouldContentSniff)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     BuiltinResourceHandleConstructorMap::iterator protocolMapItem = builtinResourceHandleConstructorMap().find(request.url().protocol());
 
     if (protocolMapItem != builtinResourceHandleConstructorMap().end())
@@ -105,13 +107,13 @@ RefPtr<ResourceHandle> ResourceHandle::create(NetworkingContext* context, const 
 }
 
 void ResourceHandle::scheduleFailure(FailureType type)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     d->m_scheduledFailureType = type;
     d->m_failureTimer.startOneShot(0);
 }
 
 void ResourceHandle::failureTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!client())
         return;
 
@@ -133,7 +135,7 @@ void ResourceHandle::failureTimerFired()
 }
 
 void ResourceHandle::loadResourceSynchronously(NetworkingContext* context, const ResourceRequest& request, StoredCredentials storedCredentials, ResourceError& error, ResourceResponse& response, Vector<char>& data)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     BuiltinResourceHandleSynchronousLoaderMap::iterator protocolMapItem = builtinResourceHandleSynchronousLoaderMap().find(request.url().protocol());
 
     if (protocolMapItem != builtinResourceHandleSynchronousLoaderMap().end()) {
@@ -145,57 +147,57 @@ void ResourceHandle::loadResourceSynchronously(NetworkingContext* context, const
 }
 
 ResourceHandleClient* ResourceHandle::client() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return d->m_client;
 }
 
 void ResourceHandle::clearClient()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     d->m_client = nullptr;
 }
 
 #if !PLATFORM(COCOA) && !USE(CFNETWORK) && !USE(SOUP)
 // ResourceHandle never uses async client calls on these platforms yet.
 void ResourceHandle::continueWillSendRequest(ResourceRequest&&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 void ResourceHandle::continueDidReceiveResponse()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 #if USE(PROTECTION_SPACE_AUTH_CALLBACK)
 void ResourceHandle::continueCanAuthenticateAgainstProtectionSpace(bool)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 #endif
 #endif
 
 ResourceRequest& ResourceHandle::firstRequest()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return d->m_firstRequest;
 }
 
 NetworkingContext* ResourceHandle::context() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return d->m_context.get();
 }
 
 const String& ResourceHandle::lastHTTPMethod() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return d->m_lastHTTPMethod;
 }
 
 bool ResourceHandle::hasAuthenticationChallenge() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !d->m_currentWebChallenge.isNull();
 }
 
 void ResourceHandle::clearAuthentication()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(COCOA)
     d->m_currentMacChallenge = nil;
 #endif
@@ -203,12 +205,12 @@ void ResourceHandle::clearAuthentication()
 }
   
 bool ResourceHandle::shouldContentSniff() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return d->m_shouldContentSniff;
 }
 
 bool ResourceHandle::shouldContentSniffURL(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(COCOA)
     if (shouldForceContentSniffing)
         return true;
@@ -218,12 +220,12 @@ bool ResourceHandle::shouldContentSniffURL(const URL& url)
 }
 
 void ResourceHandle::forceContentSniffing()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     shouldForceContentSniffing = true;
 }
 
 void ResourceHandle::setDefersLoading(bool defers)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Network, "Handle %p setDefersLoading(%s)", this, defers ? "true" : "false");
 
     ASSERT(d->m_defersLoading != defers); // Deferring is not counted, so calling setDefersLoading() repeatedly is likely to be in error.
@@ -242,7 +244,7 @@ void ResourceHandle::setDefersLoading(bool defers)
 }
 
 bool ResourceHandle::usesAsyncCallbacks() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return d->m_usesAsyncCallbacks;
 }
 

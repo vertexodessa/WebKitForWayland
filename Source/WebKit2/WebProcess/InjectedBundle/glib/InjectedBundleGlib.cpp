@@ -32,20 +32,36 @@
 #include <WebCore/FileSystem.h>
 #include <wtf/text/CString.h>
 
+#include <algorithm>
+#include <wtf/macros.h>
+
+#include <dlfcn.h>
+
 using namespace WebCore;
 
 namespace WebKit {
 
 bool InjectedBundle::initialize(const WebProcessCreationParameters&, API::Object* initializationUserData)
-{
-    m_platformBundle = g_module_open(fileSystemRepresentation(m_path).data(), G_MODULE_BIND_LOCAL);
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+    { 
+        WTF_AUTO_SCOPE0("MODULE_OPEN");
+
+        m_platformBundle = dlopen (fileSystemRepresentation(m_path).data(),
+                                   RTLD_LAZY);
+
+        //m_platformBundle = g_module_open(fileSystemRepresentation(m_path).data(), (GModuleFlags)(G_MODULE_BIND_LAZY));
+    }
     if (!m_platformBundle) {
         g_warning("Error loading the injected bundle (%s): %s", m_path.utf8().data(), g_module_error());
         return false;
     }
 
     WKBundleInitializeFunctionPtr initializeFunction = 0;
-    if (!g_module_symbol(m_platformBundle, "WKBundleInitialize", reinterpret_cast<void**>(&initializeFunction)) || !initializeFunction) {
+
+
+    if (! (initializeFunction = (WKBundleInitializeFunctionPtr) dlsym(m_platformBundle, "WKBundleInitialize"))) {
+    
+    //if (!g_module_symbol(m_platformBundle, "WKBundleInitialize", reinterpret_cast<void**>(&initializeFunction)) || !initializeFunction) {
         g_warning("Error loading WKBundleInitialize symbol from injected bundle.");
         return false;
     }
@@ -55,11 +71,11 @@ bool InjectedBundle::initialize(const WebProcessCreationParameters&, API::Object
 }
 
 void InjectedBundle::setBundleParameter(WTF::String const&, IPC::DataReference const&)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void InjectedBundle::setBundleParameters(const IPC::DataReference&)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 } // namespace WebKit

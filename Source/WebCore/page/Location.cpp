@@ -37,15 +37,17 @@
 #include "URL.h"
 #include "SecurityOrigin.h"
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 Location::Location(Frame* frame)
     : DOMWindowProperty(frame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 inline const URL& Location::url() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_frame);
 
     const URL& url = m_frame->document()->url();
@@ -56,7 +58,7 @@ inline const URL& Location::url() const
 }
 
 String Location::href() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
 
@@ -72,7 +74,7 @@ String Location::href() const
 }
 
 String Location::protocol() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
 
@@ -80,7 +82,7 @@ String Location::protocol() const
 }
 
 String Location::host() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
 
@@ -91,7 +93,7 @@ String Location::host() const
 }
 
 String Location::hostname() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
 
@@ -99,7 +101,7 @@ String Location::hostname() const
 }
 
 String Location::port() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
 
@@ -108,7 +110,7 @@ String Location::port() const
 }
 
 String Location::pathname() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
 
@@ -117,7 +119,7 @@ String Location::pathname() const
 }
 
 String Location::search() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
 
@@ -126,14 +128,14 @@ String Location::search() const
 }
 
 String Location::origin() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
     return SecurityOrigin::create(url())->toString();
 }
 
 Vector<String> Location::ancestorOrigins() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<String> origins;
     if (!m_frame)
         return origins;
@@ -143,7 +145,7 @@ Vector<String> Location::ancestorOrigins() const
 }
 
 String Location::hash() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return String();
 
@@ -152,14 +154,14 @@ String Location::hash() const
 }
 
 void Location::setHref(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     setLocation(activeWindow, firstWindow, url);
 }
 
 void Location::setProtocol(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& protocol, ExceptionCode& ec)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     URL url = m_frame->document()->url();
@@ -171,7 +173,7 @@ void Location::setProtocol(DOMWindow& activeWindow, DOMWindow& firstWindow, cons
 }
 
 void Location::setHost(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& host)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     URL url = m_frame->document()->url();
@@ -180,7 +182,7 @@ void Location::setHost(DOMWindow& activeWindow, DOMWindow& firstWindow, const St
 }
 
 void Location::setHostname(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& hostname)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     URL url = m_frame->document()->url();
@@ -189,7 +191,7 @@ void Location::setHostname(DOMWindow& activeWindow, DOMWindow& firstWindow, cons
 }
 
 void Location::setPort(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& portString)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     URL url = m_frame->document()->url();
@@ -202,7 +204,7 @@ void Location::setPort(DOMWindow& activeWindow, DOMWindow& firstWindow, const St
 }
 
 void Location::setPathname(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& pathname)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     URL url = m_frame->document()->url();
@@ -211,7 +213,7 @@ void Location::setPathname(DOMWindow& activeWindow, DOMWindow& firstWindow, cons
 }
 
 void Location::setSearch(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& search)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     URL url = m_frame->document()->url();
@@ -220,7 +222,7 @@ void Location::setSearch(DOMWindow& activeWindow, DOMWindow& firstWindow, const 
 }
 
 void Location::setHash(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& hash)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     URL url = m_frame->document()->url();
@@ -238,14 +240,14 @@ void Location::setHash(DOMWindow& activeWindow, DOMWindow& firstWindow, const St
 }
 
 void Location::assign(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     setLocation(activeWindow, firstWindow, url);
 }
 
 void Location::replace(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     // Note: We call DOMWindow::setLocation directly here because replace() always operates on the current frame.
@@ -253,7 +255,7 @@ void Location::replace(DOMWindow& activeWindow, DOMWindow& firstWindow, const St
 }
 
 void Location::reload(DOMWindow& activeWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame)
         return;
     // FIXME: It's not clear this cross-origin security check is valuable.
@@ -270,7 +272,7 @@ void Location::reload(DOMWindow& activeWindow)
 }
 
 void Location::setLocation(DOMWindow& activeWindow, DOMWindow& firstWindow, const String& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_frame);
     Frame* frame = m_frame->loader().findFrameForNavigation(String(), activeWindow.document());
     if (!frame)

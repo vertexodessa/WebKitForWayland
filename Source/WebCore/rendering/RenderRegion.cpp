@@ -46,6 +46,8 @@
 #include "RenderView.h"
 #include "StyleResolver.h"
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 RenderRegion::RenderRegion(Element& element, RenderStyle&& style, RenderFlowThread* flowThread)
@@ -53,7 +55,7 @@ RenderRegion::RenderRegion(Element& element, RenderStyle&& style, RenderFlowThre
     , m_flowThread(flowThread)
     , m_parentNamedFlowThread(nullptr)
     , m_isValid(false)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 RenderRegion::RenderRegion(Document& document, RenderStyle&& style, RenderFlowThread* flowThread)
@@ -61,11 +63,11 @@ RenderRegion::RenderRegion(Document& document, RenderStyle&& style, RenderFlowTh
     , m_flowThread(flowThread)
     , m_parentNamedFlowThread(nullptr)
     , m_isValid(false)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 LayoutPoint RenderRegion::mapRegionPointIntoFlowThreadCoordinates(const LayoutPoint& point)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Assuming the point is relative to the region block, 3 cases will be considered:
     // a) top margin, padding or border.
     // b) bottom margin, padding or border.
@@ -105,7 +107,7 @@ LayoutPoint RenderRegion::mapRegionPointIntoFlowThreadCoordinates(const LayoutPo
 }
 
 VisiblePosition RenderRegion::positionForPoint(const LayoutPoint& point, const RenderRegion* region)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isValid() || !m_flowThread->firstChild()) // checking for empty region blocks.
         return RenderBlock::positionForPoint(point, region);
 
@@ -113,29 +115,29 @@ VisiblePosition RenderRegion::positionForPoint(const LayoutPoint& point, const R
 }
 
 LayoutUnit RenderRegion::pageLogicalWidth() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
     return m_flowThread->isHorizontalWritingMode() ? contentWidth() : contentHeight();
 }
 
 LayoutUnit RenderRegion::pageLogicalHeight() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
     return m_flowThread->isHorizontalWritingMode() ? contentHeight() : contentWidth();
 }
 
 LayoutUnit RenderRegion::logicalHeightOfAllFlowThreadContent() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return pageLogicalHeight();
 }
 
 LayoutRect RenderRegion::flowThreadPortionOverflowRect()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return overflowRectForFlowThreadPortion(flowThreadPortionRect(), isFirstRegion(), isLastRegion(), VisualOverflow);
 }
 
 LayoutPoint RenderRegion::flowThreadPortionLocation() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LayoutPoint portionLocation;
     LayoutRect portionRect = flowThreadPortionRect();
 
@@ -150,7 +152,7 @@ LayoutPoint RenderRegion::flowThreadPortionLocation() const
 }
 
 LayoutRect RenderRegion::overflowRectForFlowThreadPortion(const LayoutRect& flowThreadPortionRect, bool isFirstPortion, bool isLastPortion, OverflowType overflowType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
     if (shouldClipFlowThreadContent())
         return flowThreadPortionRect;
@@ -176,31 +178,31 @@ LayoutRect RenderRegion::overflowRectForFlowThreadPortion(const LayoutRect& flow
 }
 
 LayoutUnit RenderRegion::pageLogicalTopForOffset(LayoutUnit /* offset */) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return flowThread()->isHorizontalWritingMode() ? flowThreadPortionRect().y() : flowThreadPortionRect().x();
 }
 
 bool RenderRegion::isFirstRegion() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
 
     return m_flowThread->firstRegion() == this;
 }
 
 bool RenderRegion::isLastRegion() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
 
     return m_flowThread->lastRegion() == this;
 }
 
 bool RenderRegion::shouldClipFlowThreadContent() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return hasOverflowClip();
 }
 
 void RenderRegion::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RenderBlockFlow::styleDidChange(diff, oldStyle);
 
     if (!isValid())
@@ -211,7 +213,7 @@ void RenderRegion::styleDidChange(StyleDifference diff, const RenderStyle* oldSt
 }
 
 void RenderRegion::computeOverflowFromFlowThread()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
 
     LayoutRect layoutRect = layoutOverflowRectForBox(m_flowThread);
@@ -228,12 +230,12 @@ void RenderRegion::computeOverflowFromFlowThread()
 }
 
 void RenderRegion::repaintFlowThreadContent(const LayoutRect& repaintRect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     repaintFlowThreadContentRectangle(repaintRect, flowThreadPortionRect(), contentBoxRect().location());
 }
 
 void RenderRegion::repaintFlowThreadContentRectangle(const LayoutRect& repaintRect, const LayoutRect& flowThreadPortionRect, const LayoutPoint& regionLocation, const LayoutRect* flowThreadPortionClipRect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
 
     // We only have to issue a repaint in this region if the region rect intersects the repaint rect.
@@ -262,7 +264,7 @@ void RenderRegion::repaintFlowThreadContentRectangle(const LayoutRect& repaintRe
 }
 
 void RenderRegion::installFlowThread()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_flowThread = &view().flowThreadController().ensureRenderFlowThreadWithName(style().regionThread());
 
     // By now the flow thread should already be added to the rendering tree,
@@ -279,7 +281,7 @@ void RenderRegion::installFlowThread()
 }
 
 void RenderRegion::attachRegion()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (documentBeingDestroyed())
         return;
     
@@ -299,21 +301,21 @@ void RenderRegion::attachRegion()
 }
 
 void RenderRegion::detachRegion()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_flowThread)
         m_flowThread->removeRegionFromThread(this);
     m_flowThread = nullptr;
 }
 
 RenderBoxRegionInfo* RenderRegion::renderBoxRegionInfo(const RenderBox* box) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
     return m_renderBoxRegionInfo.get(box);
 }
 
 RenderBoxRegionInfo* RenderRegion::setRenderBoxRegionInfo(const RenderBox* box, LayoutUnit logicalLeftInset, LayoutUnit logicalRightInset,
     bool containingBlockChainIsInset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
 
     std::unique_ptr<RenderBoxRegionInfo>& boxInfo = m_renderBoxRegionInfo.add(box, std::make_unique<RenderBoxRegionInfo>(logicalLeftInset, logicalRightInset, containingBlockChainIsInset)).iterator->value;
@@ -321,48 +323,48 @@ RenderBoxRegionInfo* RenderRegion::setRenderBoxRegionInfo(const RenderBox* box, 
 }
 
 std::unique_ptr<RenderBoxRegionInfo> RenderRegion::takeRenderBoxRegionInfo(const RenderBox* box)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_renderBoxRegionInfo.take(box);
 }
 
 void RenderRegion::removeRenderBoxRegionInfo(const RenderBox* box)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_renderBoxRegionInfo.remove(box);
 }
 
 void RenderRegion::deleteAllRenderBoxRegionInfo()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_renderBoxRegionInfo.clear();
 }
 
 LayoutUnit RenderRegion::logicalTopOfFlowThreadContentRect(const LayoutRect& rect) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
     return flowThread()->isHorizontalWritingMode() ? rect.y() : rect.x();
 }
 
 LayoutUnit RenderRegion::logicalBottomOfFlowThreadContentRect(const LayoutRect& rect) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isValid());
     return flowThread()->isHorizontalWritingMode() ? rect.maxY() : rect.maxX();
 }
 
 void RenderRegion::insertedIntoTree()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     attachRegion();
     if (isValid())
         RenderBlockFlow::insertedIntoTree();
 }
 
 void RenderRegion::willBeRemovedFromTree()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RenderBlockFlow::willBeRemovedFromTree();
 
     detachRegion();
 }
 
 void RenderRegion::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isValid()) {
         RenderBlockFlow::computeIntrinsicLogicalWidths(minLogicalWidth, maxLogicalWidth);
         return;
@@ -373,7 +375,7 @@ void RenderRegion::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, La
 }
 
 void RenderRegion::computePreferredLogicalWidths()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(preferredLogicalWidthsDirty());
 
     if (!isValid()) {
@@ -408,14 +410,14 @@ void RenderRegion::computePreferredLogicalWidths()
 }
 
 void RenderRegion::adjustRegionBoundsFromFlowThreadPortionRect(LayoutRect& regionBounds) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LayoutRect flippedFlowThreadPortionRect = flowThreadPortionRect();
     flowThread()->flipForWritingMode(flippedFlowThreadPortionRect);
     regionBounds.moveBy(flippedFlowThreadPortionRect.location());
 }
 
 void RenderRegion::ensureOverflowForBox(const RenderBox* box, RefPtr<RenderOverflow>& overflow, bool forceCreation)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_flowThread->renderRegionList().contains(this));
     ASSERT(isValid());
 
@@ -450,7 +452,7 @@ void RenderRegion::ensureOverflowForBox(const RenderBox* box, RefPtr<RenderOverf
 }
 
 LayoutRect RenderRegion::rectFlowPortionForBox(const RenderBox* box, const LayoutRect& rect) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LayoutRect mappedRect = m_flowThread->mapFromLocalToFlowThread(box, rect);
 
     RenderRegion* startRegion = nullptr;
@@ -473,7 +475,7 @@ LayoutRect RenderRegion::rectFlowPortionForBox(const RenderBox* box, const Layou
 }
 
 void RenderRegion::addLayoutOverflowForBox(const RenderBox* box, const LayoutRect& rect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (rect.isEmpty())
         return;
 
@@ -487,7 +489,7 @@ void RenderRegion::addLayoutOverflowForBox(const RenderBox* box, const LayoutRec
 }
 
 void RenderRegion::addVisualOverflowForBox(const RenderBox* box, const LayoutRect& rect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (rect.isEmpty())
         return;
 
@@ -503,7 +505,7 @@ void RenderRegion::addVisualOverflowForBox(const RenderBox* box, const LayoutRec
 }
 
 LayoutRect RenderRegion::layoutOverflowRectForBox(const RenderBox* box)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<RenderOverflow> overflow;
     ensureOverflowForBox(box, overflow, true);
     
@@ -512,7 +514,7 @@ LayoutRect RenderRegion::layoutOverflowRectForBox(const RenderBox* box)
 }
 
 LayoutRect RenderRegion::visualOverflowRectForBox(const RenderBoxModelObject& box)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (is<RenderInline>(box)) {
         const RenderInline& inlineBox = downcast<RenderInline>(box);
         return inlineBox.linesVisualOverflowBoundingBoxInRegion(this);
@@ -532,7 +534,7 @@ LayoutRect RenderRegion::visualOverflowRectForBox(const RenderBoxModelObject& bo
 
 // FIXME: This doesn't work for writing modes.
 LayoutRect RenderRegion::layoutOverflowRectForBoxForPropagation(const RenderBox* box)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Only propagate interior layout overflow if we don't clip it.
     LayoutRect rect = box->borderBoxRectInRegion(this);
     rect = rectFlowPortionForBox(box, rect);
@@ -552,7 +554,7 @@ LayoutRect RenderRegion::layoutOverflowRectForBoxForPropagation(const RenderBox*
 }
 
 LayoutRect RenderRegion::visualOverflowRectForBoxForPropagation(const RenderBoxModelObject& box)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LayoutRect rect = visualOverflowRectForBox(box);
     flowThread()->flipForWritingModeLocalCoordinates(rect);
 
@@ -561,7 +563,7 @@ LayoutRect RenderRegion::visualOverflowRectForBoxForPropagation(const RenderBoxM
 
 CurrentRenderRegionMaintainer::CurrentRenderRegionMaintainer(RenderRegion& region)
     : m_region(region)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RenderFlowThread* flowThread = region.flowThread();
     // A flow thread can have only one current region.
     ASSERT(!flowThread->currentRegion());
@@ -569,7 +571,7 @@ CurrentRenderRegionMaintainer::CurrentRenderRegionMaintainer(RenderRegion& regio
 }
 
 CurrentRenderRegionMaintainer::~CurrentRenderRegionMaintainer()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RenderFlowThread* flowThread = m_region.flowThread();
     flowThread->setCurrentRegionMaintainer(nullptr);
 }

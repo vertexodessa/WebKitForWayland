@@ -50,7 +50,7 @@ public:
     ResourceLoadIdentifier identifier { 0 };
     Vector<RefPtr<SandboxExtension>> requestBodySandboxExtensions; // Created automatically for the sender.
     RefPtr<SandboxExtension> resourceSandboxExtension; // Created automatically for the sender.
-    std::chrono::milliseconds maximumBufferingTime { 0ms };
+    std::chrono::milliseconds maximumBufferingTime { 10ms };
 };
 
 } // namespace WebKit

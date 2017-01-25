@@ -156,6 +156,8 @@
 #include <bindings/ScriptObject.h>
 #endif
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 static const double SeekRepeatDelay = 0.1;
@@ -1335,6 +1337,7 @@ void HTMLMediaElement::loadNextSourceChild()
 
 void HTMLMediaElement::loadResource(const URL& initialURL, ContentType& contentType, const String& keySystem)
 {
+
     ASSERT(isSafeToLoadURL(initialURL, Complain));
 
     LOG(Media, "HTMLMediaElement::loadResource(%p) - %s, %s, %s", this, urlForLoggingMedia(initialURL).utf8().data(), contentType.raw().utf8().data(), keySystem.utf8().data());

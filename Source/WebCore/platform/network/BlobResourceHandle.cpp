@@ -48,6 +48,8 @@
 #include <wtf/MainThread.h>
 #include <wtf/Ref.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 static const unsigned bufferSize = 512 * 1024;
@@ -96,11 +98,11 @@ BlobResourceSynchronousLoader::BlobResourceSynchronousLoader(ResourceError& erro
     : m_error(error)
     , m_response(response)
     , m_data(data)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void BlobResourceSynchronousLoader::didReceiveResponse(ResourceHandle* handle, ResourceResponse&& response)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We cannot handle the size that is more than maximum integer.
     if (response.expectedContentLength() > INT_MAX) {
         m_error = ResourceError(webKitBlobResourceDomain, notReadableError, response.url(), "File is too large");
@@ -115,7 +117,7 @@ void BlobResourceSynchronousLoader::didReceiveResponse(ResourceHandle* handle, R
 }
 
 void BlobResourceSynchronousLoader::didFail(ResourceHandle*, const ResourceError& error)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_error = error;
 }
 
@@ -125,12 +127,12 @@ void BlobResourceSynchronousLoader::didFail(ResourceHandle*, const ResourceError
 // BlobResourceHandle
 
 Ref<BlobResourceHandle> BlobResourceHandle::createAsync(BlobData* blobData, const ResourceRequest& request, ResourceHandleClient* client)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return adoptRef(*new BlobResourceHandle(blobData, request, client, true));
 }
 
 void BlobResourceHandle::loadResourceSynchronously(BlobData* blobData, const ResourceRequest& request, ResourceError& error, ResourceResponse& response, Vector<char>& data)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!equalLettersIgnoringASCIICase(request.httpMethod(), "get")) {
         error = ResourceError(webKitBlobResourceDomain, methodNotAllowed, response.url(), "Request method must be GET");
         return;
@@ -145,7 +147,7 @@ BlobResourceHandle::BlobResourceHandle(BlobData* blobData, const ResourceRequest
     : ResourceHandle(nullptr, request, client, false, false)
     , m_blobData(blobData)
     , m_async(async)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_async)
         m_asyncStream = std::make_unique<AsyncFileStream>(*this);
     else
@@ -153,11 +155,11 @@ BlobResourceHandle::BlobResourceHandle(BlobData* blobData, const ResourceRequest
 }
 
 BlobResourceHandle::~BlobResourceHandle()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void BlobResourceHandle::cancel()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_asyncStream = nullptr;
 
     m_aborted = true;
@@ -166,12 +168,12 @@ void BlobResourceHandle::cancel()
 }
 
 void BlobResourceHandle::continueDidReceiveResponse()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // BlobResourceHandle doesn't wait for didReceiveResponse, and it currently cannot be used for downloading.
 }
 
 void BlobResourceHandle::start()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_async) {
         doStart();
         return;
@@ -184,7 +186,7 @@ void BlobResourceHandle::start()
 }
 
 void BlobResourceHandle::doStart()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
 
     // Do not continue if the request is aborted or an error occurs.
@@ -222,7 +224,7 @@ void BlobResourceHandle::doStart()
 }
 
 void BlobResourceHandle::getSizeForNext()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
 
     // Do we finish validating and counting size for all items?
@@ -257,7 +259,7 @@ void BlobResourceHandle::getSizeForNext()
 }
 
 void BlobResourceHandle::didGetSize(long long size)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
 
     // Do not continue if the request is aborted or an error occurs.
@@ -288,7 +290,7 @@ void BlobResourceHandle::didGetSize(long long size)
 }
 
 void BlobResourceHandle::seek()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
 
     // Convert from the suffix length to the range.
@@ -319,7 +321,7 @@ void BlobResourceHandle::seek()
 }
 
 int BlobResourceHandle::readSync(char* buf, int length)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
 
     ASSERT(!m_async);
@@ -367,7 +369,7 @@ int BlobResourceHandle::readSync(char* buf, int length)
 }
 
 int BlobResourceHandle::readDataSync(const BlobDataItem& item, char* buf, int length)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
 
     ASSERT(!m_async);
@@ -389,7 +391,7 @@ int BlobResourceHandle::readDataSync(const BlobDataItem& item, char* buf, int le
 }
 
 int BlobResourceHandle::readFileSync(const BlobDataItem& item, char* buf, int length)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
 
     ASSERT(!m_async);
@@ -424,7 +426,7 @@ int BlobResourceHandle::readFileSync(const BlobDataItem& item, char* buf, int le
 }
 
 void BlobResourceHandle::readAsync()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     ASSERT(m_async);
 
@@ -448,7 +450,7 @@ void BlobResourceHandle::readAsync()
 }
 
 void BlobResourceHandle::readDataAsync(const BlobDataItem& item)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     ASSERT(m_async);
     ASSERT(item.data().data());
@@ -463,7 +465,7 @@ void BlobResourceHandle::readDataAsync(const BlobDataItem& item)
 }
 
 void BlobResourceHandle::readFileAsync(const BlobDataItem& item)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     ASSERT(m_async);
 
@@ -481,7 +483,7 @@ void BlobResourceHandle::readFileAsync(const BlobDataItem& item)
 }
 
 void BlobResourceHandle::didOpen(bool success)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_async);
 
     if (!success) {
@@ -494,7 +496,7 @@ void BlobResourceHandle::didOpen(bool success)
 }
 
 void BlobResourceHandle::didRead(int bytesRead)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (bytesRead < 0) {
         failed(notReadableError);
         return;
@@ -504,7 +506,7 @@ void BlobResourceHandle::didRead(int bytesRead)
 }
 
 void BlobResourceHandle::consumeData(const char* data, int bytesRead)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_async);
     Ref<BlobResourceHandle> protectedThis(*this);
 
@@ -534,7 +536,7 @@ void BlobResourceHandle::consumeData(const char* data, int bytesRead)
 }
 
 void BlobResourceHandle::failed(int errorCode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_async);
     Ref<BlobResourceHandle> protectedThis(*this);
 
@@ -549,7 +551,7 @@ void BlobResourceHandle::failed(int errorCode)
 }
 
 void BlobResourceHandle::notifyResponse()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!client())
         return;
 
@@ -562,7 +564,7 @@ void BlobResourceHandle::notifyResponse()
 }
 
 void BlobResourceHandle::notifyResponseOnSuccess()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
 
     bool isRangeRequest = m_rangeOffset != kPositionNotSpecified;
@@ -589,7 +591,7 @@ void BlobResourceHandle::notifyResponseOnSuccess()
 }
 
 void BlobResourceHandle::notifyResponseOnError()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_errorCode);
 
     ResourceResponse response(firstRequest().url(), "text/plain", 0, String());
@@ -621,19 +623,19 @@ void BlobResourceHandle::notifyResponseOnError()
 }
 
 void BlobResourceHandle::notifyReceiveData(const char* data, int bytesRead)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (client())
         client()->didReceiveBuffer(this, SharedBuffer::create(data, bytesRead), bytesRead);
 }
 
 void BlobResourceHandle::notifyFail(int errorCode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (client())
         client()->didFail(this, ResourceError(webKitBlobResourceDomain, errorCode, firstRequest().url(), String()));
 }
 
 static void doNotifyFinish(BlobResourceHandle& handle)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (handle.aborted())
         return;
 
@@ -644,7 +646,7 @@ static void doNotifyFinish(BlobResourceHandle& handle)
 }
 
 void BlobResourceHandle::notifyFinish()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_async) {
         doNotifyFinish(*this);
         return;

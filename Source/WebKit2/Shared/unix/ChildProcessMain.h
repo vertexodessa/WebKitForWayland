@@ -30,6 +30,15 @@
 #include "WebKit2Initialize.h"
 #include <wtf/RunLoop.h>
 
+
+#include <string>
+#include <sys/types.h>
+#include <sys/syscall.h>
+#include <fstream>
+#define WTF_ENABLE
+#include <wtf/macros.h>
+#include <unistd.h>
+
 namespace WebKit {
 
 class ChildProcessMainBase {
@@ -44,9 +53,23 @@ protected:
     ChildProcessInitializationParameters m_parameters;
 };
 
+extern bool gShouldDumpWtfStats;
+void switchDumpVar(int signal);
+
+#define DUMP_PREFIX "/opt/"
+
+class WtfDumpFileTimer {
+  public:
+  WtfDumpFileTimer(std::string fname) : m_fname(fname) { }
+    void TimerFired();
+  private:
+    std::string m_fname;
+};
+
 template<typename ChildProcessType, typename ChildProcessMainType>
 int ChildProcessMain(int argc, char** argv)
 {
+    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ChildProcessMainType childMain;
 
     InitializeWebKit2();
@@ -58,6 +81,22 @@ int ChildProcessMain(int argc, char** argv)
         return EXIT_FAILURE;
 
     ChildProcessType::singleton().initialize(childMain.initializationParameters());
+
+    int sig = SIGUSR1;
+    fprintf(stderr, "III: installing signal handler (%d)!\n", sig);
+    signal(sig, switchDumpVar);
+
+    std::string fname;
+    fname = DUMP_PREFIX;
+    fname += std::to_string(syscall(SYS_gettid));
+    fname += ".webkittrace.wtf-trace";
+
+    WtfDumpFileTimer wtfDumpFileTimer(fname);
+
+    RunLoop::Timer<WtfDumpFileTimer> t(RunLoop::main(), &wtfDumpFileTimer, &WtfDumpFileTimer::TimerFired);
+
+    t.startRepeating(5);
+
     RunLoop::run();
     childMain.platformFinalize();
 
