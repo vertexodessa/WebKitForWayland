@@ -275,6 +275,7 @@ list(APPEND WebKit2_LIBRARIES
     ${HARFBUZZ_LIBRARIES}
     ${LIBSOUP_LIBRARIES}
     WPE
+     libwtf.a
 )
 
 if (ENABLE_BREAKPAD)
@@ -291,7 +292,7 @@ if (ENABLE_BREAKPAD)
     )
 
     list(APPEND NetworkProcess_LIBRARIES
-        ${BREAKPAD_LIBRARIES}
+      ${BREAKPAD_LIBRARIES}
     )
 endif ()
 

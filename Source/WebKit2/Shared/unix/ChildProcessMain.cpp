@@ -30,6 +30,33 @@
 
 namespace WebKit {
 
+bool gShouldDumpWtfStats = false;
+
+void WtfDumpFileTimer::TimerFired()
+{
+    if (gShouldDumpWtfStats)
+    {
+        std::string msg("III: dumping collected stats to file ");
+        msg +=  m_fname + "\n";
+        write(1, msg.c_str(), msg.size());
+        std::fstream out;
+        out.open(m_fname,
+                 std::ios_base::out | std::ios_base::trunc);
+        wtf::Runtime::GetInstance()->Save(&out);
+        out.close();
+        gShouldDumpWtfStats = false;
+    }
+};
+
+    
+void switchDumpVar(int signal)
+{
+    const std::string msg("III: signal to dump the file received! \n");
+
+    write(1, msg.c_str(), msg.size());
+    gShouldDumpWtfStats = true;
+}
+
 bool ChildProcessMainBase::parseCommandLine(int argc, char** argv)
 {
     ASSERT(argc >= 2);

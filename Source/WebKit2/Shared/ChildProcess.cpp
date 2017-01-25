@@ -29,6 +29,10 @@
 #include "SandboxInitializationParameters.h"
 #include <unistd.h>
 
+#include <wtf/macros.h>
+
+
+
 namespace WebKit {
 
 ChildProcess::ChildProcess()
@@ -36,15 +40,15 @@ ChildProcess::ChildProcess()
     , m_terminationCounter(0)
     , m_terminationTimer(RunLoop::main(), this, &ChildProcess::terminationTimerFired)
     , m_processSuppressionDisabled("Process Suppression Disabled by UIProcess")
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 ChildProcess::~ChildProcess()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 static void didCloseOnConnectionWorkQueue(IPC::Connection*)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If the connection has been closed and we haven't responded in the main thread for 10 seconds
     // the process will exit forcibly.
     auto watchdogDelay = std::chrono::seconds(10);
@@ -59,7 +63,7 @@ static void didCloseOnConnectionWorkQueue(IPC::Connection*)
 }
 
 void ChildProcess::initialize(const ChildProcessInitializationParameters& parameters)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     platformInitialize();
 
 #if PLATFORM(COCOA)
@@ -79,7 +83,7 @@ void ChildProcess::initialize(const ChildProcessInitializationParameters& parame
 }
 
 void ChildProcess::setProcessSuppressionEnabled(bool enabled)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (enabled)
         m_processSuppressionDisabled.stop();
     else
@@ -87,50 +91,50 @@ void ChildProcess::setProcessSuppressionEnabled(bool enabled)
 }
 
 void ChildProcess::initializeProcess(const ChildProcessInitializationParameters&)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void ChildProcess::initializeProcessName(const ChildProcessInitializationParameters&)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void ChildProcess::initializeConnection(IPC::Connection*)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void ChildProcess::addMessageReceiver(IPC::StringReference messageReceiverName, IPC::MessageReceiver& messageReceiver)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_messageReceiverMap.addMessageReceiver(messageReceiverName, messageReceiver);
 }
 
 void ChildProcess::addMessageReceiver(IPC::StringReference messageReceiverName, uint64_t destinationID, IPC::MessageReceiver& messageReceiver)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_messageReceiverMap.addMessageReceiver(messageReceiverName, destinationID, messageReceiver);
 }
 
 void ChildProcess::removeMessageReceiver(IPC::StringReference messageReceiverName, uint64_t destinationID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_messageReceiverMap.removeMessageReceiver(messageReceiverName, destinationID);
 }
 
 void ChildProcess::removeMessageReceiver(IPC::StringReference messageReceiverName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_messageReceiverMap.removeMessageReceiver(messageReceiverName);
 }
 
 void ChildProcess::removeMessageReceiver(IPC::MessageReceiver& messageReceiver)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_messageReceiverMap.removeMessageReceiver(messageReceiver);
 }
 
 void ChildProcess::disableTermination()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_terminationCounter++;
     m_terminationTimer.stop();
 }
 
 void ChildProcess::enableTermination()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_terminationCounter > 0);
     m_terminationCounter--;
 
@@ -146,17 +150,17 @@ void ChildProcess::enableTermination()
 }
 
 IPC::Connection* ChildProcess::messageSenderConnection()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_connection.get();
 }
 
 uint64_t ChildProcess::messageSenderDestinationID()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return 0;
 }
 
 void ChildProcess::terminationTimerFired()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!shouldTerminate())
         return;
 
@@ -164,36 +168,36 @@ void ChildProcess::terminationTimerFired()
 }
 
 void ChildProcess::stopRunLoop()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     platformStopRunLoop();
 }
 
 #if !PLATFORM(IOS)
 void ChildProcess::platformStopRunLoop()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RunLoop::main().stop();
 }
 #endif
 
 void ChildProcess::terminate()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_connection->invalidate();
 
     stopRunLoop();
 }
 
 void ChildProcess::shutDown()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     terminate();
 }
 
 #if !PLATFORM(COCOA)
 void ChildProcess::platformInitialize()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void ChildProcess::initializeSandbox(const ChildProcessInitializationParameters&, SandboxInitializationParameters&)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 #endif
 

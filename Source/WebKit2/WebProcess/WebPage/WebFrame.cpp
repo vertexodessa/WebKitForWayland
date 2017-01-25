@@ -89,6 +89,8 @@
 #include <wtf/RefCountedLeakCounter.h>
 #endif
 
+#include <wtf/macros.h>
+
 using namespace JSC;
 using namespace WebCore;
 
@@ -97,19 +99,19 @@ namespace WebKit {
 DEFINE_DEBUG_ONLY_GLOBAL(WTF::RefCountedLeakCounter, webFrameCounter, ("WebFrame"));
 
 static uint64_t generateFrameID()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static uint64_t uniqueFrameID = 1;
     return uniqueFrameID++;
 }
 
 static uint64_t generateListenerID()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static uint64_t uniqueListenerID = 1;
     return uniqueListenerID++;
 }
 
 PassRefPtr<WebFrame> WebFrame::createWithCoreMainFrame(WebPage* page, WebCore::Frame* coreFrame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto frame = create(std::unique_ptr<WebFrameLoaderClient>(static_cast<WebFrameLoaderClient*>(&coreFrame->loader().client())));
     page->send(Messages::WebPageProxy::DidCreateMainFrame(frame->frameID()), page->pageID(), IPC::DispatchMessageEvenWhenWaitingForSyncReply);
 
@@ -120,7 +122,7 @@ PassRefPtr<WebFrame> WebFrame::createWithCoreMainFrame(WebPage* page, WebCore::F
 }
 
 PassRefPtr<WebFrame> WebFrame::createSubframe(WebPage* page, const String& frameName, HTMLFrameOwnerElement* ownerElement)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto frame = create(std::make_unique<WebFrameLoaderClient>());
     page->send(Messages::WebPageProxy::DidCreateSubframe(frame->frameID()), page->pageID(), IPC::DispatchMessageEvenWhenWaitingForSyncReply);
 
@@ -136,7 +138,7 @@ PassRefPtr<WebFrame> WebFrame::createSubframe(WebPage* page, const String& frame
 }
 
 PassRefPtr<WebFrame> WebFrame::create(std::unique_ptr<WebFrameLoaderClient> frameLoaderClient)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto frame = adoptRef(*new WebFrame(WTFMove(frameLoaderClient)));
 
     // Add explict ref() that will be balanced in WebFrameLoaderClient::frameLoaderDestroyed().
@@ -156,7 +158,7 @@ WebFrame::WebFrame(std::unique_ptr<WebFrameLoaderClient> frameLoaderClient)
 #if PLATFORM(IOS)
     , m_firstLayerTreeTransactionIDAfterDidCommitLoad(0)
 #endif
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frameLoaderClient->setWebFrame(this);
     WebProcess::singleton().addWebFrame(m_frameID, this);
 
@@ -166,7 +168,7 @@ WebFrame::WebFrame(std::unique_ptr<WebFrameLoaderClient> frameLoaderClient)
 }
 
 WebFrame::~WebFrame()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_coreFrame);
 
 #ifndef NDEBUG
@@ -175,7 +177,7 @@ WebFrame::~WebFrame()
 }
 
 WebPage* WebFrame::page() const
-{ 
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__); 
     if (!m_coreFrame)
         return 0;
     
@@ -186,7 +188,7 @@ WebPage* WebFrame::page() const
 }
 
 WebFrame* WebFrame::fromCoreFrame(Frame& frame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto* webFrameLoaderClient = toWebFrameLoaderClient(frame.loader().client());
     if (!webFrameLoaderClient)
         return nullptr;
@@ -195,13 +197,13 @@ WebFrame* WebFrame::fromCoreFrame(Frame& frame)
 }
 
 void WebFrame::invalidate()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().removeWebFrame(m_frameID);
     m_coreFrame = 0;
 }
 
 uint64_t WebFrame::setUpPolicyListener(WebCore::FramePolicyFunction policyFunction)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: <rdar://5634381> We need to support multiple active policy listeners.
 
     invalidatePolicyListener();
@@ -212,7 +214,7 @@ uint64_t WebFrame::setUpPolicyListener(WebCore::FramePolicyFunction policyFuncti
 }
 
 void WebFrame::invalidatePolicyListener()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_policyListenerID)
         return;
 
@@ -222,7 +224,7 @@ void WebFrame::invalidatePolicyListener()
 }
 
 void WebFrame::didReceivePolicyDecision(uint64_t listenerID, PolicyAction action, uint64_t navigationID, DownloadID downloadID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return;
 
@@ -248,7 +250,7 @@ void WebFrame::didReceivePolicyDecision(uint64_t listenerID, PolicyAction action
 }
 
 void WebFrame::startDownload(const WebCore::ResourceRequest& request, const String& suggestedName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_policyDownloadID.downloadID());
 
     auto policyDownloadID = m_policyDownloadID;
@@ -260,7 +262,7 @@ void WebFrame::startDownload(const WebCore::ResourceRequest& request, const Stri
 }
 
 void WebFrame::convertMainResourceLoadToDownload(DocumentLoader* documentLoader, SessionID sessionID, const ResourceRequest& request, const ResourceResponse& response)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_policyDownloadID.downloadID());
 
     auto policyDownloadID = m_policyDownloadID;
@@ -282,7 +284,7 @@ void WebFrame::convertMainResourceLoadToDownload(DocumentLoader* documentLoader,
 }
 
 String WebFrame::source() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return String();
     Document* document = m_coreFrame->document();
@@ -301,7 +303,7 @@ String WebFrame::source() const
 }
 
 String WebFrame::contentsAsString() const 
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return String();
 
@@ -339,7 +341,7 @@ String WebFrame::contentsAsString() const
 }
 
 String WebFrame::selectionAsString() const 
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return String();
 
@@ -347,7 +349,7 @@ String WebFrame::selectionAsString() const
 }
 
 IntSize WebFrame::size() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return IntSize();
 
@@ -359,7 +361,7 @@ IntSize WebFrame::size() const
 }
 
 bool WebFrame::isFrameSet() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return false;
 
@@ -370,7 +372,7 @@ bool WebFrame::isFrameSet() const
 }
 
 bool WebFrame::isMainFrame() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return false;
 
@@ -378,7 +380,7 @@ bool WebFrame::isMainFrame() const
 }
 
 String WebFrame::name() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return String();
 
@@ -386,7 +388,7 @@ String WebFrame::name() const
 }
 
 String WebFrame::url() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return String();
 
@@ -398,7 +400,7 @@ String WebFrame::url() const
 }
 
 CertificateInfo WebFrame::certificateInfo() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return { };
 
@@ -410,7 +412,7 @@ CertificateInfo WebFrame::certificateInfo() const
 }
 
 String WebFrame::innerText() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return String();
 
@@ -421,7 +423,7 @@ String WebFrame::innerText() const
 }
 
 WebFrame* WebFrame::parentFrame() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame || !m_coreFrame->ownerElement())
         return 0;
 
@@ -429,7 +431,7 @@ WebFrame* WebFrame::parentFrame() const
 }
 
 Ref<API::Array> WebFrame::childFrames()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return API::Array::create();
 
@@ -450,7 +452,7 @@ Ref<API::Array> WebFrame::childFrames()
 }
 
 String WebFrame::layerTreeAsText() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return "";
 
@@ -458,7 +460,7 @@ String WebFrame::layerTreeAsText() const
 }
 
 unsigned WebFrame::pendingUnloadCount() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return 0;
 
@@ -466,7 +468,7 @@ unsigned WebFrame::pendingUnloadCount() const
 }
 
 bool WebFrame::allowsFollowingLink(const WebCore::URL& url) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return true;
         
@@ -474,17 +476,17 @@ bool WebFrame::allowsFollowingLink(const WebCore::URL& url) const
 }
 
 JSGlobalContextRef WebFrame::jsContext()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return toGlobalRef(m_coreFrame->script().globalObject(mainThreadNormalWorld())->globalExec());
 }
 
 JSGlobalContextRef WebFrame::jsContextForWorld(InjectedBundleScriptWorld* world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return toGlobalRef(m_coreFrame->script().globalObject(world->coreWorld())->globalExec());
 }
 
 bool WebFrame::handlesPageScaleGesture() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame->document()->isPluginDocument())
         return 0;
 
@@ -494,7 +496,7 @@ bool WebFrame::handlesPageScaleGesture() const
 }
 
 bool WebFrame::requiresUnifiedScaleFactor() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame->document()->isPluginDocument())
         return 0;
 
@@ -504,7 +506,7 @@ bool WebFrame::requiresUnifiedScaleFactor() const
 }
 
 void WebFrame::setAccessibleName(const String& accessibleName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!AXObjectCache::accessibilityEnabled())
         return;
     
@@ -523,7 +525,7 @@ void WebFrame::setAccessibleName(const String& accessibleName)
 }
 
 IntRect WebFrame::contentBounds() const
-{    
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);    
     if (!m_coreFrame)
         return IntRect();
     
@@ -535,7 +537,7 @@ IntRect WebFrame::contentBounds() const
 }
 
 IntRect WebFrame::visibleContentBounds() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return IntRect();
     
@@ -548,7 +550,7 @@ IntRect WebFrame::visibleContentBounds() const
 }
 
 IntRect WebFrame::visibleContentBoundsExcludingScrollbars() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return IntRect();
     
@@ -561,7 +563,7 @@ IntRect WebFrame::visibleContentBoundsExcludingScrollbars() const
 }
 
 IntSize WebFrame::scrollOffset() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return IntSize();
     
@@ -573,7 +575,7 @@ IntSize WebFrame::scrollOffset() const
 }
 
 bool WebFrame::hasHorizontalScrollbar() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return false;
 
@@ -585,7 +587,7 @@ bool WebFrame::hasHorizontalScrollbar() const
 }
 
 bool WebFrame::hasVerticalScrollbar() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return false;
 
@@ -597,7 +599,7 @@ bool WebFrame::hasVerticalScrollbar() const
 }
 
 PassRefPtr<InjectedBundleHitTestResult> WebFrame::hitTest(const IntPoint point) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return 0;
 
@@ -605,7 +607,7 @@ PassRefPtr<InjectedBundleHitTestResult> WebFrame::hitTest(const IntPoint point) 
 }
 
 bool WebFrame::getDocumentBackgroundColor(double* red, double* green, double* blue, double* alpha)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return false;
 
@@ -622,7 +624,7 @@ bool WebFrame::getDocumentBackgroundColor(double* red, double* green, double* bl
 }
 
 bool WebFrame::containsAnyFormElements() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return false;
     
@@ -640,7 +642,7 @@ bool WebFrame::containsAnyFormElements() const
 }
 
 bool WebFrame::containsAnyFormControls() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return false;
     
@@ -658,7 +660,7 @@ bool WebFrame::containsAnyFormControls() const
 }
 
 void WebFrame::stopLoading()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return;
 
@@ -666,7 +668,7 @@ void WebFrame::stopLoading()
 }
 
 WebFrame* WebFrame::frameForContext(JSContextRef context)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     JSObjectRef globalObjectRef = JSContextGetGlobalObject(context);
     JSC::JSObject* globalObjectObj = toJS(globalObjectRef);
     if (strcmp(globalObjectObj->classInfo()->className, "JSDOMWindowShell") != 0)
@@ -677,7 +679,7 @@ WebFrame* WebFrame::frameForContext(JSContextRef context)
 }
 
 JSValueRef WebFrame::jsWrapperForWorld(InjectedBundleNodeHandle* nodeHandle, InjectedBundleScriptWorld* world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return 0;
 
@@ -689,7 +691,7 @@ JSValueRef WebFrame::jsWrapperForWorld(InjectedBundleNodeHandle* nodeHandle, Inj
 }
 
 JSValueRef WebFrame::jsWrapperForWorld(InjectedBundleRangeHandle* rangeHandle, InjectedBundleScriptWorld* world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return 0;
 
@@ -701,7 +703,7 @@ JSValueRef WebFrame::jsWrapperForWorld(InjectedBundleRangeHandle* rangeHandle, I
 }
 
 JSValueRef WebFrame::jsWrapperForWorld(InjectedBundleFileHandle* fileHandle, InjectedBundleScriptWorld* world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return nullptr;
 
@@ -713,7 +715,7 @@ JSValueRef WebFrame::jsWrapperForWorld(InjectedBundleFileHandle* fileHandle, Inj
 }
 
 String WebFrame::counterValue(JSObjectRef element)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!toJS(element)->inherits(JSElement::info()))
         return String();
 
@@ -721,7 +723,7 @@ String WebFrame::counterValue(JSObjectRef element)
 }
 
 String WebFrame::provisionalURL() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return String();
 
@@ -733,7 +735,7 @@ String WebFrame::provisionalURL() const
 }
 
 String WebFrame::suggestedFilenameForResourceWithURL(const URL& url) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return String();
 
@@ -754,7 +756,7 @@ String WebFrame::suggestedFilenameForResourceWithURL(const URL& url) const
 }
 
 String WebFrame::mimeTypeForResourceWithURL(const URL& url) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return String();
 
@@ -775,7 +777,7 @@ String WebFrame::mimeTypeForResourceWithURL(const URL& url) const
 }
 
 void WebFrame::setTextDirection(const String& direction)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coreFrame)
         return;
 
@@ -788,13 +790,13 @@ void WebFrame::setTextDirection(const String& direction)
 }
 
 void WebFrame::documentLoaderDetached(uint64_t navigationID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     page()->send(Messages::WebPageProxy::DidDestroyNavigation(navigationID));
 }
 
 #if PLATFORM(COCOA)
 RetainPtr<CFDataRef> WebFrame::webArchiveData(FrameFilterFunction callback, void* context)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<LegacyWebArchive> archive = LegacyWebArchive::create(*coreFrame()->document(), [this, callback, context](Frame& frame) -> bool {
         if (!callback)
             return true;
@@ -813,7 +815,7 @@ RetainPtr<CFDataRef> WebFrame::webArchiveData(FrameFilterFunction callback, void
 #endif
 
 PassRefPtr<ShareableBitmap> WebFrame::createSelectionSnapshot() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     std::unique_ptr<ImageBuffer> snapshot = snapshotSelection(*coreFrame(), WebCore::SnapshotOptionsForceBlackText);
     if (!snapshot)
         return nullptr;

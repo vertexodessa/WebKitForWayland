@@ -37,6 +37,8 @@
 #include "HTMLUnknownElement.h"
 #include "JSCustomElementInterface.h"
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 using namespace HTMLNames;
@@ -50,11 +52,11 @@ HTMLDocumentParser::HTMLDocumentParser(HTMLDocument& document)
     , m_parserScheduler(std::make_unique<HTMLParserScheduler>(*this))
     , m_xssAuditorDelegate(document)
     , m_preloader(std::make_unique<HTMLResourcePreloader>(document))
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 Ref<HTMLDocumentParser> HTMLDocumentParser::create(HTMLDocument& document)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return adoptRef(*new HTMLDocumentParser(document));
 }
 
@@ -64,7 +66,7 @@ inline HTMLDocumentParser::HTMLDocumentParser(DocumentFragment& fragment, Elemen
     , m_tokenizer(m_options)
     , m_treeBuilder(std::make_unique<HTMLTreeBuilder>(*this, fragment, contextElement, parserContentPolicy(), m_options))
     , m_xssAuditorDelegate(fragment.document())
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // https://html.spec.whatwg.org/multipage/syntax.html#parsing-html-fragments
     if (contextElement.isHTMLElement())
         m_tokenizer.updateStateFor(contextElement.tagQName().localName());
@@ -72,12 +74,12 @@ inline HTMLDocumentParser::HTMLDocumentParser(DocumentFragment& fragment, Elemen
 }
 
 inline Ref<HTMLDocumentParser> HTMLDocumentParser::create(DocumentFragment& fragment, Element& contextElement, ParserContentPolicy parserContentPolicy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return adoptRef(*new HTMLDocumentParser(fragment, contextElement, parserContentPolicy));
 }
 
 HTMLDocumentParser::~HTMLDocumentParser()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_parserScheduler);
     ASSERT(!m_pumpSessionNestingLevel);
     ASSERT(!m_preloadScanner);
@@ -85,7 +87,7 @@ HTMLDocumentParser::~HTMLDocumentParser()
 }
 
 void HTMLDocumentParser::detach()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     DocumentParser::detach();
 
     if (m_scriptRunner)
@@ -98,7 +100,7 @@ void HTMLDocumentParser::detach()
 }
 
 void HTMLDocumentParser::stopParsing()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     DocumentParser::stopParsing();
     m_parserScheduler = nullptr; // Deleting the scheduler will clear any timers.
 }
@@ -106,7 +108,7 @@ void HTMLDocumentParser::stopParsing()
 // This kicks off "Once the user agent stops parsing" as described by:
 // https://html.spec.whatwg.org/multipage/syntax.html#the-end
 void HTMLDocumentParser::prepareToStopParsing()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!hasInsertionPoint());
 
     // pumpTokenizer can cause this parser to be detached from the Document,
@@ -135,27 +137,27 @@ void HTMLDocumentParser::prepareToStopParsing()
 }
 
 inline bool HTMLDocumentParser::inPumpSession() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_pumpSessionNestingLevel > 0;
 }
 
 inline bool HTMLDocumentParser::shouldDelayEnd() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return inPumpSession() || isWaitingForScripts() || isScheduledForResume() || isExecutingScript();
 }
 
 bool HTMLDocumentParser::isParsingFragment() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_treeBuilder->isParsingFragment();
 }
 
 bool HTMLDocumentParser::processingData() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return isScheduledForResume() || inPumpSession();
 }
 
 void HTMLDocumentParser::pumpTokenizerIfPossible(SynchronousMode mode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isStopped() || isWaitingForScripts())
         return;
 
@@ -169,13 +171,13 @@ void HTMLDocumentParser::pumpTokenizerIfPossible(SynchronousMode mode)
 }
 
 bool HTMLDocumentParser::isScheduledForResume() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_parserScheduler && m_parserScheduler->isScheduledForResume();
 }
 
 // Used by HTMLParserScheduler
 void HTMLDocumentParser::resumeParsingAfterYield()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // pumpTokenizer can cause this parser to be detached from the Document,
     // but we need to ensure it isn't deleted yet.
     Ref<HTMLDocumentParser> protectedThis(*this);
@@ -187,7 +189,7 @@ void HTMLDocumentParser::resumeParsingAfterYield()
 }
 
 void HTMLDocumentParser::runScriptsForPausedTreeBuilder()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(scriptingContentIsAllowed(parserContentPolicy()));
 
 #if ENABLE(CUSTOM_ELEMENTS)
@@ -215,7 +217,7 @@ void HTMLDocumentParser::runScriptsForPausedTreeBuilder()
 }
 
 Document* HTMLDocumentParser::contextForParsingSession()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // The parsing session should interact with the document only when parsing
     // non-fragments. Otherwise, we might delay the load event mistakenly.
     if (isParsingFragment())
@@ -224,7 +226,7 @@ Document* HTMLDocumentParser::contextForParsingSession()
 }
 
 bool HTMLDocumentParser::pumpTokenizerLoop(SynchronousMode mode, bool parsingFragment, PumpSession& session)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     do {
         if (UNLIKELY(isWaitingForScripts())) {
             if (mode == AllowYield && m_parserScheduler->shouldYieldBeforeExecutingScript(session))
@@ -268,7 +270,7 @@ bool HTMLDocumentParser::pumpTokenizerLoop(SynchronousMode mode, bool parsingFra
 }
 
 void HTMLDocumentParser::pumpTokenizer(SynchronousMode mode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!isStopped());
     ASSERT(!isScheduledForResume());
 
@@ -302,7 +304,7 @@ void HTMLDocumentParser::pumpTokenizer(SynchronousMode mode)
 }
 
 void HTMLDocumentParser::constructTreeFromHTMLToken(HTMLTokenizer::TokenPtr& rawToken)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     AtomicHTMLToken token(*rawToken);
 
     // We clear the rawToken in case constructTreeFromAtomicToken
@@ -325,7 +327,7 @@ void HTMLDocumentParser::constructTreeFromHTMLToken(HTMLTokenizer::TokenPtr& raw
 }
 
 bool HTMLDocumentParser::hasInsertionPoint()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: The wasCreatedByScript() branch here might not be fully correct.
     // Our model of the EOF character differs slightly from the one in the spec
     // because our treatment is uniform between network-sourced and script-sourced
@@ -334,7 +336,7 @@ bool HTMLDocumentParser::hasInsertionPoint()
 }
 
 void HTMLDocumentParser::insert(const SegmentedString& source)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isStopped())
         return;
 
@@ -360,7 +362,7 @@ void HTMLDocumentParser::insert(const SegmentedString& source)
 }
 
 void HTMLDocumentParser::append(RefPtr<StringImpl>&& inputSource)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isStopped())
         return;
 
@@ -397,7 +399,7 @@ void HTMLDocumentParser::append(RefPtr<StringImpl>&& inputSource)
 }
 
 void HTMLDocumentParser::end()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!isDetached());
     ASSERT(!isScheduledForResume());
 
@@ -406,7 +408,7 @@ void HTMLDocumentParser::end()
 }
 
 void HTMLDocumentParser::attemptToRunDeferredScriptsAndEnd()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isStopping());
     ASSERT(!hasInsertionPoint());
     if (m_scriptRunner && !m_scriptRunner->executeScriptsWaitingForParsing())
@@ -415,7 +417,7 @@ void HTMLDocumentParser::attemptToRunDeferredScriptsAndEnd()
 }
 
 void HTMLDocumentParser::attemptToEnd()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // finish() indicates we will not receive any more data. If we are waiting on
     // an external script to load, we can't finish parsing quite yet.
 
@@ -427,7 +429,7 @@ void HTMLDocumentParser::attemptToEnd()
 }
 
 void HTMLDocumentParser::endIfDelayed()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If we've already been detached, don't bother ending.
     if (isDetached())
         return;
@@ -440,7 +442,7 @@ void HTMLDocumentParser::endIfDelayed()
 }
 
 void HTMLDocumentParser::finish()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: We should ASSERT(!m_parserStopped) here, since it does not
     // makes sense to call any methods on DocumentParser once it's been stopped.
     // However, FrameLoader::stop calls DocumentParser::finish unconditionally.
@@ -455,23 +457,23 @@ void HTMLDocumentParser::finish()
 }
 
 bool HTMLDocumentParser::isExecutingScript() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_scriptRunner && m_scriptRunner->isExecutingScript();
 }
 
 TextPosition HTMLDocumentParser::textPosition() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto& currentString = m_input.current();
     return TextPosition(currentString.currentLine(), currentString.currentColumn());
 }
 
 bool HTMLDocumentParser::shouldAssociateConsoleMessagesWithTextPosition() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return inPumpSession() && !isExecutingScript();
 }
 
 bool HTMLDocumentParser::isWaitingForScripts() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // When the TreeBuilder encounters a </script> tag, it returns to the HTMLDocumentParser
     // where the script is transfered from the treebuilder to the script runner.
     // The script runner will hold the script until its loaded and run. During
@@ -487,7 +489,7 @@ bool HTMLDocumentParser::isWaitingForScripts() const
 }
 
 void HTMLDocumentParser::resumeParsingAfterScriptExecution()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!isExecutingScript());
     ASSERT(!isWaitingForScripts());
 
@@ -501,7 +503,7 @@ void HTMLDocumentParser::resumeParsingAfterScriptExecution()
 }
 
 void HTMLDocumentParser::watchForLoad(CachedResource* cachedScript)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!cachedScript->isLoaded());
     // addClient would call notifyFinished if the load were complete.
     // Callers do not expect to be re-entered from this call, so they should
@@ -510,19 +512,19 @@ void HTMLDocumentParser::watchForLoad(CachedResource* cachedScript)
 }
 
 void HTMLDocumentParser::stopWatchingForLoad(CachedResource* cachedScript)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     cachedScript->removeClient(this);
 }
 
 void HTMLDocumentParser::appendCurrentInputStreamToPreloadScannerAndScan()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_preloadScanner);
     m_preloadScanner->appendToEnd(m_input.current());
     m_preloadScanner->scan(*m_preloader, *document());
 }
 
 void HTMLDocumentParser::notifyFinished(CachedResource* cachedResource)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // pumpTokenizer can cause this parser to be detached from the Document,
     // but we need to ensure it isn't deleted yet.
     Ref<HTMLDocumentParser> protectedThis(*this);
@@ -540,7 +542,7 @@ void HTMLDocumentParser::notifyFinished(CachedResource* cachedResource)
 }
 
 void HTMLDocumentParser::executeScriptsWaitingForStylesheets()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Document only calls this when the Document owns the DocumentParser
     // so this will not be called in the DocumentFragment case.
     ASSERT(m_scriptRunner);
@@ -559,7 +561,7 @@ void HTMLDocumentParser::executeScriptsWaitingForStylesheets()
 }
 
 void HTMLDocumentParser::parseDocumentFragment(const String& source, DocumentFragment& fragment, Element& contextElement, ParserContentPolicy parserContentPolicy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto parser = create(fragment, contextElement, parserContentPolicy);
     parser->insert(source); // Use insert() so that the parser will not yield.
     parser->finish();
@@ -568,13 +570,13 @@ void HTMLDocumentParser::parseDocumentFragment(const String& source, DocumentFra
 }
     
 void HTMLDocumentParser::suspendScheduledTasks()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_parserScheduler)
         m_parserScheduler->suspend();
 }
 
 void HTMLDocumentParser::resumeScheduledTasks()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_parserScheduler)
         m_parserScheduler->resume();
 }

@@ -353,6 +353,7 @@ static NO_RETURN void dumpBacktraceSignalHandler(int sig)
 
 static void installSignalHandlersForFatalErrors(void (*handler)(int))
 {
+    return;
     signal(SIGILL, handler); //    4: illegal instruction (not reset when caught).
     signal(SIGTRAP, handler); //   5: trace trap (not reset when caught).
     signal(SIGFPE, handler); //    8: floating point exception.

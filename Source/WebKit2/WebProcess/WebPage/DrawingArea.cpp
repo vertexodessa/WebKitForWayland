@@ -47,12 +47,14 @@
 #endif
 #endif
 
+#include <wtf/macros.h>
+
 using namespace WebCore;
 
 namespace WebKit {
 
 std::unique_ptr<DrawingArea> DrawingArea::create(WebPage& webPage, const WebPageCreationParameters& parameters)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (parameters.drawingAreaType) {
 #if PLATFORM(COCOA)
 #if !PLATFORM(IOS)
@@ -81,24 +83,24 @@ std::unique_ptr<DrawingArea> DrawingArea::create(WebPage& webPage, const WebPage
 DrawingArea::DrawingArea(DrawingAreaType type, WebPage& webPage)
     : m_type(type)
     , m_webPage(webPage)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().addMessageReceiver(Messages::DrawingArea::messageReceiverName(), m_webPage.pageID(), *this);
 }
 
 DrawingArea::~DrawingArea()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().removeMessageReceiver(Messages::DrawingArea::messageReceiverName(), m_webPage.pageID());
 }
 
 void DrawingArea::dispatchAfterEnsuringUpdatedScrollPosition(std::function<void ()> function)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Scroll position updates are synchronous by default so we can just call the function right away here.
     function();
 }
 
 #if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
 RefPtr<WebCore::DisplayRefreshMonitor> DrawingArea::createDisplayRefreshMonitor(PlatformDisplayID)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return nullptr;
 }
 #endif

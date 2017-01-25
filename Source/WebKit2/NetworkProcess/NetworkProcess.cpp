@@ -63,6 +63,8 @@
 #include <wtf/RunLoop.h>
 #include <wtf/text/CString.h>
 
+#include <wtf/macros.h>
+
 #if ENABLE(SEC_ITEM_SHIM)
 #include "SecItemShim.h"
 #endif
@@ -94,6 +96,7 @@ NetworkProcess::NetworkProcess()
     , m_webSQLiteDatabaseTracker(*this)
 #endif
 {
+    
     NetworkProcessPlatformStrategies::initialize();
 
     addSupplement<AuthenticationManager>();

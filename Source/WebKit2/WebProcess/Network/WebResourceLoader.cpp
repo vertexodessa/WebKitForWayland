@@ -40,6 +40,8 @@
 #include <WebCore/ResourceLoader.h>
 #include <WebCore/SubresourceLoader.h>
 
+#include <wtf/macros.h>
+
 using namespace WebCore;
 
 #define RELEASE_LOG_IF_ALLOWED(...) RELEASE_LOG_IF(isAlwaysOnLoggingAllowed(), __VA_ARGS__)
@@ -47,36 +49,36 @@ using namespace WebCore;
 namespace WebKit {
 
 Ref<WebResourceLoader> WebResourceLoader::create(Ref<ResourceLoader>&& coreLoader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return adoptRef(*new WebResourceLoader(WTFMove(coreLoader)));
 }
 
 WebResourceLoader::WebResourceLoader(Ref<WebCore::ResourceLoader>&& coreLoader)
     : m_coreLoader(WTFMove(coreLoader))
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 WebResourceLoader::~WebResourceLoader()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 IPC::Connection* WebResourceLoader::messageSenderConnection()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return &WebProcess::singleton().networkConnection().connection();
 }
 
 uint64_t WebResourceLoader::messageSenderDestinationID()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_coreLoader->identifier();
 }
 
 void WebResourceLoader::detachFromCoreLoader()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_coreLoader = nullptr;
 }
 
 void WebResourceLoader::willSendRequest(ResourceRequest&& proposedRequest, ResourceResponse&& redirectResponse)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Network, "(WebProcess) WebResourceLoader::willSendRequest to '%s'", proposedRequest.url().string().latin1().data());
     RELEASE_LOG_IF_ALLOWED("WebResourceLoader::willSendRequest, WebResourceLoader = %p", this);
 
@@ -94,12 +96,12 @@ void WebResourceLoader::willSendRequest(ResourceRequest&& proposedRequest, Resou
 }
 
 void WebResourceLoader::didSendData(uint64_t bytesSent, uint64_t totalBytesToBeSent)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_coreLoader->didSendData(bytesSent, totalBytesToBeSent);
 }
 
 void WebResourceLoader::didReceiveResponse(const ResourceResponse& response, bool needsContinueDidReceiveResponseMessage)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Network, "(WebProcess) WebResourceLoader::didReceiveResponse for '%s'. Status %d.", m_coreLoader->url().string().latin1().data(), response.httpStatusCode());
     RELEASE_LOG_IF_ALLOWED("WebResourceLoader::didReceiveResponse, WebResourceLoader = %p, status = %d.", this, response.httpStatusCode());
 
@@ -131,7 +133,7 @@ void WebResourceLoader::didReceiveResponse(const ResourceResponse& response, boo
 }
 
 void WebResourceLoader::didReceiveData(const IPC::DataReference& data, int64_t encodedDataLength)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Network, "(WebProcess) WebResourceLoader::didReceiveData of size %lu for '%s'", data.size(), m_coreLoader->url().string().latin1().data());
     RELEASE_LOG_IF_ALLOWED("WebResourceLoader::didReceiveData, WebResourceLoader = %p, size = %lu", this, data.size());
 
@@ -145,9 +147,9 @@ void WebResourceLoader::didReceiveData(const IPC::DataReference& data, int64_t e
 }
 
 void WebResourceLoader::didFinishResourceLoad(double finishTime)
-{
-    LOG(Network, "(WebProcess) WebResourceLoader::didFinishResourceLoad for '%s'", m_coreLoader->url().string().latin1().data());
-    RELEASE_LOG_IF_ALLOWED("WebResourceLoader::didFinishResourceLoad, WebResourceLoader = %p", this);
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+    //LOG(Network, "(WebProcess) WebResourceLoader::didFinishResourceLoad for '%s'", m_coreLoader->url().string().latin1().data());
+    //RELEASE_LOG_IF_ALLOWED("WebResourceLoader::didFinishResourceLoad, WebResourceLoader = %p", this);
 
 #if USE(QUICK_LOOK)
     if (QuickLookHandle* quickLookHandle = m_coreLoader->documentLoader()->quickLookHandle()) {
@@ -159,7 +161,7 @@ void WebResourceLoader::didFinishResourceLoad(double finishTime)
 }
 
 void WebResourceLoader::didFailResourceLoad(const ResourceError& error)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Network, "(WebProcess) WebResourceLoader::didFailResourceLoad for '%s'", m_coreLoader->url().string().latin1().data());
     RELEASE_LOG_IF_ALLOWED("WebResourceLoader::didFailResourceLoad, WebResourceLoader = %p", this);
 
@@ -174,7 +176,7 @@ void WebResourceLoader::didFailResourceLoad(const ResourceError& error)
 
 #if ENABLE(SHAREABLE_RESOURCE)
 void WebResourceLoader::didReceiveResource(const ShareableResource::Handle& handle, double finishTime)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Network, "(WebProcess) WebResourceLoader::didReceiveResource for '%s'", m_coreLoader->url().string().latin1().data());
     RELEASE_LOG_IF_ALLOWED("WebResourceLoader::didReceiveResource, WebResourceLoader = %p", this);
 
@@ -212,7 +214,7 @@ void WebResourceLoader::didReceiveResource(const ShareableResource::Handle& hand
 #endif
 
 bool WebResourceLoader::isAlwaysOnLoggingAllowed() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return resourceLoader() && resourceLoader()->isAlwaysOnLoggingAllowed();
 }
 

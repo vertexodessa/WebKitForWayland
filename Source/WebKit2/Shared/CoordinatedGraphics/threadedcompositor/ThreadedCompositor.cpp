@@ -45,12 +45,14 @@
 #include <GL/gl.h>
 #endif
 
+#include <wtf/macros.h>
+
 using namespace WebCore;
 
 namespace WebKit {
 
 Ref<ThreadedCompositor> ThreadedCompositor::create(Client* client, WebPage& webPage, uint64_t nativeSurfaceHandle)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return adoptRef(*new ThreadedCompositor(client, webPage, nativeSurfaceHandle));
 }
 
@@ -61,7 +63,7 @@ ThreadedCompositor::ThreadedCompositor(Client* client, WebPage& webPage, uint64_
     , m_displayRefreshMonitor(adoptRef(new WebKit::DisplayRefreshMonitor(*this)))
 #endif
     , m_compositingRunLoop(std::make_unique<CompositingRunLoop>([this] { renderLayerTree(); }))
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_clientRendersNextFrame.store(false);
     m_coordinateUpdateCompletionWithClient.store(false);
 
@@ -77,12 +79,12 @@ ThreadedCompositor::ThreadedCompositor(Client* client, WebPage& webPage, uint64_
 }
 
 ThreadedCompositor::~ThreadedCompositor()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_client);
 }
 
 void ThreadedCompositor::invalidate()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_scene->detach();
     m_compositingRunLoop->stopUpdates();
     m_compositingRunLoop->performTaskSync([this, protectedThis = makeRef(*this)] {
@@ -102,7 +104,7 @@ void ThreadedCompositor::invalidate()
 }
 
 void ThreadedCompositor::setNativeSurfaceHandleForCompositing(uint64_t handle)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(GTK)
     m_compositingRunLoop->stopUpdates();
     m_compositingRunLoop->performTaskSync([this, protectedThis = makeRef(*this), handle] {
@@ -119,7 +121,7 @@ void ThreadedCompositor::setNativeSurfaceHandleForCompositing(uint64_t handle)
 }
 
 void ThreadedCompositor::setDeviceScaleFactor(float scale)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_compositingRunLoop->performTask([this, protectedThis = makeRef(*this), scale] {
         m_deviceScaleFactor = scale;
         scheduleDisplayImmediately();
@@ -127,7 +129,7 @@ void ThreadedCompositor::setDeviceScaleFactor(float scale)
 }
 
 void ThreadedCompositor::setDrawsBackground(bool drawsBackground)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_compositingRunLoop->performTask([this, protectedThis = Ref<ThreadedCompositor>(*this), drawsBackground] {
         m_drawsBackground = drawsBackground;
         scheduleDisplayImmediately();
@@ -135,21 +137,21 @@ void ThreadedCompositor::setDrawsBackground(bool drawsBackground)
 }
 
 void ThreadedCompositor::didChangeViewportSize(const IntSize& size)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_compositingRunLoop->performTaskSync([this, protectedThis = makeRef(*this), size] {
         m_viewportController->didChangeViewportSize(size);
     });
 }
 
 void ThreadedCompositor::didChangeViewportAttribute(const ViewportAttributes& attr)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_compositingRunLoop->performTask([this, protectedThis = makeRef(*this), attr] {
         m_viewportController->didChangeViewportAttribute(attr);
     });
 }
 
 void ThreadedCompositor::didChangeContentsSize(const IntSize& size)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: This seems a bit wrong, but it works. Needs review and investigation.
     m_viewportSize = size;
 
@@ -164,43 +166,43 @@ void ThreadedCompositor::didChangeContentsSize(const IntSize& size)
 }
 
 void ThreadedCompositor::scrollTo(const IntPoint& position)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_compositingRunLoop->performTask([this, protectedThis = makeRef(*this), position] {
         m_viewportController->scrollTo(position);
     });
 }
 
 void ThreadedCompositor::scrollBy(const IntSize& delta)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_compositingRunLoop->performTask([this, protectedThis = makeRef(*this), delta] {
         m_viewportController->scrollBy(delta);
     });
 }
 
 void ThreadedCompositor::renderNextFrame()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     m_client->renderNextFrame();
 }
 
 void ThreadedCompositor::commitScrollOffset(uint32_t layerID, const IntSize& offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     m_client->commitScrollOffset(layerID, offset);
 }
 
 void ThreadedCompositor::updateViewport()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_compositingRunLoop->scheduleUpdate();
 }
 
 void ThreadedCompositor::scheduleDisplayImmediately()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_compositingRunLoop->scheduleUpdate();
 }
 
 bool ThreadedCompositor::tryEnsureGLContext()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!glContext())
         return false;
 
@@ -211,7 +213,7 @@ bool ThreadedCompositor::tryEnsureGLContext()
 }
 
 GLContext* ThreadedCompositor::glContext()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_context)
         return m_context.get();
 
@@ -231,14 +233,14 @@ GLContext* ThreadedCompositor::glContext()
 }
 
 void ThreadedCompositor::forceRepaint()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_compositingRunLoop->performTaskSync([this, protectedThis = makeRef(*this)] {
         renderLayerTree();
     });
 }
 
 void ThreadedCompositor::didChangeVisibleRect()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RunLoop::main().dispatch([this, protectedThis = makeRef(*this), visibleRect = m_viewportController->visibleContentsRect(), scale = m_viewportController->pageScaleFactor()] {
         if (m_client)
             m_client->setVisibleContentsRect(visibleRect, FloatPoint::zero(), scale);
@@ -248,7 +250,7 @@ void ThreadedCompositor::didChangeVisibleRect()
 }
 
 void ThreadedCompositor::renderLayerTree()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_scene)
         return;
 #if PLATFORM(GTK)
@@ -284,7 +286,7 @@ void ThreadedCompositor::renderLayerTree()
 }
 
 void ThreadedCompositor::updateSceneState(const CoordinatedGraphicsState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     RefPtr<ThreadedCompositor> protector(this);
     RefPtr<CoordinatedGraphicsScene> scene = m_scene;
@@ -304,7 +306,7 @@ void ThreadedCompositor::updateSceneState(const CoordinatedGraphicsState& state)
 
 #if PLATFORM(WPE)
 static void debugThreadedCompositorFPS()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static double lastTime = currentTime();
     static unsigned frameCount = 0;
 
@@ -319,7 +321,7 @@ static void debugThreadedCompositorFPS()
 }
 
 void ThreadedCompositor::frameComplete()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!RunLoop::isMain());
     static bool reportFPS = !!std::getenv("WPE_THREADED_COMPOSITOR_FPS");
     if (reportFPS)
@@ -338,7 +340,7 @@ void ThreadedCompositor::frameComplete()
 
 #if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
 RefPtr<WebCore::DisplayRefreshMonitor> ThreadedCompositor::createDisplayRefreshMonitor(PlatformDisplayID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_displayRefreshMonitor;
 }
 #endif

@@ -31,12 +31,14 @@
 #include <WebCore/TextureMapperGL.h>
 #include <wtf/StdLibExtras.h>
 
+#include <wtf/macros.h>
+
 using namespace WebCore;
 
 namespace WebKit {
 
 Ref<ThreadSafeCoordinatedSurface> ThreadSafeCoordinatedSurface::create(const IntSize& size, CoordinatedSurface::Flags flags)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Making an unconditionally unaccelerated buffer here is OK because this code
     // isn't used by any platforms that respect the accelerated bit.
     return adoptRef(*new ThreadSafeCoordinatedSurface(size, flags, ImageBuffer::create(size, Unaccelerated)));
@@ -45,22 +47,22 @@ Ref<ThreadSafeCoordinatedSurface> ThreadSafeCoordinatedSurface::create(const Int
 ThreadSafeCoordinatedSurface::ThreadSafeCoordinatedSurface(const IntSize& size, CoordinatedSurface::Flags flags, std::unique_ptr<ImageBuffer> buffer)
     : CoordinatedSurface(size, flags)
     , m_imageBuffer(WTFMove(buffer))
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 ThreadSafeCoordinatedSurface::~ThreadSafeCoordinatedSurface()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void ThreadSafeCoordinatedSurface::paintToSurface(const IntRect& rect, CoordinatedSurface::Client& client)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     GraphicsContext& context = beginPaint(rect);
     client.paintToSurfaceContext(context);
     endPaint();
 }
 
 GraphicsContext& ThreadSafeCoordinatedSurface::beginPaint(const IntRect& rect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_imageBuffer);
     GraphicsContext& graphicsContext = m_imageBuffer->context();
     graphicsContext.save();
@@ -70,13 +72,13 @@ GraphicsContext& ThreadSafeCoordinatedSurface::beginPaint(const IntRect& rect)
 }
 
 void ThreadSafeCoordinatedSurface::endPaint()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_imageBuffer);
     m_imageBuffer->context().restore();
 }
 
 void ThreadSafeCoordinatedSurface::copyToTexture(RefPtr<BitmapTexture> texture, const IntRect& target, const IntPoint& sourceOffset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_imageBuffer);
     RefPtr<Image> image = m_imageBuffer->copyImage(DontCopyBackingStore);
     texture->updateContents(image.get(), target, sourceOffset, BitmapTexture::UpdateCanModifyOriginalImageData);

@@ -39,6 +39,8 @@
 #include <wtf/text/CString.h>
 #include <wtf/CurrentTime.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 // Always start progress at initialProgressValue. This helps provide feedback as 
@@ -89,21 +91,21 @@ ProgressTracker::ProgressTracker(ProgressTrackerClient& client)
     , m_heartbeatsWithNoProgress(0)
     , m_totalBytesReceivedBeforePreviousHeartbeat(0)
     , m_isMainLoad(false)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 ProgressTracker::~ProgressTracker()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_client.progressTrackerDestroyed();
 }
 
 double ProgressTracker::estimatedProgress() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_progressValue;
 }
 
 void ProgressTracker::reset()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_progressItems.clear();    
 
     m_totalPageAndResourceBytesToLoad = 0;
@@ -121,7 +123,7 @@ void ProgressTracker::reset()
 }
 
 void ProgressTracker::progressStarted(Frame& frame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Progress, "Progress started (%p) - frame %p(\"%s\"), value %f, tracked frames %d, originating frame %p", this, &frame, frame.tree().uniqueName().string().utf8().data(), m_progressValue, m_numProgressTrackedFrames, m_originatingProgressFrame.get());
 
     m_client.willChangeEstimatedProgress();
@@ -149,7 +151,7 @@ void ProgressTracker::progressStarted(Frame& frame)
 }
 
 void ProgressTracker::progressCompleted(Frame& frame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Progress, "Progress completed (%p) - frame %p(\"%s\"), value %f, tracked frames %d, originating frame %p", this, &frame, frame.tree().uniqueName().string().utf8().data(), m_progressValue, m_numProgressTrackedFrames, m_originatingProgressFrame.get());
     
     if (m_numProgressTrackedFrames <= 0)
@@ -165,7 +167,7 @@ void ProgressTracker::progressCompleted(Frame& frame)
 }
 
 void ProgressTracker::finalProgressComplete()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Progress, "Final progress complete (%p)", this);
     
     auto frame = WTFMove(m_originatingProgressFrame);
@@ -190,7 +192,7 @@ void ProgressTracker::finalProgressComplete()
 }
 
 void ProgressTracker::incrementProgress(unsigned long identifier, const ResourceResponse& response)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LOG(Progress, "Progress incremented (%p) - value %f, tracked frames %d, originating frame %p", this, m_progressValue, m_numProgressTrackedFrames, m_originatingProgressFrame.get());
 
     if (m_numProgressTrackedFrames <= 0)
@@ -213,7 +215,7 @@ void ProgressTracker::incrementProgress(unsigned long identifier, const Resource
 }
 
 void ProgressTracker::incrementProgress(unsigned long identifier, unsigned bytesReceived)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ProgressItem* item = m_progressItems.get(identifier);
     
     // FIXME: Can this ever happen?
@@ -273,7 +275,7 @@ void ProgressTracker::incrementProgress(unsigned long identifier, unsigned bytes
 }
 
 void ProgressTracker::completeProgress(unsigned long identifier)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto it = m_progressItems.find(identifier);
 
     // This can happen if a load fails without receiving any response data.
@@ -290,12 +292,12 @@ void ProgressTracker::completeProgress(unsigned long identifier)
 }
 
 unsigned long ProgressTracker::createUniqueIdentifier()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return ++s_uniqueIdentifier;
 }
 
 bool ProgressTracker::isMainLoadProgressing() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_originatingProgressFrame)
         return false;
 
@@ -306,7 +308,7 @@ bool ProgressTracker::isMainLoadProgressing() const
 }
 
 void ProgressTracker::progressHeartbeatTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_totalBytesReceived < m_totalBytesReceivedBeforePreviousHeartbeat + minumumBytesPerHeartbeatForProgress)
         ++m_heartbeatsWithNoProgress;
     else

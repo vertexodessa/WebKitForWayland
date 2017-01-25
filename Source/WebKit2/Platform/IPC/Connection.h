@@ -50,6 +50,8 @@
 #include "GSocketMonitor.h"
 #endif
 
+#include <wtf/macros.h>
+
 namespace IPC {
 
 struct WaitForMessageState;
@@ -358,7 +360,7 @@ private:
 };
 
 template<typename T> bool Connection::send(T&& message, uint64_t destinationID, unsigned messageSendFlags)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     COMPILE_ASSERT(!T::isSync, AsyncMessageExpected);
 
     auto encoder = std::make_unique<Encoder>(T::receiverName(), T::name(), destinationID);
@@ -368,7 +370,7 @@ template<typename T> bool Connection::send(T&& message, uint64_t destinationID, 
 }
 
 template<typename T> bool Connection::sendSync(T&& message, typename T::Reply&& reply, uint64_t destinationID, std::chrono::milliseconds timeout, unsigned syncSendFlags)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     COMPILE_ASSERT(T::isSync, SyncMessageExpected);
 
     uint64_t syncRequestID = 0;
@@ -392,7 +394,7 @@ template<typename T> bool Connection::sendSync(T&& message, typename T::Reply&& 
 }
 
 template<typename T> bool Connection::waitForAndDispatchImmediately(uint64_t destinationID, std::chrono::milliseconds timeout, unsigned waitForMessageFlags)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     std::unique_ptr<Decoder> decoder = waitForMessage(T::receiverName(), T::name(), destinationID, timeout, waitForMessageFlags);
     if (!decoder)
         return false;

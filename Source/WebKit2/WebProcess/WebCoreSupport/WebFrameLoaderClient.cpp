@@ -85,6 +85,8 @@
 #include <WebCore/WindowFeatures.h>
 #include <wtf/NeverDestroyed.h>
 
+#include <wtf/macros.h>
+
 using namespace WebCore;
 
 namespace WebKit {
@@ -95,15 +97,15 @@ WebFrameLoaderClient::WebFrameLoaderClient()
     , m_didCompletePageTransition(false)
     , m_frameHasCustomContentProvider(false)
     , m_frameCameFromPageCache(false)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 WebFrameLoaderClient::~WebFrameLoaderClient()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
     
 void WebFrameLoaderClient::frameLoaderDestroyed()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frame->invalidate();
 
     // Balances explicit ref() in WebFrame::create().
@@ -111,32 +113,32 @@ void WebFrameLoaderClient::frameLoaderDestroyed()
 }
 
 bool WebFrameLoaderClient::hasHTMLView() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !m_frameHasCustomContentProvider;
 }
 
 bool WebFrameLoaderClient::hasWebView() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_frame->page();
 }
 
 void WebFrameLoaderClient::makeRepresentation(DocumentLoader*)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 void WebFrameLoaderClient::forceLayoutForNonHTML()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 void WebFrameLoaderClient::setCopiesOnScroll()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 void WebFrameLoaderClient::detachedFromParent2()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -148,12 +150,12 @@ void WebFrameLoaderClient::detachedFromParent2()
 }
 
 void WebFrameLoaderClient::detachedFromParent3()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 void WebFrameLoaderClient::assignIdentifierToInitialRequest(unsigned long identifier, DocumentLoader* loader, const ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -167,7 +169,7 @@ void WebFrameLoaderClient::assignIdentifierToInitialRequest(unsigned long identi
 }
 
 void WebFrameLoaderClient::dispatchWillSendRequest(DocumentLoader*, unsigned long identifier, ResourceRequest& request, const ResourceResponse& redirectResponse)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -176,7 +178,7 @@ void WebFrameLoaderClient::dispatchWillSendRequest(DocumentLoader*, unsigned lon
 }
 
 bool WebFrameLoaderClient::shouldUseCredentialStorage(DocumentLoader*, unsigned long identifier)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return true;
@@ -185,7 +187,7 @@ bool WebFrameLoaderClient::shouldUseCredentialStorage(DocumentLoader*, unsigned 
 }
 
 void WebFrameLoaderClient::dispatchDidReceiveAuthenticationChallenge(DocumentLoader*, unsigned long, const AuthenticationChallenge& challenge)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Authentication is a per-resource concept, but we don't do per-resource handling in the UIProcess at the API level quite yet.
     // Once we do, we might need to make sure authentication fits with our solution.
 
@@ -198,7 +200,7 @@ void WebFrameLoaderClient::dispatchDidReceiveAuthenticationChallenge(DocumentLoa
 
 #if USE(PROTECTION_SPACE_AUTH_CALLBACK)
 bool WebFrameLoaderClient::canAuthenticateAgainstProtectionSpace(DocumentLoader*, unsigned long, const ProtectionSpace& protectionSpace)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // The WebKit 2 Networking process asks the UIProcess directly, so the WebContent process should never receive this callback.
     ASSERT_NOT_REACHED();
     return false;
@@ -206,7 +208,7 @@ bool WebFrameLoaderClient::canAuthenticateAgainstProtectionSpace(DocumentLoader*
 #endif
 
 void WebFrameLoaderClient::dispatchDidReceiveResponse(DocumentLoader*, unsigned long identifier, const ResourceResponse& response)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -215,7 +217,7 @@ void WebFrameLoaderClient::dispatchDidReceiveResponse(DocumentLoader*, unsigned 
 }
 
 void WebFrameLoaderClient::dispatchDidReceiveContentLength(DocumentLoader*, unsigned long identifier, int dataLength)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -225,7 +227,7 @@ void WebFrameLoaderClient::dispatchDidReceiveContentLength(DocumentLoader*, unsi
 
 #if ENABLE(DATA_DETECTION)
 void WebFrameLoaderClient::dispatchDidFinishDataDetection(NSArray *detectionResults)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -234,7 +236,7 @@ void WebFrameLoaderClient::dispatchDidFinishDataDetection(NSArray *detectionResu
 #endif
 
 void WebFrameLoaderClient::dispatchDidFinishLoading(DocumentLoader*, unsigned long identifier)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -244,7 +246,7 @@ void WebFrameLoaderClient::dispatchDidFinishLoading(DocumentLoader*, unsigned lo
 }
 
 void WebFrameLoaderClient::dispatchDidFailLoading(DocumentLoader*, unsigned long identifier, const ResourceError& error)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -254,13 +256,13 @@ void WebFrameLoaderClient::dispatchDidFailLoading(DocumentLoader*, unsigned long
 }
 
 bool WebFrameLoaderClient::dispatchDidLoadResourceFromMemoryCache(DocumentLoader*, const ResourceRequest&, const ResourceResponse&, int /*length*/)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
     return false;
 }
 
 void WebFrameLoaderClient::dispatchDidDispatchOnloadEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -270,7 +272,7 @@ void WebFrameLoaderClient::dispatchDidDispatchOnloadEvents()
 }
 
 void WebFrameLoaderClient::dispatchDidReceiveServerRedirectForProvisionalLoad()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -287,7 +289,7 @@ void WebFrameLoaderClient::dispatchDidReceiveServerRedirectForProvisionalLoad()
 }
 
 void WebFrameLoaderClient::dispatchDidChangeProvisionalURL()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -297,7 +299,7 @@ void WebFrameLoaderClient::dispatchDidChangeProvisionalURL()
 }
 
 void WebFrameLoaderClient::dispatchDidCancelClientRedirect()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -307,7 +309,7 @@ void WebFrameLoaderClient::dispatchDidCancelClientRedirect()
 }
 
 void WebFrameLoaderClient::dispatchWillPerformClientRedirect(const URL& url, double interval, double fireDate)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -317,7 +319,7 @@ void WebFrameLoaderClient::dispatchWillPerformClientRedirect(const URL& url, dou
 }
 
 void WebFrameLoaderClient::dispatchDidChangeLocationWithinPage()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -334,7 +336,7 @@ void WebFrameLoaderClient::dispatchDidChangeLocationWithinPage()
 }
 
 void WebFrameLoaderClient::dispatchDidPushStateWithinPage()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -351,7 +353,7 @@ void WebFrameLoaderClient::dispatchDidPushStateWithinPage()
 }
 
 void WebFrameLoaderClient::dispatchDidReplaceStateWithinPage()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -368,7 +370,7 @@ void WebFrameLoaderClient::dispatchDidReplaceStateWithinPage()
 }
 
 void WebFrameLoaderClient::dispatchDidPopStateWithinPage()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -385,17 +387,17 @@ void WebFrameLoaderClient::dispatchDidPopStateWithinPage()
 }
 
 void WebFrameLoaderClient::dispatchWillClose()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 void WebFrameLoaderClient::dispatchDidReceiveIcon()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().parentProcessConnection()->send(Messages::WebIconDatabase::DidReceiveIconForPageURL(m_frame->url()), 0);
 }
 
 void WebFrameLoaderClient::dispatchDidStartProvisionalLoad()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -423,7 +425,7 @@ void WebFrameLoaderClient::dispatchDidStartProvisionalLoad()
 }
 
 void WebFrameLoaderClient::dispatchDidReceiveTitle(const StringWithDirection& title)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -439,7 +441,7 @@ void WebFrameLoaderClient::dispatchDidReceiveTitle(const StringWithDirection& ti
 }
 
 void WebFrameLoaderClient::dispatchDidCommitLoad()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -459,7 +461,7 @@ void WebFrameLoaderClient::dispatchDidCommitLoad()
 }
 
 void WebFrameLoaderClient::dispatchDidFailProvisionalLoad(const ResourceError& error)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -493,7 +495,7 @@ void WebFrameLoaderClient::dispatchDidFailProvisionalLoad(const ResourceError& e
 }
 
 void WebFrameLoaderClient::dispatchDidFailLoad(const ResourceError& error)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -514,7 +516,7 @@ void WebFrameLoaderClient::dispatchDidFailLoad(const ResourceError& error)
 }
 
 void WebFrameLoaderClient::dispatchDidFinishDocumentLoad()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -531,7 +533,7 @@ void WebFrameLoaderClient::dispatchDidFinishDocumentLoad()
 }
 
 void WebFrameLoaderClient::dispatchDidFinishLoad()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -554,7 +556,7 @@ void WebFrameLoaderClient::dispatchDidFinishLoad()
 }
 
 void WebFrameLoaderClient::forcePageTransitionIfNeeded()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_didCompletePageTransition)
         return;
 
@@ -567,7 +569,8 @@ void WebFrameLoaderClient::forcePageTransitionIfNeeded()
 }
 
 void WebFrameLoaderClient::dispatchDidReachLayoutMilestone(LayoutMilestones milestones)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+    WTF_AUTO_THREAD_ENABLE(); WTF_SCOPE0(__FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -611,7 +614,7 @@ void WebFrameLoaderClient::dispatchDidReachLayoutMilestone(LayoutMilestones mile
 }
 
 void WebFrameLoaderClient::dispatchDidLayout()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -638,7 +641,7 @@ void WebFrameLoaderClient::dispatchDidLayout()
 }
 
 Frame* WebFrameLoaderClient::dispatchCreatePage(const NavigationAction& navigationAction)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return 0;
@@ -653,7 +656,7 @@ Frame* WebFrameLoaderClient::dispatchCreatePage(const NavigationAction& navigati
 }
 
 void WebFrameLoaderClient::dispatchShow()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -662,7 +665,7 @@ void WebFrameLoaderClient::dispatchShow()
 }
 
 void WebFrameLoaderClient::dispatchDecidePolicyForResponse(const ResourceResponse& response, const ResourceRequest& request, FramePolicyFunction function)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage) {
         function(PolicyIgnore);
@@ -703,7 +706,7 @@ void WebFrameLoaderClient::dispatchDecidePolicyForResponse(const ResourceRespons
 }
 
 void WebFrameLoaderClient::dispatchDecidePolicyForNewWindowAction(const NavigationAction& navigationAction, const ResourceRequest& request, PassRefPtr<FormState> formState, const String& frameName, FramePolicyFunction function)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage) {
         function(PolicyIgnore);
@@ -739,7 +742,7 @@ void WebFrameLoaderClient::dispatchDecidePolicyForNewWindowAction(const Navigati
 }
 
 void WebFrameLoaderClient::dispatchDecidePolicyForNavigationAction(const NavigationAction& navigationAction, const ResourceRequest& request, PassRefPtr<FormState> prpFormState, FramePolicyFunction function)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage) {
         function(PolicyIgnore);
@@ -820,12 +823,12 @@ void WebFrameLoaderClient::dispatchDecidePolicyForNavigationAction(const Navigat
 }
 
 void WebFrameLoaderClient::cancelPolicyCheck()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frame->invalidatePolicyListener();
 }
 
 void WebFrameLoaderClient::dispatchUnableToImplementPolicy(const ResourceError& error)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -840,7 +843,7 @@ void WebFrameLoaderClient::dispatchUnableToImplementPolicy(const ResourceError& 
 }
 
 void WebFrameLoaderClient::dispatchWillSendSubmitEvent(PassRefPtr<FormState> prpFormState)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -855,7 +858,7 @@ void WebFrameLoaderClient::dispatchWillSendSubmitEvent(PassRefPtr<FormState> prp
 }
 
 void WebFrameLoaderClient::dispatchWillSubmitForm(PassRefPtr<FormState> prpFormState, FramePolicyFunction function)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -880,12 +883,12 @@ void WebFrameLoaderClient::dispatchWillSubmitForm(PassRefPtr<FormState> prpFormS
 }
 
 void WebFrameLoaderClient::revertToProvisionalState(DocumentLoader*)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 void WebFrameLoaderClient::setMainDocumentError(DocumentLoader*, const ResourceError& error)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_pluginView)
         return;
     
@@ -895,27 +898,27 @@ void WebFrameLoaderClient::setMainDocumentError(DocumentLoader*, const ResourceE
 }
 
 void WebFrameLoaderClient::setMainFrameDocumentReady(bool)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 void WebFrameLoaderClient::startDownload(const ResourceRequest& request, const String& suggestedName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frame->startDownload(request, suggestedName);
 }
 
 void WebFrameLoaderClient::willChangeTitle(DocumentLoader*)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 void WebFrameLoaderClient::didChangeTitle(DocumentLoader*)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 void WebFrameLoaderClient::willReplaceMultipartContent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -923,7 +926,7 @@ void WebFrameLoaderClient::willReplaceMultipartContent()
 }
 
 void WebFrameLoaderClient::didReplaceMultipartContent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -931,7 +934,7 @@ void WebFrameLoaderClient::didReplaceMultipartContent()
 }
 
 void WebFrameLoaderClient::committedLoad(DocumentLoader* loader, const char* data, int length)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_pluginView)
         loader->commitData(data, length);
 
@@ -957,7 +960,7 @@ void WebFrameLoaderClient::committedLoad(DocumentLoader* loader, const char* dat
 }
 
 void WebFrameLoaderClient::finishedLoading(DocumentLoader* loader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_pluginView) {
         if (m_frameHasCustomContentProvider) {
             WebPage* webPage = m_frame->page();
@@ -988,7 +991,7 @@ void WebFrameLoaderClient::finishedLoading(DocumentLoader* loader)
 }
 
 void WebFrameLoaderClient::updateGlobalHistory()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage || !webPage->pageGroup()->isVisibleToHistoryClient())
         return;
@@ -1006,7 +1009,7 @@ void WebFrameLoaderClient::updateGlobalHistory()
 }
 
 void WebFrameLoaderClient::updateGlobalHistoryRedirectLinks()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage || !webPage->pageGroup()->isVisibleToHistoryClient())
         return;
@@ -1028,7 +1031,7 @@ void WebFrameLoaderClient::updateGlobalHistoryRedirectLinks()
 }
 
 bool WebFrameLoaderClient::shouldGoToHistoryItem(HistoryItem* item) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return false;
@@ -1053,7 +1056,7 @@ bool WebFrameLoaderClient::shouldGoToHistoryItem(HistoryItem* item) const
 }
 
 void WebFrameLoaderClient::didDisplayInsecureContent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1066,7 +1069,7 @@ void WebFrameLoaderClient::didDisplayInsecureContent()
 }
 
 void WebFrameLoaderClient::didRunInsecureContent(SecurityOrigin*, const URL&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1079,7 +1082,7 @@ void WebFrameLoaderClient::didRunInsecureContent(SecurityOrigin*, const URL&)
 }
 
 void WebFrameLoaderClient::didDetectXSS(const URL&, bool)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1092,54 +1095,54 @@ void WebFrameLoaderClient::didDetectXSS(const URL&, bool)
 }
 
 ResourceError WebFrameLoaderClient::cancelledError(const ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return WebKit::cancelledError(request);
 }
 
 ResourceError WebFrameLoaderClient::blockedError(const ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return WebKit::blockedError(request);
 }
 
 ResourceError WebFrameLoaderClient::blockedByContentBlockerError(const ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return WebKit::blockedByContentBlockerError(request);
 }
 
 ResourceError WebFrameLoaderClient::cannotShowURLError(const ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return WebKit::cannotShowURLError(request);
 }
 
 ResourceError WebFrameLoaderClient::interruptedForPolicyChangeError(const ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return WebKit::interruptedForPolicyChangeError(request);
 }
 
 #if ENABLE(CONTENT_FILTERING)
 ResourceError WebFrameLoaderClient::blockedByContentFilterError(const ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return WebKit::blockedByContentFilterError(request);
 }
 #endif
 
 ResourceError WebFrameLoaderClient::cannotShowMIMETypeError(const ResourceResponse& response)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return WebKit::cannotShowMIMETypeError(response);
 }
 
 ResourceError WebFrameLoaderClient::fileDoesNotExistError(const ResourceResponse& response)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return WebKit::fileDoesNotExistError(response);
 }
 
 ResourceError WebFrameLoaderClient::pluginWillHandleLoadError(const ResourceResponse& response)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return WebKit::pluginWillHandleLoadError(response);
 }
 
 bool WebFrameLoaderClient::shouldFallBack(const ResourceError& error)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<const ResourceError> cancelledError(this->cancelledError(ResourceRequest()));
     static NeverDestroyed<const ResourceError> pluginWillHandleLoadError(this->pluginWillHandleLoadError(ResourceResponse()));
 
@@ -1153,36 +1156,36 @@ bool WebFrameLoaderClient::shouldFallBack(const ResourceError& error)
 }
 
 bool WebFrameLoaderClient::canHandleRequest(const ResourceRequest&) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
     return true;
 }
 
 bool WebFrameLoaderClient::canShowMIMEType(const String& /*MIMEType*/) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
     return true;
 }
 
 bool WebFrameLoaderClient::canShowMIMETypeAsHTML(const String& /*MIMEType*/) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return true;
 }
 
 bool WebFrameLoaderClient::representationExistsForURLScheme(const String& /*URLScheme*/) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
     return false;
 }
 
 String WebFrameLoaderClient::generatedMIMETypeForURLScheme(const String& /*URLScheme*/) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
     return String();
 }
 
 void WebFrameLoaderClient::frameLoadCompleted()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Note: Can be called multiple times.
     WebPage* webPage = m_frame->page();
     if (!webPage)
@@ -1195,7 +1198,7 @@ void WebFrameLoaderClient::frameLoadCompleted()
 }
 
 void WebFrameLoaderClient::saveViewStateToItem(HistoryItem& historyItem)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(IOS) || PLATFORM(EFL)
     if (m_frame->isMainFrame())
         m_frame->page()->savePageState(historyItem);
@@ -1205,7 +1208,7 @@ void WebFrameLoaderClient::saveViewStateToItem(HistoryItem& historyItem)
 }
 
 void WebFrameLoaderClient::restoreViewState()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(IOS) || PLATFORM(EFL)
     Frame& frame = *m_frame->coreFrame();
     HistoryItem* currentItem = frame.loader().history().currentItem();
@@ -1231,7 +1234,7 @@ void WebFrameLoaderClient::restoreViewState()
 }
 
 void WebFrameLoaderClient::provisionalLoadStarted()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1243,29 +1246,29 @@ void WebFrameLoaderClient::provisionalLoadStarted()
 }
 
 void WebFrameLoaderClient::didFinishLoad()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If we have a load listener, notify it.
     if (WebFrame::LoadListener* loadListener = m_frame->loadListener())
         loadListener->didFinishLoad(m_frame);
 }
 
 void WebFrameLoaderClient::prepareForDataSourceReplacement()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 Ref<DocumentLoader> WebFrameLoaderClient::createDocumentLoader(const ResourceRequest& request, const SubstituteData& substituteData)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_frame->page()->createDocumentLoader(*m_frame->coreFrame(), request, substituteData);
 }
 
 void WebFrameLoaderClient::updateCachedDocumentLoader(WebCore::DocumentLoader& loader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frame->page()->updateCachedDocumentLoader(static_cast<WebDocumentLoader&>(loader), *m_frame->coreFrame());
 }
 
 void WebFrameLoaderClient::setTitle(const StringWithDirection& title, const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage || !webPage->pageGroup()->isVisibleToHistoryClient())
         return;
@@ -1275,7 +1278,7 @@ void WebFrameLoaderClient::setTitle(const StringWithDirection& title, const URL&
 }
 
 String WebFrameLoaderClient::userAgent(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return String();
@@ -1284,18 +1287,18 @@ String WebFrameLoaderClient::userAgent(const URL& url)
 }
 
 void WebFrameLoaderClient::savePlatformDataToCachedFrame(CachedFrame*)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void WebFrameLoaderClient::transitionToCommittedFromCachedFrame(CachedFrame*)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const ResourceResponse& response = m_frame->coreFrame()->loader().documentLoader()->response();
     m_frameHasCustomContentProvider = m_frame->isMainFrame() && m_frame->page()->shouldUseCustomContentProviderForResponse(response);
     m_frameCameFromPageCache = true;
 }
 
 void WebFrameLoaderClient::transitionToCommittedForNewPage()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
 
     Color backgroundColor = webPage->drawsBackground() ? Color::white : Color::transparent;
@@ -1354,7 +1357,7 @@ void WebFrameLoaderClient::transitionToCommittedForNewPage()
 }
 
 void WebFrameLoaderClient::didSaveToPageCache()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1363,12 +1366,12 @@ void WebFrameLoaderClient::didSaveToPageCache()
 }
 
 void WebFrameLoaderClient::didRestoreFromPageCache()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frameCameFromPageCache = true;
 }
 
 void WebFrameLoaderClient::dispatchDidBecomeFrameset(bool value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1377,20 +1380,20 @@ void WebFrameLoaderClient::dispatchDidBecomeFrameset(bool value)
 }
 
 bool WebFrameLoaderClient::canCachePage() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We cannot cache frames that have custom representations because they are
     // rendered in the UIProcess.
     return !m_frameHasCustomContentProvider;
 }
 
 void WebFrameLoaderClient::convertMainResourceLoadToDownload(DocumentLoader *documentLoader, SessionID sessionID, const ResourceRequest& request, const ResourceResponse& response)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frame->convertMainResourceLoadToDownload(documentLoader, sessionID, request, response);
 }
 
 RefPtr<Frame> WebFrameLoaderClient::createFrame(const URL& url, const String& name, HTMLFrameOwnerElement* ownerElement,
                                                     const String& referrer, bool /*allowsScrolling*/, int /*marginWidth*/, int /*marginHeight*/)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
 
     RefPtr<WebFrame> subframe = WebFrame::createSubframe(webPage, name, ownerElement);
@@ -1416,7 +1419,7 @@ RefPtr<Frame> WebFrameLoaderClient::createFrame(const URL& url, const String& na
 }
 
 RefPtr<Widget> WebFrameLoaderClient::createPlugin(const IntSize&, HTMLPlugInElement* pluginElement, const URL& url, const Vector<String>& paramNames, const Vector<String>& paramValues, const String& mimeType, bool loadManually)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(paramNames.size() == paramValues.size());
     ASSERT(m_frame->page());
 
@@ -1444,7 +1447,7 @@ RefPtr<Widget> WebFrameLoaderClient::createPlugin(const IntSize&, HTMLPlugInElem
 }
 
 void WebFrameLoaderClient::recreatePlugin(Widget* widget)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(NETSCAPE_PLUGIN_API)
     ASSERT(widget && widget->isPluginViewBase());
     ASSERT(m_frame->page());
@@ -1459,14 +1462,14 @@ void WebFrameLoaderClient::recreatePlugin(Widget* widget)
 }
 
 void WebFrameLoaderClient::redirectDataToPlugin(Widget* pluginWidget)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (pluginWidget)
         m_pluginView = static_cast<PluginView*>(pluginWidget);
 }
 
 #if ENABLE(WEBGL)
 WebCore::WebGLLoadPolicy WebFrameLoaderClient::webGLPolicyForURL(const String& url) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (WebPage* webPage = m_frame->page())
         return webPage->webGLPolicyForURL(m_frame, url);
 
@@ -1474,7 +1477,7 @@ WebCore::WebGLLoadPolicy WebFrameLoaderClient::webGLPolicyForURL(const String& u
 }
 
 WebCore::WebGLLoadPolicy WebFrameLoaderClient::resolveWebGLPolicyForURL(const String& url) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (WebPage* webPage = m_frame->page())
         return webPage->resolveWebGLPolicyForURL(m_frame, url);
 
@@ -1483,7 +1486,7 @@ WebCore::WebGLLoadPolicy WebFrameLoaderClient::resolveWebGLPolicyForURL(const St
 #endif // ENABLE(WEBGL)
 
 PassRefPtr<Widget> WebFrameLoaderClient::createJavaAppletWidget(const IntSize& pluginSize, HTMLAppletElement* appletElement, const URL&, const Vector<String>& paramNames, const Vector<String>& paramValues)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if ENABLE(NETSCAPE_PLUGIN_API)
     auto plugin = createPlugin(pluginSize, appletElement, URL(), paramNames, paramValues, appletElement->serviceType(), false);
     if (!plugin) {
@@ -1504,7 +1507,7 @@ PassRefPtr<Widget> WebFrameLoaderClient::createJavaAppletWidget(const IntSize& p
 }
 
 static bool pluginSupportsExtension(const PluginData& pluginData, const String& extension)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(extension.convertToASCIILowercase() == extension);
     Vector<MimeClassInfo> mimes;
     Vector<size_t> mimePluginIndices;
@@ -1517,7 +1520,7 @@ static bool pluginSupportsExtension(const PluginData& pluginData, const String& 
 }
 
 ObjectContentType WebFrameLoaderClient::objectContentType(const URL& url, const String& mimeTypeIn)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: This should eventually be merged with WebCore::FrameLoader::defaultObjectContentType.
 
     String mimeType = mimeTypeIn;
@@ -1563,13 +1566,13 @@ ObjectContentType WebFrameLoaderClient::objectContentType(const URL& url, const 
 }
 
 String WebFrameLoaderClient::overrideMediaType() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
     return String();
 }
 
 void WebFrameLoaderClient::dispatchDidClearWindowObjectInWorld(DOMWrapperWorld& world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1589,7 +1592,7 @@ void WebFrameLoaderClient::dispatchDidClearWindowObjectInWorld(DOMWrapperWorld& 
 
 
 void WebFrameLoaderClient::dispatchGlobalObjectAvailable(DOMWrapperWorld& world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1598,7 +1601,7 @@ void WebFrameLoaderClient::dispatchGlobalObjectAvailable(DOMWrapperWorld& world)
 }
 
 void WebFrameLoaderClient::dispatchWillDisconnectDOMWindowExtensionFromGlobalObject(WebCore::DOMWindowExtension* extension)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1607,7 +1610,7 @@ void WebFrameLoaderClient::dispatchWillDisconnectDOMWindowExtensionFromGlobalObj
 }
 
 void WebFrameLoaderClient::dispatchDidReconnectDOMWindowExtensionToGlobalObject(WebCore::DOMWindowExtension* extension)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1616,7 +1619,7 @@ void WebFrameLoaderClient::dispatchDidReconnectDOMWindowExtensionToGlobalObject(
 }
 
 void WebFrameLoaderClient::dispatchWillDestroyGlobalObjectForDOMWindowExtension(WebCore::DOMWindowExtension* extension)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1625,14 +1628,14 @@ void WebFrameLoaderClient::dispatchWillDestroyGlobalObjectForDOMWindowExtension(
 }
 
 void WebFrameLoaderClient::registerForIconNotification(bool /*listen*/)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
 }
 
 #if PLATFORM(COCOA)
     
 RemoteAXObjectRef WebFrameLoaderClient::accessibilityRemoteObject() 
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return 0;
@@ -1641,7 +1644,7 @@ RemoteAXObjectRef WebFrameLoaderClient::accessibilityRemoteObject()
 }
     
 NSCachedURLResponse *WebFrameLoaderClient::willCacheResponse(DocumentLoader*, unsigned long identifier, NSCachedURLResponse* response) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return response;
@@ -1650,7 +1653,7 @@ NSCachedURLResponse *WebFrameLoaderClient::willCacheResponse(DocumentLoader*, un
 }
 
 NSDictionary *WebFrameLoaderClient::dataDetectionContext()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return nil;
@@ -1661,13 +1664,13 @@ NSDictionary *WebFrameLoaderClient::dataDetectionContext()
 #endif // PLATFORM(COCOA)
 
 bool WebFrameLoaderClient::shouldAlwaysUsePluginDocument(const String& /*mimeType*/) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     notImplemented();
     return false;
 }
 
 void WebFrameLoaderClient::didChangeScrollOffset()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1676,7 +1679,7 @@ void WebFrameLoaderClient::didChangeScrollOffset()
 }
 
 bool WebFrameLoaderClient::allowScript(bool enabledPerSettings)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!enabledPerSettings)
         return false;
 
@@ -1697,7 +1700,7 @@ bool WebFrameLoaderClient::allowScript(bool enabledPerSettings)
 }
 
 bool WebFrameLoaderClient::shouldForceUniversalAccessFromLocalURL(const WebCore::URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return false;
@@ -1706,14 +1709,14 @@ bool WebFrameLoaderClient::shouldForceUniversalAccessFromLocalURL(const WebCore:
 }
 
 PassRefPtr<FrameNetworkingContext> WebFrameLoaderClient::createNetworkingContext()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     auto context = WebFrameNetworkingContext::create(m_frame);
     return WTFMove(context);
 }
 
 #if ENABLE(CONTENT_FILTERING)
 void WebFrameLoaderClient::contentFilterDidBlockLoad(WebCore::ContentFilterUnblockHandler unblockHandler)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!unblockHandler.needsUIProcess()) {
         m_frame->coreFrame()->loader().policyChecker().setContentFilterUnblockHandler(WTFMove(unblockHandler));
         return;
@@ -1726,17 +1729,17 @@ void WebFrameLoaderClient::contentFilterDidBlockLoad(WebCore::ContentFilterUnblo
 
 #if ENABLE(REQUEST_AUTOCOMPLETE)
 void WebFrameLoaderClient::didRequestAutocomplete(PassRefPtr<WebCore::FormState>)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 #endif
 
 void WebFrameLoaderClient::prefetchDNS(const String& hostname)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().prefetchDNS(hostname);
 }
 
 void WebFrameLoaderClient::didRestoreScrollPosition()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebPage* webPage = m_frame->page();
     if (!webPage)
         return;
@@ -1745,7 +1748,7 @@ void WebFrameLoaderClient::didRestoreScrollPosition()
 }
 
 bool WebFrameLoaderClient::shouldPaintBrokenImage(const WebCore::URL&) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(WPE)
     return false;
 #else

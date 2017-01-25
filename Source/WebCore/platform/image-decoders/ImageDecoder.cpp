@@ -36,6 +36,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <wtf/macros.h>
+
 using namespace std;
 
 namespace WebCore {
@@ -43,7 +45,7 @@ namespace WebCore {
 namespace {
 
 unsigned copyFromSharedBuffer(char* buffer, unsigned bufferLength, const SharedBuffer& sharedBuffer, unsigned offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     unsigned bytesExtracted = 0;
     const char* moreData;
     while (unsigned moreDataLength = sharedBuffer.getSomeData(moreData, offset)) {
@@ -58,46 +60,46 @@ unsigned copyFromSharedBuffer(char* buffer, unsigned bufferLength, const SharedB
 }
 
 bool matchesGIFSignature(char* contents)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !memcmp(contents, "GIF87a", 6) || !memcmp(contents, "GIF89a", 6);
 }
 
 bool matchesPNGSignature(char* contents)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !memcmp(contents, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", 8);
 }
 
 bool matchesJPEGSignature(char* contents)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !memcmp(contents, "\xFF\xD8\xFF", 3);
 }
 
 #if USE(WEBP)
 bool matchesWebPSignature(char* contents)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !memcmp(contents, "RIFF", 4) && !memcmp(contents + 8, "WEBPVP", 6);
 }
 #endif
 
 bool matchesBMPSignature(char* contents)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !memcmp(contents, "BM", 2);
 }
 
 bool matchesICOSignature(char* contents)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !memcmp(contents, "\x00\x00\x01\x00", 4);
 }
 
 bool matchesCURSignature(char* contents)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !memcmp(contents, "\x00\x00\x02\x00", 4);
 }
 
 }
 
 std::unique_ptr<ImageDecoder> ImageDecoder::create(const SharedBuffer& data, ImageSource::AlphaOption alphaOption, ImageSource::GammaAndColorProfileOption gammaAndColorProfileOption)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static const unsigned lengthOfLongestSignature = 14; // To wit: "RIFF????WEBPVP"
     char contents[lengthOfLongestSignature];
     unsigned length = copyFromSharedBuffer(contents, lengthOfLongestSignature, data, 0);
@@ -133,11 +135,11 @@ ImageFrame::ImageFrame()
     , m_duration(0)
     , m_disposalMethod(DisposeNotSpecified)
     , m_premultiplyAlpha(true)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 } 
 
 ImageFrame& ImageFrame::operator=(const ImageFrame& other)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (this == &other)
         return *this;
 
@@ -151,7 +153,7 @@ ImageFrame& ImageFrame::operator=(const ImageFrame& other)
 }
 
 void ImageFrame::clearPixelData()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_backingStore.clear();
     m_bytes = 0;
     m_status = FrameEmpty;
@@ -162,13 +164,13 @@ void ImageFrame::clearPixelData()
 }
 
 void ImageFrame::zeroFillPixelData()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     memset(m_bytes, 0, m_size.width() * m_size.height() * sizeof(PixelData));
     m_hasAlpha = true;
 }
 
 void ImageFrame::zeroFillFrameRect(const IntRect& rect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(IntRect(IntPoint(), m_size).contains(rect));
 
     if (rect.isEmpty())
@@ -185,7 +187,7 @@ void ImageFrame::zeroFillFrameRect(const IntRect& rect)
 }
 
 bool ImageFrame::copyBitmapData(const ImageFrame& other)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (this == &other)
         return true;
 
@@ -197,7 +199,7 @@ bool ImageFrame::copyBitmapData(const ImageFrame& other)
 }
 
 bool ImageFrame::setSize(int newWidth, int newHeight)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!width() && !height());
     size_t backingStoreSize = newWidth * newHeight;
     if (!m_backingStore.tryReserveCapacity(backingStoreSize))
@@ -211,22 +213,22 @@ bool ImageFrame::setSize(int newWidth, int newHeight)
 }
 
 bool ImageFrame::hasAlpha() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_hasAlpha;
 }
 
 void ImageFrame::setHasAlpha(bool alpha)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_hasAlpha = alpha;
 }
 
 void ImageFrame::setColorProfile(const ColorProfile& colorProfile)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_colorProfile = colorProfile;
 }
 
 void ImageFrame::setStatus(FrameStatus status)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_status = status;
 }
 
@@ -239,7 +241,7 @@ enum MatchType {
 };
 
 inline void fillScaledValues(Vector<int>& scaledValues, double scaleRate, int length)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     double inflateRate = 1. / scaleRate;
     scaledValues.reserveCapacity(static_cast<int>(length * scaleRate + 0.5));
     for (int scaledIndex = 0; ; ++scaledIndex) {
@@ -251,7 +253,7 @@ inline void fillScaledValues(Vector<int>& scaledValues, double scaleRate, int le
 }
 
 template <MatchType type> int getScaledValue(const Vector<int>& scaledValues, int valueToMatch, int searchStart)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (scaledValues.isEmpty())
         return valueToMatch;
 
@@ -272,13 +274,13 @@ template <MatchType type> int getScaledValue(const Vector<int>& scaledValues, in
 }
 
 bool ImageDecoder::frameIsCompleteAtIndex(size_t index)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ImageFrame* buffer = frameBufferAtIndex(index);
     return buffer && buffer->status() == ImageFrame::FrameComplete;
 }
 
 bool ImageDecoder::frameHasAlphaAtIndex(size_t index) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_frameBufferCache.size() <= index)
         return true;
     if (m_frameBufferCache[index].status() == ImageFrame::FrameComplete)
@@ -287,7 +289,7 @@ bool ImageDecoder::frameHasAlphaAtIndex(size_t index) const
 }
 
 unsigned ImageDecoder::frameBytesAtIndex(size_t index) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_frameBufferCache.size() <= index)
         return 0;
     // FIXME: Use the dimension of the requested frame.
@@ -295,7 +297,7 @@ unsigned ImageDecoder::frameBytesAtIndex(size_t index) const
 }
 
 float ImageDecoder::frameDurationAtIndex(size_t index)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ImageFrame* buffer = frameBufferAtIndex(index);
     if (!buffer || buffer->status() == ImageFrame::FrameEmpty)
         return 0;
@@ -311,7 +313,7 @@ float ImageDecoder::frameDurationAtIndex(size_t index)
 }
 
 NativeImagePtr ImageDecoder::createFrameImageAtIndex(size_t index, SubsamplingLevel)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Zero-height images can cause problems for some ports. If we have an empty image dimension, just bail.
     if (size().isEmpty())
         return nullptr;
@@ -326,7 +328,7 @@ NativeImagePtr ImageDecoder::createFrameImageAtIndex(size_t index, SubsamplingLe
 }
 
 void ImageDecoder::prepareScaleDataIfNecessary()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_scaled = false;
     m_scaledColumns.clear();
     m_scaledRows.clear();
@@ -344,27 +346,27 @@ void ImageDecoder::prepareScaleDataIfNecessary()
 }
 
 int ImageDecoder::upperBoundScaledX(int origX, int searchStart)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return getScaledValue<UpperBound>(m_scaledColumns, origX, searchStart);
 }
 
 int ImageDecoder::lowerBoundScaledX(int origX, int searchStart)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return getScaledValue<LowerBound>(m_scaledColumns, origX, searchStart);
 }
 
 int ImageDecoder::upperBoundScaledY(int origY, int searchStart)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return getScaledValue<UpperBound>(m_scaledRows, origY, searchStart);
 }
 
 int ImageDecoder::lowerBoundScaledY(int origY, int searchStart)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return getScaledValue<LowerBound>(m_scaledRows, origY, searchStart);
 }
 
 int ImageDecoder::scaledY(int origY, int searchStart)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return getScaledValue<Exact>(m_scaledRows, origY, searchStart);
 }
 

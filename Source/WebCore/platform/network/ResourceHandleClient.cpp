@@ -30,52 +30,54 @@
 #include "ResourceRequest.h"
 #include "SharedBuffer.h"
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 ResourceHandleClient::ResourceHandleClient()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 ResourceHandleClient::~ResourceHandleClient()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
     
 ResourceRequest ResourceHandleClient::willSendRequest(ResourceHandle*, ResourceRequest&& request, ResourceResponse&&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return WTFMove(request);
 }
 
 void ResourceHandleClient::willSendRequestAsync(ResourceHandle* handle, ResourceRequest&& request, ResourceResponse&& /*redirectResponse*/)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     handle->continueWillSendRequest(WTFMove(request));
 }
 
 void ResourceHandleClient::didReceiveResponseAsync(ResourceHandle* handle, ResourceResponse&&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     handle->continueDidReceiveResponse();
 }
 
 #if USE(PROTECTION_SPACE_AUTH_CALLBACK)
 void ResourceHandleClient::canAuthenticateAgainstProtectionSpaceAsync(ResourceHandle* handle, const ProtectionSpace&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     handle->continueCanAuthenticateAgainstProtectionSpace(false);
 }
 #endif
 
 #if USE(CFNETWORK)
 void ResourceHandleClient::willCacheResponseAsync(ResourceHandle* handle, CFCachedURLResponseRef response)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     handle->continueWillCacheResponse(response);
 }
 #elif PLATFORM(COCOA)
 void ResourceHandleClient::willCacheResponseAsync(ResourceHandle* handle, NSCachedURLResponse *response)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     handle->continueWillCacheResponse(response);
 }
 #endif
 
 void ResourceHandleClient::didReceiveBuffer(ResourceHandle* handle, Ref<SharedBuffer>&& buffer, int encodedDataLength)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     didReceiveData(handle, buffer->data(), buffer->size(), encodedDataLength);
 }
 

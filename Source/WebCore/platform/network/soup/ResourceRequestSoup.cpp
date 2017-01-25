@@ -30,10 +30,12 @@
 #include <wtf/text/CString.h>
 #include <wtf/text/WTFString.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 void ResourceRequest::updateSoupMessageMembers(SoupMessage* soupMessage) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     updateSoupMessageHeaders(soupMessage->request_headers);
 
     GUniquePtr<SoupURI> firstParty = firstPartyForCookies().createSoupURI();
@@ -49,7 +51,7 @@ void ResourceRequest::updateSoupMessageMembers(SoupMessage* soupMessage) const
 }
 
 void ResourceRequest::updateSoupMessageHeaders(SoupMessageHeaders* soupHeaders) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const HTTPHeaderMap& headers = httpHeaderFields();
     if (!headers.isEmpty()) {
         HTTPHeaderMap::const_iterator end = headers.end();
@@ -59,7 +61,7 @@ void ResourceRequest::updateSoupMessageHeaders(SoupMessageHeaders* soupHeaders) 
 }
 
 void ResourceRequest::updateFromSoupMessageHeaders(SoupMessageHeaders* soupHeaders)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_httpHeaderFields.clear();
     SoupMessageHeadersIter headersIter;
     soup_message_headers_iter_init(&headersIter, soupHeaders);
@@ -70,7 +72,7 @@ void ResourceRequest::updateFromSoupMessageHeaders(SoupMessageHeaders* soupHeade
 }
 
 void ResourceRequest::updateSoupMessage(SoupMessage* soupMessage) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     g_object_set(soupMessage, SOUP_MESSAGE_METHOD, httpMethod().ascii().data(), NULL);
 
     GUniquePtr<SoupURI> uri = createSoupURI();
@@ -80,7 +82,7 @@ void ResourceRequest::updateSoupMessage(SoupMessage* soupMessage) const
 }
 
 SoupMessage* ResourceRequest::toSoupMessage() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SoupMessage* soupMessage = soup_message_new(httpMethod().ascii().data(), url().string().utf8().data());
     if (!soupMessage)
         return 0;
@@ -94,7 +96,7 @@ SoupMessage* ResourceRequest::toSoupMessage() const
 }
 
 void ResourceRequest::updateFromSoupMessage(SoupMessage* soupMessage)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool shouldPortBeResetToZero = m_url.hasPort() && !m_url.port();
     m_url = URL(soup_message_get_uri(soupMessage));
 
@@ -122,7 +124,7 @@ void ResourceRequest::updateFromSoupMessage(SoupMessage* soupMessage)
 static const char* gSoupRequestInitiatingPageIDKey = "wk-soup-request-initiating-page-id";
 
 void ResourceRequest::updateSoupRequest(SoupRequest* soupRequest) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_initiatingPageID) {
         uint64_t* initiatingPageIDPtr = static_cast<uint64_t*>(fastMalloc(sizeof(uint64_t)));
         *initiatingPageIDPtr = m_initiatingPageID;
@@ -134,13 +136,13 @@ void ResourceRequest::updateSoupRequest(SoupRequest* soupRequest) const
 }
 
 void ResourceRequest::updateFromSoupRequest(SoupRequest* soupRequest)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     uint64_t* initiatingPageIDPtr = static_cast<uint64_t*>(g_object_get_data(G_OBJECT(soupRequest), gSoupRequestInitiatingPageIDKey));
     m_initiatingPageID = initiatingPageIDPtr ? *initiatingPageIDPtr : 0;
 }
 
 unsigned initializeMaximumHTTPConnectionCountPerHost()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Soup has its own queue control; it wants to have all requests
     // given to it, so that it is able to look ahead, and schedule
     // them in a good way.
@@ -148,7 +150,7 @@ unsigned initializeMaximumHTTPConnectionCountPerHost()
 }
 
 GUniquePtr<SoupURI> ResourceRequest::createSoupURI() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // WebKit does not support fragment identifiers in data URLs, but soup does.
     // Before passing the URL to soup, we should make sure to urlencode any '#'
     // characters, so that soup does not interpret them as fragment identifiers.

@@ -53,6 +53,8 @@
 #include "TransformState.h"
 #include <wtf/StackStats.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 struct FrameFlatteningLayoutDisallower {
@@ -122,7 +124,7 @@ RenderView::RenderView(Document& document, RenderStyle&& style)
 #if ENABLE(SERVICE_CONTROLS)
     , m_selectionRectGatherer(*this)
 #endif
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setIsRenderView();
 
     // FIXME: We should find a way to enforce this at compile time.
@@ -140,11 +142,11 @@ RenderView::RenderView(Document& document, RenderStyle&& style)
 }
 
 RenderView::~RenderView()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void RenderView::scheduleLazyRepaint(RenderBox& renderer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (renderer.renderBoxNeedsLazyRepaint())
         return;
     renderer.setRenderBoxNeedsLazyRepaint(true);
@@ -154,7 +156,7 @@ void RenderView::scheduleLazyRepaint(RenderBox& renderer)
 }
 
 void RenderView::unscheduleLazyRepaint(RenderBox& renderer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!renderer.renderBoxNeedsLazyRepaint())
         return;
     renderer.setRenderBoxNeedsLazyRepaint(false);
@@ -164,7 +166,7 @@ void RenderView::unscheduleLazyRepaint(RenderBox& renderer)
 }
 
 void RenderView::lazyRepaintTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool shouldRepaint = !document().inPageCache();
 
     for (auto& renderer : m_renderersNeedingLazyRepaint) {
@@ -176,12 +178,12 @@ void RenderView::lazyRepaintTimerFired()
 }
 
 bool RenderView::hitTest(const HitTestRequest& request, HitTestResult& result)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return hitTest(request, result.hitTestLocation(), result);
 }
 
 bool RenderView::hitTest(const HitTestRequest& request, const HitTestLocation& location, HitTestResult& result)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     document().updateLayout();
 
     FrameFlatteningLayoutDisallower disallower(frameView());
@@ -206,18 +208,18 @@ bool RenderView::hitTest(const HitTestRequest& request, const HitTestLocation& l
 }
 
 void RenderView::computeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit, LogicalExtentComputedValues& computedValues) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     computedValues.m_extent = !shouldUsePrintingLayout() ? LayoutUnit(viewLogicalHeight()) : logicalHeight;
 }
 
 void RenderView::updateLogicalWidth()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!shouldUsePrintingLayout())
         setLogicalWidth(viewLogicalWidth());
 }
 
 LayoutUnit RenderView::availableLogicalHeight(AvailableLogicalHeightType) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Make sure block progression pagination for percentages uses the column extent and
     // not the view's extent. See https://bugs.webkit.org/show_bug.cgi?id=135204.
     if (multiColumnFlowThread() && multiColumnFlowThread()->firstMultiColumnSet())
@@ -232,12 +234,12 @@ LayoutUnit RenderView::availableLogicalHeight(AvailableLogicalHeightType) const
 }
 
 bool RenderView::isChildAllowed(const RenderObject& child, const RenderStyle&) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return child.isBox();
 }
 
 void RenderView::layoutContent(const LayoutState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     UNUSED_PARAM(state);
     ASSERT(needsLayout());
 
@@ -251,7 +253,7 @@ void RenderView::layoutContent(const LayoutState& state)
 
 #ifndef NDEBUG
 void RenderView::checkLayoutState(const LayoutState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(layoutDeltaMatches(LayoutSize()));
     ASSERT(!m_layoutStateDisableCount);
     ASSERT(m_layoutState.get() == &state);
@@ -259,7 +261,7 @@ void RenderView::checkLayoutState(const LayoutState& state)
 #endif
 
 void RenderView::initializeLayoutState(LayoutState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: May be better to push a clip and avoid issuing offscreen repaints.
     state.m_clipped = false;
 
@@ -281,7 +283,7 @@ void RenderView::initializeLayoutState(LayoutState& state)
 // 3. The last step is to do one last layout if there are pathological dependencies between non-auto-height regions and auto-height regions
 // as detected in the previous step.
 void RenderView::layoutContentInAutoLogicalHeightRegions(const LayoutState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We need to invalidate all the flows with auto-height regions if one such flow needs layout.
     // If none is found we do a layout a check back again afterwards.
     if (!flowThreadController().updateFlowThreadsNeedingLayout()) {
@@ -309,7 +311,7 @@ void RenderView::layoutContentInAutoLogicalHeightRegions(const LayoutState& stat
 }
 
 void RenderView::layoutContentToComputeOverflowInRegions(const LayoutState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!hasRenderNamedFlowThreads())
         return;
 
@@ -331,7 +333,7 @@ void RenderView::layoutContentToComputeOverflowInRegions(const LayoutState& stat
 }
 
 void RenderView::layout()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     StackStats::LayoutCheckPoint layoutCheckPoint;
     if (!document().paginated())
         setPageLogicalHeight(0);
@@ -379,7 +381,7 @@ void RenderView::layout()
 }
 
 LayoutUnit RenderView::pageOrViewLogicalHeight() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (document().printing())
         return pageLogicalHeight();
     
@@ -392,7 +394,7 @@ LayoutUnit RenderView::pageOrViewLogicalHeight() const
 }
 
 LayoutUnit RenderView::clientLogicalWidthForFixedPosition() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: If the FrameView's fixedVisibleContentRect() is not empty, perhaps it should be consulted here too?
     if (frameView().fixedElementsLayoutRelativeToFrame())
         return (isHorizontalWritingMode() ? frameView().visibleWidth() : frameView().visibleHeight()) / frameView().frame().frameScaleFactor();
@@ -406,7 +408,7 @@ LayoutUnit RenderView::clientLogicalWidthForFixedPosition() const
 }
 
 LayoutUnit RenderView::clientLogicalHeightForFixedPosition() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: If the FrameView's fixedVisibleContentRect() is not empty, perhaps it should be consulted here too?
     if (frameView().fixedElementsLayoutRelativeToFrame())
         return (isHorizontalWritingMode() ? frameView().visibleHeight() : frameView().visibleWidth()) / frameView().frame().frameScaleFactor();
@@ -420,7 +422,7 @@ LayoutUnit RenderView::clientLogicalHeightForFixedPosition() const
 }
 
 void RenderView::mapLocalToContainer(const RenderLayerModelObject* repaintContainer, TransformState& transformState, MapCoordinatesFlags mode, bool* wasFixed) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If a container was specified, and was not nullptr or the RenderView,
     // then we should have found it by now.
     ASSERT_ARG(repaintContainer, !repaintContainer || repaintContainer == this);
@@ -437,7 +439,7 @@ void RenderView::mapLocalToContainer(const RenderLayerModelObject* repaintContai
 }
 
 const RenderObject* RenderView::pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap& geometryMap) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If a container was specified, and was not nullptr or the RenderView,
     // then we should have found it by now.
     ASSERT_ARG(ancestorToStopAt, !ancestorToStopAt || ancestorToStopAt == this);
@@ -455,7 +457,7 @@ const RenderObject* RenderView::pushMappingToContainer(const RenderLayerModelObj
 }
 
 void RenderView::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, TransformState& transformState) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (mode & IsFixed)
         transformState.move(toLayoutSize(frameView().scrollPositionRespectingCustomFixedPosition()));
 
@@ -467,12 +469,12 @@ void RenderView::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, TransformStat
 }
 
 bool RenderView::requiresColumns(int) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return frameView().pagination().mode != Pagination::Unpaginated;
 }
 
 void RenderView::computeColumnCountAndWidth()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     int columnWidth = contentLogicalWidth();
     if (style().hasInlineColumnAxis()) {
         if (int pageLength = frameView().pagination().pageLength)
@@ -482,7 +484,7 @@ void RenderView::computeColumnCountAndWidth()
 }
 
 void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If we ever require layout but receive a paint anyway, something has gone horribly wrong.
     ASSERT(!needsLayout());
     // RenderViews should never be called to paint with an offset not on device pixels.
@@ -496,7 +498,7 @@ void RenderView::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 }
 
 static inline bool rendererObscuresBackground(RenderElement* rootObject)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!rootObject)
         return false;
     
@@ -519,7 +521,7 @@ static inline bool rendererObscuresBackground(RenderElement* rootObject)
 }
 
 void RenderView::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoint&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!paintInfo.shouldPaintWithinRoot(*this))
         return;
 
@@ -591,12 +593,12 @@ void RenderView::paintBoxDecorations(PaintInfo& paintInfo, const LayoutPoint&)
 }
 
 bool RenderView::shouldRepaint(const LayoutRect& rect) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return !printing() && !rect.isEmpty();
 }
 
 void RenderView::repaintRootContents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (layer()->isComposited()) {
         layer()->setBackingNeedsRepaint(GraphicsLayer::DoNotClipToLayer);
         return;
@@ -609,7 +611,7 @@ void RenderView::repaintRootContents()
 }
 
 void RenderView::repaintViewRectangle(const LayoutRect& repaintRect) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!shouldRepaint(repaintRect))
         return;
 
@@ -657,7 +659,7 @@ void RenderView::repaintViewRectangle(const LayoutRect& repaintRect) const
 }
 
 void RenderView::flushAccumulatedRepaintRegion() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!document().ownerElement());
     ASSERT(m_accumulatedRepaintRegion);
     auto repaintRects = m_accumulatedRepaintRegion->rects();
@@ -667,7 +669,7 @@ void RenderView::flushAccumulatedRepaintRegion() const
 }
 
 void RenderView::repaintViewAndCompositedLayers()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     repaintRootContents();
 
     RenderLayerCompositor& compositor = this->compositor();
@@ -676,7 +678,7 @@ void RenderView::repaintViewAndCompositedLayers()
 }
 
 LayoutRect RenderView::visualOverflowRect() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (frameView().paintsEntireContents())
         return layoutOverflowRect();
 
@@ -684,7 +686,7 @@ LayoutRect RenderView::visualOverflowRect() const
 }
 
 LayoutRect RenderView::computeRectForRepaint(const LayoutRect& rect, const RenderLayerModelObject* repaintContainer, RepaintContext context) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If a container was specified, and was not nullptr or the RenderView,
     // then we should have found it by now.
     ASSERT_ARG(repaintContainer, !repaintContainer || repaintContainer == this);
@@ -712,7 +714,7 @@ LayoutRect RenderView::computeRectForRepaint(const LayoutRect& rect, const Rende
 }
 
 bool RenderView::isScrollableOrRubberbandableBox() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // The main frame might be allowed to rubber-band even if there is no content to scroll to. This is unique to
     // the main frame; subframes and overflow areas have to have content that can be scrolled to in order to rubber-band.
     FrameView::Scrollability defineScrollable = frame().ownerElement() ? FrameView::Scrollability::Scrollable : FrameView::Scrollability::ScrollableOrRubberbandable;
@@ -720,19 +722,19 @@ bool RenderView::isScrollableOrRubberbandableBox() const
 }
 
 void RenderView::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumulatedOffset) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     rects.append(snappedIntRect(accumulatedOffset, layer()->size()));
 }
 
 void RenderView::absoluteQuads(Vector<FloatQuad>& quads, bool* wasFixed) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (wasFixed)
         *wasFixed = false;
     quads.append(FloatRect(FloatPoint(), layer()->size()));
 }
 
 static RenderObject* rendererAfterPosition(RenderObject* object, unsigned offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!object)
         return nullptr;
 
@@ -741,7 +743,7 @@ static RenderObject* rendererAfterPosition(RenderObject* object, unsigned offset
 }
 
 IntRect RenderView::selectionBounds(bool clipToVisibleContent) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LayoutRect selRect = subtreeSelectionBounds(*this, clipToVisibleContent);
 
     if (hasRenderNamedFlowThreads()) {
@@ -755,7 +757,7 @@ IntRect RenderView::selectionBounds(bool clipToVisibleContent) const
 }
 
 LayoutRect RenderView::subtreeSelectionBounds(const SelectionSubtreeRoot& root, bool clipToVisibleContent) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     typedef HashMap<RenderObject*, std::unique_ptr<RenderSelectionInfo>> SelectionMap;
     SelectionMap selectedObjects;
 
@@ -799,7 +801,7 @@ LayoutRect RenderView::subtreeSelectionBounds(const SelectionSubtreeRoot& root, 
 }
 
 void RenderView::repaintSelection() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     repaintSubtreeSelection(*this);
 
     if (hasRenderNamedFlowThreads()) {
@@ -809,7 +811,7 @@ void RenderView::repaintSelection() const
 }
 
 void RenderView::repaintSubtreeSelection(const SelectionSubtreeRoot& root) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     HashSet<RenderBlock*> processedBlocks;
 
     auto* selectionEnd = root.selectionData().selectionEnd();
@@ -835,7 +837,7 @@ void RenderView::repaintSubtreeSelection(const SelectionSubtreeRoot& root) const
 }
 
 void RenderView::setSelection(RenderObject* start, Optional<unsigned> startPos, RenderObject* end, Optional<unsigned> endPos, SelectionRepaintMode blockRepaintMode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Make sure both our start and end objects are defined.
     // Check www.msnbc.com and try clicking around to find the case where this happened.
     if ((start && !end) || (end && !start))
@@ -872,7 +874,7 @@ void RenderView::setSelection(RenderObject* start, Optional<unsigned> startPos, 
 }
 
 void RenderView::splitSelectionBetweenSubtrees(const RenderObject* start, Optional<unsigned> startPos, const RenderObject* end, Optional<unsigned> endPos, SelectionRepaintMode blockRepaintMode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Compute the visible selection end points for each of the subtrees.
     RenderSubtreesMap renderSubtreesMap;
 
@@ -915,7 +917,7 @@ void RenderView::splitSelectionBetweenSubtrees(const RenderObject* start, Option
 }
 
 void RenderView::updateSelectionForSubtrees(RenderSubtreesMap& renderSubtreesMap, SelectionRepaintMode blockRepaintMode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SubtreeOldSelectionDataMap oldSelectionDataMap;
     for (auto& subtreeSelectionInfo : renderSubtreesMap) {
         SelectionSubtreeRoot& root = *subtreeSelectionInfo.key;
@@ -940,12 +942,12 @@ void RenderView::updateSelectionForSubtrees(RenderSubtreesMap& renderSubtreesMap
 }
 
 static inline bool isValidObjectForNewSelection(const SelectionSubtreeRoot& root, const RenderObject& object)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return (object.canBeSelectionLeaf() || &object == root.selectionData().selectionStart() || &object == root.selectionData().selectionEnd()) && object.selectionState() != RenderObject::SelectionNone && object.containingBlock();
 }
 
 void RenderView::clearSubtreeSelection(const SelectionSubtreeRoot& root, SelectionRepaintMode blockRepaintMode, OldSelectionData& oldSelectionData) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Record the old selected objects.  These will be used later
     // when we compare against the new selected objects.
     oldSelectionData.selectionStartPos = root.selectionData().selectionStartPos();
@@ -985,7 +987,7 @@ void RenderView::clearSubtreeSelection(const SelectionSubtreeRoot& root, Selecti
 }
 
 void RenderView::applySubtreeSelection(const SelectionSubtreeRoot& root, SelectionRepaintMode blockRepaintMode, const OldSelectionData& oldSelectionData)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Update the selection status of all objects between selectionStart and selectionEnd
     if (root.selectionData().selectionStart() && root.selectionData().selectionStart() == root.selectionData().selectionEnd())
         root.selectionData().selectionStart()->setSelectionStateIfNeeded(SelectionBoth);
@@ -1092,7 +1094,7 @@ void RenderView::applySubtreeSelection(const SelectionSubtreeRoot& root, Selecti
 }
 
 void RenderView::getSelection(RenderObject*& startRenderer, Optional<unsigned>& startOffset, RenderObject*& endRenderer, Optional<unsigned>& endOffset) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     startRenderer = m_selectionUnsplitStart;
     startOffset = m_selectionUnsplitStartPos;
     endRenderer = m_selectionUnsplitEnd;
@@ -1100,39 +1102,39 @@ void RenderView::getSelection(RenderObject*& startRenderer, Optional<unsigned>& 
 }
 
 void RenderView::clearSelection()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     layer()->repaintBlockSelectionGaps();
     setSelection(nullptr, Nullopt, nullptr, Nullopt, RepaintNewMinusOld);
 }
 
 bool RenderView::printing() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return document().printing();
 }
 
 bool RenderView::shouldUsePrintingLayout() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!printing())
         return false;
     return frameView().frame().shouldUsePrintingLayout();
 }
 
 LayoutRect RenderView::viewRect() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (shouldUsePrintingLayout())
         return LayoutRect(LayoutPoint(), size());
     return frameView().visibleContentRect(ScrollableArea::LegacyIOSDocumentVisibleRect);
 }
 
 IntRect RenderView::unscaledDocumentRect() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     LayoutRect overflowRect(layoutOverflowRect());
     flipForWritingMode(overflowRect);
     return snappedIntRect(overflowRect);
 }
 
 bool RenderView::rootBackgroundIsEntirelyFixed() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RenderElement* rootObject = document().documentElement() ? document().documentElement()->renderer() : nullptr;
     if (!rootObject)
         return false;
@@ -1141,13 +1143,13 @@ bool RenderView::rootBackgroundIsEntirelyFixed() const
 }
     
 LayoutRect RenderView::unextendedBackgroundRect() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: What is this? Need to patch for new columns?
     return unscaledDocumentRect();
 }
     
 LayoutRect RenderView::backgroundRect() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: New columns care about this?
     if (frameView().hasExtendedBackgroundRectForPainting())
         return frameView().extendedBackgroundRectForPainting();
@@ -1156,7 +1158,7 @@ LayoutRect RenderView::backgroundRect() const
 }
 
 IntRect RenderView::documentRect() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     FloatRect overflowRect(unscaledDocumentRect());
     if (hasTransform())
         overflowRect = layer()->currentTransform().mapRect(overflowRect);
@@ -1164,7 +1166,7 @@ IntRect RenderView::documentRect() const
 }
 
 int RenderView::viewHeight() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     int height = 0;
     if (!shouldUsePrintingLayout()) {
         height = frameView().layoutHeight();
@@ -1174,7 +1176,7 @@ int RenderView::viewHeight() const
 }
 
 int RenderView::viewWidth() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     int width = 0;
     if (!shouldUsePrintingLayout()) {
         width = frameView().layoutWidth();
@@ -1184,18 +1186,18 @@ int RenderView::viewWidth() const
 }
 
 int RenderView::viewLogicalHeight() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     int height = style().isHorizontalWritingMode() ? viewHeight() : viewWidth();
     return height;
 }
 
 float RenderView::zoomFactor() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return frameView().frame().pageZoomFactor();
 }
 
 void RenderView::pushLayoutState(RenderObject& root)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_layoutStateDisableCount == 0);
     ASSERT(m_layoutState == 0);
 
@@ -1204,12 +1206,12 @@ void RenderView::pushLayoutState(RenderObject& root)
 }
 
 IntSize RenderView::viewportSizeForCSSViewportUnits() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return frameView().viewportSizeForCSSViewportUnits();
 }
 
 void RenderView::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (result.innerNode())
         return;
 
@@ -1234,7 +1236,7 @@ void RenderView::updateHitTestResult(HitTestResult& result, const LayoutPoint& p
 // The idea here is to take into account what object is moving the pagination point, and
 // thus choose the best place to chop it.
 void RenderView::setBestTruncatedAt(int y, RenderBoxModelObject* forRenderer, bool forcedBreak)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Nobody else can set a page break once we have a forced break.
     if (m_legacyPrinting.m_forcedPageBreak)
         return;
@@ -1255,12 +1257,12 @@ void RenderView::setBestTruncatedAt(int y, RenderBoxModelObject* forRenderer, bo
 }
 
 bool RenderView::usesCompositing() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_compositor && m_compositor->inCompositingMode();
 }
 
 RenderLayerCompositor& RenderView::compositor()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_compositor)
         m_compositor = std::make_unique<RenderLayerCompositor>(*this);
 
@@ -1268,13 +1270,13 @@ RenderLayerCompositor& RenderView::compositor()
 }
 
 void RenderView::setIsInWindow(bool isInWindow)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_compositor)
         m_compositor->setIsInWindow(isInWindow);
 }
 
 void RenderView::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RenderBlockFlow::styleDidChange(diff, oldStyle);
     if (hasRenderNamedFlowThreads())
         flowThreadController().styleDidChange();
@@ -1283,17 +1285,17 @@ void RenderView::styleDidChange(StyleDifference diff, const RenderStyle* oldStyl
 }
 
 bool RenderView::hasRenderNamedFlowThreads() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_flowThreadController && m_flowThreadController->hasRenderNamedFlowThreads();
 }
 
 bool RenderView::checkTwoPassLayoutForAutoHeightRegions() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return hasRenderNamedFlowThreads() && m_flowThreadController->hasFlowThreadsWithAutoLogicalHeightRegions();
 }
 
 FlowThreadController& RenderView::flowThreadController()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_flowThreadController)
         m_flowThreadController = std::make_unique<FlowThreadController>(this);
 
@@ -1301,7 +1303,7 @@ FlowThreadController& RenderView::flowThreadController()
 }
 
 void RenderView::pushLayoutStateForCurrentFlowThread(const RenderObject& object)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_flowThreadController)
         return;
 
@@ -1315,7 +1317,7 @@ void RenderView::pushLayoutStateForCurrentFlowThread(const RenderObject& object)
 }
 
 void RenderView::popLayoutStateForCurrentFlowThread()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_flowThreadController)
         return;
 
@@ -1327,26 +1329,26 @@ void RenderView::popLayoutStateForCurrentFlowThread()
 }
 
 ImageQualityController& RenderView::imageQualityController()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_imageQualityController)
         m_imageQualityController = std::make_unique<ImageQualityController>(*this);
     return *m_imageQualityController;
 }
 
 void RenderView::registerForVisibleInViewportCallback(RenderElement& renderer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_visibleInViewportRenderers.contains(&renderer));
     m_visibleInViewportRenderers.add(&renderer);
 }
 
 void RenderView::unregisterForVisibleInViewportCallback(RenderElement& renderer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_visibleInViewportRenderers.contains(&renderer));
     m_visibleInViewportRenderers.remove(&renderer);
 }
 
 void RenderView::updateVisibleViewportRect(const IntRect& visibleRect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     resumePausedImageAnimationsIfNeeded(visibleRect);
 
     for (auto* renderer : m_visibleInViewportRenderers)
@@ -1354,7 +1356,7 @@ void RenderView::updateVisibleViewportRect(const IntRect& visibleRect)
 }
 
 void RenderView::addRendererWithPausedImageAnimations(RenderElement& renderer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (renderer.hasPausedImageAnimations()) {
         ASSERT(m_renderersWithPausedImageAnimation.contains(&renderer));
         return;
@@ -1364,7 +1366,7 @@ void RenderView::addRendererWithPausedImageAnimations(RenderElement& renderer)
 }
 
 void RenderView::removeRendererWithPausedImageAnimations(RenderElement& renderer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(renderer.hasPausedImageAnimations());
     ASSERT(m_renderersWithPausedImageAnimation.contains(&renderer));
 
@@ -1373,7 +1375,7 @@ void RenderView::removeRendererWithPausedImageAnimations(RenderElement& renderer
 }
 
 void RenderView::resumePausedImageAnimationsIfNeeded(IntRect visibleRect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<RenderElement*, 10> toRemove;
     for (auto* renderer : m_renderersWithPausedImageAnimation) {
         if (renderer->repaintForPausedImageAnimationsIfNeeded(visibleRect))
@@ -1385,7 +1387,7 @@ void RenderView::resumePausedImageAnimationsIfNeeded(IntRect visibleRect)
 
 RenderView::RepaintRegionAccumulator::RepaintRegionAccumulator(RenderView* view)
     : m_rootView(view ? view->document().topDocument().renderView() : nullptr)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_rootView)
         return;
     m_wasAccumulatingRepaintRegion = !!m_rootView->m_accumulatedRepaintRegion;
@@ -1394,7 +1396,7 @@ RenderView::RepaintRegionAccumulator::RepaintRegionAccumulator(RenderView* view)
 }
 
 RenderView::RepaintRegionAccumulator::~RepaintRegionAccumulator()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_rootView)
         return;
     if (m_wasAccumulatingRepaintRegion)
@@ -1403,7 +1405,7 @@ RenderView::RepaintRegionAccumulator::~RepaintRegionAccumulator()
 }
 
 unsigned RenderView::pageNumberForBlockProgressionOffset(int offset) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     int columnNumber = 0;
     const Pagination& pagination = frameView().frame().page()->pagination();
     if (pagination.mode == Pagination::Unpaginated)
@@ -1429,7 +1431,7 @@ unsigned RenderView::pageNumberForBlockProgressionOffset(int offset) const
 }
 
 unsigned RenderView::pageCount() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     const Pagination& pagination = frameView().frame().page()->pagination();
     if (pagination.mode == Pagination::Unpaginated)
         return 0;
@@ -1442,12 +1444,12 @@ unsigned RenderView::pageCount() const
 
 #if ENABLE(CSS_SCROLL_SNAP)
 void RenderView::registerBoxWithScrollSnapCoordinates(const RenderBox& box)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_boxesWithScrollSnapCoordinates.add(&box);
 }
 
 void RenderView::unregisterBoxWithScrollSnapCoordinates(const RenderBox& box)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_boxesWithScrollSnapCoordinates.remove(&box);
 }
 #endif

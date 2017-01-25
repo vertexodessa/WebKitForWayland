@@ -74,39 +74,39 @@ using namespace WebCore;
 namespace WebKit {
 
 void WebPlatformStrategies::initialize()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static NeverDestroyed<WebPlatformStrategies> platformStrategies;
     setPlatformStrategies(&platformStrategies.get());
 }
 
 WebPlatformStrategies::WebPlatformStrategies()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 CookiesStrategy* WebPlatformStrategies::createCookiesStrategy()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return this;
 }
 
 LoaderStrategy* WebPlatformStrategies::createLoaderStrategy()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return &WebProcess::singleton().webLoaderStrategy();
 }
 
 PasteboardStrategy* WebPlatformStrategies::createPasteboardStrategy()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return this;
 }
 
 BlobRegistry* WebPlatformStrategies::createBlobRegistry()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return new BlobRegistryProxy;
 }
 
 // CookiesStrategy
 
 String WebPlatformStrategies::cookiesForDOM(const NetworkStorageSession& session, const URL& firstParty, const URL& url)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String result;
     if (!WebProcess::singleton().networkConnection().connection().sendSync(Messages::NetworkConnectionToWebProcess::CookiesForDOM(session.sessionID(), firstParty, url), Messages::NetworkConnectionToWebProcess::CookiesForDOM::Reply(result), 0))
         return String();
@@ -114,12 +114,12 @@ String WebPlatformStrategies::cookiesForDOM(const NetworkStorageSession& session
 }
 
 void WebPlatformStrategies::setCookiesFromDOM(const NetworkStorageSession& session, const URL& firstParty, const URL& url, const String& cookieString)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().networkConnection().connection().send(Messages::NetworkConnectionToWebProcess::SetCookiesFromDOM(session.sessionID(), firstParty, url, cookieString), 0);
 }
 
 bool WebPlatformStrategies::cookiesEnabled(const NetworkStorageSession& session, const URL& firstParty, const URL& url)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool result;
     if (!WebProcess::singleton().networkConnection().connection().sendSync(Messages::NetworkConnectionToWebProcess::CookiesEnabled(session.sessionID(), firstParty, url), Messages::NetworkConnectionToWebProcess::CookiesEnabled::Reply(result), 0))
         return false;
@@ -127,12 +127,12 @@ bool WebPlatformStrategies::cookiesEnabled(const NetworkStorageSession& session,
 }
 
 String WebPlatformStrategies::cookieRequestHeaderFieldValue(const NetworkStorageSession& session, const URL& firstParty, const URL& url)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return cookieRequestHeaderFieldValue(session.sessionID(), firstParty, url);
 }
 
 String WebPlatformStrategies::cookieRequestHeaderFieldValue(SessionID sessionID, const URL& firstParty, const URL& url)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String result;
     if (!WebProcess::singleton().networkConnection().connection().sendSync(Messages::NetworkConnectionToWebProcess::CookieRequestHeaderFieldValue(sessionID, firstParty, url), Messages::NetworkConnectionToWebProcess::CookieRequestHeaderFieldValue::Reply(result), 0))
         return String();
@@ -140,19 +140,19 @@ String WebPlatformStrategies::cookieRequestHeaderFieldValue(SessionID sessionID,
 }
 
 bool WebPlatformStrategies::getRawCookies(const NetworkStorageSession& session, const URL& firstParty, const URL& url, Vector<Cookie>& rawCookies)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!WebProcess::singleton().networkConnection().connection().sendSync(Messages::NetworkConnectionToWebProcess::GetRawCookies(session.sessionID(), firstParty, url), Messages::NetworkConnectionToWebProcess::GetRawCookies::Reply(rawCookies), 0))
         return false;
     return true;
 }
 
 void WebPlatformStrategies::deleteCookie(const NetworkStorageSession& session, const URL& url, const String& cookieName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().networkConnection().connection().send(Messages::NetworkConnectionToWebProcess::DeleteCookie(session.sessionID(), url, cookieName), 0);
 }
 
 void WebPlatformStrategies::addCookie(const NetworkStorageSession& session, const URL& url, const Cookie& cookie)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().networkConnection().connection().send(Messages::NetworkConnectionToWebProcess::AddCookie(session.sessionID(), url, cookie), 0);
 }
 
@@ -160,7 +160,7 @@ void WebPlatformStrategies::addCookie(const NetworkStorageSession& session, cons
 // PasteboardStrategy
 
 void WebPlatformStrategies::getTypes(Vector<String>& types, const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // First check the overrides.
     // The purpose of the overrides is to avoid messaging back to the UI process.
     // Therefore, if there are any overridden types, we return just those.
@@ -172,7 +172,7 @@ void WebPlatformStrategies::getTypes(Vector<String>& types, const String& pasteb
 }
 
 RefPtr<WebCore::SharedBuffer> WebPlatformStrategies::bufferForType(const String& pasteboardType, const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // First check the overrides.
     Vector<char> overrideBuffer;
     if (WebPasteboardOverrides::sharedPasteboardOverrides().getDataForOverride(pasteboardName, pasteboardType, overrideBuffer))
@@ -189,68 +189,68 @@ RefPtr<WebCore::SharedBuffer> WebPlatformStrategies::bufferForType(const String&
 }
 
 void WebPlatformStrategies::getPathnamesForType(Vector<String>& pathnames, const String& pasteboardType, const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::GetPasteboardPathnamesForType(pasteboardName, pasteboardType), Messages::WebPasteboardProxy::GetPasteboardPathnamesForType::Reply(pathnames), 0);
 }
 
 String WebPlatformStrategies::stringForType(const String& pasteboardType, const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String value;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::GetPasteboardStringForType(pasteboardName, pasteboardType), Messages::WebPasteboardProxy::GetPasteboardStringForType::Reply(value), 0);
     return value;
 }
 
 long WebPlatformStrategies::copy(const String& fromPasteboard, const String& toPasteboard)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     uint64_t newChangeCount;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::PasteboardCopy(fromPasteboard, toPasteboard), Messages::WebPasteboardProxy::PasteboardCopy::Reply(newChangeCount), 0);
     return newChangeCount;
 }
 
 long WebPlatformStrategies::changeCount(const WTF::String &pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     uint64_t changeCount;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::GetPasteboardChangeCount(pasteboardName), Messages::WebPasteboardProxy::GetPasteboardChangeCount::Reply(changeCount), 0);
     return changeCount;
 }
 
 String WebPlatformStrategies::uniqueName()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String pasteboardName;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::GetPasteboardUniqueName(), Messages::WebPasteboardProxy::GetPasteboardUniqueName::Reply(pasteboardName), 0);
     return pasteboardName;
 }
 
 Color WebPlatformStrategies::color(const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Color color;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::GetPasteboardColor(pasteboardName), Messages::WebPasteboardProxy::GetPasteboardColor::Reply(color), 0);
     return color;
 }
 
 URL WebPlatformStrategies::url(const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String urlString;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::GetPasteboardURL(pasteboardName), Messages::WebPasteboardProxy::GetPasteboardURL::Reply(urlString), 0);
     return URL(ParsedURLString, urlString);
 }
 
 long WebPlatformStrategies::addTypes(const Vector<String>& pasteboardTypes, const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     uint64_t newChangeCount;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::AddPasteboardTypes(pasteboardName, pasteboardTypes), Messages::WebPasteboardProxy::AddPasteboardTypes::Reply(newChangeCount), 0);
     return newChangeCount;
 }
 
 long WebPlatformStrategies::setTypes(const Vector<String>& pasteboardTypes, const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     uint64_t newChangeCount;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::SetPasteboardTypes(pasteboardName, pasteboardTypes), Messages::WebPasteboardProxy::SetPasteboardTypes::Reply(newChangeCount), 0);
     return newChangeCount;
 }
 
 long WebPlatformStrategies::setBufferForType(SharedBuffer* buffer, const String& pasteboardType, const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SharedMemory::Handle handle;
     if (buffer) {
         RefPtr<SharedMemory> sharedMemoryBuffer = SharedMemory::allocate(buffer->size());
@@ -267,14 +267,14 @@ long WebPlatformStrategies::setBufferForType(SharedBuffer* buffer, const String&
 }
 
 long WebPlatformStrategies::setPathnamesForType(const Vector<String>& pathnames, const String& pasteboardType, const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     uint64_t newChangeCount;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::SetPasteboardPathnamesForType(pasteboardName, pasteboardType, pathnames), Messages::WebPasteboardProxy::SetPasteboardPathnamesForType::Reply(newChangeCount), 0);
     return newChangeCount;
 }
 
 long WebPlatformStrategies::setStringForType(const String& string, const String& pasteboardType, const String& pasteboardName)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     uint64_t newChangeCount;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::SetPasteboardStringForType(pasteboardName, pasteboardType, string), Messages::WebPasteboardProxy::SetPasteboardStringForType::Reply(newChangeCount), 0);
     return newChangeCount;
@@ -282,29 +282,29 @@ long WebPlatformStrategies::setStringForType(const String& string, const String&
 
 #if PLATFORM(IOS)
 void WebPlatformStrategies::writeToPasteboard(const WebCore::PasteboardWebContent& content)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().parentProcessConnection()->send(Messages::WebPasteboardProxy::WriteWebContentToPasteboard(content), 0);
 }
 
 void WebPlatformStrategies::writeToPasteboard(const WebCore::PasteboardImage& image)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().parentProcessConnection()->send(Messages::WebPasteboardProxy::WriteImageToPasteboard(image), 0);
 }
 
 void WebPlatformStrategies::writeToPasteboard(const String& pasteboardType, const String& text)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().parentProcessConnection()->send(Messages::WebPasteboardProxy::WriteStringToPasteboard(pasteboardType, text), 0);
 }
 
 int WebPlatformStrategies::getPasteboardItemsCount()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     uint64_t itemsCount;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::GetPasteboardItemsCount(), Messages::WebPasteboardProxy::GetPasteboardItemsCount::Reply(itemsCount), 0);
     return itemsCount;
 }
 
 RefPtr<WebCore::SharedBuffer> WebPlatformStrategies::readBufferFromPasteboard(int index, const String& pasteboardType)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SharedMemory::Handle handle;
     uint64_t size = 0;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::ReadBufferFromPasteboard(index, pasteboardType), Messages::WebPasteboardProxy::ReadBufferFromPasteboard::Reply(handle, size), 0);
@@ -315,21 +315,21 @@ RefPtr<WebCore::SharedBuffer> WebPlatformStrategies::readBufferFromPasteboard(in
 }
 
 WebCore::URL WebPlatformStrategies::readURLFromPasteboard(int index, const String& pasteboardType)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String urlString;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::ReadURLFromPasteboard(index, pasteboardType), Messages::WebPasteboardProxy::ReadURLFromPasteboard::Reply(urlString), 0);
     return URL(ParsedURLString, urlString);
 }
 
 String WebPlatformStrategies::readStringFromPasteboard(int index, const String& pasteboardType)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String value;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::ReadStringFromPasteboard(index, pasteboardType), Messages::WebPasteboardProxy::ReadStringFromPasteboard::Reply(value), 0);
     return value;
 }
 
 long WebPlatformStrategies::changeCount()
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     uint64_t changeCount;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::GetPasteboardChangeCount(String()), Messages::WebPasteboardProxy::GetPasteboardChangeCount::Reply(changeCount), 0);
     return changeCount;
@@ -342,24 +342,24 @@ long WebPlatformStrategies::changeCount()
 #if PLATFORM(WPE)
 
 void WebPlatformStrategies::getTypes(Vector<String>& types)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::GetPasteboardTypes(), Messages::WebPasteboardProxy::GetPasteboardTypes::Reply(types), 0);
 }
 
 String WebPlatformStrategies::readStringFromPasteboard(int index, const String& pasteboardType)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String value;
     WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPasteboardProxy::ReadStringFromPasteboard(index, pasteboardType), Messages::WebPasteboardProxy::ReadStringFromPasteboard::Reply(value), 0);
     return value;
 }
 
 void WebPlatformStrategies::writeToPasteboard(const WebCore::PasteboardWebContent& content)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().parentProcessConnection()->send(Messages::WebPasteboardProxy::WriteWebContentToPasteboard(content), 0);
 }
 
 void WebPlatformStrategies::writeToPasteboard(const String& pasteboardType, const String& text)
-{
+{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     WebProcess::singleton().parentProcessConnection()->send(Messages::WebPasteboardProxy::WriteStringToPasteboard(pasteboardType, text), 0);
 }
 

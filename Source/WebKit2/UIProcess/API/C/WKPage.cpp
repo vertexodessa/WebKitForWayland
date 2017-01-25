@@ -95,6 +95,8 @@
 #include <WebCore/MediaSessionEvents.h>
 #endif
 
+#include <wtf/macros.h>
+
 using namespace WebCore;
 using namespace WebKit;
 
@@ -153,6 +155,7 @@ WKPageConfigurationRef WKPageCopyPageConfiguration(WKPageRef pageRef)
 
 void WKPageLoadURL(WKPageRef pageRef, WKURLRef URLRef)
 {
+    WTF_AUTO_THREAD_ENABLE(); WTF_SCOPE0(__FUNCTION__);
     toImpl(pageRef)->loadRequest(URL(URL(), toWTFString(URLRef)));
 }
 

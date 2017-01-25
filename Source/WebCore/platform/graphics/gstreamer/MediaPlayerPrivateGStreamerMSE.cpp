@@ -52,6 +52,8 @@
 #include "PlayreadySession.h"
 #endif
 
+#include <wtf/macros.h>
+
 static const char* dumpReadyState(WebCore::MediaPlayer::ReadyState readyState)
 {
     switch (readyState) {
@@ -1254,6 +1256,7 @@ AppendPipeline::AppendPipeline(PassRefPtr<MediaSourceClientGStreamerMSE> mediaSo
     , m_abortPending(false)
     , m_streamType(Unknown)
 {
+    WTF_AUTO_THREAD_ENABLE(); WTF_SCOPE0(__FUNCTION__);
     ASSERT(WTF::isMainThread());
 
     GST_DEBUG("%p", this);

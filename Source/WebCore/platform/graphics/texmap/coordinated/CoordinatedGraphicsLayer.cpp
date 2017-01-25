@@ -36,10 +36,12 @@
 #endif
 #include <wtf/text/CString.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 std::unique_ptr<GraphicsLayer> GraphicsLayer::create(GraphicsLayerFactory* factory, GraphicsLayerClient& client, Type layerType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!factory)
         return std::make_unique<CoordinatedGraphicsLayer>(layerType, client);
 
@@ -47,12 +49,12 @@ std::unique_ptr<GraphicsLayer> GraphicsLayer::create(GraphicsLayerFactory* facto
 }
 
 static CoordinatedLayerID toCoordinatedLayerID(GraphicsLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return is<CoordinatedGraphicsLayer>(layer) ? downcast<CoordinatedGraphicsLayer>(*layer).id() : 0;
 }
 
 void CoordinatedGraphicsLayer::notifyFlushRequired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_coordinator);
     if (m_coordinator->isFlushingLayerChanges())
         return;
@@ -61,37 +63,37 @@ void CoordinatedGraphicsLayer::notifyFlushRequired()
 }
 
 void CoordinatedGraphicsLayer::didChangeLayerState()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldSyncLayerState = true;
     notifyFlushRequired();
 }
 
 void CoordinatedGraphicsLayer::didChangeAnimations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldSyncAnimations = true;
     notifyFlushRequired();
 }
 
 void CoordinatedGraphicsLayer::didChangeChildren()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldSyncChildren = true;
     notifyFlushRequired();
 }
 
 void CoordinatedGraphicsLayer::didChangeFilters()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldSyncFilters = true;
     notifyFlushRequired();
 }
 
 void CoordinatedGraphicsLayer::didChangeImageBacking()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldSyncImageBacking = true;
     notifyFlushRequired();
 }
 
 void CoordinatedGraphicsLayer::setShouldUpdateVisibleRect()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldUpdateVisibleRect = true;
     for (auto& child : children())
         downcast<CoordinatedGraphicsLayer>(*child).setShouldUpdateVisibleRect();
@@ -100,7 +102,7 @@ void CoordinatedGraphicsLayer::setShouldUpdateVisibleRect()
 }
 
 void CoordinatedGraphicsLayer::didChangeGeometry()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     didChangeLayerState();
     setShouldUpdateVisibleRect();
 }
@@ -133,13 +135,13 @@ CoordinatedGraphicsLayer::CoordinatedGraphicsLayer(Type layerType, GraphicsLayer
     , m_platformLayer(0)
     , m_animationStartedTimer(*this, &CoordinatedGraphicsLayer::animationStartedTimerFired)
     , m_scrollableArea(0)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     static CoordinatedLayerID nextLayerID = 1;
     m_id = nextLayerID++;
 }
 
 CoordinatedGraphicsLayer::~CoordinatedGraphicsLayer()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_coordinator) {
         purgeBackingStores();
         m_coordinator->detachLayer(this);
@@ -150,7 +152,7 @@ CoordinatedGraphicsLayer::~CoordinatedGraphicsLayer()
 }
 
 bool CoordinatedGraphicsLayer::setChildren(const Vector<GraphicsLayer*>& children)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool ok = GraphicsLayer::setChildren(children);
     if (!ok)
         return false;
@@ -159,31 +161,31 @@ bool CoordinatedGraphicsLayer::setChildren(const Vector<GraphicsLayer*>& childre
 }
 
 void CoordinatedGraphicsLayer::addChild(GraphicsLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     GraphicsLayer::addChild(layer);
     didChangeChildren();
 }
 
 void CoordinatedGraphicsLayer::addChildAtIndex(GraphicsLayer* layer, int index)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     GraphicsLayer::addChildAtIndex(layer, index);
     didChangeChildren();
 }
 
 void CoordinatedGraphicsLayer::addChildAbove(GraphicsLayer* layer, GraphicsLayer* sibling)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     GraphicsLayer::addChildAbove(layer, sibling);
     didChangeChildren();
 }
 
 void CoordinatedGraphicsLayer::addChildBelow(GraphicsLayer* layer, GraphicsLayer* sibling)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     GraphicsLayer::addChildBelow(layer, sibling);
     didChangeChildren();
 }
 
 bool CoordinatedGraphicsLayer::replaceChild(GraphicsLayer* oldChild, GraphicsLayer* newChild)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool ok = GraphicsLayer::replaceChild(oldChild, newChild);
     if (!ok)
         return false;
@@ -192,14 +194,14 @@ bool CoordinatedGraphicsLayer::replaceChild(GraphicsLayer* oldChild, GraphicsLay
 }
 
 void CoordinatedGraphicsLayer::removeFromParent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (CoordinatedGraphicsLayer* parentLayer = downcast<CoordinatedGraphicsLayer>(parent()))
         parentLayer->didChangeChildren();
     GraphicsLayer::removeFromParent();
 }
 
 void CoordinatedGraphicsLayer::setPosition(const FloatPoint& p)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (position() == p)
         return;
 
@@ -209,7 +211,7 @@ void CoordinatedGraphicsLayer::setPosition(const FloatPoint& p)
 }
 
 void CoordinatedGraphicsLayer::setAnchorPoint(const FloatPoint3D& p)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (anchorPoint() == p)
         return;
 
@@ -219,7 +221,7 @@ void CoordinatedGraphicsLayer::setAnchorPoint(const FloatPoint3D& p)
 }
 
 void CoordinatedGraphicsLayer::setSize(const FloatSize& size)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (this->size() == size)
         return;
 
@@ -232,7 +234,7 @@ void CoordinatedGraphicsLayer::setSize(const FloatSize& size)
 }
 
 void CoordinatedGraphicsLayer::setTransform(const TransformationMatrix& t)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (transform() == t)
         return;
 
@@ -243,7 +245,7 @@ void CoordinatedGraphicsLayer::setTransform(const TransformationMatrix& t)
 }
 
 void CoordinatedGraphicsLayer::setChildrenTransform(const TransformationMatrix& t)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (childrenTransform() == t)
         return;
 
@@ -254,7 +256,7 @@ void CoordinatedGraphicsLayer::setChildrenTransform(const TransformationMatrix& 
 }
 
 void CoordinatedGraphicsLayer::setPreserves3D(bool b)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (preserves3D() == b)
         return;
 
@@ -266,7 +268,7 @@ void CoordinatedGraphicsLayer::setPreserves3D(bool b)
 }
 
 void CoordinatedGraphicsLayer::setMasksToBounds(bool b)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (masksToBounds() == b)
         return;
     GraphicsLayer::setMasksToBounds(b);
@@ -277,7 +279,7 @@ void CoordinatedGraphicsLayer::setMasksToBounds(bool b)
 }
 
 void CoordinatedGraphicsLayer::setDrawsContent(bool b)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (drawsContent() == b)
         return;
     GraphicsLayer::setDrawsContent(b);
@@ -288,7 +290,7 @@ void CoordinatedGraphicsLayer::setDrawsContent(bool b)
 }
 
 void CoordinatedGraphicsLayer::setContentsVisible(bool b)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (contentsAreVisible() == b)
         return;
     GraphicsLayer::setContentsVisible(b);
@@ -302,7 +304,7 @@ void CoordinatedGraphicsLayer::setContentsVisible(bool b)
 }
 
 void CoordinatedGraphicsLayer::setContentsOpaque(bool b)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (contentsOpaque() == b)
         return;
     if (m_mainBackingStore)
@@ -315,7 +317,7 @@ void CoordinatedGraphicsLayer::setContentsOpaque(bool b)
 }
 
 void CoordinatedGraphicsLayer::setBackfaceVisibility(bool b)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (backfaceVisibility() == b)
         return;
 
@@ -327,7 +329,7 @@ void CoordinatedGraphicsLayer::setBackfaceVisibility(bool b)
 }
 
 void CoordinatedGraphicsLayer::setOpacity(float opacity)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (this->opacity() == opacity)
         return;
 
@@ -339,7 +341,7 @@ void CoordinatedGraphicsLayer::setOpacity(float opacity)
 }
 
 void CoordinatedGraphicsLayer::setContentsRect(const FloatRect& r)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (contentsRect() == r)
         return;
 
@@ -351,7 +353,7 @@ void CoordinatedGraphicsLayer::setContentsRect(const FloatRect& r)
 }
 
 void CoordinatedGraphicsLayer::setContentsTileSize(const FloatSize& s)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (contentsTileSize() == s)
         return;
 
@@ -362,7 +364,7 @@ void CoordinatedGraphicsLayer::setContentsTileSize(const FloatSize& s)
 }
 
 void CoordinatedGraphicsLayer::setContentsTilePhase(const FloatSize& p)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (contentsTilePhase() == p)
         return;
 
@@ -373,12 +375,12 @@ void CoordinatedGraphicsLayer::setContentsTilePhase(const FloatSize& p)
 }
 
 bool GraphicsLayer::supportsContentsTiling()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return true;
 }
 
 void CoordinatedGraphicsLayer::setContentsNeedsDisplay()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(GRAPHICS_SURFACE)
     if (m_platformLayer)
         m_pendingPlatformLayerOperation |= SyncPlatformLayer;
@@ -392,7 +394,7 @@ void CoordinatedGraphicsLayer::setContentsNeedsDisplay()
 }
 
 void CoordinatedGraphicsLayer::setContentsToPlatformLayer(PlatformLayer* platformLayer, ContentsLayerPurpose)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(GRAPHICS_SURFACE)
     if (m_platformLayer) {
         ASSERT(m_platformLayerToken.isValid());
@@ -428,7 +430,7 @@ void CoordinatedGraphicsLayer::setContentsToPlatformLayer(PlatformLayer* platfor
 }
 
 bool CoordinatedGraphicsLayer::setFilters(const FilterOperations& newFilters)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (filters() == newFilters)
         return true;
 
@@ -440,7 +442,7 @@ bool CoordinatedGraphicsLayer::setFilters(const FilterOperations& newFilters)
 }
 
 void CoordinatedGraphicsLayer::setContentsToSolidColor(const Color& color)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_layerState.solidColor == color)
         return;
 
@@ -451,7 +453,7 @@ void CoordinatedGraphicsLayer::setContentsToSolidColor(const Color& color)
 }
 
 void CoordinatedGraphicsLayer::setShowDebugBorder(bool show)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isShowingDebugBorder() == show)
         return;
 
@@ -463,7 +465,7 @@ void CoordinatedGraphicsLayer::setShowDebugBorder(bool show)
 }
 
 void CoordinatedGraphicsLayer::setShowRepaintCounter(bool show)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isShowingRepaintCounter() == show)
         return;
 
@@ -475,7 +477,7 @@ void CoordinatedGraphicsLayer::setShowRepaintCounter(bool show)
 }
 
 void CoordinatedGraphicsLayer::setContentsToImage(Image* image)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     NativeImagePtr nativeImagePtr = image ? image->nativeImageForCurrentFrame() : nullptr;
     if (m_compositedImage == image && m_compositedNativeImagePtr == nativeImagePtr)
         return;
@@ -488,7 +490,7 @@ void CoordinatedGraphicsLayer::setContentsToImage(Image* image)
 }
 
 void CoordinatedGraphicsLayer::setMaskLayer(GraphicsLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (layer == maskLayer())
         return;
 
@@ -509,7 +511,7 @@ void CoordinatedGraphicsLayer::setMaskLayer(GraphicsLayer* layer)
 }
 
 bool CoordinatedGraphicsLayer::shouldDirectlyCompositeImage(Image* image) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!image || !image->isBitmapImage())
         return false;
 
@@ -521,7 +523,7 @@ bool CoordinatedGraphicsLayer::shouldDirectlyCompositeImage(Image* image) const
 }
 
 void CoordinatedGraphicsLayer::setReplicatedByLayer(GraphicsLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (layer == replicaLayer())
         return;
 
@@ -532,12 +534,12 @@ void CoordinatedGraphicsLayer::setReplicatedByLayer(GraphicsLayer* layer)
 }
 
 void CoordinatedGraphicsLayer::setNeedsDisplay()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setNeedsDisplayInRect(FloatRect(FloatPoint(), size()));
 }
 
 void CoordinatedGraphicsLayer::setNeedsDisplayInRect(const FloatRect& rect, ShouldClipToLayer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_mainBackingStore)
         m_mainBackingStore->invalidate(IntRect(rect));
 
@@ -547,7 +549,7 @@ void CoordinatedGraphicsLayer::setNeedsDisplayInRect(const FloatRect& rect, Shou
 }
 
 void CoordinatedGraphicsLayer::setScrollableArea(ScrollableArea* scrollableArea)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool oldScrollable = isScrollable();
     m_scrollableArea = scrollableArea;
     if (oldScrollable == isScrollable())
@@ -559,7 +561,7 @@ void CoordinatedGraphicsLayer::setScrollableArea(ScrollableArea* scrollableArea)
 }
 
 void CoordinatedGraphicsLayer::commitScrollOffset(const IntSize& offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isScrollable() || offset.isZero())
         return;
 
@@ -570,7 +572,7 @@ void CoordinatedGraphicsLayer::commitScrollOffset(const IntSize& offset)
 }
 
 void CoordinatedGraphicsLayer::setFixedToViewport(bool isFixed)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_fixedToViewport == isFixed)
         return;
 
@@ -582,7 +584,7 @@ void CoordinatedGraphicsLayer::setFixedToViewport(bool isFixed)
 }
 
 void CoordinatedGraphicsLayer::flushCompositingState(const FloatRect& rect, bool viewportIsStable)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (CoordinatedGraphicsLayer* mask = downcast<CoordinatedGraphicsLayer>(maskLayer()))
         mask->flushCompositingStateForThisLayerOnly(viewportIsStable);
 
@@ -596,7 +598,7 @@ void CoordinatedGraphicsLayer::flushCompositingState(const FloatRect& rect, bool
 }
 
 void CoordinatedGraphicsLayer::syncChildren()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_shouldSyncChildren)
         return;
     m_shouldSyncChildren = false;
@@ -607,7 +609,7 @@ void CoordinatedGraphicsLayer::syncChildren()
 }
 
 void CoordinatedGraphicsLayer::syncFilters()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_shouldSyncFilters)
         return;
     m_shouldSyncFilters = false;
@@ -617,7 +619,7 @@ void CoordinatedGraphicsLayer::syncFilters()
 }
 
 void CoordinatedGraphicsLayer::syncImageBacking()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_shouldSyncImageBacking)
         return;
     m_shouldSyncImageBacking = false;
@@ -646,7 +648,7 @@ void CoordinatedGraphicsLayer::syncImageBacking()
 }
 
 void CoordinatedGraphicsLayer::syncLayerState()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_shouldSyncLayerState)
         return;
     m_shouldSyncLayerState = false;
@@ -680,7 +682,7 @@ void CoordinatedGraphicsLayer::syncLayerState()
 }
 
 void CoordinatedGraphicsLayer::setDebugBorder(const Color& color, float width)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_layerState.showDebugBorders);
     if (m_layerState.debugBorderColor != color) {
         m_layerState.debugBorderColor = color;
@@ -694,7 +696,7 @@ void CoordinatedGraphicsLayer::setDebugBorder(const Color& color, float width)
 }
 
 void CoordinatedGraphicsLayer::syncAnimations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_shouldSyncAnimations)
         return;
 
@@ -704,7 +706,7 @@ void CoordinatedGraphicsLayer::syncAnimations()
 }
 
 void CoordinatedGraphicsLayer::syncPlatformLayer()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(GRAPHICS_SURFACE)
     destroyPlatformLayerIfNeeded();
     createPlatformLayerIfNeeded();
@@ -732,7 +734,7 @@ void CoordinatedGraphicsLayer::syncPlatformLayer()
 }
 
 void CoordinatedGraphicsLayer::updatePlatformLayer()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(COORDINATED_GRAPHICS_THREADED)
     if (!m_shouldUpdatePlatformLayer)
         return;
@@ -746,7 +748,7 @@ void CoordinatedGraphicsLayer::updatePlatformLayer()
 
 #if USE(GRAPHICS_SURFACE)
 void CoordinatedGraphicsLayer::destroyPlatformLayerIfNeeded()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!(m_pendingPlatformLayerOperation & DestroyPlatformLayer))
         return;
 
@@ -760,7 +762,7 @@ void CoordinatedGraphicsLayer::destroyPlatformLayerIfNeeded()
 }
 
 void CoordinatedGraphicsLayer::createPlatformLayerIfNeeded()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!(m_pendingPlatformLayerOperation & CreatePlatformLayer))
         return;
 
@@ -778,7 +780,7 @@ void CoordinatedGraphicsLayer::createPlatformLayerIfNeeded()
 #endif
 
 void CoordinatedGraphicsLayer::flushCompositingStateForThisLayerOnly(bool)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // When we have a transform animation, we need to update visible rect every frame to adjust the visible rect of a backing store.
     bool hasActiveTransformAnimation = selfOrAncestorHasActiveTransformAnimation();
     if (hasActiveTransformAnimation)
@@ -802,7 +804,7 @@ void CoordinatedGraphicsLayer::flushCompositingStateForThisLayerOnly(bool)
 }
 
 void CoordinatedGraphicsLayer::syncPendingStateChangesIncludingSubLayers()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_layerState.hasPendingChanges()) {
         m_coordinator->syncLayerState(m_id, m_layerState);
         resetLayerState();
@@ -816,7 +818,7 @@ void CoordinatedGraphicsLayer::syncPendingStateChangesIncludingSubLayers()
 }
 
 void CoordinatedGraphicsLayer::resetLayerState()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_layerState.changeMask = 0;
     m_layerState.tilesToCreate.clear();
     m_layerState.tilesToRemove.clear();
@@ -825,13 +827,13 @@ void CoordinatedGraphicsLayer::resetLayerState()
 }
 
 bool CoordinatedGraphicsLayer::imageBackingVisible()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_coordinatedImageBacking);
     return transformedVisibleRect().intersects(IntRect(contentsRect()));
 }
 
 void CoordinatedGraphicsLayer::releaseImageBackingIfNeeded()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_coordinatedImageBacking)
         return;
 
@@ -843,7 +845,7 @@ void CoordinatedGraphicsLayer::releaseImageBackingIfNeeded()
 }
 
 CoordinatedGraphicsLayer* CoordinatedGraphicsLayer::findFirstDescendantWithContentsRecursively()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (shouldHaveBackingStore())
         return this;
 
@@ -856,7 +858,7 @@ CoordinatedGraphicsLayer* CoordinatedGraphicsLayer::findFirstDescendantWithConte
 }
 
 void CoordinatedGraphicsLayer::setVisibleContentRectTrajectoryVector(const FloatPoint& trajectoryVector)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_mainBackingStore)
         return;
 
@@ -865,18 +867,18 @@ void CoordinatedGraphicsLayer::setVisibleContentRectTrajectoryVector(const Float
 }
 
 void CoordinatedGraphicsLayer::deviceOrPageScaleFactorChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (shouldHaveBackingStore())
         m_pendingContentsScaleAdjustment = true;
 }
 
 float CoordinatedGraphicsLayer::effectiveContentsScale()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return selfOrAncestorHaveNonAffineTransforms() ? 1 : deviceScaleFactor() * pageScaleFactor();
 }
 
 void CoordinatedGraphicsLayer::adjustContentsScale()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(shouldHaveBackingStore());
     if (!m_mainBackingStore || m_mainBackingStore->contentsScale() == effectiveContentsScale())
         return;
@@ -892,20 +894,20 @@ void CoordinatedGraphicsLayer::adjustContentsScale()
 }
 
 void CoordinatedGraphicsLayer::createBackingStore()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_mainBackingStore = std::make_unique<TiledBackingStore>(this, effectiveContentsScale());
     m_mainBackingStore->setSupportsAlpha(!contentsOpaque());
 }
 
 void CoordinatedGraphicsLayer::tiledBackingStorePaint(GraphicsContext& context, const IntRect& rect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (rect.isEmpty())
         return;
     paintGraphicsLayerContents(context, rect);
 }
 
 void CoordinatedGraphicsLayer::didUpdateTileBuffers()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!isShowingRepaintCounter())
         return;
 
@@ -914,13 +916,13 @@ void CoordinatedGraphicsLayer::didUpdateTileBuffers()
 }
 
 void CoordinatedGraphicsLayer::tiledBackingStoreHasPendingTileCreation()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setNeedsVisibleRectAdjustment();
     notifyFlushRequired();
 }
 
 static void clampToContentsRectIfRectIsInfinite(FloatRect& rect, const FloatSize& contentsSize)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (rect.width() >= LayoutUnit::nearlyMax() || rect.width() <= LayoutUnit::nearlyMin()) {
         rect.setX(0);
         rect.setWidth(contentsSize.width());
@@ -933,7 +935,7 @@ static void clampToContentsRectIfRectIsInfinite(FloatRect& rect, const FloatSize
 }
 
 IntRect CoordinatedGraphicsLayer::transformedVisibleRect()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Non-invertible layers are not visible.
     if (!m_layerTransform.combined().isInvertible())
         return IntRect();
@@ -948,14 +950,14 @@ IntRect CoordinatedGraphicsLayer::transformedVisibleRect()
 }
 
 bool CoordinatedGraphicsLayer::paintToSurface(const IntSize& size, uint32_t& atlas, IntPoint& offset, CoordinatedSurface::Client& client)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_coordinator);
     ASSERT(m_coordinator->isFlushingLayerChanges());
     return m_coordinator->paintToSurface(size, contentsOpaque() ? CoordinatedSurface::NoFlags : CoordinatedSurface::SupportsAlpha, atlas, offset, client);
 }
 
 void CoordinatedGraphicsLayer::createTile(uint32_t tileID, float scaleFactor)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_coordinator);
     ASSERT(m_coordinator->isFlushingLayerChanges());
 
@@ -966,7 +968,7 @@ void CoordinatedGraphicsLayer::createTile(uint32_t tileID, float scaleFactor)
 }
 
 void CoordinatedGraphicsLayer::updateTile(uint32_t tileID, const SurfaceUpdateInfo& updateInfo, const IntRect& tileRect)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_coordinator);
     ASSERT(m_coordinator->isFlushingLayerChanges());
 
@@ -978,14 +980,14 @@ void CoordinatedGraphicsLayer::updateTile(uint32_t tileID, const SurfaceUpdateIn
 }
 
 void CoordinatedGraphicsLayer::removeTile(uint32_t tileID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_coordinator);
     ASSERT(m_coordinator->isFlushingLayerChanges() || m_isPurging);
     m_layerState.tilesToRemove.append(tileID);
 }
 
 void CoordinatedGraphicsLayer::updateContentBuffersIncludingSubLayers()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (CoordinatedGraphicsLayer* mask = downcast<CoordinatedGraphicsLayer>(maskLayer()))
         mask->updateContentBuffers();
 
@@ -999,7 +1001,7 @@ void CoordinatedGraphicsLayer::updateContentBuffersIncludingSubLayers()
 }
 
 void CoordinatedGraphicsLayer::updateContentBuffers()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!shouldHaveBackingStore()) {
         m_mainBackingStore = nullptr;
         m_previousBackingStore = nullptr;
@@ -1033,7 +1035,7 @@ void CoordinatedGraphicsLayer::updateContentBuffers()
 }
 
 void CoordinatedGraphicsLayer::purgeBackingStores()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #ifndef NDEBUG
     TemporaryChange<bool> updateModeProtector(m_isPurging, true);
 #endif
@@ -1046,23 +1048,23 @@ void CoordinatedGraphicsLayer::purgeBackingStores()
 }
 
 void CoordinatedGraphicsLayer::setCoordinator(CoordinatedGraphicsLayerClient* coordinator)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_coordinator = coordinator;
 }
 
 void CoordinatedGraphicsLayer::setNeedsVisibleRectAdjustment()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (shouldHaveBackingStore())
         m_pendingVisibleRectAdjustment = true;
 }
 
 static inline bool isIntegral(float value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return static_cast<int>(value) == value;
 }
 
 FloatPoint CoordinatedGraphicsLayer::computePositionRelativeToBase()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     FloatPoint offset;
     for (const GraphicsLayer* currLayer = this; currLayer; currLayer = currLayer->parent())
         offset += currLayer->position();
@@ -1071,7 +1073,7 @@ FloatPoint CoordinatedGraphicsLayer::computePositionRelativeToBase()
 }
 
 void CoordinatedGraphicsLayer::computePixelAlignment(FloatPoint& position, FloatSize& size, FloatPoint3D& anchorPoint, FloatSize& alignmentOffset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (isIntegral(effectiveContentsScale())) {
         position = m_position;
         size = m_size;
@@ -1115,7 +1117,7 @@ void CoordinatedGraphicsLayer::computePixelAlignment(FloatPoint& position, Float
 }
 
 void CoordinatedGraphicsLayer::computeTransformedVisibleRect()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_shouldUpdateVisibleRect && !m_movingVisibleRect)
         return;
 
@@ -1140,12 +1142,12 @@ void CoordinatedGraphicsLayer::computeTransformedVisibleRect()
 }
 
 bool CoordinatedGraphicsLayer::shouldHaveBackingStore() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return drawsContent() && contentsAreVisible() && !m_size.isEmpty();
 }
 
 bool CoordinatedGraphicsLayer::selfOrAncestorHasActiveTransformAnimation() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_animations.hasActiveAnimationsOfType(AnimatedPropertyTransform))
         return true;
 
@@ -1156,7 +1158,7 @@ bool CoordinatedGraphicsLayer::selfOrAncestorHasActiveTransformAnimation() const
 }
 
 bool CoordinatedGraphicsLayer::selfOrAncestorHaveNonAffineTransforms()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_animations.hasActiveAnimationsOfType(AnimatedPropertyTransform))
         return true;
 
@@ -1170,7 +1172,7 @@ bool CoordinatedGraphicsLayer::selfOrAncestorHaveNonAffineTransforms()
 }
 
 bool CoordinatedGraphicsLayer::addAnimation(const KeyframeValueList& valueList, const FloatSize& boxSize, const Animation* anim, const String& keyframesName, double delayAsNegativeTimeOffset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!keyframesName.isEmpty());
 
     if (!anim || anim->isEmptyOrZeroDuration() || valueList.size() < 2 || (valueList.property() != AnimatedPropertyTransform && valueList.property() != AnimatedPropertyOpacity && valueList.property() != AnimatedPropertyFilter))
@@ -1190,41 +1192,41 @@ bool CoordinatedGraphicsLayer::addAnimation(const KeyframeValueList& valueList, 
 }
 
 void CoordinatedGraphicsLayer::pauseAnimation(const String& animationName, double time)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_animations.pause(animationName, time);
     didChangeAnimations();
 }
 
 void CoordinatedGraphicsLayer::removeAnimation(const String& animationName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_animations.remove(animationName);
     didChangeAnimations();
 }
 
 void CoordinatedGraphicsLayer::suspendAnimations(double time)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_animations.suspend(time);
     didChangeAnimations();
 }
 
 void CoordinatedGraphicsLayer::resumeAnimations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_animations.resume();
     didChangeAnimations();
 }
 
 void CoordinatedGraphicsLayer::animationStartedTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     client().notifyAnimationStarted(this, "", m_lastAnimationStartTime);
 }
 
 #if USE(COORDINATED_GRAPHICS_THREADED)
 void CoordinatedGraphicsLayer::platformLayerWillBeDestroyed()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void CoordinatedGraphicsLayer::setPlatformLayerNeedsDisplay()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 #endif
 

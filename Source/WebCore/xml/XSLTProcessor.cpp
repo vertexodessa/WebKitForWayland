@@ -44,10 +44,12 @@
 #include "markup.h"
 #include <wtf/Assertions.h>
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 static inline void transformTextStringToXHTMLDocumentString(String& text)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Modify the output so that it is a well-formed XHTML document with a <pre> tag enclosing the text.
     text.replaceWithLiteral('&', "&amp;");
     text.replaceWithLiteral('<', "&lt;");
@@ -62,14 +64,14 @@ static inline void transformTextStringToXHTMLDocumentString(String& text)
 }
 
 XSLTProcessor::~XSLTProcessor()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Stylesheet shouldn't outlive its root node.
     ASSERT(!m_stylesheetRootNode || !m_stylesheet || m_stylesheet->hasOneRef());
 }
 
 Ref<Document> XSLTProcessor::createDocumentFromSource(const String& sourceString,
     const String& sourceEncoding, const String& sourceMIMEType, Node* sourceNode, Frame* frame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<Document> ownerDocument(sourceNode->document());
     bool sourceIsDocument = (sourceNode == &ownerDocument.get());
     String documentSource = sourceString;
@@ -109,7 +111,7 @@ Ref<Document> XSLTProcessor::createDocumentFromSource(const String& sourceString
 }
 
 RefPtr<Document> XSLTProcessor::transformToDocument(Node* sourceNode)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!sourceNode)
         return nullptr;
 
@@ -122,7 +124,7 @@ RefPtr<Document> XSLTProcessor::transformToDocument(Node* sourceNode)
 }
 
 RefPtr<DocumentFragment> XSLTProcessor::transformToFragment(Node* sourceNode, Document* outputDoc)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!sourceNode || !outputDoc)
         return nullptr;
 
@@ -140,27 +142,27 @@ RefPtr<DocumentFragment> XSLTProcessor::transformToFragment(Node* sourceNode, Do
 }
 
 void XSLTProcessor::setParameter(const String& /*namespaceURI*/, const String& localName, const String& value)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: namespace support?
     // should make a QualifiedName here but we'd have to expose the impl
     m_parameters.set(localName, value);
 }
 
 String XSLTProcessor::getParameter(const String& /*namespaceURI*/, const String& localName) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: namespace support?
     // should make a QualifiedName here but we'd have to expose the impl
     return m_parameters.get(localName);
 }
 
 void XSLTProcessor::removeParameter(const String& /*namespaceURI*/, const String& localName)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: namespace support?
     m_parameters.remove(localName);
 }
 
 void XSLTProcessor::reset()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_stylesheet = nullptr;
     m_stylesheetRootNode = nullptr;
     m_parameters.clear();

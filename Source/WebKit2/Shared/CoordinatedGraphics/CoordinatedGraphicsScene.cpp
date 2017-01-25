@@ -30,12 +30,14 @@
 #include <WebCore/TextureMapperLayer.h>
 #include <wtf/Atomics.h>
 
+#include <wtf/macros.h>
+
 using namespace WebCore;
 
 namespace WebKit {
 
 void CoordinatedGraphicsScene::dispatchOnMainThread(Function<void()>&& function)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (RunLoop::isMain()) {
         function();
         return;
@@ -47,7 +49,7 @@ void CoordinatedGraphicsScene::dispatchOnMainThread(Function<void()>&& function)
 }
 
 void CoordinatedGraphicsScene::dispatchOnClientRunLoop(Function<void()>&& function)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (&m_clientRunLoop == &RunLoop::current()) {
         function();
         return;
@@ -59,7 +61,7 @@ void CoordinatedGraphicsScene::dispatchOnClientRunLoop(Function<void()>&& functi
 }
 
 static bool layerShouldHaveBackingStore(TextureMapperLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return layer->drawsContent() && layer->contentsAreVisible() && !layer->size().isEmpty();
 }
 
@@ -73,15 +75,15 @@ CoordinatedGraphicsScene::CoordinatedGraphicsScene(CoordinatedGraphicsSceneClien
     , m_viewBackgroundColor(Color::black)
 #endif
     , m_clientRunLoop(RunLoop::current())
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 CoordinatedGraphicsScene::~CoordinatedGraphicsScene()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void CoordinatedGraphicsScene::paintToCurrentGLContext(const TransformationMatrix& matrix, float opacity, const FloatRect& clipRect, const Color& backgroundColor, bool drawsBackground, const FloatPoint& contentPosition, TextureMapper::PaintFlags PaintFlags)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_textureMapper) {
         m_textureMapper = TextureMapper::create();
         static_cast<TextureMapperGL*>(m_textureMapper.get())->setEnableEdgeDistanceAntialiasing(true);
@@ -130,7 +132,7 @@ void CoordinatedGraphicsScene::paintToCurrentGLContext(const TransformationMatri
 }
 
 void CoordinatedGraphicsScene::paintToGraphicsContext(PlatformGraphicsContext* platformContext, const Color& backgroundColor, bool drawsBackground)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_textureMapper)
         m_textureMapper = TextureMapper::create();
     syncRemoteContent();
@@ -156,7 +158,7 @@ void CoordinatedGraphicsScene::paintToGraphicsContext(PlatformGraphicsContext* p
 }
 
 void CoordinatedGraphicsScene::updateViewport()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_client)
         return;
     dispatchOnClientRunLoop([this] {
@@ -166,7 +168,7 @@ void CoordinatedGraphicsScene::updateViewport()
 }
 
 void CoordinatedGraphicsScene::adjustPositionForFixedLayers(const FloatPoint& contentPosition)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_fixedLayers.isEmpty())
         return;
 
@@ -180,7 +182,7 @@ void CoordinatedGraphicsScene::adjustPositionForFixedLayers(const FloatPoint& co
 }
 
 void CoordinatedGraphicsScene::syncPlatformLayerIfNeeded(TextureMapperLayer* layer, const CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(GRAPHICS_SURFACE)
     ASSERT(m_textureMapper);
 
@@ -212,13 +214,13 @@ void CoordinatedGraphicsScene::syncPlatformLayerIfNeeded(TextureMapperLayer* lay
 
 #if USE(COORDINATED_GRAPHICS_THREADED)
 void CoordinatedGraphicsScene::onNewBufferAvailable()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_client)
         m_client->updateViewport();
 }
 
 TextureMapperGL* CoordinatedGraphicsScene::texmapGL()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_textureMapper)
         return nullptr;
 
@@ -228,7 +230,7 @@ TextureMapperGL* CoordinatedGraphicsScene::texmapGL()
 
 #if USE(GRAPHICS_SURFACE)
 void CoordinatedGraphicsScene::createPlatformLayerIfNeeded(TextureMapperLayer* layer, const CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!state.platformLayerToken.isValid())
         return;
 
@@ -239,7 +241,7 @@ void CoordinatedGraphicsScene::createPlatformLayerIfNeeded(TextureMapperLayer* l
 }
 
 void CoordinatedGraphicsScene::destroyPlatformLayerIfNeeded(TextureMapperLayer* layer, const CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (state.platformLayerToken.isValid())
         return;
 
@@ -249,7 +251,7 @@ void CoordinatedGraphicsScene::destroyPlatformLayerIfNeeded(TextureMapperLayer* 
 #endif
 
 void CoordinatedGraphicsScene::setLayerRepaintCountIfNeeded(TextureMapperLayer* layer, const CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!layer->isShowingRepaintCounter() || !state.repaintCountChanged)
         return;
 
@@ -257,7 +259,7 @@ void CoordinatedGraphicsScene::setLayerRepaintCountIfNeeded(TextureMapperLayer* 
 }
 
 void CoordinatedGraphicsScene::setLayerChildrenIfNeeded(TextureMapperLayer* layer, const CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!state.childrenChanged)
         return;
 
@@ -270,7 +272,7 @@ void CoordinatedGraphicsScene::setLayerChildrenIfNeeded(TextureMapperLayer* laye
 }
 
 void CoordinatedGraphicsScene::setLayerFiltersIfNeeded(TextureMapperLayer* layer, const CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!state.filtersChanged)
         return;
 
@@ -278,7 +280,7 @@ void CoordinatedGraphicsScene::setLayerFiltersIfNeeded(TextureMapperLayer* layer
 }
 
 void CoordinatedGraphicsScene::setLayerState(CoordinatedLayerID id, const CoordinatedGraphicsLayerState& layerState)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_rootLayerID != InvalidCoordinatedLayerID);
     TextureMapperLayer* layer = layerByID(id);
 
@@ -362,18 +364,18 @@ void CoordinatedGraphicsScene::setLayerState(CoordinatedLayerID id, const Coordi
 }
 
 TextureMapperLayer* CoordinatedGraphicsScene::getLayerByIDIfExists(CoordinatedLayerID id)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return (id != InvalidCoordinatedLayerID) ? layerByID(id) : 0;
 }
 
 void CoordinatedGraphicsScene::createLayers(const Vector<CoordinatedLayerID>& layerIDs)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& layerID : layerIDs)
         createLayer(layerID);
 }
 
 void CoordinatedGraphicsScene::createLayer(CoordinatedLayerID id)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     std::unique_ptr<TextureMapperLayer> newLayer = std::make_unique<TextureMapperLayer>();
     newLayer->setID(id);
     newLayer->setScrollClient(this);
@@ -381,13 +383,13 @@ void CoordinatedGraphicsScene::createLayer(CoordinatedLayerID id)
 }
 
 void CoordinatedGraphicsScene::deleteLayers(const Vector<CoordinatedLayerID>& layerIDs)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& layerID : layerIDs)
         deleteLayer(layerID);
 }
 
 void CoordinatedGraphicsScene::deleteLayer(CoordinatedLayerID layerID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     std::unique_ptr<TextureMapperLayer> layer = m_layers.take(layerID);
     ASSERT(layer);
 
@@ -403,7 +405,7 @@ void CoordinatedGraphicsScene::deleteLayer(CoordinatedLayerID layerID)
 }
 
 void CoordinatedGraphicsScene::setRootLayerID(CoordinatedLayerID layerID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(layerID != InvalidCoordinatedLayerID);
     ASSERT(m_rootLayerID == InvalidCoordinatedLayerID);
 
@@ -415,7 +417,7 @@ void CoordinatedGraphicsScene::setRootLayerID(CoordinatedLayerID layerID)
 }
 
 void CoordinatedGraphicsScene::prepareContentBackingStore(TextureMapperLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!layerShouldHaveBackingStore(layer)) {
         removeBackingStoreIfNeeded(layer);
         return;
@@ -426,7 +428,7 @@ void CoordinatedGraphicsScene::prepareContentBackingStore(TextureMapperLayer* la
 }
 
 void CoordinatedGraphicsScene::createBackingStoreIfNeeded(TextureMapperLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_backingStores.contains(layer))
         return;
 
@@ -436,7 +438,7 @@ void CoordinatedGraphicsScene::createBackingStoreIfNeeded(TextureMapperLayer* la
 }
 
 void CoordinatedGraphicsScene::removeBackingStoreIfNeeded(TextureMapperLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<CoordinatedBackingStore> backingStore = m_backingStores.take(layer);
     if (!backingStore)
         return;
@@ -445,7 +447,7 @@ void CoordinatedGraphicsScene::removeBackingStoreIfNeeded(TextureMapperLayer* la
 }
 
 void CoordinatedGraphicsScene::resetBackingStoreSizeToLayerSize(TextureMapperLayer* layer)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<CoordinatedBackingStore> backingStore = m_backingStores.get(layer);
     ASSERT(backingStore);
     backingStore->setSize(layer->size());
@@ -453,7 +455,7 @@ void CoordinatedGraphicsScene::resetBackingStoreSizeToLayerSize(TextureMapperLay
 }
 
 void CoordinatedGraphicsScene::createTilesIfNeeded(TextureMapperLayer* layer, const CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (state.tilesToCreate.isEmpty())
         return;
 
@@ -468,7 +470,7 @@ void CoordinatedGraphicsScene::createTilesIfNeeded(TextureMapperLayer* layer, co
 }
 
 void CoordinatedGraphicsScene::removeTilesIfNeeded(TextureMapperLayer* layer, const CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (state.tilesToRemove.isEmpty())
         return;
 
@@ -483,7 +485,7 @@ void CoordinatedGraphicsScene::removeTilesIfNeeded(TextureMapperLayer* layer, co
 }
 
 void CoordinatedGraphicsScene::updateTilesIfNeeded(TextureMapperLayer* layer, const CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (state.tilesToUpdate.isEmpty())
         return;
 
@@ -505,7 +507,7 @@ void CoordinatedGraphicsScene::updateTilesIfNeeded(TextureMapperLayer* layer, co
 }
 
 void CoordinatedGraphicsScene::syncUpdateAtlases(const CoordinatedGraphicsState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& atlas : state.updateAtlasesToCreate)
         createUpdateAtlas(atlas.first, atlas.second);
 
@@ -514,19 +516,19 @@ void CoordinatedGraphicsScene::syncUpdateAtlases(const CoordinatedGraphicsState&
 }
 
 void CoordinatedGraphicsScene::createUpdateAtlas(uint32_t atlasID, PassRefPtr<CoordinatedSurface> surface)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_surfaces.contains(atlasID));
     m_surfaces.add(atlasID, surface);
 }
 
 void CoordinatedGraphicsScene::removeUpdateAtlas(uint32_t atlasID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_surfaces.contains(atlasID));
     m_surfaces.remove(atlasID);
 }
 
 void CoordinatedGraphicsScene::syncImageBackings(const CoordinatedGraphicsState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& image : state.imagesToRemove)
         removeImageBacking(image);
 
@@ -541,14 +543,14 @@ void CoordinatedGraphicsScene::syncImageBackings(const CoordinatedGraphicsState&
 }
 
 void CoordinatedGraphicsScene::createImageBacking(CoordinatedImageBackingID imageID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_imageBackings.contains(imageID));
     RefPtr<CoordinatedBackingStore> backingStore(CoordinatedBackingStore::create());
     m_imageBackings.add(imageID, backingStore.release());
 }
 
 void CoordinatedGraphicsScene::updateImageBacking(CoordinatedImageBackingID imageID, PassRefPtr<CoordinatedSurface> surface)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_imageBackings.contains(imageID));
     ImageBackingMap::iterator it = m_imageBackings.find(imageID);
     RefPtr<CoordinatedBackingStore> backingStore = it->value;
@@ -565,7 +567,7 @@ void CoordinatedGraphicsScene::updateImageBacking(CoordinatedImageBackingID imag
 }
 
 void CoordinatedGraphicsScene::clearImageBackingContents(CoordinatedImageBackingID imageID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_imageBackings.contains(imageID));
     ImageBackingMap::iterator it = m_imageBackings.find(imageID);
     RefPtr<CoordinatedBackingStore> backingStore = it->value;
@@ -574,7 +576,7 @@ void CoordinatedGraphicsScene::clearImageBackingContents(CoordinatedImageBacking
 }
 
 void CoordinatedGraphicsScene::removeImageBacking(CoordinatedImageBackingID imageID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_imageBackings.contains(imageID));
 
     // We don't want TextureMapperLayer refers a dangling pointer.
@@ -582,7 +584,7 @@ void CoordinatedGraphicsScene::removeImageBacking(CoordinatedImageBackingID imag
 }
 
 void CoordinatedGraphicsScene::assignImageBackingToLayer(TextureMapperLayer* layer, CoordinatedImageBackingID imageID)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if USE(GRAPHICS_SURFACE)
     if (m_surfaceBackingStores.contains(layer))
         return;
@@ -599,12 +601,12 @@ void CoordinatedGraphicsScene::assignImageBackingToLayer(TextureMapperLayer* lay
 }
 
 void CoordinatedGraphicsScene::removeReleasedImageBackingsIfNeeded()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_releasedImageBackings.clear();
 }
 
 void CoordinatedGraphicsScene::commitPendingBackingStoreOperations()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (auto& backingStore : m_backingStoresWithPendingBuffers)
         backingStore->commitTileOperations(*m_textureMapper);
 
@@ -612,7 +614,7 @@ void CoordinatedGraphicsScene::commitPendingBackingStoreOperations()
 }
 
 void CoordinatedGraphicsScene::commitSceneState(const CoordinatedGraphicsState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_renderedContentsScrollPosition = state.scrollPosition;
 
     createLayers(state.layersToCreate);
@@ -632,7 +634,7 @@ void CoordinatedGraphicsScene::commitSceneState(const CoordinatedGraphicsState& 
 }
 
 void CoordinatedGraphicsScene::renderNextFrame()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_client)
         return;
     dispatchOnMainThread([this] {
@@ -642,7 +644,7 @@ void CoordinatedGraphicsScene::renderNextFrame()
 }
 
 void CoordinatedGraphicsScene::ensureRootLayer()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_rootLayer)
         return;
 
@@ -659,7 +661,7 @@ void CoordinatedGraphicsScene::ensureRootLayer()
 }
 
 void CoordinatedGraphicsScene::syncRemoteContent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We enqueue messages and execute them during paint, as they require an active GL context.
     ensureRootLayer();
 
@@ -676,7 +678,7 @@ void CoordinatedGraphicsScene::syncRemoteContent()
 }
 
 void CoordinatedGraphicsScene::purgeGLResources()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_client);
 
     m_imageBackings.clear();
@@ -699,7 +701,7 @@ void CoordinatedGraphicsScene::purgeGLResources()
 }
 
 void CoordinatedGraphicsScene::commitScrollOffset(uint32_t layerID, const IntSize& offset)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_client)
         return;
     dispatchOnMainThread([this, layerID, offset] {
@@ -709,7 +711,7 @@ void CoordinatedGraphicsScene::commitScrollOffset(uint32_t layerID, const IntSiz
 }
 
 void CoordinatedGraphicsScene::setLayerAnimationsIfNeeded(TextureMapperLayer* layer, const CoordinatedGraphicsLayerState& state)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!state.animationsChanged)
         return;
 
@@ -717,7 +719,7 @@ void CoordinatedGraphicsScene::setLayerAnimationsIfNeeded(TextureMapperLayer* la
 }
 
 void CoordinatedGraphicsScene::detach()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     m_renderQueue.clear();
     m_isActive = false;
@@ -725,14 +727,14 @@ void CoordinatedGraphicsScene::detach()
 }
 
 void CoordinatedGraphicsScene::appendUpdate(std::function<void()>&& function)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(isMainThread());
     LockHolder locker(m_renderQueueMutex);
     m_renderQueue.append(WTFMove(function));
 }
 
 void CoordinatedGraphicsScene::setActive(bool active)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_client)
         return;
 
@@ -745,7 +747,7 @@ void CoordinatedGraphicsScene::setActive(bool active)
 }
 
 TextureMapperLayer* CoordinatedGraphicsScene::findScrollableContentsLayerAt(const FloatPoint& point)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return rootLayer() ? rootLayer()->findScrollableContentsLayerAt(point) : 0;
 }
 

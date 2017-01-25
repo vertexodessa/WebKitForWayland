@@ -31,6 +31,8 @@
 #include "CoordinatedGraphicsState.h"
 #include "GraphicsContext.h"
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 class ImageBackingSurfaceClient : public CoordinatedSurface::Client {
@@ -52,13 +54,13 @@ private:
 };
 
 CoordinatedImageBackingID CoordinatedImageBacking::getCoordinatedImageBackingID(Image* image)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // CoordinatedImageBacking keeps a RefPtr<Image> member, so the same Image pointer can not refer two different instances until CoordinatedImageBacking releases the member.
     return reinterpret_cast<CoordinatedImageBackingID>(image);
 }
 
 PassRefPtr<CoordinatedImageBacking> CoordinatedImageBacking::create(Client* client, PassRefPtr<Image> image)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return adoptRef(new CoordinatedImageBacking(client, image));
 }
 
@@ -69,7 +71,7 @@ CoordinatedImageBacking::CoordinatedImageBacking(Client* client, PassRefPtr<Imag
     , m_clearContentsTimer(*this, &CoordinatedImageBacking::clearContentsTimerFired)
     , m_isDirty(false)
     , m_isVisible(false)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: We would need to decode a small image directly into a GraphicsSurface.
     // http://webkit.org/b/101426
 
@@ -77,17 +79,17 @@ CoordinatedImageBacking::CoordinatedImageBacking(Client* client, PassRefPtr<Imag
 }
 
 CoordinatedImageBacking::~CoordinatedImageBacking()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 void CoordinatedImageBacking::addHost(Host* host)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_hosts.contains(host));
     m_hosts.append(host);
 }
 
 void CoordinatedImageBacking::removeHost(Host* host)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     size_t position = m_hosts.find(host);
     ASSERT(position != notFound);
     m_hosts.remove(position);
@@ -97,12 +99,12 @@ void CoordinatedImageBacking::removeHost(Host* host)
 }
 
 void CoordinatedImageBacking::markDirty()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_isDirty = true;
 }
 
 void CoordinatedImageBacking::update()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     releaseSurfaceIfNeeded();
 
     bool changedToVisible;
@@ -138,7 +140,7 @@ void CoordinatedImageBacking::update()
 }
 
 void CoordinatedImageBacking::releaseSurfaceIfNeeded()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We must keep m_surface until UI Process reads m_surface.
     // If m_surface exists, it was created in the previous update.
     m_surface = nullptr;
@@ -147,7 +149,7 @@ void CoordinatedImageBacking::releaseSurfaceIfNeeded()
 static const double clearContentsTimerInterval = 3;
 
 void CoordinatedImageBacking::updateVisibilityIfNeeded(bool& changedToVisible)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     bool previousIsVisible = m_isVisible;
 
     m_isVisible = false;
@@ -174,7 +176,7 @@ void CoordinatedImageBacking::updateVisibilityIfNeeded(bool& changedToVisible)
 }
 
 void CoordinatedImageBacking::clearContentsTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_client->clearImageBackingContents(id());
 }
 

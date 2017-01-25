@@ -144,6 +144,8 @@
 
 #define RELEASE_LOG_IF_ALLOWED(...) RELEASE_LOG_IF(isAlwaysOnLoggingAllowed(), __VA_ARGS__)
 
+#include <wtf/macros.h>
+
 namespace WebCore {
 
 using namespace HTMLNames;
@@ -156,7 +158,7 @@ const int memoryLevelThresholdToPrunePageCache = 20;
 #endif
 
 bool isBackForwardLoadType(FrameLoadType type)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     switch (type) {
     case FrameLoadType::Standard:
     case FrameLoadType::Reload:
@@ -181,7 +183,7 @@ bool isBackForwardLoadType(FrameLoadType type)
 // API simpler.
 //
 static bool isDocumentSandboxed(Frame& frame, SandboxFlags mask)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return frame.document() && frame.document()->isSandboxed(mask);
 }
 
@@ -266,11 +268,11 @@ FrameLoader::FrameLoader(Frame& frame, FrameLoaderClient& client)
     , m_currentNavigationHasShownBeforeUnloadConfirmPanel(false)
     , m_loadsSynchronously(false)
     , m_forcedSandboxFlags(SandboxNone)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 }
 
 FrameLoader::~FrameLoader()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setOpener(nullptr);
 
     for (auto& frame : m_openedFrames)
@@ -283,7 +285,7 @@ FrameLoader::~FrameLoader()
 }
 
 void FrameLoader::init()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // This somewhat odd set of steps gives the frame an initial empty document.
     setPolicyDocumentLoader(m_client.createDocumentLoader(ResourceRequest(URL(ParsedURLString, emptyString())), SubstituteData()).ptr());
     setProvisionalDocumentLoader(m_policyDocumentLoader.get());
@@ -299,7 +301,7 @@ void FrameLoader::init()
 
 #if PLATFORM(IOS)
 void FrameLoader::initForSynthesizedDocument(const URL&)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: We need to initialize the document URL to the specified URL. Currently the URL is empty and hence
     // FrameLoader::checkCompleted() will overwrite the URL of the document to be activeDocumentLoader()->documentURL().
 
@@ -325,7 +327,7 @@ void FrameLoader::initForSynthesizedDocument(const URL&)
 #endif
 
 void FrameLoader::setDefersLoading(bool defers)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_documentLoader)
         m_documentLoader->setDefersLoading(defers);
     if (m_provisionalDocumentLoader)
@@ -341,26 +343,26 @@ void FrameLoader::setDefersLoading(bool defers)
 }
 
 void FrameLoader::changeLocation(const FrameLoadRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     urlSelected(request, nullptr);
 }
 
 void FrameLoader::urlSelected(const URL& url, const String& passedTarget, Event* triggeringEvent, LockHistory lockHistory, LockBackForwardList lockBackForwardList, ShouldSendReferrer shouldSendReferrer, ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicy, const AtomicString& downloadAttribute)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     NewFrameOpenerPolicy newFrameOpenerPolicy = shouldSendReferrer == NeverSendReferrer ? NewFrameOpenerPolicy::Suppress : NewFrameOpenerPolicy::Allow;
 
     urlSelected(FrameLoadRequest(m_frame.document()->securityOrigin(), ResourceRequest(url), passedTarget, lockHistory, lockBackForwardList, shouldSendReferrer, AllowNavigationToInvalidURL::Yes, newFrameOpenerPolicy, DoNotReplaceDocumentIfJavaScriptURL, shouldOpenExternalURLsPolicy, downloadAttribute), triggeringEvent);
 }
 
 void FrameLoader::urlSelected(const URL& url, const String& passedTarget, Event* triggeringEvent, LockHistory lockHistory, LockBackForwardList lockBackForwardList, ShouldSendReferrer shouldSendReferrer, ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     NewFrameOpenerPolicy newFrameOpenerPolicy = shouldSendReferrer == NeverSendReferrer ? NewFrameOpenerPolicy::Suppress : NewFrameOpenerPolicy::Allow;
 
     urlSelected(FrameLoadRequest(m_frame.document()->securityOrigin(), ResourceRequest(url), passedTarget, lockHistory, lockBackForwardList, shouldSendReferrer, AllowNavigationToInvalidURL::Yes, newFrameOpenerPolicy, DoNotReplaceDocumentIfJavaScriptURL, shouldOpenExternalURLsPolicy, nullAtom), triggeringEvent);
 }
 
 void FrameLoader::urlSelected(const FrameLoadRequest& passedRequest, Event* triggeringEvent)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<Frame> protect(m_frame);
     FrameLoadRequest frameRequest(passedRequest);
 
@@ -377,7 +379,7 @@ void FrameLoader::urlSelected(const FrameLoadRequest& passedRequest, Event* trig
 }
 
 void FrameLoader::submitForm(PassRefPtr<FormSubmission> submission)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(submission->method() == FormSubmission::PostMethod || submission->method() == FormSubmission::GetMethod);
 
     // FIXME: Find a good spot for these.
@@ -451,7 +453,7 @@ void FrameLoader::submitForm(PassRefPtr<FormSubmission> submission)
 }
 
 void FrameLoader::stopLoading(UnloadEventPolicy unloadEventPolicy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_frame.document() && m_frame.document()->parser())
         m_frame.document()->parser()->stopParsing();
 
@@ -480,7 +482,7 @@ void FrameLoader::stopLoading(UnloadEventPolicy unloadEventPolicy)
 }
 
 void FrameLoader::stop()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // http://bugs.webkit.org/show_bug.cgi?id=10854
     // The frame's last ref may be removed and it will be deleted by checkCompleted().
     Ref<Frame> protect(m_frame);
@@ -494,7 +496,7 @@ void FrameLoader::stop()
 }
 
 void FrameLoader::willTransitionToCommitted()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // This function is called when a frame is still fully in place (not cached, not detached), but will be replaced.
 
     if (m_frame.editor().hasComposition()) {
@@ -508,7 +510,7 @@ void FrameLoader::willTransitionToCommitted()
 }
 
 bool FrameLoader::closeURL()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     history().saveDocumentState();
 
     Document* currentDocument = m_frame.document();
@@ -528,7 +530,7 @@ bool FrameLoader::closeURL()
 }
 
 bool FrameLoader::didOpenURL()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_frame.navigationScheduler().redirectScheduledDuringLoad()) {
         // A redirect was scheduled before the document was created.
         // This can happen when one frame changes another frame's location.
@@ -556,7 +558,7 @@ bool FrameLoader::didOpenURL()
 }
 
 void FrameLoader::didExplicitOpen()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_isComplete = false;
     m_didCallImplicitClose = false;
 
@@ -573,7 +575,7 @@ void FrameLoader::didExplicitOpen()
 
 
 void FrameLoader::cancelAndClear()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frame.navigationScheduler().cancel();
 
     if (!m_isComplete)
@@ -584,7 +586,7 @@ void FrameLoader::cancelAndClear()
 }
 
 void FrameLoader::clear(Document* newDocument, bool clearWindowProperties, bool clearScriptObjects, bool clearFrameView)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frame.editor().clear();
 
     if (!m_needsClear)
@@ -638,7 +640,7 @@ void FrameLoader::clear(Document* newDocument, bool clearWindowProperties, bool 
 }
 
 void FrameLoader::receivedFirstData()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     dispatchDidCommitLoad();
     dispatchDidClearWindowObjectsInAllWorlds();
     dispatchGlobalObjectAvailableInAllWorlds();
@@ -672,12 +674,12 @@ void FrameLoader::receivedFirstData()
 }
 
 void FrameLoader::setOutgoingReferrer(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_outgoingReferrer = url.strippedForUseAsReferrer();
 }
 
 void FrameLoader::didBeginDocument(bool dispatch)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_needsClear = true;
     m_isComplete = false;
     m_didCallImplicitClose = false;
@@ -719,7 +721,7 @@ void FrameLoader::didBeginDocument(bool dispatch)
 }
 
 void FrameLoader::finishedParsing()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_frame.injectUserScripts(InjectAtDocumentEnd);
 
     if (m_stateMachine.creatingInitialEmptyDocument())
@@ -745,12 +747,12 @@ void FrameLoader::finishedParsing()
 }
 
 void FrameLoader::loadDone()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     checkCompleted();
 }
 
 bool FrameLoader::allChildrenAreComplete() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* child = m_frame.tree().firstChild(); child; child = child->tree().nextSibling()) {
         if (!child->loader().m_isComplete)
             return false;
@@ -759,7 +761,7 @@ bool FrameLoader::allChildrenAreComplete() const
 }
 
 bool FrameLoader::allAncestorsAreComplete() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* ancestor = &m_frame; ancestor; ancestor = ancestor->tree().parent()) {
         if (!ancestor->loader().m_isComplete)
             return false;
@@ -768,7 +770,7 @@ bool FrameLoader::allAncestorsAreComplete() const
 }
 
 void FrameLoader::checkCompleted()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldCallCheckCompleted = false;
 
     // Have we completed before?
@@ -823,7 +825,7 @@ void FrameLoader::checkCompleted()
 }
 
 void FrameLoader::checkTimerFired()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<Frame> protect(m_frame);
 
     if (Page* page = m_frame.page()) {
@@ -837,7 +839,7 @@ void FrameLoader::checkTimerFired()
 }
 
 void FrameLoader::startCheckCompleteTimer()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!(m_shouldCallCheckCompleted || m_shouldCallCheckLoadComplete))
         return;
     if (m_checkTimer.isActive())
@@ -846,19 +848,19 @@ void FrameLoader::startCheckCompleteTimer()
 }
 
 void FrameLoader::scheduleCheckCompleted()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldCallCheckCompleted = true;
     startCheckCompleteTimer();
 }
 
 void FrameLoader::scheduleCheckLoadComplete()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_shouldCallCheckLoadComplete = true;
     startCheckCompleteTimer();
 }
 
 void FrameLoader::checkCallImplicitClose()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_didCallImplicitClose || m_frame.document()->parsing() || m_frame.document()->isDelayingLoadEvent())
         return;
 
@@ -871,7 +873,7 @@ void FrameLoader::checkCallImplicitClose()
 }
 
 void FrameLoader::loadURLIntoChildFrame(const URL& url, const String& referer, Frame* childFrame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(childFrame);
 
 #if ENABLE(WEB_ARCHIVE) || ENABLE(MHTML)
@@ -901,7 +903,7 @@ void FrameLoader::loadURLIntoChildFrame(const URL& url, const String& referer, F
 
 #if ENABLE(WEB_ARCHIVE) || ENABLE(MHTML)
 void FrameLoader::loadArchive(PassRefPtr<Archive> archive)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ArchiveResource* mainResource = archive->mainResource();
     ASSERT(mainResource);
     if (!mainResource)
@@ -919,7 +921,7 @@ void FrameLoader::loadArchive(PassRefPtr<Archive> archive)
 #endif // ENABLE(WEB_ARCHIVE) || ENABLE(MHTML)
 
 String FrameLoader::outgoingReferrer() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // See http://www.whatwg.org/specs/web-apps/current-work/#fetching-resources
     // for why we walk the parent chain for srcdoc documents.
     Frame* frame = &m_frame;
@@ -933,12 +935,12 @@ String FrameLoader::outgoingReferrer() const
 }
 
 String FrameLoader::outgoingOrigin() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_frame.document()->securityOrigin()->toString();
 }
 
 bool FrameLoader::checkIfFormActionAllowedByCSP(const URL& url, bool didReceiveRedirectResponse) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_submittedFormURL.isEmpty())
         return true;
 
@@ -947,12 +949,12 @@ bool FrameLoader::checkIfFormActionAllowedByCSP(const URL& url, bool didReceiveR
 }
 
 Frame* FrameLoader::opener()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_opener;
 }
 
 void FrameLoader::setOpener(Frame* opener)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_opener && !opener)
         m_client.didDisownOpener();
 
@@ -968,7 +970,7 @@ void FrameLoader::setOpener(Frame* opener)
 
 // FIXME: This does not belong in FrameLoader!
 void FrameLoader::handleFallbackContent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     HTMLFrameOwnerElement* owner = m_frame.ownerElement();
     if (!is<HTMLObjectElement>(owner))
         return;
@@ -976,7 +978,7 @@ void FrameLoader::handleFallbackContent()
 }
 
 void FrameLoader::provisionalLoadStarted()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_stateMachine.firstLayoutDone())
         m_stateMachine.advanceTo(FrameLoaderStateMachine::CommittedFirstRealLoad);
     m_frame.navigationScheduler().cancel(true);
@@ -984,12 +986,12 @@ void FrameLoader::provisionalLoadStarted()
 }
 
 void FrameLoader::resetMultipleFormSubmissionProtection()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_submittedFormURL = URL();
 }
 
 void FrameLoader::updateFirstPartyForCookies()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_frame.tree().parent())
         setFirstPartyForCookies(m_frame.tree().parent()->document()->firstPartyForCookies());
     else
@@ -997,7 +999,7 @@ void FrameLoader::updateFirstPartyForCookies()
 }
 
 void FrameLoader::setFirstPartyForCookies(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     for (Frame* frame = &m_frame; frame; frame = frame->tree().traverseNext(&m_frame))
         frame->document()->setFirstPartyForCookies(url);
 }
@@ -1005,7 +1007,7 @@ void FrameLoader::setFirstPartyForCookies(const URL& url)
 // This does the same kind of work that didOpenURL does, except it relies on the fact
 // that a higher level already checked that the URLs match and the scrolling is the right thing to do.
 void FrameLoader::loadInSameDocument(const URL& url, PassRefPtr<SerializedScriptValue> stateObject, bool isNewNavigation)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If we have a state object, we cannot also be a new navigation.
     ASSERT(!stateObject || (stateObject && !isNewNavigation));
 
@@ -1070,12 +1072,12 @@ void FrameLoader::loadInSameDocument(const URL& url, PassRefPtr<SerializedScript
 }
 
 bool FrameLoader::isComplete() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_isComplete;
 }
 
 void FrameLoader::completed()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<Frame> protect(m_frame);
 
     for (Frame* descendant = m_frame.tree().traverseNext(&m_frame); descendant; descendant = descendant->tree().traverseNext(&m_frame))
@@ -1090,7 +1092,7 @@ void FrameLoader::completed()
 }
 
 void FrameLoader::started()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_frame.page())
         m_activityAssertion = m_frame.page()->pageThrottler().pageLoadActivityToken();
     for (Frame* frame = &m_frame; frame; frame = frame->tree().parent())
@@ -1098,7 +1100,7 @@ void FrameLoader::started()
 }
 
 void FrameLoader::prepareForLoadStart()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RELEASE_LOG_IF_ALLOWED("Starting frame load, frame = %p, main = %d", &m_frame, m_frame.isMainFrame());
 
     m_progressTracker->progressStarted();
@@ -1113,7 +1115,7 @@ void FrameLoader::prepareForLoadStart()
 }
 
 void FrameLoader::setupForReplace()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_client.revertToProvisionalState(m_documentLoader.get());
     setState(FrameStateProvisional);
     m_provisionalDocumentLoader = m_documentLoader;
@@ -1122,7 +1124,7 @@ void FrameLoader::setupForReplace()
 }
 
 void FrameLoader::loadFrameRequest(const FrameLoadRequest& request, Event* event, PassRefPtr<FormState> formState)
-{    
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);    
     // Protect frame from getting blown away inside dispatchBeforeLoadEvent in loadWithDocumentLoader.
     Ref<Frame> protect(m_frame);
 
@@ -1168,7 +1170,7 @@ void FrameLoader::loadFrameRequest(const FrameLoadRequest& request, Event* event
 }
 
 static ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicyToApply(Frame& sourceFrame, ShouldOpenExternalURLsPolicy propagatedPolicy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!sourceFrame.isMainFrame())
         return ShouldOpenExternalURLsPolicy::ShouldNotAllow;
     if (ScriptController::processingUserGesture())
@@ -1177,7 +1179,7 @@ static ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicyToApply(Frame& s
 }
 
 void FrameLoader::loadURL(const FrameLoadRequest& frameLoadRequest, const String& referrer, FrameLoadType newLoadType, Event* event, PassRefPtr<FormState> prpFormState)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_inStopAllLoaders)
         return;
 
@@ -1264,7 +1266,7 @@ void FrameLoader::loadURL(const FrameLoadRequest& frameLoadRequest, const String
 }
 
 SubstituteData FrameLoader::defaultSubstituteDataForURL(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!shouldTreatURLAsSrcdocDocument(url))
         return SubstituteData();
     String srcdoc = m_frame.ownerElement()->attributeWithoutSynchronization(srcdocAttr);
@@ -1276,7 +1278,7 @@ SubstituteData FrameLoader::defaultSubstituteDataForURL(const URL& url)
 }
 
 void FrameLoader::load(const FrameLoadRequest& passedRequest)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     FrameLoadRequest request(passedRequest);
 
     if (m_inStopAllLoaders)
@@ -1312,7 +1314,7 @@ void FrameLoader::load(const FrameLoadRequest& passedRequest)
 }
 
 void FrameLoader::loadWithNavigationAction(const ResourceRequest& request, const NavigationAction& action, LockHistory lockHistory, FrameLoadType type, PassRefPtr<FormState> formState, AllowNavigationToInvalidURL allowNavigationToInvalidURL)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<DocumentLoader> loader = m_client.createDocumentLoader(request, defaultSubstituteDataForURL(request.url()));
     applyShouldOpenExternalURLsPolicyToNewDocumentLoader(loader, action.shouldOpenExternalURLsPolicy());
 
@@ -1327,7 +1329,7 @@ void FrameLoader::loadWithNavigationAction(const ResourceRequest& request, const
 }
 
 void FrameLoader::load(DocumentLoader* newDocumentLoader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ResourceRequest& r = newDocumentLoader->request();
     addExtraFieldsToMainResourceRequest(r);
     FrameLoadType type;
@@ -1366,7 +1368,7 @@ void FrameLoader::load(DocumentLoader* newDocumentLoader)
 }
 
 static void logNavigation(MainFrame& frame, FrameLoadType type)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!frame.page())
         return;
 
@@ -1402,7 +1404,7 @@ static void logNavigation(MainFrame& frame, FrameLoadType type)
 }
 
 void FrameLoader::loadWithDocumentLoader(DocumentLoader* loader, FrameLoadType type, PassRefPtr<FormState> prpFormState, AllowNavigationToInvalidURL allowNavigationToInvalidURL)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Retain because dispatchBeforeLoadEvent may release the last reference to it.
     Ref<Frame> protect(m_frame);
 
@@ -1470,7 +1472,7 @@ void FrameLoader::loadWithDocumentLoader(DocumentLoader* loader, FrameLoadType t
 }
 
 void FrameLoader::reportLocalLoadFailed(Frame* frame, const String& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!url.isEmpty());
     if (!frame)
         return;
@@ -1479,7 +1481,7 @@ void FrameLoader::reportLocalLoadFailed(Frame* frame, const String& url)
 }
 
 void FrameLoader::reportBlockedPortFailed(Frame* frame, const String& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!url.isEmpty());
     if (!frame)
         return;
@@ -1488,12 +1490,12 @@ void FrameLoader::reportBlockedPortFailed(Frame* frame, const String& url)
 }
 
 const ResourceRequest& FrameLoader::initialRequest() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return activeDocumentLoader()->originalRequest();
 }
 
 bool FrameLoader::willLoadMediaElementURL(URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(IOS)
     // MobileStore depends on the iOS 4.0 era client delegate method because webView:resource:willSendRequest:redirectResponse:fromDataSource
     // doesn't let them tell when a load request is coming from a media element. See <rdar://problem/8266916> for more details.
@@ -1514,7 +1516,7 @@ bool FrameLoader::willLoadMediaElementURL(URL& url)
 }
 
 bool FrameLoader::shouldReloadToHandleUnreachableURL(DocumentLoader* docLoader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     URL unreachableURL = docLoader->unreachableURL();
 
     if (unreachableURL.isEmpty())
@@ -1535,7 +1537,7 @@ bool FrameLoader::shouldReloadToHandleUnreachableURL(DocumentLoader* docLoader)
 }
 
 void FrameLoader::reloadWithOverrideEncoding(const String& encoding)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_documentLoader)
         return;
 
@@ -1559,7 +1561,7 @@ void FrameLoader::reloadWithOverrideEncoding(const String& encoding)
 }
 
 void FrameLoader::reload(bool endToEndReload, bool contentBlockersEnabled)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_documentLoader)
         return;
 
@@ -1596,7 +1598,7 @@ void FrameLoader::reload(bool endToEndReload, bool contentBlockersEnabled)
 }
 
 void FrameLoader::stopAllLoaders(ClearProvisionalItemPolicy clearProvisionalItemPolicy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_frame.document() || !m_frame.document()->inPageCache());
     if (m_pageDismissalEventBeingDispatched != PageDismissalType::None)
         return;
@@ -1633,7 +1635,7 @@ void FrameLoader::stopAllLoaders(ClearProvisionalItemPolicy clearProvisionalItem
 }
 
 void FrameLoader::stopForUserCancel(bool deferCheckLoadComplete)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Calling stopAllLoaders can cause the frame to be deallocated, including the frame loader.
     Ref<Frame> protectedFrame(m_frame);
 
@@ -1654,14 +1656,14 @@ void FrameLoader::stopForUserCancel(bool deferCheckLoadComplete)
 }
 
 DocumentLoader* FrameLoader::activeDocumentLoader() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_state == FrameStateProvisional)
         return m_provisionalDocumentLoader.get();
     return m_documentLoader.get();
 }
 
 bool FrameLoader::isLoading() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     DocumentLoader* docLoader = activeDocumentLoader();
     if (!docLoader)
         return false;
@@ -1669,12 +1671,12 @@ bool FrameLoader::isLoading() const
 }
 
 bool FrameLoader::frameHasLoaded() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_stateMachine.committedFirstRealDocumentLoad() || (m_provisionalDocumentLoader && !m_stateMachine.creatingInitialEmptyDocument()); 
 }
 
 void FrameLoader::setDocumentLoader(DocumentLoader* loader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!loader && !m_documentLoader)
         return;
     
@@ -1701,7 +1703,7 @@ void FrameLoader::setDocumentLoader(DocumentLoader* loader)
 }
 
 void FrameLoader::setPolicyDocumentLoader(DocumentLoader* loader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_policyDocumentLoader == loader)
         return;
 
@@ -1716,7 +1718,7 @@ void FrameLoader::setPolicyDocumentLoader(DocumentLoader* loader)
 }
 
 void FrameLoader::setProvisionalDocumentLoader(DocumentLoader* loader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!loader || !m_provisionalDocumentLoader);
     ASSERT(!loader || loader->frameLoader() == this);
 
@@ -1727,7 +1729,7 @@ void FrameLoader::setProvisionalDocumentLoader(DocumentLoader* loader)
 }
 
 void FrameLoader::setState(FrameState newState)
-{    
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);    
     m_state = newState;
     
     if (newState == FrameStateProvisional)
@@ -1740,14 +1742,14 @@ void FrameLoader::setState(FrameState newState)
 }
 
 void FrameLoader::clearProvisionalLoad()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     setProvisionalDocumentLoader(nullptr);
     m_progressTracker->progressCompleted();
     setState(FrameStateComplete);
 }
 
 void FrameLoader::commitProvisionalLoad()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<DocumentLoader> pdl = m_provisionalDocumentLoader;
     Ref<Frame> protect(m_frame);
 
@@ -1890,7 +1892,7 @@ void FrameLoader::commitProvisionalLoad()
 }
 
 void FrameLoader::transitionToCommitted(CachedPage* cachedPage)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_client.hasWebView());
     ASSERT(m_state == FrameStateProvisional);
 
@@ -2005,7 +2007,7 @@ void FrameLoader::transitionToCommitted(CachedPage* cachedPage)
 }
 
 void FrameLoader::clientRedirectCancelledOrFinished(bool cancelWithLoadInProgress)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Note that -webView:didCancelClientRedirectForFrame: is called on the frame load delegate even if
     // the redirect succeeded.  We should either rename this API, or add a new method, like
     // -webView:didFinishClientRedirectForFrame:
@@ -2018,7 +2020,7 @@ void FrameLoader::clientRedirectCancelledOrFinished(bool cancelWithLoadInProgres
 }
 
 void FrameLoader::clientRedirected(const URL& url, double seconds, double fireDate, LockBackForwardList lockBackForwardList)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_client.dispatchWillPerformClientRedirect(url, seconds, fireDate);
     
     // Remember that we sent a redirect notification to the frame load delegate so that when we commit
@@ -2033,7 +2035,7 @@ void FrameLoader::clientRedirected(const URL& url, double seconds, double fireDa
 }
 
 bool FrameLoader::shouldReload(const URL& currentURL, const URL& destinationURL)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // This function implements the rule: "Don't reload if navigating by fragment within
     // the same URL, but do reload if going to a new URL or to the same URL with no
     // fragment identifier at all."
@@ -2043,7 +2045,7 @@ bool FrameLoader::shouldReload(const URL& currentURL, const URL& destinationURL)
 }
 
 void FrameLoader::closeOldDataSources()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Is it important for this traversal to be postorder instead of preorder?
     // If so, add helpers for postorder traversal, and use them. If not, then lets not
     // use a recursive algorithm here.
@@ -2057,7 +2059,7 @@ void FrameLoader::closeOldDataSources()
 }
 
 void FrameLoader::prepareForCachedPageRestore()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!m_frame.tree().parent());
     ASSERT(m_frame.page());
     ASSERT(m_frame.isMainFrame());
@@ -2076,7 +2078,7 @@ void FrameLoader::prepareForCachedPageRestore()
 }
 
 void FrameLoader::open(CachedFrameBase& cachedFrame)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_isComplete = false;
     
     // Don't re-emit the load event.
@@ -2124,23 +2126,23 @@ void FrameLoader::open(CachedFrameBase& cachedFrame)
 }
 
 bool FrameLoader::isHostedByObjectElement() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     HTMLFrameOwnerElement* owner = m_frame.ownerElement();
     return owner && owner->hasTagName(objectTag);
 }
 
 bool FrameLoader::isReplacing() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_loadType == FrameLoadType::Replace;
 }
 
 void FrameLoader::setReplacing()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_loadType = FrameLoadType::Replace;
 }
 
 bool FrameLoader::subframeIsLoading() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // It's most likely that the last added frame is the last to load so we walk backwards.
     for (Frame* child = m_frame.tree().lastChild(); child; child = child->tree().previousSibling()) {
         FrameLoader& childLoader = child->loader();
@@ -2158,17 +2160,17 @@ bool FrameLoader::subframeIsLoading() const
 }
 
 void FrameLoader::willChangeTitle(DocumentLoader* loader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_client.willChangeTitle(loader);
 }
 
 FrameLoadType FrameLoader::loadType() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_loadType;
 }
     
 CachePolicy FrameLoader::subresourceCachePolicy() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (Page* page = m_frame.page()) {
         if (page->isResourceCachingDisabled())
             return CachePolicyReload;
@@ -2208,7 +2210,7 @@ CachePolicy FrameLoader::subresourceCachePolicy() const
 }
 
 void FrameLoader::checkLoadCompleteForThisFrame()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_client.hasWebView());
 
     switch (m_state) {
@@ -2351,7 +2353,7 @@ void FrameLoader::checkLoadCompleteForThisFrame()
 }
 
 void FrameLoader::continueLoadAfterWillSubmitForm()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_provisionalDocumentLoader)
         return;
 
@@ -2371,7 +2373,7 @@ void FrameLoader::continueLoadAfterWillSubmitForm()
 }
 
 void FrameLoader::setOriginalURLForDownloadRequest(ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Rename firstPartyForCookies back to mainDocumentURL. It was a mistake to think that it was only used for cookies.
     // The originalURL is defined as the URL of the page where the download was initiated.
     URL originalURL = m_frame.document() ? m_frame.document()->firstPartyForCookies() : URL();
@@ -2384,14 +2386,14 @@ void FrameLoader::setOriginalURLForDownloadRequest(ResourceRequest& request)
 }
 
 void FrameLoader::didReachLayoutMilestone(LayoutMilestones milestones)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_frame.isMainFrame());
 
     m_client.dispatchDidReachLayoutMilestone(milestones);
 }
 
 void FrameLoader::didFirstLayout()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
 #if PLATFORM(IOS)
     // Only send layout-related delegate callbacks synchronously for the main frame to
     // avoid reentering layout for the main frame while delivering a layout-related delegate
@@ -2407,7 +2409,7 @@ void FrameLoader::didFirstLayout()
 }
 
 void FrameLoader::frameLoadCompleted()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Note: Can be called multiple times.
 
     m_client.frameLoadCompleted();
@@ -2421,7 +2423,7 @@ void FrameLoader::frameLoadCompleted()
 }
 
 void FrameLoader::detachChildren()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // detachChildren() will fire the unload event in each subframe and the
     // HTML specification states that the parent document's ignore-opens-during-unload counter while
     // this event is being fired in its subframes:
@@ -2437,7 +2439,7 @@ void FrameLoader::detachChildren()
 }
 
 void FrameLoader::closeAndRemoveChild(Frame* child)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     child->tree().detachFromParent();
 
     child->setView(nullptr);
@@ -2451,7 +2453,7 @@ void FrameLoader::closeAndRemoveChild(Frame* child)
 
 // Called every time a resource is completely loaded or an error is received.
 void FrameLoader::checkLoadComplete()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_client.hasWebView());
     
     m_shouldCallCheckLoadComplete = false;
@@ -2473,7 +2475,7 @@ void FrameLoader::checkLoadComplete()
 }
 
 int FrameLoader::numPendingOrLoadingRequests(bool recurse) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!recurse)
         return m_frame.document()->cachedResourceLoader().requestCount();
 
@@ -2484,12 +2486,12 @@ int FrameLoader::numPendingOrLoadingRequests(bool recurse) const
 }
 
 String FrameLoader::userAgent(const URL& url) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_client.userAgent(url);
 }
 
 void FrameLoader::dispatchOnloadEvents()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_client.dispatchDidDispatchOnloadEvents();
 
     if (documentLoader())
@@ -2497,7 +2499,7 @@ void FrameLoader::dispatchOnloadEvents()
 }
 
 void FrameLoader::frameDetached()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Calling stopAllLoaders can cause the frame to be deallocated, including the frame loader.
     Ref<Frame> protectedFrame(m_frame);
 
@@ -2507,7 +2509,7 @@ void FrameLoader::frameDetached()
 }
 
 void FrameLoader::detachFromParent()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Ref<Frame> protect(m_frame);
 
     closeURL();
@@ -2535,19 +2537,19 @@ void FrameLoader::detachFromParent()
 }
 
 void FrameLoader::detachViewsAndDocumentLoader()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_client.detachedFromParent2();
     setDocumentLoader(nullptr);
     m_client.detachedFromParent3();
 }
     
 void FrameLoader::addExtraFieldsToSubresourceRequest(ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     addExtraFieldsToRequest(request, m_loadType, false);
 }
 
 void FrameLoader::addExtraFieldsToMainResourceRequest(ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // FIXME: Using m_loadType seems wrong for some callers.
     // If we are only preparing to load the main resource, that is previous load's load type!
     addExtraFieldsToRequest(request, m_loadType, true);
@@ -2557,7 +2559,7 @@ void FrameLoader::addExtraFieldsToMainResourceRequest(ResourceRequest& request)
 }
 
 void FrameLoader::addExtraFieldsToRequest(ResourceRequest& request, FrameLoadType loadType, bool mainResource)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Page* page = frame().page();
     bool cachingDisabled = page && page->isResourceCachingDisabled();
 
@@ -2634,7 +2636,7 @@ void FrameLoader::addExtraFieldsToRequest(ResourceRequest& request, FrameLoadTyp
 }
 
 void FrameLoader::addHTTPOriginIfNeeded(ResourceRequest& request, const String& origin)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!request.httpOrigin().isEmpty())
         return;  // Request already has an Origin header.
 
@@ -2661,7 +2663,7 @@ void FrameLoader::addHTTPOriginIfNeeded(ResourceRequest& request, const String& 
 }
 
 void FrameLoader::addHTTPUpgradeInsecureRequestsIfNeeded(ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (request.url().protocolIs("https")) {
         // FIXME: Identify HSTS cases and avoid adding the header. <https://bugs.webkit.org/show_bug.cgi?id=157885>
         return;
@@ -2671,7 +2673,7 @@ void FrameLoader::addHTTPUpgradeInsecureRequestsIfNeeded(ResourceRequest& reques
 }
 
 void FrameLoader::loadPostRequest(const FrameLoadRequest& request, const String& referrer, FrameLoadType loadType, Event* event, PassRefPtr<FormState> prpFormState)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     RefPtr<FormState> formState = prpFormState;
 
     String frameName = request.frameName();
@@ -2723,7 +2725,7 @@ void FrameLoader::loadPostRequest(const FrameLoadRequest& request, const String&
 }
 
 unsigned long FrameLoader::loadResourceSynchronously(const ResourceRequest& request, StoredCredentials storedCredentials, ClientCredentialPolicy clientCredentialPolicy, ResourceError& error, ResourceResponse& response, RefPtr<SharedBuffer>& data)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_frame.document());
     String referrer = SecurityPolicy::generateReferrerHeader(m_frame.document()->referrerPolicy(), request.url(), outgoingReferrer());
     
@@ -2776,12 +2778,12 @@ unsigned long FrameLoader::loadResourceSynchronously(const ResourceRequest& requ
 }
 
 const ResourceRequest& FrameLoader::originalRequest() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return activeDocumentLoader()->originalRequestCopy();
 }
 
 void FrameLoader::receivedMainResourceError(const ResourceError& error)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Retain because the stop may release the last reference to it.
     Ref<Frame> protect(m_frame);
 
@@ -2816,7 +2818,7 @@ void FrameLoader::receivedMainResourceError(const ResourceError& error)
 }
 
 void FrameLoader::continueFragmentScrollAfterNavigationPolicy(const ResourceRequest& request, bool shouldContinue)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_quickRedirectComing = false;
 
     if (!shouldContinue)
@@ -2837,7 +2839,7 @@ void FrameLoader::continueFragmentScrollAfterNavigationPolicy(const ResourceRequ
 }
 
 bool FrameLoader::shouldPerformFragmentNavigation(bool isFormSubmission, const String& httpMethod, FrameLoadType loadType, const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // We don't do this if we are submitting a form with method other than "GET", explicitly reloading,
     // currently displaying a frameset, or if the URL does not have a fragment.
     // These rules were originally based on what KHTML was doing in KHTMLPart::openURL.
@@ -2855,7 +2857,7 @@ bool FrameLoader::shouldPerformFragmentNavigation(bool isFormSubmission, const S
 }
 
 void FrameLoader::scrollToFragmentWithParentBoundary(const URL& url)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     FrameView* view = m_frame.view();
     if (!view)
         return;
@@ -2873,7 +2875,7 @@ void FrameLoader::scrollToFragmentWithParentBoundary(const URL& url)
 }
 
 bool FrameLoader::shouldClose()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Page* page = m_frame.page();
     if (!page)
         return true;
@@ -2910,7 +2912,7 @@ bool FrameLoader::shouldClose()
 }
 
 void FrameLoader::dispatchUnloadEvents(UnloadEventPolicy unloadEventPolicy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame.document())
         return;
 
@@ -2969,7 +2971,7 @@ void FrameLoader::dispatchUnloadEvents(UnloadEventPolicy unloadEventPolicy)
 }
 
 bool FrameLoader::dispatchBeforeUnloadEvent(Chrome& chrome, FrameLoader* frameLoaderBeingNavigated)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     DOMWindow* domWindow = m_frame.document()->domWindow();
     if (!domWindow)
         return true;
@@ -3032,7 +3034,7 @@ bool FrameLoader::dispatchBeforeUnloadEvent(Chrome& chrome, FrameLoader* frameLo
 }
 
 void FrameLoader::continueLoadAfterNavigationPolicy(const ResourceRequest& request, PassRefPtr<FormState> formState, bool shouldContinue, AllowNavigationToInvalidURL allowNavigationToInvalidURL)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // If we loaded an alternate page to replace an unreachableURL, we'll get in here with a
     // nil policyDataSource because loading the alternate page will have passed
     // through this method already, nested; otherwise, policyDataSource should still be set.
@@ -3109,7 +3111,7 @@ void FrameLoader::continueLoadAfterNavigationPolicy(const ResourceRequest& reque
 
 void FrameLoader::continueLoadAfterNewWindowPolicy(const ResourceRequest& request,
     PassRefPtr<FormState> formState, const String& frameName, const NavigationAction& action, bool shouldContinue, AllowNavigationToInvalidURL allowNavigationToInvalidURL, NewFrameOpenerPolicy openerPolicy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!shouldContinue)
         return;
 
@@ -3135,7 +3137,7 @@ void FrameLoader::continueLoadAfterNewWindowPolicy(const ResourceRequest& reques
 }
 
 void FrameLoader::requestFromDelegate(ResourceRequest& request, unsigned long& identifier, ResourceError& error)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!request.isNull());
 
     identifier = 0;
@@ -3156,7 +3158,7 @@ void FrameLoader::requestFromDelegate(ResourceRequest& request, unsigned long& i
 }
 
 void FrameLoader::loadedResourceFromMemoryCache(CachedResource* resource, ResourceRequest& newRequest)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Page* page = m_frame.page();
     if (!page)
         return;
@@ -3189,14 +3191,14 @@ void FrameLoader::loadedResourceFromMemoryCache(CachedResource* resource, Resour
 }
 
 void FrameLoader::applyUserAgent(ResourceRequest& request)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     String userAgent = this->userAgent(request.url());
     ASSERT(!userAgent.isNull());
     request.setHTTPUserAgent(userAgent);
 }
 
 bool FrameLoader::shouldInterruptLoadForXFrameOptions(const String& content, const URL& url, unsigned long requestIdentifier)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Frame& topFrame = m_frame.tree().top();
     if (&m_frame == &topFrame)
         return false;
@@ -3232,7 +3234,7 @@ bool FrameLoader::shouldInterruptLoadForXFrameOptions(const String& content, con
 }
 
 void FrameLoader::loadProvisionalItemFromCachedPage()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     DocumentLoader* provisionalLoader = provisionalDocumentLoader();
     LOG(PageCache, "WebCorePageCache: Loading provisional DocumentLoader %p with URL '%s' from CachedPage", provisionalDocumentLoader(), provisionalDocumentLoader()->url().stringCenterEllipsizedToLength().utf8().data());
 
@@ -3250,14 +3252,14 @@ void FrameLoader::loadProvisionalItemFromCachedPage()
 }
 
 bool FrameLoader::shouldTreatURLAsSameAsCurrent(const URL& url) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!history().currentItem())
         return false;
     return url == history().currentItem()->url() || url == history().currentItem()->originalURL();
 }
 
 bool FrameLoader::shouldTreatURLAsSrcdocDocument(const URL& url) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!equalLettersIgnoringASCIICase(url.string(), "about:srcdoc"))
         return false;
     HTMLFrameOwnerElement* ownerElement = m_frame.ownerElement();
@@ -3269,7 +3271,7 @@ bool FrameLoader::shouldTreatURLAsSrcdocDocument(const URL& url) const
 }
 
 Frame* FrameLoader::findFrameForNavigation(const AtomicString& name, Document* activeDocument)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Frame* frame = m_frame.tree().find(name);
 
     // FIXME: Eventually all callers should supply the actual activeDocument so we can call canNavigate with the right document.
@@ -3283,7 +3285,7 @@ Frame* FrameLoader::findFrameForNavigation(const AtomicString& name, Document* a
 }
 
 void FrameLoader::loadSameDocumentItem(HistoryItem& item)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(item.documentSequenceNumber() == history().currentItem()->documentSequenceNumber());
 
     Ref<Frame> protect(m_frame);
@@ -3307,7 +3309,7 @@ void FrameLoader::loadSameDocumentItem(HistoryItem& item)
 // which should be methods of HistoryController and some of which should be
 // methods of FrameLoader.
 void FrameLoader::loadDifferentDocumentItem(HistoryItem& item, FrameLoadType loadType, FormSubmissionCacheLoadPolicy cacheLoadPolicy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     // Remember this item so we can traverse any child items as child frames load
     history().setProvisionalItem(&item);
 
@@ -3406,7 +3408,7 @@ void FrameLoader::loadDifferentDocumentItem(HistoryItem& item, FrameLoadType loa
 
 // Loads content into this frame, as specified by history item
 void FrameLoader::loadItem(HistoryItem& item, FrameLoadType loadType)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_requestedHistoryItem = &item;
     HistoryItem* currentItem = history().currentItem();
     bool sameDocumentNavigation = currentItem && item.shouldDoSameDocumentNavigationTo(*currentItem);
@@ -3418,7 +3420,7 @@ void FrameLoader::loadItem(HistoryItem& item, FrameLoadType loadType)
 }
 
 void FrameLoader::retryAfterFailedCacheOnlyMainResourceLoad()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_state == FrameStateProvisional);
     ASSERT(!m_loadingFromCachedPage);
     ASSERT(history().provisionalItem());
@@ -3433,19 +3435,19 @@ void FrameLoader::retryAfterFailedCacheOnlyMainResourceLoad()
 }
 
 ResourceError FrameLoader::cancelledError(const ResourceRequest& request) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ResourceError error = m_client.cancelledError(request);
     error.setType(ResourceError::Type::Cancellation);
     return error;
 }
 
 ResourceError FrameLoader::blockedByContentBlockerError(const ResourceRequest& request) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_client.blockedByContentBlockerError(request);
 }
 
 ResourceError FrameLoader::blockedError(const ResourceRequest& request) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ResourceError error = m_client.blockedError(request);
     error.setType(ResourceError::Type::Cancellation);
     return error;
@@ -3453,7 +3455,7 @@ ResourceError FrameLoader::blockedError(const ResourceRequest& request) const
 
 #if ENABLE(CONTENT_FILTERING)
 ResourceError FrameLoader::blockedByContentFilterError(const ResourceRequest& request) const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ResourceError error = m_client.blockedByContentFilterError(request);
     error.setType(ResourceError::Type::General);
     return error;
@@ -3462,18 +3464,18 @@ ResourceError FrameLoader::blockedByContentFilterError(const ResourceRequest& re
 
 #if PLATFORM(IOS)
 RetainPtr<CFDictionaryRef> FrameLoader::connectionProperties(ResourceLoader* loader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_client.connectionProperties(loader->documentLoader(), loader->identifier());
 }
 #endif
 
 String FrameLoader::referrer() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_documentLoader ? m_documentLoader->request().httpReferrer() : emptyString();
 }
 
 void FrameLoader::dispatchDidClearWindowObjectsInAllWorlds()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame.script().canExecuteScripts(NotAboutToExecuteScript))
         return;
 
@@ -3484,7 +3486,7 @@ void FrameLoader::dispatchDidClearWindowObjectsInAllWorlds()
 }
 
 void FrameLoader::dispatchDidClearWindowObjectInWorld(DOMWrapperWorld& world)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (!m_frame.script().canExecuteScripts(NotAboutToExecuteScript) || !m_frame.script().existingWindowShell(world))
         return;
 
@@ -3497,7 +3499,7 @@ void FrameLoader::dispatchDidClearWindowObjectInWorld(DOMWrapperWorld& world)
 }
 
 void FrameLoader::dispatchGlobalObjectAvailableInAllWorlds()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     Vector<Ref<DOMWrapperWorld>> worlds;
     ScriptController::getAllWorlds(worlds);
     for (auto& world : worlds)
@@ -3505,7 +3507,7 @@ void FrameLoader::dispatchGlobalObjectAvailableInAllWorlds()
 }
 
 SandboxFlags FrameLoader::effectiveSandboxFlags() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     SandboxFlags flags = m_forcedSandboxFlags;
     if (Frame* parentFrame = m_frame.tree().parent())
         flags |= parentFrame->document()->sandboxFlags();
@@ -3515,7 +3517,7 @@ SandboxFlags FrameLoader::effectiveSandboxFlags() const
 }
 
 void FrameLoader::didChangeTitle(DocumentLoader* loader)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_client.didChangeTitle(loader);
 
     if (loader == m_documentLoader) {
@@ -3534,7 +3536,7 @@ void FrameLoader::didChangeTitle(DocumentLoader* loader)
 }
 
 void FrameLoader::dispatchDidCommitLoad()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (m_stateMachine.creatingInitialEmptyDocument())
         return;
 
@@ -3554,7 +3556,7 @@ void FrameLoader::dispatchDidCommitLoad()
 }
 
 void FrameLoader::tellClientAboutPastMemoryCacheLoads()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(m_frame.page());
     ASSERT(m_frame.page()->areMemoryCacheClientCallsEnabled());
 
@@ -3580,45 +3582,45 @@ void FrameLoader::tellClientAboutPastMemoryCacheLoads()
 }
 
 NetworkingContext* FrameLoader::networkingContext() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return m_networkingContext.get();
 }
 
 void FrameLoader::loadProgressingStatusChanged()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     if (auto* view = m_frame.mainFrame().view())
         view->loadProgressingStatusChanged();
 }
 
 void FrameLoader::forcePageTransitionIfNeeded()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_client.forcePageTransitionIfNeeded();
 }
 
 void FrameLoader::clearTestingOverrides()
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     m_overrideCachePolicyForTesting = Nullopt;
     m_overrideResourceLoadPriorityForTesting = Nullopt;
     m_isStrictRawResourceValidationPolicyDisabledForTesting = false;
 }
 
 void FrameLoader::applyShouldOpenExternalURLsPolicyToNewDocumentLoader(DocumentLoader& documentLoader, ShouldOpenExternalURLsPolicy propagatedPolicy)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     documentLoader.setShouldOpenExternalURLsPolicy(shouldOpenExternalURLsPolicyToApply(m_frame, propagatedPolicy));
 }
 
 bool FrameLoader::isAlwaysOnLoggingAllowed() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return frame().isAlwaysOnLoggingAllowed();
 }
 
 bool FrameLoaderClient::hasHTMLView() const
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     return true;
 }
 
 RefPtr<Frame> createWindow(Frame& openerFrame, Frame& lookupFrame, const FrameLoadRequest& request, const WindowFeatures& features, bool& created)
-{
+{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
     ASSERT(!features.dialog || request.frameName().isEmpty());
 
     created = false;
