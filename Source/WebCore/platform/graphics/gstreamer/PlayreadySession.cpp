@@ -18,6 +18,7 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Suite 500,
  * Boston, MA 02110-1335, USA.
  */
+#include "stdio.h"
 
 #include "config.h"
 #include "PlayreadySession.h"
@@ -36,10 +37,13 @@ GST_DEBUG_CATEGORY_EXTERN(webkit_media_playready_decrypt_debug_category);
 
 G_LOCK_DEFINE_STATIC (pr_decoder_lock);
 
+#define MAX_CHALLENGE_LEN 64000
+
 namespace WebCore {
 
 // The default location of CDM DRM store.
 // /tmp/drmstore.dat
+/*
 const DRM_WCHAR g_rgwchCDMDrmStoreName[] = {WCHAR_CAST('/'), WCHAR_CAST('t'), WCHAR_CAST('m'), WCHAR_CAST('p'), WCHAR_CAST('/'),
                                             WCHAR_CAST('d'), WCHAR_CAST('r'), WCHAR_CAST('m'), WCHAR_CAST('s'), WCHAR_CAST('t'),
                                             WCHAR_CAST('o'), WCHAR_CAST('r'), WCHAR_CAST('e'), WCHAR_CAST('.'), WCHAR_CAST('d'),
@@ -48,12 +52,16 @@ const DRM_WCHAR g_rgwchCDMDrmStoreName[] = {WCHAR_CAST('/'), WCHAR_CAST('t'), WC
 const DRM_CONST_STRING g_dstrCDMDrmStoreName = CREATE_DRM_STRING(g_rgwchCDMDrmStoreName);
 
 const DRM_CONST_STRING* g_rgpdstrRights[1] = {&g_dstrWMDRM_RIGHT_PLAYBACK};
-
+*/
 PlayreadySession::PlayreadySession()
-    : m_key()
-    , m_eKeyState(KEY_INIT)
-    , m_fCommit(FALSE)
+    : //m_key()
+    //, m_eKeyState(KEY_INIT)
+    /*, m_fCommit(FALSE)*/m_comcastDrmStream(NULL)
+    , m_ready(false)
+    , m_keyRequested(false)
+
 {
+/*
     DRM_RESULT dr = DRM_SUCCESS;
     DRM_ID oSessionID;
     DRM_DWORD cchEncodedSessionID = SIZEOF(m_rgchSessionID);
@@ -88,41 +96,51 @@ PlayreadySession::PlayreadySession()
                           m_rgchSessionID,
                           &cchEncodedSessionID,
                           0));
+*/
+    printf("Comcast Playready initialized!\n");
 
-    GST_DEBUG("Playready initialized");
-
+/*
  ErrorExit:
     if (DRM_FAILED(dr)) {
         m_eKeyState = KEY_ERROR;
         GST_ERROR("Playready initialization failed");
     }
+*/
 }
 
 PlayreadySession::~PlayreadySession()
 {
     GST_DEBUG("Releasing resources");
-
+/*
     if (DRM_REVOCATION_IsRevocationSupported())
         SAFE_OEM_FREE(m_pbRevocationBuffer);
 
     SAFE_OEM_FREE(m_pbOpaqueBuffer);
     SAFE_OEM_FREE(m_poAppContext);
+*/
+    if (m_comcastDrmStream != NULL) {
+        ComcastDrmStream_CloseStream(m_comcastDrmStream);
+        m_comcastDrmStream = NULL;
+    }
 }
 
 // PlayReady license policy callback which should be
 // customized for platform/environment that hosts the CDM.
 // It is currently implemented as a place holder that
 // does nothing.
+/*
 DRM_RESULT DRM_CALL PlayreadySession::_PolicyCallback(const DRM_VOID *f_pvOutputLevelsData, DRM_POLICY_CALLBACK_TYPE f_dwCallbackType, const DRM_VOID *f_pv)
 {
     return DRM_SUCCESS;
 }
+*/
 
 //
 // Expected synchronisation from caller. This method is not thread-safe!
 //
 RefPtr<Uint8Array> PlayreadySession::playreadyGenerateKeyRequest(Uint8Array* initData, const String& customData, String& destinationURL, unsigned short& errorCode, uint32_t& systemCode)
 {
+/*
     RefPtr<Uint8Array> result;
     DRM_RESULT dr = DRM_SUCCESS;
     DRM_BYTE *pbChallenge = NULL;
@@ -218,6 +236,57 @@ ErrorExit:
         errorCode = MediaKeyError::MEDIA_KEYERR_CLIENT;
     }
     return result;
+*/
+    RefPtr<Uint8Array> result = NULL;
+    GST_DEBUG("generating key request");
+    int status = -1;
+    errorCode = 0;
+
+    status = ComcastDrmClient_OpenDrmStream(&m_comcastDrmStream, initData->data(), initData->byteLength());
+    if(status < 0)
+    {
+        systemCode = 0; //SYSCODE_ERROR;
+        return NULL;
+    }
+ 
+    m_keyRequested = true;
+
+    int challengeLength = MAX_CHALLENGE_LEN;
+    unsigned char* challenge = static_cast<unsigned char*>(g_malloc0(challengeLength));
+    
+    int urlLength = MAX_CHALLENGE_LEN;
+    unsigned char* challengeUrl =  static_cast<unsigned char*>(g_malloc0(urlLength));
+
+    status = ComcastDrmStream_GetLicenseChallenge(m_comcastDrmStream, challenge, &challengeLength, challengeUrl, &urlLength);
+
+    if(status < 0)
+    {
+        systemCode = 0; //SYSCODE_ERROR;
+        g_free(challenge);
+        g_free(challengeUrl);
+        return NULL;
+    }
+
+    if( !challengeLength && !urlLength)
+    {
+        //if no error code is returned and challenge and url lengths are 0, key is ready.
+        systemCode = 2; //SYSCODE_KEYREADY;
+        m_ready = true;
+    }
+    else
+    {
+        systemCode = 1; //SYSCODE_LICENSEREQUEST;
+        result = Uint8Array::create(challenge, challengeLength);
+
+        destinationURL = static_cast<const unsigned char *>(challengeUrl);
+        GST_INFO("destination URL : %s", destinationURL.utf8().data());
+    }
+
+    g_free(challenge);
+    g_free(challengeUrl);
+
+    return result;
+
 }
 
 //
@@ -225,6 +294,7 @@ ErrorExit:
 //
 bool PlayreadySession::playreadyProcessKey(Uint8Array* key, RefPtr<Uint8Array>& nextMessage, unsigned short& errorCode, uint32_t& systemCode)
 {
+/*
     DRM_RESULT dr = DRM_SUCCESS;
     DRM_LICENSE_RESPONSE oLicenseResponse = {eUnknownProtocol, 0};
     uint8_t *m_pbKeyMessageResponse = key->data();
@@ -266,10 +336,27 @@ ErrorExit:
         m_eKeyState = KEY_ERROR;
     }
     return false;
+*/
+    int status = -1;
+    errorCode = 0;
+    systemCode = 2; 
+
+    GST_DEBUG("calling ComcastDrmStream_ProcessLicenseResponse");
+    
+    status = ComcastDrmStream_ProcessLicenseResponse(m_comcastDrmStream, key->data(), key->byteLength() );
+
+    if(status == 0){
+        m_ready = true;
+        return true;
+    }
+
+    return false;
+
 }
 
 int PlayreadySession::processPayload(const void* iv, uint32_t ivSize, void* payloadData, uint32_t payloadDataSize)
 {
+/*
     DRM_RESULT dr = DRM_SUCCESS;
     DRM_AES_COUNTER_MODE_CONTEXT oAESContext = {0};
 
@@ -302,6 +389,30 @@ int PlayreadySession::processPayload(const void* iv, uint32_t ivSize, void* payl
 ErrorExit:
     G_UNLOCK (pr_decoder_lock);
     return 1;
+*/
+    int status = 0;
+    uint8_t *ivDataPtr = (uint8_t *) iv;
+
+    if(!m_ready)
+    {
+        GST_ERROR("Decrypt called before key is ready!");
+        return -1;
+    }
+
+    // IV bytes need to be swapped...
+    uint8_t temp;
+    for(uint32_t i =0; i < ivSize/2; i++)
+    {
+        temp = ivDataPtr[i];
+        ivDataPtr[i] = ivDataPtr[ivSize - i - 1];
+        ivDataPtr[ivSize - i - 1] = temp;
+    }
+
+    status = ComcastDrmStream_Decrypt(m_comcastDrmStream, (unsigned char *)payloadData, payloadDataSize,
+                                      (unsigned char *)iv, ivSize);
+
+    return status;
+
 }
 }
 

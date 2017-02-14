@@ -2169,7 +2169,7 @@ bool RenderLayerCompositor::requiresCompositingLayer(const RenderLayer& layer, R
     auto& renderer = rendererForCompositingTests(layer);
 
     // The root layer always has a compositing layer, but it may not have backing.
-    return requiresCompositingForTransform(renderer)
+    return requiresCompositingForTransform(renderer) || (canRender3DTransforms() && renderer.style().backfaceVisibility() == BackfaceVisibilityHidden)
         || requiresCompositingForVideo(renderer)
         || requiresCompositingForCanvas(renderer)
         || requiresCompositingForPlugin(renderer)

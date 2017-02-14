@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
     WKPageLoadURL(WKViewGetPage(view.get()), shellURL.get());
 
     WKPreferencesSetTabToLinksEnabled(preferences.get(), true);
-    WKPreferencesSetSpatialNavigationEnabled(preferences.get(), true);
+    WKPreferencesSetSpatialNavigationEnabled(preferences.get(), false);
 
     g_main_loop_run(loop);
 

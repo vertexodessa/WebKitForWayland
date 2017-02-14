@@ -199,7 +199,7 @@ bool gstRegistryHasElementForMediaType(GList* elementFactories, const char* caps
     return result;
 }
 
-#if GST_CHECK_VERSION(1, 5, 3)
+#if GST_CHECK_VERSION(1, 4, 4)
 GstElement* createGstDecryptor(const gchar* protectionSystem)
 {
     GstElement* decryptor = nullptr;

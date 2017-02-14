@@ -62,7 +62,7 @@ unsigned getGstPlayFlag(const char* nick);
 GstClockTime toGstClockTime(float time);
 bool gstRegistryHasElementForMediaType(GList* elementFactories, const char* capsString);
 
-#if GST_CHECK_VERSION(1, 5, 3)
+#if GST_CHECK_VERSION(1, 4, 4)
 GstElement* createGstDecryptor(const gchar* protectionSystem);
 #endif
 }

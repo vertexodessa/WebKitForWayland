@@ -23,20 +23,22 @@
 #define PlayreadySession_h
 
 #if USE(PLAYREADY)
-
+/*
 #include <drmtypes.h>
 #include <drmcommon.h>
 #include <drmmanager.h>
 #include <drmmathsafe.h>
+*/
 #undef __in
 #undef __out
+#include <comcastDrmClient.h>
 #include <runtime/Uint8Array.h>
 #include <wtf/Forward.h>
 
 namespace WebCore {
 
 class PlayreadySession {
-
+/*
 private:
     enum KeyState {
         // Has been initialized.
@@ -50,7 +52,7 @@ private:
         // Has been closed.
         KEY_CLOSED = 4
     };
-
+*/
 public:
     PlayreadySession();
     ~PlayreadySession();
@@ -58,14 +60,15 @@ public:
     RefPtr<Uint8Array> playreadyGenerateKeyRequest(Uint8Array* initData, const String& customData, String& destinationURL, unsigned short& errorCode, uint32_t& systemCode);
     bool playreadyProcessKey(Uint8Array* key, RefPtr<Uint8Array>& nextMessage, unsigned short& errorCode, uint32_t& systemCode);
 
-    bool keyRequested() const { return m_eKeyState == KEY_PENDING; }
-    bool ready() const { return m_eKeyState == KEY_READY; }
+    bool keyRequested() const { return /*m_eKeyState == KEY_PENDING;*/ m_keyRequested; }
+    bool ready() const { return /*m_eKeyState == KEY_READY;*/ m_ready; }
     int processPayload(const void* iv, uint32_t ivSize, void* payloadData, uint32_t payloadDataSize);
 
 protected:
-    RefPtr<ArrayBuffer> m_key;
+
 
 private:
+/*
     static DRM_RESULT DRM_CALL _PolicyCallback(const DRM_VOID* f_pvOutputLevelsData, DRM_POLICY_CALLBACK_TYPE f_dwCallbackType, const DRM_VOID* f_pv);
 
     DRM_APP_CONTEXT* m_poAppContext { nullptr };
@@ -78,6 +81,11 @@ private:
     KeyState m_eKeyState;
     DRM_CHAR m_rgchSessionID[CCH_BASE64_EQUIV(SIZEOF(DRM_ID)) + 1];
     DRM_BOOL m_fCommit;
+*/
+    void* m_comcastDrmStream;
+    bool m_ready;
+    bool m_keyRequested;
+
 };
 
 }
