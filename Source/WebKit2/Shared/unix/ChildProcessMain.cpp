@@ -44,6 +44,7 @@ void dumpTraces(int)
 }
 
 void watchThread() {
+    return;
     while(1) {
 //        std::unique_lock<std::mutex> lock(m);
 //        cv.wait(lock);

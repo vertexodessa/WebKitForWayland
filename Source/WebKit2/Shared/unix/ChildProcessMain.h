@@ -72,7 +72,7 @@ int ChildProcessMain(int argc, char** argv)
     profiler::startListen();
 
 
-    AUTO_EASY_THREAD(); EASY_FUNCTION();
+    //AUTO_EASY_THREAD(); EASY_FUNCTION();
     ChildProcessMainType childMain;
 
     InitializeWebKit2();
