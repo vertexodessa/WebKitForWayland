@@ -44,11 +44,11 @@ void dumpTraces(int)
 }
 
 void watchThread() {
-    return;
+//    return;
     while(1) {
 //        std::unique_lock<std::mutex> lock(m);
 //        cv.wait(lock);
-        WTF::sleep(30);
+        WTF::sleep(30.0);
         std::string fname;
         fname = "/opt/easy_dump_";
         fname += std::to_string(syscall(SYS_gettid));
