@@ -185,7 +185,6 @@ TextCheckerClient* Editor::textChecker() const
 
 void Editor::handleKeyboardEvent(KeyboardEvent* event)
 {
-    printf("IIIIkey: %s called\n", __PRETTY_FUNCTION__);
     if (EditorClient* c = client())
         c->handleKeyboardEvent(event);
 }

@@ -2288,7 +2288,6 @@ static bool handleKeyEvent(const WebKeyboardEvent& keyboardEvent, Page* page)
 
 void WebPage::keyEvent(const WebKeyboardEvent& keyboardEvent)
 {
-    printf("IIIkey: %s called\n", __PRETTY_FUNCTION__);
     m_userIsInteracting = true;
 
     m_page->pageThrottler().didReceiveUserInput();

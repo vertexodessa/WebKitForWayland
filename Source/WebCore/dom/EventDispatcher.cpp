@@ -65,7 +65,6 @@ WindowEventContext::WindowEventContext(Node* node, const EventContext* topEventC
 
 bool WindowEventContext::handleLocalEvents(Event& event)
 {
-    printf("IIIIIkey: %s called\n", __PRETTY_FUNCTION__);
     if (!m_window)
         return false;
 
@@ -84,7 +83,6 @@ void EventDispatcher::dispatchScopedEvent(Node& node, Event& event)
 
 static void callDefaultEventHandlersInTheBubblingOrder(Event& event, const EventPath& path)
 {
-    printf("IIIkey: %s called\n", __PRETTY_FUNCTION__);
     if (path.isEmpty())
         return;
 
@@ -93,10 +91,7 @@ static void callDefaultEventHandlersInTheBubblingOrder(Event& event, const Event
     ASSERT(!event.defaultPrevented());
 
     if (event.defaultHandled() || !event.bubbles())
-    {
-        printf("IIIkey: %s event.defaultHandled() %d,  !event.bubbles() %d \n", __PRETTY_FUNCTION__, event.defaultHandled(), !event.bubbles());
         return;
-    }
 
     size_t size = path.size();
     for (size_t i = 1; i < size; ++i) {
@@ -155,7 +150,6 @@ static void dispatchEventInDOM(Event& event, const EventPath& path, WindowEventC
 
 bool EventDispatcher::dispatchEvent(Node* origin, Event& event)
 {
-    printf("IIIkey: %s called\n", __PRETTY_FUNCTION__);
     ASSERT_WITH_SECURITY_IMPLICATION(!NoEventDispatchAssertion::isEventDispatchForbidden());
     ASSERT(origin);
     RefPtr<Node> node(origin);

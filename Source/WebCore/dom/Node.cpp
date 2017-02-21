@@ -2116,7 +2116,6 @@ void Node::notifyMutationObserversNodeWillDetach()
 
 void Node::handleLocalEvents(Event& event)
 {
-    printf("IIIIIkey: %s called\n", __PRETTY_FUNCTION__);
     if (!hasEventTargetData())
         return;
 
@@ -2134,12 +2133,9 @@ void Node::dispatchScopedEvent(Event& event)
 
 bool Node::dispatchEvent(Event& event)
 {
-    printf("IIIkey: %s called\n", __PRETTY_FUNCTION__);
 #if ENABLE(TOUCH_EVENTS) && !PLATFORM(IOS)
-    if (is<TouchEvent>(event)) {
-        printf("IIIkey: !!!!!!!!!!!!!!!!!!!!!!!!!  NOT %s called\n", __PRETTY_FUNCTION__);
+    if (is<TouchEvent>(event))
         return dispatchTouchEvent(downcast<TouchEvent>(event));
-    }
 #endif
     return EventDispatcher::dispatchEvent(this, event);
 }
@@ -2202,49 +2198,28 @@ void Node::dispatchInputEvent()
 
 void Node::defaultEventHandler(Event* event)
 {
-    printf("IIIkey: %s called\n", __PRETTY_FUNCTION__);
-
-    
-    if (event->target() != this) {
-        printf("IIIkey: %s 0 \n", __PRETTY_FUNCTION__);
+    if (event->target() != this)
         return;
-    }
     const AtomicString& eventType = event->type();
     if (eventType == eventNames().keydownEvent || eventType == eventNames().keypressEvent) {
-        printf("IIIkey: %s 1 \n", __PRETTY_FUNCTION__);
         if (is<KeyboardEvent>(*event)) {
-            printf("IIIkey: %s 1 \n", __PRETTY_FUNCTION__);
-            if (Frame* frame = document().frame()) {
-                printf("IIIkey: %s 2 \n", __PRETTY_FUNCTION__);
+            if (Frame* frame = document().frame())
                 frame->eventHandler().defaultKeyboardEventHandler(downcast<KeyboardEvent>(event));
-            }
         }
     } else if (eventType == eventNames().clickEvent) {
-        printf("IIIkey: %s 3 \n", __PRETTY_FUNCTION__);
         int detail = is<UIEvent>(*event) ? downcast<UIEvent>(*event).detail() : 0;
-        if (dispatchDOMActivateEvent(detail, event)) {
-            printf("IIIkey: %s 4 \n", __PRETTY_FUNCTION__);
+        if (dispatchDOMActivateEvent(detail, event))
             event->setDefaultHandled();
-        }
 #if ENABLE(CONTEXT_MENUS)
     } else if (eventType == eventNames().contextmenuEvent) {
-        printf("IIIkey: %s 4 \n", __PRETTY_FUNCTION__);
-        if (Frame* frame = document().frame()) {
-            printf("IIIkey: %s 5 \n", __PRETTY_FUNCTION__);
-            if (Page* page = frame->page()) {
-                printf("IIIkey: %s 6 \n", __PRETTY_FUNCTION__);
+        if (Frame* frame = document().frame())
+            if (Page* page = frame->page())
                 page->contextMenuController().handleContextMenuEvent(event);
-            }
-        }
 #endif
     } else if (eventType == eventNames().textInputEvent) {
-        printf("IIIkey: %s 7 \n", __PRETTY_FUNCTION__);
         if (is<TextEvent>(*event)) {
-            printf("IIIkey: %s 8 \n", __PRETTY_FUNCTION__);
-            if (Frame* frame = document().frame()) {
-                printf("IIIkey: %s 9 \n", __PRETTY_FUNCTION__);
+            if (Frame* frame = document().frame())
                 frame->eventHandler().defaultTextInputEventHandler(downcast<TextEvent>(event));
-            }
         }
 #if ENABLE(PAN_SCROLLING)
     } else if (eventType == eventNames().mousedownEvent && is<MouseEvent>(*event)) {
@@ -2284,7 +2259,6 @@ void Node::defaultEventHandler(Event* event)
         }
 #endif
     } else if (event->type() == eventNames().webkitEditableContentChangedEvent) {
-        printf("IIIkey: %s 10 \n", __PRETTY_FUNCTION__);
         dispatchInputEvent();
     }
 }

@@ -155,7 +155,6 @@ bool EventTarget::dispatchEventForBindings(Event& event, ExceptionCode& ec)
 
 bool EventTarget::dispatchEvent(Event& event)
 {
-    printf("IIIIIkey: %s called\n", __PRETTY_FUNCTION__);
     ASSERT(event.isInitialized());
     ASSERT(!event.isBeingDispatched());
 
@@ -194,7 +193,6 @@ static const AtomicString& legacyType(const Event& event)
 
 bool EventTarget::fireEventListeners(Event& event)
 {
-    printf("IIIIkey: %s called\n", __PRETTY_FUNCTION__);
     ASSERT_WITH_SECURITY_IMPLICATION(!NoEventDispatchAssertion::isEventDispatchForbidden());
     ASSERT(event.isInitialized());
 

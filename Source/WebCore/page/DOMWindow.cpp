@@ -1892,7 +1892,6 @@ void DOMWindow::dispatchLoadEvent()
 
 bool DOMWindow::dispatchEvent(Event& event, EventTarget* target)
 {
-    printf("IIIIIkey: %s called\n", __PRETTY_FUNCTION__);
     Ref<EventTarget> protectedThis(*this);
 
     // Pausing a page may trigger pagehide and pageshow events. WebCore also implicitly fires these

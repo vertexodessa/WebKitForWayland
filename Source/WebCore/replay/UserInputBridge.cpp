@@ -154,7 +154,6 @@ bool UserInputBridge::handleMouseForceEvent(const PlatformMouseEvent& mouseEvent
 
 bool UserInputBridge::handleKeyEvent(const PlatformKeyboardEvent& keyEvent, InputSource inputSource)
 {
-    printf("IIIkey: %s called\n", __PRETTY_FUNCTION__);
 #if ENABLE(WEB_REPLAY)
     EARLY_RETURN_IF_SHOULD_IGNORE_INPUT;
 

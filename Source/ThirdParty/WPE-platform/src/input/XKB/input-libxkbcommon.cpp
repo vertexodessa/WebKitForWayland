@@ -33,8 +33,6 @@
 #include "TvKeyboardCodes.h"
 #include <xkbcommon/xkbcommon-keysyms.h>
 
-#include <stdio.h>
-
 extern "C" {
 
 struct wpe_input_key_mapper_interface libxkbcommon_input_key_mapper_interface = {
@@ -115,10 +113,8 @@ struct wpe_input_key_mapper_interface libxkbcommon_input_key_mapper_interface = 
             case XKB_KEY_Left:
                 return "Left";
             case XKB_KEY_Page_Down:
-            printf("IIIkey: XKB_KEY_Page_Down\n");
                 return "PageDown";
             case XKB_KEY_Page_Up:
-            printf("IIIkey: XKB_KEY_Page_Up\n");
                 return "PageUp";
             case XKB_KEY_Pause:
                 return "Pause";
@@ -220,7 +216,6 @@ struct wpe_input_key_mapper_interface libxkbcommon_input_key_mapper_interface = 
     // windows_key_code_for_key_event
     [](struct wpe_input_keyboard_event* event) -> int
     {
-        printf("IIIkey: event->keyCode %d \n", event->keyCode);
         switch (event->keyCode) {
             case XKB_KEY_KP_0:
                 return VK_NUMPAD0;// (60) Numeric keypad 0 key
@@ -254,10 +249,8 @@ struct wpe_input_key_mapper_interface libxkbcommon_input_key_mapper_interface = 
                 return VK_DIVIDE; // (6F) Divide key
 
             case XKB_KEY_KP_Page_Up:
-                printf("IIIkey: XKB_KEY_KP_Page_Up\n");
                 return VK_PRIOR; // (21) PAGE UP key
             case XKB_KEY_KP_Page_Down:
-            printf("IIIkey: XKB_KEY_KP_Page_Down\n");
                 return VK_NEXT; // (22) PAGE DOWN key
             case XKB_KEY_KP_End:
                 return VK_END; // (23) END key
@@ -318,10 +311,8 @@ struct wpe_input_key_mapper_interface libxkbcommon_input_key_mapper_interface = 
             case XKB_KEY_space:
                 return VK_SPACE; // (20) SPACEBAR
             case XKB_KEY_Page_Up:
-                printf("IIIkey: XKB_KEY_Page_Up2\n");
                 return VK_PRIOR; // (21) PAGE UP key
             case XKB_KEY_Page_Down:
-            printf("IIIkey: XKB_KEY_Page_Down2\n");
                 return VK_NEXT; // (22) PAGE DOWN key
             case XKB_KEY_End:
                 return VK_END; // (23) END key
