@@ -1220,8 +1220,9 @@ bool EventHandler::logicalScrollRecursively(ScrollLogicalDirection direction, Sc
     // The layout needs to be up to date to determine if we can scroll. We may be
     // here because of an onLoad event, in which case the final layout hasn't been performed yet.
     m_frame.document()->updateLayoutIgnorePendingStylesheets();
+    printf("IIIIkey: %s 0 direction: %d, granularity: %d \n", __PRETTY_FUNCTION__, (char)direction, (char)granularity);
     if (logicalScrollOverflow(direction, granularity, startingNode))
-        return true;    
+        return printf("IIIIkey: %s 1\n", __PRETTY_FUNCTION__), true;    
     Frame* frame = &m_frame;
     FrameView* view = frame->view();
     
@@ -1232,16 +1233,16 @@ bool EventHandler::logicalScrollRecursively(ScrollLogicalDirection direction, Sc
         scrolled = true;
 #endif
     if (view && view->logicalScroll(direction, granularity))
-        scrolled = true;
+        printf("IIIIkey: %s 2\n", __PRETTY_FUNCTION__), scrolled = true;
     
     if (scrolled)
-        return true;
+        return printf("IIIIkey: %s 3\n", __PRETTY_FUNCTION__), true;
     
     frame = frame->tree().parent();
     if (!frame)
-        return false;
+        return printf("IIIIkey: %s 4\n", __PRETTY_FUNCTION__), false;
 
-    return frame->eventHandler().logicalScrollRecursively(direction, granularity, m_frame.ownerElement());
+    return printf("IIIIkey: %s 5\n", __PRETTY_FUNCTION__), frame->eventHandler().logicalScrollRecursively(direction, granularity, m_frame.ownerElement());
 }
 
 IntPoint EventHandler::lastKnownMousePosition() const
@@ -3011,6 +3012,7 @@ bool EventHandler::isKeyEventAllowedInFullScreen(const PlatformKeyboardEvent& ke
 
 bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
 {
+    printf("IIIkey: %s called\n", __PRETTY_FUNCTION__);
     RefPtr<FrameView> protector(m_frame.view());
 
 #if ENABLE(FULLSCREEN_API)
@@ -3036,12 +3038,15 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
     }
 #endif
 
+    printf("IIIkey: %s 0 \n", __PRETTY_FUNCTION__);
+
     // Check for cases where we are too early for events -- possible unmatched key up
     // from pressing return in the location bar.
     RefPtr<Element> element = eventTargetElementForDocument(m_frame.document());
     if (!element)
         return false;
 
+    printf("IIIkey: %s 1 \n", __PRETTY_FUNCTION__);
     UserGestureIndicator gestureIndicator(ProcessingUserGesture, m_frame.document());
     UserTypingGestureIndicator typingGestureIndicator(m_frame);
 
@@ -3058,23 +3063,34 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
     // Other platforms currently match either Mac or Windows behavior, depending on whether they send combined KeyDown events.
     bool matchedAnAccessKey = false;
     if (initialKeyEvent.type() == PlatformEvent::KeyDown)
+    {
+        printf("IIIkey: %s 2 \n", __PRETTY_FUNCTION__);
         matchedAnAccessKey = handleAccessKey(initialKeyEvent);
+    }
 
     // FIXME: it would be fair to let an input method handle KeyUp events before DOM dispatch.
     if (initialKeyEvent.type() == PlatformEvent::KeyUp || initialKeyEvent.type() == PlatformEvent::Char)
+    {
+        printf("IIIkey: %s 3 \n", __PRETTY_FUNCTION__);
         return !element->dispatchKeyEvent(initialKeyEvent);
+    }
 
     bool backwardCompatibilityMode = needsKeyboardEventDisambiguationQuirks();
 
-    PlatformKeyboardEvent keyDownEvent = initialKeyEvent;    
-    if (keyDownEvent.type() != PlatformEvent::RawKeyDown)
+    PlatformKeyboardEvent keyDownEvent = initialKeyEvent;
+    if (keyDownEvent.type() != PlatformEvent::RawKeyDown) {
+        printf("IIIkey: %s 4 \n", __PRETTY_FUNCTION__);
         keyDownEvent.disambiguateKeyDownEvent(PlatformEvent::RawKeyDown, backwardCompatibilityMode);
+    }
     Ref<KeyboardEvent> keydown = KeyboardEvent::create(keyDownEvent, m_frame.document()->defaultView());
-    if (matchedAnAccessKey)
+    if (matchedAnAccessKey) {
+        printf("IIIkey: %s 5 \n", __PRETTY_FUNCTION__);
         keydown->setDefaultPrevented(true);
+    }
     keydown->setTarget(element);
 
     if (initialKeyEvent.type() == PlatformEvent::RawKeyDown) {
+        printf("IIIkey: %s 6 \n", __PRETTY_FUNCTION__);
         element->dispatchEvent(keydown);
         // If frame changed as a result of keydown dispatch, then return true to avoid sending a subsequent keypress message to the new frame.
         bool changedFocusedFrame = m_frame.page() && &m_frame != &m_frame.page()->focusController().focusedOrMainFrame();
@@ -3089,27 +3105,36 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
     m_frame.editor().handleInputMethodKeydown(keydown.ptr());
     
     bool handledByInputMethod = keydown->defaultHandled();
+
+    printf("IIIkey: %s 7 \n", __PRETTY_FUNCTION__);
     
     if (handledByInputMethod) {
+        printf("IIIkey: %s 8 \n", __PRETTY_FUNCTION__);
         keyDownEvent.setWindowsVirtualKeyCode(CompositionEventKeyCode);
         keydown = KeyboardEvent::create(keyDownEvent, m_frame.document()->defaultView());
         keydown->setTarget(element);
-        keydown->setDefaultHandled();
+        printf("IIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__), keydown->setDefaultHandled();
     }
     
-    if (accessibilityPreventsEventPropogation(keydown))
+    if (accessibilityPreventsEventPropogation(keydown)) {
+        printf("IIIkey: %s 9 \n", __PRETTY_FUNCTION__);
         keydown->stopPropagation();
+    }
 
     element->dispatchEvent(keydown);
     // If frame changed as a result of keydown dispatch, then return early to avoid sending a subsequent keypress message to the new frame.
     bool changedFocusedFrame = m_frame.page() && &m_frame != &m_frame.page()->focusController().focusedOrMainFrame();
     bool keydownResult = keydown->defaultHandled() || keydown->defaultPrevented() || changedFocusedFrame;
-    if (handledByInputMethod || (keydownResult && !backwardCompatibilityMode))
+    printf("IIIkey: %s keydown->defaultHandled() %d, keydown->defaultPrevented() %d, changedFocusedFrame %d \n", __PRETTY_FUNCTION__, keydown->defaultHandled(), keydown->defaultPrevented(), changedFocusedFrame);
+    if (handledByInputMethod || (keydownResult && !backwardCompatibilityMode)) {
+        printf("IIIkey: %s 10 \n", __PRETTY_FUNCTION__);
         return keydownResult;
+    }
     
     // Focus may have changed during keydown handling, so refetch element.
     // But if we are dispatching a fake backward compatibility keypress, then we pretend that the keypress happened on the original element.
     if (!keydownResult) {
+        printf("IIIkey: %s 11 \n", __PRETTY_FUNCTION__);
         element = eventTargetElementForDocument(m_frame.document());
         if (!element)
             return false;
@@ -3117,17 +3142,22 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
 
     PlatformKeyboardEvent keyPressEvent = initialKeyEvent;
     keyPressEvent.disambiguateKeyDownEvent(PlatformEvent::Char, backwardCompatibilityMode);
-    if (keyPressEvent.text().isEmpty())
+    if (keyPressEvent.text().isEmpty()) {
+        printf("IIIkey: %s 12 \n", __PRETTY_FUNCTION__);
         return keydownResult;
+    }
     Ref<KeyboardEvent> keypress = KeyboardEvent::create(keyPressEvent, m_frame.document()->defaultView());
     keypress->setTarget(element);
-    if (keydownResult)
+    if (keydownResult) {
+        printf("IIIkey: %s 13 \n", __PRETTY_FUNCTION__);
         keypress->setDefaultPrevented(true);
+    }
 #if PLATFORM(COCOA)
     keypress->keypressCommands() = keydown->keypressCommands();
 #endif
     element->dispatchEvent(keypress);
 
+    printf("IIIkey: keydownResult %d, keypress->defaultPrevented() %d, keypress->defaultHandled() %d  \n", !!keydownResult, keypress->defaultPrevented(), keypress->defaultHandled());
     return keydownResult || keypress->defaultPrevented() || keypress->defaultHandled();
 }
 
@@ -3232,7 +3262,7 @@ static void handleKeyboardSelectionMovement(Frame& frame, KeyboardEvent* event)
     else
         setInitialKeyboardSelection(frame, direction);
 
-    event->setDefaultHandled();
+    printf("IIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__), event->setDefaultHandled();
 }
 
 void EventHandler::handleKeyboardSelectionMovementForAccessibility(KeyboardEvent* event)
@@ -3266,28 +3296,45 @@ bool EventHandler::accessibilityPreventsEventPropogation(KeyboardEvent& event)
 
 void EventHandler::defaultKeyboardEventHandler(KeyboardEvent* event)
 {
+    printf("IIIkey: %s \n", __PRETTY_FUNCTION__);
     if (event->type() == eventNames().keydownEvent) {
+        printf("IIIkey: %s 0 \n", __PRETTY_FUNCTION__);
         m_frame.editor().handleKeyboardEvent(event);
-        if (event->defaultHandled())
+        if (event->defaultHandled()) {
+            printf("IIIkey: %s 1 \n", __PRETTY_FUNCTION__);
             return;
-        if (event->keyIdentifier() == "U+0009")
-            defaultTabEventHandler(event);
-        else if (event->keyIdentifier() == "U+0008")
-            defaultBackspaceEventHandler(event);
-        else {
-            FocusDirection direction = focusDirectionForKey(event->keyIdentifier());
-            if (direction != FocusDirectionNone)
-                defaultArrowEventHandler(direction, event);
         }
+        if (event->keyIdentifier() == "U+0009") {
+            printf("IIIkey: %s 2 \n", __PRETTY_FUNCTION__);
+            defaultTabEventHandler(event);
+        }
+        else if (event->keyIdentifier() == "U+0008") {
+            printf("IIIkey: %s 3 \n", __PRETTY_FUNCTION__);
+            defaultBackspaceEventHandler(event);
+        }
+        else {
+            printf("IIIkey: %s 4 \n", __PRETTY_FUNCTION__);
+            FocusDirection direction = focusDirectionForKey(event->keyIdentifier());
+            if (direction != FocusDirectionNone) {
+                printf("IIIkey: %s 5 \n", __PRETTY_FUNCTION__);
+                defaultArrowEventHandler(direction, event);
+            }
+        }
+        printf("IIIkey: %s 6 \n", __PRETTY_FUNCTION__);
 
         handleKeyboardSelectionMovementForAccessibility(event);
     }
     if (event->type() == eventNames().keypressEvent) {
+        printf("IIIkey: %s 7 \n", __PRETTY_FUNCTION__);
         m_frame.editor().handleKeyboardEvent(event);
-        if (event->defaultHandled())
+        if (event->defaultHandled()) {
+            printf("IIIkey: %s 8 \n", __PRETTY_FUNCTION__);
             return;
-        if (event->charCode() == ' ')
+        }
+        if (event->charCode() == ' ') {
+            printf("IIIkey: %s 9 \n", __PRETTY_FUNCTION__);
             defaultSpaceEventHandler(event);
+        }
     }
 }
 
@@ -3591,12 +3638,13 @@ bool EventHandler::tabsToLinks(KeyboardEvent* event) const
 void EventHandler::defaultTextInputEventHandler(TextEvent* event)
 {
     if (m_frame.editor().handleTextEvent(event))
-        event->setDefaultHandled();
+        printf("IIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__), event->setDefaultHandled();
 }
 
 
 void EventHandler::defaultSpaceEventHandler(KeyboardEvent* event)
 {
+    printf("IIIkey: %s called\n", __PRETTY_FUNCTION__);
     ASSERT(event->type() == eventNames().keypressEvent);
 
     if (event->ctrlKey() || event->metaKey() || event->altKey() || event->altGraphKey())
@@ -3604,7 +3652,7 @@ void EventHandler::defaultSpaceEventHandler(KeyboardEvent* event)
 
     ScrollLogicalDirection direction = event->shiftKey() ? ScrollBlockDirectionBackward : ScrollBlockDirectionForward;
     if (logicalScrollOverflow(direction, ScrollByPage)) {
-        event->setDefaultHandled();
+        printf("IIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__), event->setDefaultHandled();
         return;
     }
 
@@ -3613,7 +3661,7 @@ void EventHandler::defaultSpaceEventHandler(KeyboardEvent* event)
         return;
 
     if (view->logicalScroll(direction, ScrollByPage))
-        event->setDefaultHandled();
+        printf("IIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__), event->setDefaultHandled();
 }
 
 void EventHandler::defaultBackspaceEventHandler(KeyboardEvent* event)
@@ -3640,8 +3688,10 @@ void EventHandler::defaultBackspaceEventHandler(KeyboardEvent* event)
     else
         handledEvent = page->backForward().goBack();
 
-    if (handledEvent)
+    if (handledEvent) {
+        printf("IIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__);
         event->setDefaultHandled();
+    }
 }
 
 
@@ -3664,8 +3714,10 @@ void EventHandler::defaultArrowEventHandler(FocusDirection focusDirection, Keybo
     if (m_frame.document()->inDesignMode())
         return;
 
-    if (page->focusController().advanceFocus(focusDirection, event))
+    if (page->focusController().advanceFocus(focusDirection, event)) {
+        printf("IIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__);
         event->setDefaultHandled();
+    }
 }
 
 void EventHandler::defaultTabEventHandler(KeyboardEvent* event)
@@ -3688,8 +3740,10 @@ void EventHandler::defaultTabEventHandler(KeyboardEvent* event)
     if (m_frame.document()->inDesignMode())
         return;
 
-    if (page->focusController().advanceFocus(focusDirection, event))
+    if (page->focusController().advanceFocus(focusDirection, event)) {
+        printf("IIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__);
         event->setDefaultHandled();
+    }
 }
 
 void EventHandler::sendScrollEvent()

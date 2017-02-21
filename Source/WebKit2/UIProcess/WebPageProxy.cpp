@@ -1950,6 +1950,7 @@ void WebPageProxy::sendWheelEvent(const WebWheelEvent& event)
 
 void WebPageProxy::handleKeyboardEvent(const NativeWebKeyboardEvent& event)
 {
+    printf("IIIkey: %s called\n", __PRETTY_FUNCTION__);
     if (!isValid())
         return;
     

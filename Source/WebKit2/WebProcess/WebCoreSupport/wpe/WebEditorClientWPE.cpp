@@ -79,8 +79,8 @@ static const KeyDownEntry keyDownEntries[] = {
     { VK_NEXT,   ShiftKey,           "MovePageDownAndModifySelection"          },
     { VK_UP,     CtrlKey | ShiftKey, "MoveParagraphBackwardAndModifySelection" },
     { VK_DOWN,   CtrlKey | ShiftKey, "MoveParagraphForwardAndModifySelection"  },
-    { VK_PRIOR,  0,                  "MovePageUp"                              },
-    { VK_NEXT,   0,                  "MovePageDown"                            },
+    { VK_PRIOR,  0,                  "ScrollPageBackward"                      },
+    { VK_NEXT,   0,                  "ScrollPageForward"                       },
     { VK_HOME,   0,                  "MoveToBeginningOfLine"                   },
     { VK_HOME,   ShiftKey,
         "MoveToBeginningOfLineAndModifySelection"                              },
@@ -138,6 +138,7 @@ static const KeyPressEntry keyPressEntries[] = {
 
 static const char* interpretKeyEvent(const KeyboardEvent& event)
 {
+    printf("IIIIkey: %s called\n", __PRETTY_FUNCTION__);
     static NeverDestroyed<HashMap<int, const char*>> keyDownCommandsMap;
     static NeverDestroyed<HashMap<int, const char*>> keyPressCommandsMap;
 
@@ -169,10 +170,12 @@ static const char* interpretKeyEvent(const KeyboardEvent& event)
 
 static void handleKeyPress(Frame& frame, KeyboardEvent& event, const PlatformKeyboardEvent& platformEvent)
 {
+    printf("IIIIkey: %s called\n", __PRETTY_FUNCTION__);
     String commandName = interpretKeyEvent(event);
 
     if (!commandName.isEmpty()) {
         frame.editor().command(commandName).execute();
+        printf("IIIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__);
         event.setDefaultHandled();
         return;
     }
@@ -185,12 +188,15 @@ static void handleKeyPress(Frame& frame, KeyboardEvent& event, const PlatformKey
     if (platformEvent.ctrlKey() || platformEvent.altKey())
         return;
 
-    if (frame.editor().insertText(platformEvent.text(), &event))
+    if (frame.editor().insertText(platformEvent.text(), &event)) {
+        printf("IIIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__);
         event.setDefaultHandled();
+    }
 }
 
 static void handleKeyDown(Frame& frame, KeyboardEvent& event, const PlatformKeyboardEvent&)
 {
+    printf("IIIIkey: %s called\n", __PRETTY_FUNCTION__);
     String commandName = interpretKeyEvent(event);
     if (commandName.isEmpty())
         return;
@@ -203,11 +209,13 @@ static void handleKeyDown(Frame& frame, KeyboardEvent& event, const PlatformKeyb
         return;
 
     command.execute();
+    printf("IIIIkey: %s setDefaultHandled \n", __PRETTY_FUNCTION__);
     event.setDefaultHandled();
 }
 
 void WebEditorClient::handleKeyboardEvent(WebCore::KeyboardEvent* event)
 {
+    printf("IIIIkey: %s called\n", __PRETTY_FUNCTION__);
     Node* node = event->target()->toNode();
     ASSERT(node);
     Frame* frame = node->document().frame();
@@ -216,31 +224,68 @@ void WebEditorClient::handleKeyboardEvent(WebCore::KeyboardEvent* event)
     // FIXME: Reorder the checks in a more sensible way.
 
     const PlatformKeyboardEvent* platformEvent = event->keyEvent();
-    if (!platformEvent)
+    if (!platformEvent) {
+        printf("IIIIkey: %s 1\n", __PRETTY_FUNCTION__);
         return;
+    }
 
     // If this was an IME event don't do anything.
     if (platformEvent->windowsVirtualKeyCode() == VK_PROCESSKEY)
+         {
+        printf("IIIIkey: %s 2\n", __PRETTY_FUNCTION__);
         return;
-
+    }
     // Don't allow text insertion for nodes that cannot edit.
-    if (!frame->editor().canEdit())
+    if (!frame->editor().canEdit()) {
+        printf("IIIIkey: %s 3\n", __PRETTY_FUNCTION__);
         return;
-
+    }
     // This is just a normal text insertion, so wait to execute the insertion
     // until a keypress event happens. This will ensure that the insertion will not
     // be reflected in the contents of the field until the keyup DOM event.
+
+    printf("IIIIkey: TYPE: %s\n", event->type().characters8());
+    
     if (event->type() == eventNames().keypressEvent)
-        return handleKeyPress(*frame, *event, *platformEvent);
+        return printf("IIIIkey: %s 4\n", __PRETTY_FUNCTION__), handleKeyPress(*frame, *event, *platformEvent);
     if (event->type() == eventNames().keydownEvent)
-        return handleKeyDown(*frame, *event, *platformEvent);
+        return printf("IIIIkey: %s 5\n", __PRETTY_FUNCTION__), handleKeyDown(*frame, *event, *platformEvent);
 }
 
 void WebEditorClient::handleInputMethodKeydown(WebCore::KeyboardEvent* event)
 {
+    printf("IIIIkey: %s called\n", __PRETTY_FUNCTION__);
+
+    Node* node = event->target()->toNode();
+    ASSERT(node);
+    Frame* frame = node->document().frame();
+    ASSERT(frame);
+
     const PlatformKeyboardEvent* platformEvent = event->keyEvent();
-    if (platformEvent && platformEvent->windowsVirtualKeyCode() == VK_PROCESSKEY)
+
+    if (!platformEvent)
+        return;
+
+    // printf("IIIIkey: %s 0 ----------KEY: %d, VK_PRIOR: %d, VK_NEXT: %d\n", __PRETTY_FUNCTION__, platformEvent->windowsVirtualKeyCode(), VK_PRIOR, VK_NEXT);
+
+    // if (platformEvent->windowsVirtualKeyCode() == VK_PRIOR ) {
+    //     printf("IIIIkey: %s 1\n", __PRETTY_FUNCTION__);
+    //     frame->editor().command("ScrollPageBackward").execute();
+    //     return;
+    // }
+    // if (platformEvent->windowsVirtualKeyCode() ==  VK_NEXT ) {
+    //     printf("IIIIkey: %s 2\n", __PRETTY_FUNCTION__);
+    //     frame->editor().command("ScrollPageForward").execute();
+    //     return;
+    // }
+
+    
+
+    if (platformEvent->windowsVirtualKeyCode() == VK_PROCESSKEY)
+    {
+        printf("IIIIkey: PREVENT DEFAULT\n");
         event->preventDefault();
+    }
 }
 
 } // namespace WebKit
