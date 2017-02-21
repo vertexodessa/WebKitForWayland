@@ -130,7 +130,7 @@ double FrameView::sCurrentPaintTimeStamp = 0.0;
 static const unsigned maxUpdateEmbeddedObjectsIterations = 2;
 
 static RenderLayer::UpdateLayerPositionsFlags updateLayerPositionFlags(RenderLayer* layer, bool isRelayoutingSubtree, bool didFullRepaint)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderLayer::UpdateLayerPositionsFlags flags = RenderLayer::defaultFlags;
     if (didFullRepaint) {
         flags &= ~RenderLayer::CheckForRepaint;
@@ -142,7 +142,7 @@ static RenderLayer::UpdateLayerPositionsFlags updateLayerPositionFlags(RenderLay
 }
 
 Pagination::Mode paginationModeForRenderStyle(const RenderStyle& style)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     EOverflow overflow = style.overflowY();
     if (overflow != OPAGEDX && overflow != OPAGEDY)
         return Pagination::Unpaginated;
@@ -244,7 +244,7 @@ FrameView::FrameView(Frame& frame)
     , m_visualUpdatesAllowedByClient(true)
     , m_hasFlippedBlockRenderers(false)
     , m_scrollPinningBehavior(DoNotPin)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     init();
 
 #if ENABLE(RUBBER_BANDING)
@@ -264,14 +264,14 @@ FrameView::FrameView(Frame& frame)
 }
 
 Ref<FrameView> FrameView::create(Frame& frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<FrameView> view = adoptRef(*new FrameView(frame));
     view->show();
     return view;
 }
 
 Ref<FrameView> FrameView::create(Frame& frame, const IntSize& initialSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<FrameView> view = adoptRef(*new FrameView(frame));
     view->Widget::setFrameRect(IntRect(view->location(), initialSize));
     view->show();
@@ -279,7 +279,7 @@ Ref<FrameView> FrameView::create(Frame& frame, const IntSize& initialSize)
 }
 
 FrameView::~FrameView()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_postLayoutTasksTimer.isActive())
         m_postLayoutTasksTimer.stop();
     
@@ -299,7 +299,7 @@ FrameView::~FrameView()
 }
 
 void FrameView::reset()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_cannotBlitToWindow = false;
     m_isOverlapped = false;
     m_contentIsOpaque = false;
@@ -336,7 +336,7 @@ void FrameView::reset()
 }
 
 void FrameView::removeFromAXObjectCache()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (AXObjectCache* cache = axObjectCache()) {
         if (HTMLFrameOwnerElement* owner = frame().ownerElement())
             cache->childrenChanged(owner->renderer());
@@ -345,7 +345,7 @@ void FrameView::removeFromAXObjectCache()
 }
 
 void FrameView::resetScrollbars()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Reset the document's scrollbars back to our defaults before we yield the floor.
     m_firstLayout = true;
     setScrollbarsSuppressed(true);
@@ -357,7 +357,7 @@ void FrameView::resetScrollbars()
 }
 
 void FrameView::resetScrollbarsAndClearContentsSize()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     resetScrollbars();
 
     setScrollbarsSuppressed(true);
@@ -366,7 +366,7 @@ void FrameView::resetScrollbarsAndClearContentsSize()
 }
 
 void FrameView::init()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     reset();
 
     m_margins = LayoutSize(-1, -1); // undefined
@@ -392,7 +392,7 @@ void FrameView::init()
 }
     
 void FrameView::prepareForDetach()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     detachCustomScrollbars();
     // When the view is no longer associated with a frame, it needs to be removed from the ax object cache
     // right now, otherwise it won't be able to reach the topDocument()'s axObject cache later.
@@ -405,7 +405,7 @@ void FrameView::prepareForDetach()
 }
 
 void FrameView::detachCustomScrollbars()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Scrollbar* horizontalBar = horizontalScrollbar();
     if (horizontalBar && horizontalBar->isCustomScrollbar())
         setHasHorizontalScrollbar(false);
@@ -418,7 +418,7 @@ void FrameView::detachCustomScrollbars()
 }
 
 void FrameView::recalculateScrollbarOverlayStyle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollbarOverlayStyle oldOverlayStyle = scrollbarOverlayStyle();
     WTF::Optional<ScrollbarOverlayStyle> clientOverlayStyle = frame().page() ? frame().page()->chrome().client().preferredScrollbarOverlayStyle() : ScrollbarOverlayStyleDefault;
     if (clientOverlayStyle) {
@@ -445,7 +445,7 @@ void FrameView::recalculateScrollbarOverlayStyle()
 }
 
 void FrameView::clear()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setCanBlitOnScroll(true);
     
     reset();
@@ -462,7 +462,7 @@ void FrameView::clear()
 
 #if PLATFORM(IOS)
 void FrameView::didReplaceMultipartContent()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Re-enable tile updates that were disabled in clear().
     if (LegacyTileCache* tileCache = legacyTileCache())
         tileCache->setTilingMode(LegacyTileCache::Normal);
@@ -470,12 +470,12 @@ void FrameView::didReplaceMultipartContent()
 #endif
 
 bool FrameView::didFirstLayout() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return !m_firstLayout;
 }
 
 void FrameView::invalidateRect(const IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!parent()) {
         if (HostWindow* window = hostWindow())
             window->invalidateContentsAndRootView(rect);
@@ -493,7 +493,7 @@ void FrameView::invalidateRect(const IntRect& rect)
 }
 
 void FrameView::setFrameRect(const IntRect& newRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<FrameView> protectedThis(*this);
     IntRect oldRect = frameRect();
     if (newRect == oldRect)
@@ -526,7 +526,7 @@ void FrameView::setFrameRect(const IntRect& newRect)
 
 #if ENABLE(REQUEST_ANIMATION_FRAME)
 bool FrameView::scheduleAnimation()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (HostWindow* window = hostWindow()) {
         window->scheduleAnimation();
         return true;
@@ -536,24 +536,24 @@ bool FrameView::scheduleAnimation()
 #endif
 
 void FrameView::setMarginWidth(LayoutUnit w)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // make it update the rendering area when set
     m_margins.setWidth(w);
 }
 
 void FrameView::setMarginHeight(LayoutUnit h)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // make it update the rendering area when set
     m_margins.setHeight(h);
 }
 
 bool FrameView::frameFlatteningEnabled() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frame().settings().frameFlatteningEnabled();
 }
 
 bool FrameView::isFrameFlatteningValidForThisFrame() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frameFlatteningEnabled())
         return false;
 
@@ -566,7 +566,7 @@ bool FrameView::isFrameFlatteningValidForThisFrame() const
 }
 
 bool FrameView::avoidScrollbarCreation() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // with frame flattening no subframe can have scrollbars
     // but we also cannot turn scrollbars off as we determine
     // our flattening policy using that.
@@ -574,13 +574,13 @@ bool FrameView::avoidScrollbarCreation() const
 }
 
 void FrameView::setCanHaveScrollbars(bool canHaveScrollbars)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_canHaveScrollbars = canHaveScrollbars;
     ScrollView::setCanHaveScrollbars(canHaveScrollbars);
 }
 
 void FrameView::updateCanHaveScrollbars()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollbarMode hMode;
     ScrollbarMode vMode;
     scrollbarModes(hMode, vMode);
@@ -591,7 +591,7 @@ void FrameView::updateCanHaveScrollbars()
 }
 
 PassRefPtr<Scrollbar> FrameView::createScrollbar(ScrollbarOrientation orientation)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame().settings().allowCustomScrollbarInMainFrame() && frame().isMainFrame())
         return ScrollView::createScrollbar(orientation);
 
@@ -618,7 +618,7 @@ PassRefPtr<Scrollbar> FrameView::createScrollbar(ScrollbarOrientation orientatio
 }
 
 void FrameView::setContentsSize(const IntSize& size)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (size == contentsSize())
         return;
 
@@ -648,7 +648,7 @@ void FrameView::setContentsSize(const IntSize& size)
 }
 
 void FrameView::adjustViewSize()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return;
@@ -665,7 +665,7 @@ void FrameView::adjustViewSize()
 }
 
 void FrameView::applyOverflowToViewport(const RenderElement& renderer, ScrollbarMode& hMode, ScrollbarMode& vMode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Handle the overflow:hidden/scroll case for the body/html elements.  WinIE treats
     // overflow:hidden and overflow:scroll on <body> as applying to the document's
     // scrollbars.  The CSS2.1 draft states that HTML UAs should use the <html> or <body> element and XML/XHTML UAs should
@@ -727,7 +727,7 @@ void FrameView::applyOverflowToViewport(const RenderElement& renderer, Scrollbar
 }
 
 void FrameView::applyPaginationToViewport()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Document* document = frame().document();
     auto* documentElement = document->documentElement();
     RenderElement* documentRenderer = documentElement ? documentElement->renderer() : nullptr;
@@ -753,7 +753,7 @@ void FrameView::applyPaginationToViewport()
 }
 
 void FrameView::calculateScrollbarModesForLayout(ScrollbarMode& hMode, ScrollbarMode& vMode, ScrollbarModesCalculationStrategy strategy)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_viewportRendererType = ViewportRendererType::None;
 
     const HTMLFrameOwnerElement* owner = frame().ownerElement();
@@ -815,7 +815,7 @@ void FrameView::calculateScrollbarModesForLayout(ScrollbarMode& hMode, Scrollbar
 }
 
 void FrameView::willRecalcStyle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return;
@@ -824,7 +824,7 @@ void FrameView::willRecalcStyle()
 }
 
 bool FrameView::updateCompositingLayersAfterStyleChange()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return false;
@@ -837,7 +837,7 @@ bool FrameView::updateCompositingLayersAfterStyleChange()
 }
 
 void FrameView::updateCompositingLayersAfterLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return;
@@ -848,7 +848,7 @@ void FrameView::updateCompositingLayersAfterLayout()
 }
 
 void FrameView::clearBackingStores()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return;
@@ -860,7 +860,7 @@ void FrameView::clearBackingStores()
 }
 
 void FrameView::restoreBackingStores()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return;
@@ -871,7 +871,7 @@ void FrameView::restoreBackingStores()
 }
 
 GraphicsLayer* FrameView::layerForScrolling() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return nullptr;
@@ -879,7 +879,7 @@ GraphicsLayer* FrameView::layerForScrolling() const
 }
 
 GraphicsLayer* FrameView::layerForHorizontalScrollbar() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return nullptr;
@@ -887,7 +887,7 @@ GraphicsLayer* FrameView::layerForHorizontalScrollbar() const
 }
 
 GraphicsLayer* FrameView::layerForVerticalScrollbar() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return nullptr;
@@ -895,7 +895,7 @@ GraphicsLayer* FrameView::layerForVerticalScrollbar() const
 }
 
 GraphicsLayer* FrameView::layerForScrollCorner() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return nullptr;
@@ -903,7 +903,7 @@ GraphicsLayer* FrameView::layerForScrollCorner() const
 }
 
 TiledBacking* FrameView::tiledBacking() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return nullptr;
@@ -916,7 +916,7 @@ TiledBacking* FrameView::tiledBacking() const
 }
 
 uint64_t FrameView::scrollLayerID() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return 0;
@@ -929,7 +929,7 @@ uint64_t FrameView::scrollLayerID() const
 }
 
 ScrollableArea* FrameView::scrollableAreaForScrollLayerID(uint64_t nodeID) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return nullptr;
@@ -939,7 +939,7 @@ ScrollableArea* FrameView::scrollableAreaForScrollLayerID(uint64_t nodeID) const
 
 #if ENABLE(RUBBER_BANDING)
 GraphicsLayer* FrameView::layerForOverhangAreas() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return nullptr;
@@ -947,7 +947,7 @@ GraphicsLayer* FrameView::layerForOverhangAreas() const
 }
 
 GraphicsLayer* FrameView::setWantsLayerForTopOverHangArea(bool wantsLayer) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return nullptr;
@@ -956,7 +956,7 @@ GraphicsLayer* FrameView::setWantsLayerForTopOverHangArea(bool wantsLayer) const
 }
 
 GraphicsLayer* FrameView::setWantsLayerForBottomOverHangArea(bool wantsLayer) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return nullptr;
@@ -968,7 +968,7 @@ GraphicsLayer* FrameView::setWantsLayerForBottomOverHangArea(bool wantsLayer) co
 
 #if ENABLE(CSS_SCROLL_SNAP)
 void FrameView::updateSnapOffsets()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame().document())
         return;
 
@@ -981,7 +981,7 @@ void FrameView::updateSnapOffsets()
 }
 
 bool FrameView::isScrollSnapInProgress() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (scrollbarsSuppressed())
         return false;
     
@@ -1003,13 +1003,13 @@ bool FrameView::isScrollSnapInProgress() const
 }
 
 void FrameView::updateScrollingCoordinatorScrollSnapProperties() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     renderView()->compositor().updateScrollSnapPropertiesWithFrameView(*this);
 }
 #endif
 
 bool FrameView::flushCompositingStateForThisFrame(const Frame& rootFrameForFlush)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return true; // We don't want to keep trying to update layers if we have no renderer.
@@ -1031,13 +1031,13 @@ bool FrameView::flushCompositingStateForThisFrame(const Frame& rootFrameForFlush
 }
 
 void FrameView::setNeedsOneShotDrawingSynchronization()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Page* page = frame().page())
         page->chrome().client().setNeedsOneShotDrawingSynchronization();
 }
 
 GraphicsLayer* FrameView::graphicsLayerForPlatformWidget(PlatformWidget platformWidget)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // To find the Widget that corresponds with platformWidget we have to do a linear
     // search of our child widgets.
     Widget* foundWidget = nullptr;
@@ -1063,7 +1063,7 @@ GraphicsLayer* FrameView::graphicsLayerForPlatformWidget(PlatformWidget platform
 }
 
 void FrameView::scheduleLayerFlushAllowingThrottling()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* view = this->renderView();
     if (!view)
         return;
@@ -1071,7 +1071,7 @@ void FrameView::scheduleLayerFlushAllowingThrottling()
 }
 
 LayoutRect FrameView::fixedScrollableAreaBoundsInflatedForScrolling(const LayoutRect& uninflatedBounds) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutPoint scrollPosition = scrollPositionRespectingCustomFixedPosition();
 
     LayoutSize topLeftExpansion = scrollPosition - minimumScrollPosition();
@@ -1081,7 +1081,7 @@ LayoutRect FrameView::fixedScrollableAreaBoundsInflatedForScrolling(const Layout
 }
 
 LayoutPoint FrameView::scrollPositionRespectingCustomFixedPosition() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(IOS)
     return useCustomFixedPositionLayoutRect() ? customFixedPositionLayoutRect().location() : scrollPosition();
 #else
@@ -1090,7 +1090,7 @@ LayoutPoint FrameView::scrollPositionRespectingCustomFixedPosition() const
 }
 
 void FrameView::setHeaderHeight(int headerHeight)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (frame().page())
         ASSERT(frame().isMainFrame());
     m_headerHeight = headerHeight;
@@ -1100,7 +1100,7 @@ void FrameView::setHeaderHeight(int headerHeight)
 }
 
 void FrameView::setFooterHeight(int footerHeight)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (frame().page())
         ASSERT(frame().isMainFrame());
     m_footerHeight = footerHeight;
@@ -1110,7 +1110,7 @@ void FrameView::setFooterHeight(int footerHeight)
 }
 
 float FrameView::topContentInset(TopContentInsetType contentInsetTypeToReturn) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (platformWidget() && contentInsetTypeToReturn == TopContentInsetType::WebCoreOrPlatformContentInset)
         return platformTopContentInset();
 
@@ -1122,7 +1122,7 @@ float FrameView::topContentInset(TopContentInsetType contentInsetTypeToReturn) c
 }
     
 void FrameView::topContentInsetDidChange(float newTopContentInset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return;
@@ -1141,12 +1141,12 @@ void FrameView::topContentInsetDidChange(float newTopContentInset)
 }
 
 void FrameView::topContentDirectionDidChange()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_needsDeferredScrollbarsUpdate = true;
 }
 
 void FrameView::handleDeferredScrollbarsUpdateAfterDirectionChange()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_needsDeferredScrollbarsUpdate)
         return;
 
@@ -1158,7 +1158,7 @@ void FrameView::handleDeferredScrollbarsUpdateAfterDirectionChange()
 }
     
 bool FrameView::hasCompositedContent() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderView* renderView = this->renderView())
         return renderView->compositor().inCompositingMode();
     return false;
@@ -1166,7 +1166,7 @@ bool FrameView::hasCompositedContent() const
 
 // Sometimes (for plug-ins) we need to eagerly go into compositing mode.
 void FrameView::enterCompositingMode()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderView* renderView = this->renderView()) {
         renderView->compositor().enableCompositingMode();
         if (!needsLayout())
@@ -1175,7 +1175,7 @@ void FrameView::enterCompositingMode()
 }
 
 bool FrameView::isEnclosedInCompositingLayer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto frameOwnerRenderer = frame().ownerRenderer();
     if (frameOwnerRenderer && frameOwnerRenderer->containerForRepaint())
         return true;
@@ -1186,7 +1186,7 @@ bool FrameView::isEnclosedInCompositingLayer() const
 }
 
 bool FrameView::flushCompositingStateIncludingSubframes()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     InspectorInstrumentation::willComposite(frame());
 
     bool allFramesFlushed = flushCompositingStateForThisFrame(frame());
@@ -1201,19 +1201,19 @@ bool FrameView::flushCompositingStateIncludingSubframes()
 }
 
 bool FrameView::isSoftwareRenderable() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     return !renderView || !renderView->compositor().has3DContent();
 }
 
 void FrameView::setIsInWindow(bool isInWindow)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderView* renderView = this->renderView())
         renderView->setIsInWindow(isInWindow);
 }
 
 inline void FrameView::forceLayoutParentViewIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderWidget* ownerRenderer = frame().ownerRenderer();
     if (!ownerRenderer)
         return;
@@ -1241,7 +1241,7 @@ inline void FrameView::forceLayoutParentViewIfNeeded()
 }
 
 void FrameView::layout(bool allowSubtree)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LOG(Layout, "FrameView %p (%dx%d) layout, main frameview %d, allowSubtree=%d", this, size().width(), size().height(), frame().isMainFrame(), allowSubtree);
     if (isInRenderTreeLayout()) {
         LOG(Layout, "  in layout, bailing");
@@ -1544,12 +1544,12 @@ void FrameView::layout(bool allowSubtree)
 }
 
 bool FrameView::shouldDeferScrollUpdateAfterContentSizeChange()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return (m_layoutPhase < InPostLayout) && (m_layoutPhase != OutsideLayout);
 }
 
 RenderBox* FrameView::embeddedContentBox() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return nullptr;
@@ -1564,7 +1564,7 @@ RenderBox* FrameView::embeddedContentBox() const
 }
 
 void FrameView::addEmbeddedObjectToUpdate(RenderEmbeddedObject& embeddedObject)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_embeddedObjectsToUpdate)
         m_embeddedObjectsToUpdate = std::make_unique<ListHashSet<RenderEmbeddedObject*>>();
 
@@ -1580,7 +1580,7 @@ void FrameView::addEmbeddedObjectToUpdate(RenderEmbeddedObject& embeddedObject)
 }
 
 void FrameView::removeEmbeddedObjectToUpdate(RenderEmbeddedObject& embeddedObject)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_embeddedObjectsToUpdate)
         return;
 
@@ -1588,12 +1588,12 @@ void FrameView::removeEmbeddedObjectToUpdate(RenderEmbeddedObject& embeddedObjec
 }
 
 void FrameView::setMediaType(const String& mediaType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_mediaType = mediaType;
 }
 
 String FrameView::mediaType() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // See if we have an override type.
     String overrideType = frame().loader().client().overrideMediaType();
     InspectorInstrumentation::applyEmulatedMedia(frame(), overrideType);
@@ -1603,7 +1603,7 @@ String FrameView::mediaType() const
 }
 
 void FrameView::adjustMediaTypeForPrinting(bool printing)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (printing) {
         if (m_mediaTypeWhenNotPrinting.isNull())
             m_mediaTypeWhenNotPrinting = mediaType();
@@ -1616,7 +1616,7 @@ void FrameView::adjustMediaTypeForPrinting(bool printing)
 }
 
 bool FrameView::useSlowRepaints(bool considerOverlap) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool mustBeSlow = hasSlowRepaintObjects() || (platformWidget() && hasViewportConstrainedObjects());
 
     // FIXME: WidgetMac.mm makes the assumption that useSlowRepaints ==
@@ -1638,12 +1638,12 @@ bool FrameView::useSlowRepaints(bool considerOverlap) const
 }
 
 bool FrameView::useSlowRepaintsIfNotOverlapped() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return useSlowRepaints(false);
 }
 
 void FrameView::updateCanBlitOnScrollRecursively()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto* frame = m_frame.ptr(); frame; frame = frame->tree().traverseNext(m_frame.ptr())) {
         if (FrameView* view = frame->view())
             view->setCanBlitOnScroll(!view->useSlowRepaints());
@@ -1651,7 +1651,7 @@ void FrameView::updateCanBlitOnScrollRecursively()
 }
 
 bool FrameView::usesCompositedScrolling() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (renderView && renderView->isComposited()) {
         GraphicsLayer* layer = renderView->layer()->backing()->graphicsLayer();
@@ -1663,7 +1663,7 @@ bool FrameView::usesCompositedScrolling() const
 }
 
 bool FrameView::usesAsyncScrolling() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(ASYNC_SCROLLING)
     if (Page* page = frame().page()) {
         if (ScrollingCoordinator* scrollingCoordinator = page->scrollingCoordinator())
@@ -1674,12 +1674,12 @@ bool FrameView::usesAsyncScrolling() const
 }
 
 bool FrameView::usesMockScrollAnimator() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return Settings::usesMockScrollAnimator();
 }
 
 void FrameView::logMockScrollAnimatorMessage(const String& message) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Document* document = frame().document();
     if (!document)
         return;
@@ -1692,13 +1692,13 @@ void FrameView::logMockScrollAnimatorMessage(const String& message) const
 }
 
 void FrameView::setCannotBlitToWindow()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_cannotBlitToWindow = true;
     updateCanBlitOnScrollRecursively();
 }
 
 void FrameView::addSlowRepaintObject(RenderElement* o)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool hadSlowRepaintObjects = hasSlowRepaintObjects();
 
     if (!m_slowRepaintObjects)
@@ -1717,7 +1717,7 @@ void FrameView::addSlowRepaintObject(RenderElement* o)
 }
 
 void FrameView::removeSlowRepaintObject(RenderElement* o)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_slowRepaintObjects)
         return;
 
@@ -1734,7 +1734,7 @@ void FrameView::removeSlowRepaintObject(RenderElement* o)
 }
 
 void FrameView::addViewportConstrainedObject(RenderElement* object)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_viewportConstrainedObjects)
         m_viewportConstrainedObjects = std::make_unique<ViewportConstrainedObjectSet>();
 
@@ -1751,7 +1751,7 @@ void FrameView::addViewportConstrainedObject(RenderElement* object)
 }
 
 void FrameView::removeViewportConstrainedObject(RenderElement* object)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_viewportConstrainedObjects && m_viewportConstrainedObjects->remove(object)) {
         if (Page* page = frame().page()) {
             if (ScrollingCoordinator* scrollingCoordinator = page->scrollingCoordinator())
@@ -1765,7 +1765,7 @@ void FrameView::removeViewportConstrainedObject(RenderElement* object)
 }
 
 LayoutRect FrameView::viewportConstrainedVisibleContentRect() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(IOS)
     if (useCustomFixedPositionLayoutRect())
         return customFixedPositionLayoutRect();
@@ -1777,12 +1777,12 @@ LayoutRect FrameView::viewportConstrainedVisibleContentRect() const
 }
 
 float FrameView::frameScaleFactor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frame().frameScaleFactor();
 }
 
 LayoutPoint FrameView::scrollPositionForFixedPosition(const LayoutRect& visibleContentRect, const LayoutSize& totalContentsSize, const LayoutPoint& scrollPosition, const LayoutPoint& scrollOrigin, float frameScaleFactor, bool fixedElementsLayoutRelativeToFrame, ScrollBehaviorForFixedElements behaviorForFixed, int headerHeight, int footerHeight)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutPoint position;
     if (behaviorForFixed == StickToDocumentBounds)
         position = ScrollableArea::constrainScrollPositionForOverhang(visibleContentRect, totalContentsSize, scrollPosition, scrollOrigin, headerHeight, footerHeight);
@@ -1800,7 +1800,7 @@ LayoutPoint FrameView::scrollPositionForFixedPosition(const LayoutRect& visibleC
 }
 
 float FrameView::yPositionForInsetClipLayer(const FloatPoint& scrollPosition, float topContentInset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!topContentInset)
         return 0;
 
@@ -1814,7 +1814,7 @@ float FrameView::yPositionForInsetClipLayer(const FloatPoint& scrollPosition, fl
 }
 
 float FrameView::yPositionForHeaderLayer(const FloatPoint& scrollPosition, float topContentInset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!topContentInset)
         return 0;
 
@@ -1827,23 +1827,23 @@ float FrameView::yPositionForHeaderLayer(const FloatPoint& scrollPosition, float
 }
 
 float FrameView::yPositionForFooterLayer(const FloatPoint& scrollPosition, float topContentInset, float totalContentsHeight, float footerHeight)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return yPositionForHeaderLayer(scrollPosition, topContentInset) + totalContentsHeight - footerHeight;
 }
 
 FloatPoint FrameView::positionForRootContentLayer(const FloatPoint& scrollPosition, const FloatPoint& scrollOrigin, float topContentInset, float headerHeight)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return FloatPoint(0, yPositionForHeaderLayer(scrollPosition, topContentInset) + headerHeight) - toFloatSize(scrollOrigin);
 }
 
 FloatPoint FrameView::positionForRootContentLayer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return positionForRootContentLayer(scrollPosition(), scrollOrigin(), topContentInset(), headerHeight());
 }
 
 #if PLATFORM(IOS)
 LayoutRect FrameView::rectForViewportConstrainedObjects(const LayoutRect& visibleContentRect, const LayoutSize& totalContentsSize, float frameScaleFactor, bool fixedElementsLayoutRelativeToFrame, ScrollBehaviorForFixedElements scrollBehavior)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (fixedElementsLayoutRelativeToFrame)
         return visibleContentRect;
     
@@ -1887,13 +1887,13 @@ LayoutRect FrameView::rectForViewportConstrainedObjects(const LayoutRect& visibl
 }
     
 LayoutRect FrameView::viewportConstrainedObjectsRect() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return rectForViewportConstrainedObjects(visibleContentRect(), totalContentsSize(), frame().frameScaleFactor(), fixedElementsLayoutRelativeToFrame(), scrollBehaviorForFixedElements());
 }
 #endif
     
 ScrollPosition FrameView::minimumScrollPosition() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollPosition minimumPosition = ScrollView::minimumScrollPosition();
 
     if (frame().isMainFrame() && m_scrollPinningBehavior == PinToBottom)
@@ -1903,7 +1903,7 @@ ScrollPosition FrameView::minimumScrollPosition() const
 }
 
 ScrollPosition FrameView::maximumScrollPosition() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollPosition maximumPosition = ScrollView::maximumScrollPosition();
 
     if (frame().isMainFrame() && m_scrollPinningBehavior == PinToTop)
@@ -1913,7 +1913,7 @@ ScrollPosition FrameView::maximumScrollPosition() const
 }
 
 void FrameView::viewportContentsChanged()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame().view()) {
         // The frame is being destroyed.
         return;
@@ -1931,28 +1931,28 @@ void FrameView::viewportContentsChanged()
 }
 
 bool FrameView::fixedElementsLayoutRelativeToFrame() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frame().settings().fixedElementsLayoutRelativeToFrame();
 }
 
 IntPoint FrameView::lastKnownMousePosition() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frame().eventHandler().lastKnownMousePosition();
 }
 
 bool FrameView::isHandlingWheelEvent() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frame().eventHandler().isHandlingWheelEvent();
 }
 
 bool FrameView::shouldSetCursor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Page* page = frame().page();
     return page && page->isVisible() && page->focusController().isActive();
 }
 
 bool FrameView::scrollContentsFastPath(const IntSize& scrollDelta, const IntRect& rectToScroll, const IntRect& clipRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_viewportConstrainedObjects || m_viewportConstrainedObjects->isEmpty()) {
         hostWindow()->scroll(scrollDelta, rectToScroll, clipRect);
         return true;
@@ -2016,7 +2016,7 @@ bool FrameView::scrollContentsFastPath(const IntSize& scrollDelta, const IntRect
 }
 
 void FrameView::scrollContentsSlowPath(const IntRect& updateRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     repaintSlowRepaintObjects();
 
     if (!usesCompositedScrolling() && isEnclosedInCompositingLayer()) {
@@ -2032,7 +2032,7 @@ void FrameView::scrollContentsSlowPath(const IntRect& updateRect)
 }
 
 void FrameView::repaintSlowRepaintObjects()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_slowRepaintObjects)
         return;
 
@@ -2044,7 +2044,7 @@ void FrameView::repaintSlowRepaintObjects()
 
 // Note that this gets called at painting time.
 void FrameView::setIsOverlapped(bool isOverlapped)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isOverlapped == m_isOverlapped)
         return;
 
@@ -2053,7 +2053,7 @@ void FrameView::setIsOverlapped(bool isOverlapped)
 }
 
 bool FrameView::isOverlappedIncludingAncestors() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isOverlapped())
         return true;
 
@@ -2066,7 +2066,7 @@ bool FrameView::isOverlappedIncludingAncestors() const
 }
 
 void FrameView::setContentIsOpaque(bool contentIsOpaque)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (contentIsOpaque == m_contentIsOpaque)
         return;
 
@@ -2075,12 +2075,12 @@ void FrameView::setContentIsOpaque(bool contentIsOpaque)
 }
 
 void FrameView::restoreScrollbar()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setScrollbarsSuppressed(false);
 }
 
 bool FrameView::scrollToFragment(const URL& url)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If our URL has no ref, then we have no place we need to jump to.
     // OTOH If CSS target was set previously, we want to set it to 0, recalc
     // and possibly repaint because :target pseudo class may have been
@@ -2100,7 +2100,7 @@ bool FrameView::scrollToFragment(const URL& url)
 }
 
 bool FrameView::scrollToAnchor(const String& name)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(frame().document());
     auto& document = *frame().document();
 
@@ -2147,7 +2147,7 @@ bool FrameView::scrollToAnchor(const String& name)
 }
 
 void FrameView::maintainScrollPositionAtAnchor(ContainerNode* anchorNode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_maintainScrollPositionAnchor = anchorNode;
     if (!m_maintainScrollPositionAnchor)
         return;
@@ -2164,7 +2164,7 @@ void FrameView::maintainScrollPositionAtAnchor(ContainerNode* anchorNode)
 }
 
 void FrameView::scrollElementToRect(const Element& element, const IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     frame().document()->updateLayoutIgnorePendingStylesheets();
 
     LayoutRect bounds;
@@ -2176,7 +2176,7 @@ void FrameView::scrollElementToRect(const Element& element, const IntRect& rect)
 }
 
 void FrameView::setScrollPosition(const ScrollPosition& scrollPosition)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TemporaryChange<bool> changeInProgrammaticScroll(m_inProgrammaticScroll, true);
     m_maintainScrollPositionAnchor = nullptr;
     Page* page = frame().page();
@@ -2186,14 +2186,14 @@ void FrameView::setScrollPosition(const ScrollPosition& scrollPosition)
 }
 
 void FrameView::contentsResized()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // For non-delegated scrolling, adjustTiledBackingScrollability() is called via addedOrRemovedScrollbar() which occurs less often.
     if (delegatesScrolling())
         adjustTiledBackingScrollability();
 }
 
 void FrameView::delegatesScrollingDidChange()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // When we switch to delgatesScrolling mode, we should destroy the scrolling/clipping layers in RenderLayerCompositor.
     if (hasCompositedContent())
         clearBackingStores();
@@ -2201,7 +2201,7 @@ void FrameView::delegatesScrollingDidChange()
 
 #if USE(COORDINATED_GRAPHICS)
 void FrameView::setFixedVisibleContentRect(const IntRect& visibleContentRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool visibleContentSizeDidChange = false;
     if (visibleContentRect.size() != this->fixedVisibleContentRect().size()) {
         // When the viewport size changes or the content is scaled, we need to
@@ -2229,7 +2229,7 @@ void FrameView::setFixedVisibleContentRect(const IntRect& visibleContentRect)
 #endif
 
 void FrameView::setViewportConstrainedObjectsNeedLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasViewportConstrainedObjects())
         return;
 
@@ -2238,13 +2238,13 @@ void FrameView::setViewportConstrainedObjectsNeedLayout()
 }
 
 void FrameView::didChangeScrollOffset()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     frame().mainFrame().pageOverlayController().didScrollFrame(frame());
     frame().loader().client().didChangeScrollOffset();
 }
 
 void FrameView::scrollOffsetChangedViaPlatformWidgetImpl(const ScrollOffset& oldOffset, const ScrollOffset& newOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     updateLayerPositionsAfterScrolling();
     updateCompositingLayersAfterScrolling();
     repaintSlowRepaintObjects();
@@ -2252,7 +2252,7 @@ void FrameView::scrollOffsetChangedViaPlatformWidgetImpl(const ScrollOffset& old
 }
 
 void FrameView::scrollPositionChanged(const ScrollPosition& oldPosition, const ScrollPosition& newPosition)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Page* page = frame().page();
     auto throttlingDelay = page ? page->chrome().client().eventThrottlingDelay() : 0ms;
 
@@ -2274,7 +2274,7 @@ void FrameView::scrollPositionChanged(const ScrollPosition& oldPosition, const S
 }
 
 void FrameView::applyRecursivelyWithVisibleRect(const std::function<void (FrameView& frameView, const IntRect& visibleRect)>& apply)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect windowClipRect = this->windowClipRect();
     auto visibleRect = windowToContents(windowClipRect);
     apply(*this, visibleRect);
@@ -2288,7 +2288,7 @@ void FrameView::applyRecursivelyWithVisibleRect(const std::function<void (FrameV
 }
 
 void FrameView::resumeVisibleImageAnimations(const IntRect& visibleRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (visibleRect.isEmpty())
         return;
 
@@ -2297,7 +2297,7 @@ void FrameView::resumeVisibleImageAnimations(const IntRect& visibleRect)
 }
 
 void FrameView::updateScriptedAnimationsAndTimersThrottlingState(const IntRect& visibleRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (frame().isMainFrame())
         return;
 
@@ -2318,14 +2318,14 @@ void FrameView::updateScriptedAnimationsAndTimersThrottlingState(const IntRect& 
 
 
 void FrameView::resumeVisibleImageAnimationsIncludingSubframes()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     applyRecursivelyWithVisibleRect([] (FrameView& frameView, const IntRect& visibleRect) {
         frameView.resumeVisibleImageAnimations(visibleRect);
     });
 }
 
 void FrameView::updateLayerPositionsAfterScrolling()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If we're scrolling as a result of updating the view size after layout, we'll update widgets and layer positions soon anyway.
     if (m_layoutPhase == InViewSizeAdjust)
         return;
@@ -2339,7 +2339,7 @@ void FrameView::updateLayerPositionsAfterScrolling()
 }
 
 bool FrameView::shouldUpdateCompositingLayersAfterScrolling() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(ASYNC_SCROLLING)
     // If the scrolling thread is updating the fixed elements, then the FrameView should not update them as well.
 
@@ -2369,7 +2369,7 @@ bool FrameView::shouldUpdateCompositingLayersAfterScrolling() const
 }
 
 void FrameView::updateCompositingLayersAfterScrolling()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_layoutPhase >= InPostLayout || m_layoutPhase == OutsideLayout);
 
     if (!shouldUpdateCompositingLayersAfterScrolling())
@@ -2382,7 +2382,7 @@ void FrameView::updateCompositingLayersAfterScrolling()
 }
 
 bool FrameView::isRubberBandInProgress() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (scrollbarsSuppressed())
         return false;
 
@@ -2404,7 +2404,7 @@ bool FrameView::isRubberBandInProgress() const
 }
 
 bool FrameView::requestScrollPositionUpdate(const ScrollPosition& position)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LOG_WITH_STREAM(Scrolling, stream << "FrameView::requestScrollPositionUpdate " << position);
 
 #if ENABLE(ASYNC_SCROLLING)
@@ -2425,14 +2425,14 @@ bool FrameView::requestScrollPositionUpdate(const ScrollPosition& position)
 }
 
 HostWindow* FrameView::hostWindow() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Page* page = frame().page())
         return &page->chrome();
     return nullptr;
 }
 
 void FrameView::addTrackedRepaintRect(const FloatRect& r)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_isTrackingRepaints || r.isEmpty())
         return;
 
@@ -2442,7 +2442,7 @@ void FrameView::addTrackedRepaintRect(const FloatRect& r)
 }
 
 void FrameView::repaintContentRectangle(const IntRect& r)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!frame().ownerElement());
 
     if (!shouldUpdate())
@@ -2452,7 +2452,7 @@ void FrameView::repaintContentRectangle(const IntRect& r)
 }
 
 static unsigned countRenderedCharactersInRenderObjectWithThreshold(const RenderElement& renderer, unsigned threshold)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     unsigned count = 0;
     for (const RenderObject* descendant = &renderer; descendant; descendant = descendant->nextInPreOrder()) {
         if (is<RenderText>(*descendant)) {
@@ -2465,14 +2465,14 @@ static unsigned countRenderedCharactersInRenderObjectWithThreshold(const RenderE
 }
 
 bool FrameView::renderedCharactersExceed(unsigned threshold)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame().contentRenderer())
         return false;
     return countRenderedCharactersInRenderObjectWithThreshold(*frame().contentRenderer(), threshold) >= threshold;
 }
 
 void FrameView::availableContentSizeChanged(AvailableSizeChangeReason reason)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Document* document = frame().document())
         document->updateViewportUnitsOnResize();
 
@@ -2481,12 +2481,12 @@ void FrameView::availableContentSizeChanged(AvailableSizeChangeReason reason)
 }
 
 bool FrameView::shouldLayoutAfterContentsResized() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return !useFixedLayout() || useCustomFixedPositionLayoutRect();
 }
 
 void FrameView::updateContentsSize()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We check to make sure the view is attached to a frame() as this method can
     // be triggered before the view is attached by Frame::createView(...) setting
     // various values such as setScrollBarModes(...) for example.  An ASSERT is
@@ -2516,7 +2516,7 @@ void FrameView::updateContentsSize()
 }
 
 void FrameView::addedOrRemovedScrollbar()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderView* renderView = this->renderView()) {
         if (renderView->usesCompositing())
             renderView->compositor().frameViewDidAddOrRemoveScrollbars();
@@ -2526,7 +2526,7 @@ void FrameView::addedOrRemovedScrollbar()
 }
 
 void FrameView::adjustTiledBackingScrollability()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* tiledBacking = this->tiledBacking();
     if (!tiledBacking)
         return;
@@ -2563,13 +2563,13 @@ void FrameView::adjustTiledBackingScrollability()
 
 #if PLATFORM(IOS)
 void FrameView::unobscuredContentSizeChanged()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     adjustTiledBackingScrollability();
 }
 #endif
 
 static LayerFlushThrottleState::Flags determineLayerFlushThrottleState(Page& page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We only throttle when constantly receiving new data during the inital page load.
     if (!page.progress().isMainLoadProgressing())
         return 0;
@@ -2584,7 +2584,7 @@ static LayerFlushThrottleState::Flags determineLayerFlushThrottleState(Page& pag
 }
 
 void FrameView::disableLayerFlushThrottlingTemporarilyForInteraction()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame().page())
         return;
     auto& page = *frame().page();
@@ -2598,13 +2598,13 @@ void FrameView::disableLayerFlushThrottlingTemporarilyForInteraction()
 }
 
 void FrameView::loadProgressingStatusChanged()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     updateLayerFlushThrottling();
     adjustTiledBackingCoverage();
 }
 
 void FrameView::updateLayerFlushThrottling()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Page* page = frame().page();
     if (!page)
         return;
@@ -2624,7 +2624,7 @@ void FrameView::updateLayerFlushThrottling()
 }
 
 void FrameView::adjustTiledBackingCoverage()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_speculativeTilingEnabled)
         enableSpeculativeTilingIfNeeded();
 
@@ -2638,13 +2638,13 @@ void FrameView::adjustTiledBackingCoverage()
 }
 
 static bool shouldEnableSpeculativeTilingDuringLoading(const FrameView& view)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Page* page = view.frame().page();
     return page && view.isVisuallyNonEmpty() && !page->progress().isMainLoadProgressing();
 }
 
 void FrameView::enableSpeculativeTilingIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_speculativeTilingEnabled);
     if (m_wasScrolledByUser) {
         m_speculativeTilingEnabled = true;
@@ -2660,7 +2660,7 @@ void FrameView::enableSpeculativeTilingIfNeeded()
 }
 
 void FrameView::speculativeTilingEnableTimerFired()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_speculativeTilingEnabled)
         return;
     m_speculativeTilingEnabled = shouldEnableSpeculativeTilingDuringLoading(*this);
@@ -2668,7 +2668,7 @@ void FrameView::speculativeTilingEnableTimerFired()
 }
 
 void FrameView::show()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollView::show();
 
     if (frame().isMainFrame()) {
@@ -2680,14 +2680,14 @@ void FrameView::show()
     }
 }
 void FrameView::convertSubtreeLayoutToFullLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_layoutRoot);
     m_layoutRoot->markContainingBlocksForLayout(ScheduleRelayout::No);
     m_layoutRoot = nullptr;
 }
 
 void FrameView::layoutTimerFired()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #ifdef INSTRUMENT_LAYOUT_SCHEDULING
     if (!frame().document()->ownerElement())
         printf("Layout timer fired at %lld\n", frame().document()->elapsedTime().count());
@@ -2696,7 +2696,7 @@ void FrameView::layoutTimerFired()
 }
 
 void FrameView::scheduleRelayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: We should assert the page is not in the page cache, but that is causing
     // too many false assertions.  See <rdar://problem/7218118>.
     ASSERT(frame().view() == this);
@@ -2732,7 +2732,7 @@ void FrameView::scheduleRelayout()
 }
 
 static bool isObjectAncestorContainerOf(RenderObject* ancestor, RenderObject* descendant)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (RenderObject* r = descendant; r; r = r->container()) {
         if (r == ancestor)
             return true;
@@ -2741,7 +2741,7 @@ static bool isObjectAncestorContainerOf(RenderObject* ancestor, RenderObject* de
 }
 
 void FrameView::scheduleRelayoutOfSubtree(RenderElement& newRelayoutRoot)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(renderView());
     const RenderView& renderView = *this->renderView();
 
@@ -2799,12 +2799,12 @@ void FrameView::scheduleRelayoutOfSubtree(RenderElement& newRelayoutRoot)
 }
 
 bool FrameView::layoutPending() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_layoutTimer.isActive();
 }
 
 bool FrameView::needsStyleRecalcOrLayout(bool includeSubframes) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (frame().document() && frame().document()->childNeedsStyleRecalc())
         return true;
     
@@ -2823,7 +2823,7 @@ bool FrameView::needsStyleRecalcOrLayout(bool includeSubframes) const
 }
 
 bool FrameView::needsLayout() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This can return true in cases where the document does not have a body yet.
     // Document::shouldScheduleLayout takes care of preventing us from scheduling
     // layout in that case.
@@ -2835,7 +2835,7 @@ bool FrameView::needsLayout() const
 }
 
 void FrameView::setNeedsLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_deferSetNeedsLayoutCount) {
         m_setNeedsLayoutWasDeferred = true;
         return;
@@ -2846,7 +2846,7 @@ void FrameView::setNeedsLayout()
 }
 
 void FrameView::unscheduleRelayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_postLayoutTasksTimer.isActive())
         m_postLayoutTasksTimer.stop();
 
@@ -2864,7 +2864,7 @@ void FrameView::unscheduleRelayout()
 
 #if ENABLE(REQUEST_ANIMATION_FRAME)
 void FrameView::serviceScriptedAnimations()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto* frame = m_frame.ptr(); frame; frame = frame->tree().traverseNext()) {
         frame->view()->serviceScrollAnimations();
         frame->animation().serviceAnimations();
@@ -2884,12 +2884,12 @@ void FrameView::serviceScriptedAnimations()
 #endif
 
 bool FrameView::isTransparent() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_isTransparent;
 }
 
 void FrameView::setTransparent(bool isTransparent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_isTransparent == isTransparent)
         return;
 
@@ -2906,17 +2906,17 @@ void FrameView::setTransparent(bool isTransparent)
 }
 
 bool FrameView::hasOpaqueBackground() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return !m_isTransparent && !m_baseBackgroundColor.hasAlpha();
 }
 
 Color FrameView::baseBackgroundColor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_baseBackgroundColor;
 }
 
 void FrameView::setBaseBackgroundColor(const Color& backgroundColor)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool hadAlpha = m_baseBackgroundColor.hasAlpha();
     
     if (!backgroundColor.isValid())
@@ -2934,7 +2934,7 @@ void FrameView::setBaseBackgroundColor(const Color& backgroundColor)
 }
 
 void FrameView::updateBackgroundRecursively(const Color& backgroundColor, bool transparent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto* frame = m_frame.ptr(); frame; frame = frame->tree().traverseNext(m_frame.ptr())) {
         if (FrameView* view = frame->view()) {
             view->setTransparent(transparent);
@@ -2944,7 +2944,7 @@ void FrameView::updateBackgroundRecursively(const Color& backgroundColor, bool t
 }
 
 bool FrameView::hasExtendedBackgroundRectForPainting() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame().settings().backgroundShouldExtendBeyondPage())
         return false;
 
@@ -2956,7 +2956,7 @@ bool FrameView::hasExtendedBackgroundRectForPainting() const
 }
 
 void FrameView::updateExtendBackgroundIfNecessary()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ExtendedBackgroundMode mode = calculateExtendedBackgroundMode();
     if (mode == ExtendedBackgroundModeNone)
         return;
@@ -2965,7 +2965,7 @@ void FrameView::updateExtendBackgroundIfNecessary()
 }
 
 FrameView::ExtendedBackgroundMode FrameView::calculateExtendedBackgroundMode() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Just because Settings::backgroundShouldExtendBeyondPage() is true does not necessarily mean
     // that the background rect needs to be extended for painting. Simple backgrounds can be extended
     // just with RenderLayerCompositor::setRootExtendedBackgroundColor(). More complicated backgrounds,
@@ -3007,7 +3007,7 @@ FrameView::ExtendedBackgroundMode FrameView::calculateExtendedBackgroundMode() c
 }
 
 void FrameView::updateTilesForExtendedBackgroundMode(ExtendedBackgroundMode mode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame().settings().backgroundShouldExtendBeyondPage())
         return;
 
@@ -3037,7 +3037,7 @@ void FrameView::updateTilesForExtendedBackgroundMode(ExtendedBackgroundMode mode
 }
 
 IntRect FrameView::extendedBackgroundRectForPainting() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TiledBacking* tiledBacking = this->tiledBacking();
     if (!tiledBacking)
         return IntRect();
@@ -3056,24 +3056,24 @@ IntRect FrameView::extendedBackgroundRectForPainting() const
 }
 
 bool FrameView::shouldUpdateWhileOffscreen() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_shouldUpdateWhileOffscreen;
 }
 
 void FrameView::setShouldUpdateWhileOffscreen(bool shouldUpdateWhileOffscreen)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_shouldUpdateWhileOffscreen = shouldUpdateWhileOffscreen;
 }
 
 bool FrameView::shouldUpdate() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isOffscreen() && !shouldUpdateWhileOffscreen())
         return false;
     return true;
 }
 
 void FrameView::scrollToAnchor()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<ContainerNode> anchorNode = m_maintainScrollPositionAnchor;
     if (!anchorNode)
         return;
@@ -3102,7 +3102,7 @@ void FrameView::scrollToAnchor()
 }
 
 void FrameView::updateEmbeddedObject(RenderEmbeddedObject& embeddedObject)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // No need to update if it's already crashed or known to be missing.
     if (embeddedObject.isPluginUnavailable())
         return;
@@ -3141,7 +3141,7 @@ void FrameView::updateEmbeddedObject(RenderEmbeddedObject& embeddedObject)
 }
 
 bool FrameView::updateEmbeddedObjects()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_nestedLayoutCount > 1 || !m_embeddedObjectsToUpdate || m_embeddedObjectsToUpdate->isEmpty())
         return true;
 
@@ -3162,7 +3162,7 @@ bool FrameView::updateEmbeddedObjects()
 }
 
 void FrameView::updateEmbeddedObjectsTimerFired()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<FrameView> protectedThis(this);
     m_updateEmbeddedObjectsTimer.stop();
     for (unsigned i = 0; i < maxUpdateEmbeddedObjectsIterations; i++) {
@@ -3172,7 +3172,7 @@ void FrameView::updateEmbeddedObjectsTimerFired()
 }
 
 void FrameView::flushAnyPendingPostLayoutTasks()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_postLayoutTasksTimer.isActive())
         performPostLayoutTasks();
     if (m_updateEmbeddedObjectsTimer.isActive())
@@ -3180,12 +3180,12 @@ void FrameView::flushAnyPendingPostLayoutTasks()
 }
 
 void FrameView::queuePostLayoutCallback(Function<void()>&& callback)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_postLayoutCallbackQueue.append(WTFMove(callback));
 }
 
 void FrameView::flushPostLayoutTasksQueue()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_nestedLayoutCount > 1)
         return;
 
@@ -3198,7 +3198,7 @@ void FrameView::flushPostLayoutTasksQueue()
 }
 
 void FrameView::performPostLayoutTasks()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LOG(Layout, "FrameView %p performPostLayoutTasks", this);
 
     // FIXME: We should not run any JavaScript code in this function.
@@ -3262,7 +3262,7 @@ void FrameView::performPostLayoutTasks()
 }
 
 IntSize FrameView::sizeForResizeEvent() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(IOS)
     if (m_useCustomSizeForResizeEvent)
         return m_customSizeForResizeEvent;
@@ -3273,7 +3273,7 @@ IntSize FrameView::sizeForResizeEvent() const
 }
 
 void FrameView::sendResizeEventIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isInRenderTreeLayout() || needsLayout())
         return;
 
@@ -3328,19 +3328,19 @@ void FrameView::sendResizeEventIfNeeded()
 }
 
 void FrameView::willStartLiveResize()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollView::willStartLiveResize();
     adjustTiledBackingCoverage();
 }
     
 void FrameView::willEndLiveResize()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollView::willEndLiveResize();
     adjustTiledBackingCoverage();
 }
 
 void FrameView::autoSizeIfEnabled()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_shouldAutoSize)
         return;
 
@@ -3444,7 +3444,7 @@ void FrameView::autoSizeIfEnabled()
 }
 
 void FrameView::setAutoSizeFixedMinimumHeight(int fixedMinimumHeight)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_autoSizeFixedMinimumHeight == fixedMinimumHeight)
         return;
 
@@ -3454,7 +3454,7 @@ void FrameView::setAutoSizeFixedMinimumHeight(int fixedMinimumHeight)
 }
 
 RenderElement* FrameView::viewportRenderer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_viewportRendererType == ViewportRendererType::None)
         return nullptr;
 
@@ -3481,7 +3481,7 @@ RenderElement* FrameView::viewportRenderer() const
 }
 
 void FrameView::updateOverflowStatus(bool horizontalOverflow, bool verticalOverflow)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* viewportRenderer = this->viewportRenderer();
     if (!viewportRenderer)
         return;
@@ -3509,7 +3509,7 @@ void FrameView::updateOverflowStatus(bool horizontalOverflow, bool verticalOverf
 }
 
 const Pagination& FrameView::pagination() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_pagination != Pagination())
         return m_pagination;
 
@@ -3522,7 +3522,7 @@ const Pagination& FrameView::pagination() const
 }
 
 void FrameView::setPagination(const Pagination& pagination)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_pagination == pagination)
         return;
 
@@ -3532,7 +3532,7 @@ void FrameView::setPagination(const Pagination& pagination)
 }
 
 IntRect FrameView::windowClipRect() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(frame().view() == this);
 
     if (m_cachedWindowClipRect)
@@ -3555,7 +3555,7 @@ IntRect FrameView::windowClipRect() const
 }
 
 IntRect FrameView::windowClipRectForFrameOwner(const HTMLFrameOwnerElement* ownerElement, bool clipToLayerContents) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // The renderer can sometimes be null when style="display:none" interacts
     // with external content and plugins.
     if (!ownerElement->renderer())
@@ -3577,19 +3577,19 @@ IntRect FrameView::windowClipRectForFrameOwner(const HTMLFrameOwnerElement* owne
 }
 
 bool FrameView::isActive() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Page* page = frame().page();
     return page && page->focusController().isActive();
 }
 
 bool FrameView::forceUpdateScrollbarsOnMainThreadForPerformanceTesting() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Page* page = frame().page();
     return page && page->settings().forceUpdateScrollbarsOnMainThreadForPerformanceTesting();
 }
 
 void FrameView::scrollTo(const ScrollPosition& newPosition)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint oldPosition = scrollPosition();
     ScrollView::scrollTo(newPosition);
     if (oldPosition != scrollPosition())
@@ -3598,7 +3598,7 @@ void FrameView::scrollTo(const ScrollPosition& newPosition)
 }
 
 float FrameView::adjustScrollStepForFixedContent(float step, ScrollbarOrientation orientation, ScrollGranularity granularity)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (granularity != ScrollByPage || orientation == HorizontalScrollbar)
         return step;
 
@@ -3637,7 +3637,7 @@ float FrameView::adjustScrollStepForFixedContent(float step, ScrollbarOrientatio
 }
 
 void FrameView::invalidateScrollbarRect(Scrollbar& scrollbar, const IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Add in our offset within the FrameView.
     IntRect dirtyRect = rect;
     dirtyRect.moveBy(scrollbar.location());
@@ -3645,7 +3645,7 @@ void FrameView::invalidateScrollbarRect(Scrollbar& scrollbar, const IntRect& rec
 }
 
 float FrameView::visibleContentScaleFactor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame().isMainFrame() || !frame().settings().delegatesPageScaling())
         return 1;
 
@@ -3657,7 +3657,7 @@ float FrameView::visibleContentScaleFactor() const
 }
 
 void FrameView::setVisibleScrollerThumbRect(const IntRect& scrollerThumb)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame().isMainFrame())
         return;
 
@@ -3666,13 +3666,13 @@ void FrameView::setVisibleScrollerThumbRect(const IntRect& scrollerThumb)
 }
 
 ScrollableArea* FrameView::enclosingScrollableArea() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: Walk up the frame tree and look for a scrollable parent frame or RenderLayer.
     return nullptr;
 }
 
 IntRect FrameView::scrollableAreaBoundingBox(bool*) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderWidget* ownerRenderer = frame().ownerRenderer();
     if (!ownerRenderer)
         return frameRect();
@@ -3681,7 +3681,7 @@ IntRect FrameView::scrollableAreaBoundingBox(bool*) const
 }
 
 bool FrameView::isScrollable(Scrollability definitionOfScrollable)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Check for:
     // 1) If there an actual overflow.
     // 2) display:none or visibility:hidden set to self or inherited.
@@ -3717,12 +3717,12 @@ bool FrameView::isScrollable(Scrollability definitionOfScrollable)
 }
 
 bool FrameView::isScrollableOrRubberbandable()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return isScrollable(Scrollability::ScrollableOrRubberbandable);
 }
 
 bool FrameView::hasScrollableOrRubberbandableAncestor()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (frame().isMainFrame())
         return isScrollableOrRubberbandable();
 
@@ -3736,7 +3736,7 @@ bool FrameView::hasScrollableOrRubberbandableAncestor()
 }
 
 void FrameView::updateScrollableAreaSet()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // That ensures that only inner frames are cached.
     FrameView* parentFrameView = this->parentFrameView();
     if (!parentFrameView)
@@ -3751,12 +3751,12 @@ void FrameView::updateScrollableAreaSet()
 }
 
 bool FrameView::shouldSuspendScrollAnimations() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frame().loader().state() != FrameStateComplete;
 }
 
 void FrameView::scrollbarStyleChanged(ScrollbarStyle newStyle, bool forceUpdate)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame().isMainFrame())
         return;
 
@@ -3767,7 +3767,7 @@ void FrameView::scrollbarStyleChanged(ScrollbarStyle newStyle, bool forceUpdate)
 }
 
 void FrameView::notifyPageThatContentAreaWillPaint() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Page* page = frame().page();
     if (!page)
         return;
@@ -3782,7 +3782,7 @@ void FrameView::notifyPageThatContentAreaWillPaint() const
 }
 
 bool FrameView::scrollAnimatorEnabled() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(SMOOTH_SCROLLING)
     if (Page* page = frame().page())
         return page->settings().scrollAnimatorEnabled();
@@ -3793,7 +3793,7 @@ bool FrameView::scrollAnimatorEnabled() const
 
 #if ENABLE(DASHBOARD_SUPPORT)
 void FrameView::updateAnnotatedRegions()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Document* document = frame().document();
     if (!document->hasAnnotatedRegions())
         return;
@@ -3810,7 +3810,7 @@ void FrameView::updateAnnotatedRegions()
 #endif
 
 void FrameView::updateScrollCorner()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderElement* renderer = nullptr;
     std::unique_ptr<RenderStyle> cornerStyle;
     IntRect cornerRect = scrollCornerRect();
@@ -3855,7 +3855,7 @@ void FrameView::updateScrollCorner()
 }
 
 void FrameView::paintScrollCorner(GraphicsContext& context, const IntRect& cornerRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (context.updatingControlTints()) {
         updateScrollCorner();
         return;
@@ -3872,7 +3872,7 @@ void FrameView::paintScrollCorner(GraphicsContext& context, const IntRect& corne
 }
 
 void FrameView::paintScrollbar(GraphicsContext& context, Scrollbar& bar, const IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (bar.isCustomScrollbar() && frame().isMainFrame()) {
         IntRect toFill = bar.frameRect();
         toFill.intersect(rect);
@@ -3883,7 +3883,7 @@ void FrameView::paintScrollbar(GraphicsContext& context, Scrollbar& bar, const I
 }
 
 Color FrameView::documentBackgroundColor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // <https://bugs.webkit.org/show_bug.cgi?id=59540> We blend the background color of
     // the document and the body against the base background color of the frame view.
     // Background images are unfortunately impractical to include.
@@ -3923,7 +3923,7 @@ Color FrameView::documentBackgroundColor() const
 }
 
 bool FrameView::hasCustomScrollbars() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& widget : children()) {
         if (is<FrameView>(*widget)) {
             if (downcast<FrameView>(*widget).hasCustomScrollbars())
@@ -3938,7 +3938,7 @@ bool FrameView::hasCustomScrollbars() const
 }
 
 FrameView* FrameView::parentFrameView() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!parent())
         return nullptr;
 
@@ -3949,7 +3949,7 @@ FrameView* FrameView::parentFrameView() const
 }
 
 bool FrameView::isInChildFrameWithFrameFlattening() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frameFlatteningEnabled())
         return false;
 
@@ -3975,7 +3975,7 @@ bool FrameView::isInChildFrameWithFrameFlattening() const
 }
 
 void FrameView::startLayoutAtMainFrameViewIfNeeded(bool allowSubtree)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // When we start a layout at the child level as opposed to the topmost frame view and this child
     // frame requires flattening, we need to re-initiate the layout at the topmost view. Layout
     // will hit this view eventually.
@@ -3999,7 +3999,7 @@ void FrameView::startLayoutAtMainFrameViewIfNeeded(bool allowSubtree)
 }
 
 void FrameView::updateControlTints()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This is called when control tints are changed from aqua/graphite to clear and vice versa.
     // We do a "fake" paint, and when the theme gets a paint call, it can then do an invalidate.
     // This is only done if the theme supports control tinting. It's up to the theme and platform
@@ -4026,7 +4026,7 @@ void FrameView::updateControlTints()
 }
 
 void FrameView::paintControlTints()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (needsLayout())
         layout();
 
@@ -4039,12 +4039,12 @@ void FrameView::paintControlTints()
 }
 
 bool FrameView::wasScrolledByUser() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_wasScrolledByUser;
 }
 
 void FrameView::setWasScrolledByUser(bool wasScrolledByUser)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_inProgrammaticScroll)
         return;
     m_maintainScrollPositionAnchor = nullptr;
@@ -4057,7 +4057,7 @@ void FrameView::setWasScrolledByUser(bool wasScrolledByUser)
 }
 
 void FrameView::willPaintContents(GraphicsContext& context, const IntRect&, PaintingState& paintingState)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Document* document = frame().document();
 
     if (!context.paintingDisabled())
@@ -4095,7 +4095,7 @@ void FrameView::willPaintContents(GraphicsContext& context, const IntRect&, Pain
 }
 
 void FrameView::didPaintContents(GraphicsContext& context, const IntRect& dirtyRect, PaintingState& paintingState)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_isPainting = false;
 
     if (paintingState.isFlatteningPaintOfRootFrame)
@@ -4126,7 +4126,7 @@ void FrameView::didPaintContents(GraphicsContext& context, const IntRect& dirtyR
 }
 
 void FrameView::paintContents(GraphicsContext& context, const IntRect& dirtyRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #ifndef NDEBUG
     bool fillWithRed;
     if (frame().document()->printing())
@@ -4187,28 +4187,28 @@ void FrameView::paintContents(GraphicsContext& context, const IntRect& dirtyRect
 }
 
 void FrameView::setPaintBehavior(PaintBehavior behavior)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_paintBehavior = behavior;
 }
 
 PaintBehavior FrameView::paintBehavior() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_paintBehavior;
 }
 
 bool FrameView::isPainting() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_isPainting;
 }
 
 // FIXME: change this to use the subtreePaint terminology.
 void FrameView::setNodeToDraw(Node* node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_nodeToDraw = node;
 }
 
 void FrameView::paintContentsForSnapshot(GraphicsContext& context, const IntRect& imageRect, SelectionInSnapshot shouldPaintSelection, CoordinateSpaceForSnapshot coordinateSpace)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     updateLayoutAndStyleIfNeededRecursive();
 
     // Cache paint behavior and set a new behavior appropriate for snapshots.
@@ -4244,7 +4244,7 @@ void FrameView::paintContentsForSnapshot(GraphicsContext& context, const IntRect
 }
 
 void FrameView::paintOverhangAreas(GraphicsContext& context, const IntRect& horizontalOverhangArea, const IntRect& verticalOverhangArea, const IntRect& dirtyRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (context.paintingDisabled())
         return;
 
@@ -4255,7 +4255,7 @@ void FrameView::paintOverhangAreas(GraphicsContext& context, const IntRect& hori
 }
 
 FrameView::FrameViewList FrameView::renderedChildFrameViews() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     FrameViewList childViews;
     for (Frame* frame = m_frame->tree().firstRenderedChild(); frame; frame = frame->tree().nextRenderedSibling()) {
         if (frame->view())
@@ -4266,7 +4266,7 @@ FrameView::FrameViewList FrameView::renderedChildFrameViews() const
 }
 
 void FrameView::updateLayoutAndStyleIfNeededRecursive()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We have to crawl our entire tree looking for any FrameViews that need
     // layout and make sure they are up to date.
     // Mac actually tests for intersection with the dirty region and tries not to
@@ -4297,7 +4297,7 @@ void FrameView::updateLayoutAndStyleIfNeededRecursive()
 }
 
 bool FrameView::qualifiesAsVisuallyNonEmpty() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // No content yet.
     Element* documentElement = frame().document()->documentElement();
     if (!documentElement || !documentElement->renderer())
@@ -4324,7 +4324,7 @@ bool FrameView::qualifiesAsVisuallyNonEmpty() const
 }
 
 void FrameView::updateIsVisuallyNonEmpty()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_isVisuallyNonEmpty)
         return;
     if (!qualifiesAsVisuallyNonEmpty())
@@ -4334,7 +4334,7 @@ void FrameView::updateIsVisuallyNonEmpty()
 }
 
 bool FrameView::isViewForDocumentInFrame() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return false;
@@ -4343,7 +4343,7 @@ bool FrameView::isViewForDocumentInFrame() const
 }
 
 void FrameView::enableAutoSizeMode(bool enable, const IntSize& minSize, const IntSize& maxSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!enable || !minSize.isEmpty());
     ASSERT(minSize.width() <= maxSize.width());
     ASSERT(minSize.height() <= maxSize.height());
@@ -4368,12 +4368,12 @@ void FrameView::enableAutoSizeMode(bool enable, const IntSize& minSize, const In
 }
 
 void FrameView::forceLayout(bool allowSubtree)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     layout(allowSubtree);
 }
 
 void FrameView::forceLayoutForPagination(const FloatSize& pageSize, const FloatSize& originalPageSize, float maximumShrinkFactor, AdjustViewSizeOrNot shouldAdjustViewSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Dumping externalRepresentation(frame().renderer()).ascii() is a good trick to see
     // the state of things before and after the layout
     if (RenderView* renderView = this->renderView()) {
@@ -4425,7 +4425,7 @@ void FrameView::forceLayoutForPagination(const FloatSize& pageSize, const FloatS
 }
 
 void FrameView::adjustPageHeightDeprecated(float *newBottom, float oldTop, float oldBottom, float /*bottomLimit*/)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView) {
         *newBottom = oldBottom;
@@ -4445,7 +4445,7 @@ void FrameView::adjustPageHeightDeprecated(float *newBottom, float oldTop, float
 }
 
 IntRect FrameView::convertFromRendererToContainingView(const RenderElement* renderer, const IntRect& rendererRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect rect = snappedIntRect(enclosingLayoutRect(renderer->localToAbsoluteQuad(FloatRect(rendererRect)).boundingBox()));
 
     if (!delegatesScrolling())
@@ -4455,7 +4455,7 @@ IntRect FrameView::convertFromRendererToContainingView(const RenderElement* rend
 }
 
 IntRect FrameView::convertFromContainingViewToRenderer(const RenderElement* renderer, const IntRect& viewRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect rect = viewRect;
     
     // Convert from FrameView coords into page ("absolute") coordinates.
@@ -4469,7 +4469,7 @@ IntRect FrameView::convertFromContainingViewToRenderer(const RenderElement* rend
 }
 
 IntPoint FrameView::convertFromRendererToContainingView(const RenderElement* renderer, const IntPoint& rendererPoint) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint point = roundedIntPoint(renderer->localToAbsolute(rendererPoint, UseTransforms));
 
     // Convert from page ("absolute") to FrameView coordinates.
@@ -4480,7 +4480,7 @@ IntPoint FrameView::convertFromRendererToContainingView(const RenderElement* ren
 }
 
 IntPoint FrameView::convertFromContainingViewToRenderer(const RenderElement* renderer, const IntPoint& viewPoint) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint point = viewPoint;
 
     // Convert from FrameView coords into page ("absolute") coordinates.
@@ -4491,7 +4491,7 @@ IntPoint FrameView::convertFromContainingViewToRenderer(const RenderElement* ren
 }
 
 IntRect FrameView::convertToContainingView(const IntRect& localRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (const ScrollView* parentScrollView = parent()) {
         if (is<FrameView>(*parentScrollView)) {
             const FrameView& parentView = downcast<FrameView>(*parentScrollView);
@@ -4514,7 +4514,7 @@ IntRect FrameView::convertToContainingView(const IntRect& localRect) const
 }
 
 IntRect FrameView::convertFromContainingView(const IntRect& parentRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (const ScrollView* parentScrollView = parent()) {
         if (is<FrameView>(*parentScrollView)) {
             const FrameView& parentView = downcast<FrameView>(*parentScrollView);
@@ -4538,7 +4538,7 @@ IntRect FrameView::convertFromContainingView(const IntRect& parentRect) const
 }
 
 IntPoint FrameView::convertToContainingView(const IntPoint& localPoint) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (const ScrollView* parentScrollView = parent()) {
         if (is<FrameView>(*parentScrollView)) {
             const FrameView& parentView = downcast<FrameView>(*parentScrollView);
@@ -4563,7 +4563,7 @@ IntPoint FrameView::convertToContainingView(const IntPoint& localPoint) const
 }
 
 IntPoint FrameView::convertFromContainingView(const IntPoint& parentPoint) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (const ScrollView* parentScrollView = parent()) {
         if (is<FrameView>(*parentScrollView)) {
             const FrameView& parentView = downcast<FrameView>(*parentScrollView);
@@ -4587,7 +4587,7 @@ IntPoint FrameView::convertFromContainingView(const IntPoint& parentPoint) const
 }
 
 void FrameView::setTracksRepaints(bool trackRepaints)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (trackRepaints == m_isTrackingRepaints)
         return;
 
@@ -4607,14 +4607,14 @@ void FrameView::setTracksRepaints(bool trackRepaints)
 }
 
 void FrameView::resetTrackedRepaints()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_trackedRepaintRects.clear();
     if (RenderView* renderView = this->renderView())
         renderView->compositor().resetTrackedRepaintRects();
 }
 
 String FrameView::trackedRepaintRectsAsText() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (frame().document())
         frame().document()->updateLayout();
 
@@ -4629,7 +4629,7 @@ String FrameView::trackedRepaintRectsAsText() const
 }
 
 bool FrameView::addScrollableArea(ScrollableArea* scrollableArea)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_scrollableAreas)
         m_scrollableAreas = std::make_unique<ScrollableAreaSet>();
     
@@ -4642,7 +4642,7 @@ bool FrameView::addScrollableArea(ScrollableArea* scrollableArea)
 }
 
 bool FrameView::removeScrollableArea(ScrollableArea* scrollableArea)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_scrollableAreas && m_scrollableAreas->remove(scrollableArea)) {
         scrollableAreaSetChanged();
         return true;
@@ -4651,12 +4651,12 @@ bool FrameView::removeScrollableArea(ScrollableArea* scrollableArea)
 }
 
 bool FrameView::containsScrollableArea(ScrollableArea* scrollableArea) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_scrollableAreas && m_scrollableAreas->contains(scrollableArea);
 }
 
 void FrameView::scrollableAreaSetChanged()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (auto* page = frame().page()) {
         if (auto* scrollingCoordinator = page->scrollingCoordinator())
             scrollingCoordinator->frameViewEventTrackingRegionsChanged(*this);
@@ -4664,7 +4664,7 @@ void FrameView::scrollableAreaSetChanged()
 }
 
 void FrameView::sendScrollEvent()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     frame().eventHandler().sendScrollEvent();
     frame().eventHandler().dispatchFakeMouseMoveEventSoon();
 #if ENABLE(CSS_ANIMATIONS_LEVEL_2)
@@ -4673,7 +4673,7 @@ void FrameView::sendScrollEvent()
 }
 
 void FrameView::removeChild(Widget& widget)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (is<FrameView>(widget))
         removeScrollableArea(&downcast<FrameView>(widget));
 
@@ -4681,7 +4681,7 @@ void FrameView::removeChild(Widget& widget)
 }
 
 bool FrameView::wheelEvent(const PlatformWheelEvent& wheelEvent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Note that to allow for rubber-band over-scroll behavior, even non-scrollable views
     // should handle wheel events.
 #if !ENABLE(RUBBER_BANDING)
@@ -4721,7 +4721,7 @@ bool FrameView::wheelEvent(const PlatformWheelEvent& wheelEvent)
 
 
 bool FrameView::isVerticalDocument() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return true;
@@ -4730,7 +4730,7 @@ bool FrameView::isVerticalDocument() const
 }
 
 bool FrameView::isFlippedDocument() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderView* renderView = this->renderView();
     if (!renderView)
         return false;
@@ -4739,7 +4739,7 @@ bool FrameView::isFlippedDocument() const
 }
 
 void FrameView::notifyWidgetsInAllFrames(WidgetNotification notification)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto* frame = m_frame.ptr(); frame; frame = frame->tree().traverseNext(m_frame.ptr())) {
         if (FrameView* view = frame->view())
             view->notifyWidgets(notification);
@@ -4747,7 +4747,7 @@ void FrameView::notifyWidgetsInAllFrames(WidgetNotification notification)
 }
     
 AXObjectCache* FrameView::axObjectCache() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (frame().document())
         return frame().document()->existingAXObjectCache();
     return nullptr;
@@ -4755,7 +4755,7 @@ AXObjectCache* FrameView::axObjectCache() const
     
 #if PLATFORM(IOS)
 void FrameView::setCustomFixedPositionLayoutRect(const IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_useCustomFixedPositionLayoutRect && m_customFixedPositionLayoutRect == rect)
         return;
     m_useCustomFixedPositionLayoutRect = true;
@@ -4764,7 +4764,7 @@ void FrameView::setCustomFixedPositionLayoutRect(const IntRect& rect)
 }
 
 bool FrameView::updateFixedPositionLayoutRect()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_useCustomFixedPositionLayoutRect)
         return false;
 
@@ -4782,27 +4782,27 @@ bool FrameView::updateFixedPositionLayoutRect()
 }
 
 void FrameView::setCustomSizeForResizeEvent(IntSize customSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_useCustomSizeForResizeEvent = true;
     m_customSizeForResizeEvent = customSize;
     sendResizeEventIfNeeded();
 }
 
 void FrameView::setScrollVelocity(double horizontalVelocity, double verticalVelocity, double scaleChangeRate, double timestamp)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (TiledBacking* tiledBacking = this->tiledBacking())
         tiledBacking->setVelocity(VelocityData(horizontalVelocity, verticalVelocity, scaleChangeRate, timestamp));
 }
 #endif // PLATFORM(IOS)
 
 void FrameView::setScrollingPerformanceLoggingEnabled(bool flag)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (TiledBacking* tiledBacking = this->tiledBacking())
         tiledBacking->setScrollingPerformanceLoggingEnabled(flag);
 }
 
 void FrameView::didAddScrollbar(Scrollbar* scrollbar, ScrollbarOrientation orientation)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollableArea::didAddScrollbar(scrollbar, orientation);
     Page* page = frame().page();
     if (page && page->expectsWheelEventTriggers())
@@ -4812,7 +4812,7 @@ void FrameView::didAddScrollbar(Scrollbar* scrollbar, ScrollbarOrientation orien
 }
 
 void FrameView::willRemoveScrollbar(Scrollbar* scrollbar, ScrollbarOrientation orientation)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollableArea::willRemoveScrollbar(scrollbar, orientation);
     if (AXObjectCache* cache = axObjectCache()) {
         cache->remove(scrollbar);
@@ -4821,12 +4821,12 @@ void FrameView::willRemoveScrollbar(Scrollbar* scrollbar, ScrollbarOrientation o
 }
 
 void FrameView::addPaintPendingMilestones(LayoutMilestones milestones)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_milestonesPendingPaint |= milestones;
 }
 
 void FrameView::fireLayoutRelatedMilestonesIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutMilestones requestedMilestones = 0;
     LayoutMilestones milestonesAchieved = 0;
     Page* page = frame().page();
@@ -4855,7 +4855,7 @@ void FrameView::fireLayoutRelatedMilestonesIfNeeded()
 }
 
 void FrameView::firePaintRelatedMilestonesIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Page* page = frame().page();
     if (!page)
         return;
@@ -4880,7 +4880,7 @@ void FrameView::firePaintRelatedMilestonesIfNeeded()
 }
 
 void FrameView::setVisualUpdatesAllowedByClient(bool visualUpdatesAllowed)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_visualUpdatesAllowedByClient == visualUpdatesAllowed)
         return;
 
@@ -4890,7 +4890,7 @@ void FrameView::setVisualUpdatesAllowedByClient(bool visualUpdatesAllowed)
 }
     
 void FrameView::setScrollPinningBehavior(ScrollPinningBehavior pinning)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_scrollPinningBehavior = pinning;
     
     if (Page* page = frame().page()) {
@@ -4902,46 +4902,46 @@ void FrameView::setScrollPinningBehavior(ScrollPinningBehavior pinning)
 }
 
 ScrollBehaviorForFixedElements FrameView::scrollBehaviorForFixedElements() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frame().settings().backgroundShouldExtendBeyondPage() ? StickToViewportBounds : StickToDocumentBounds;
 }
 
 RenderView* FrameView::renderView() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frame().contentRenderer();
 }
 
 int FrameView::mapFromLayoutToCSSUnits(LayoutUnit value) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return value / (frame().pageZoomFactor() * frame().frameScaleFactor());
 }
 
 LayoutUnit FrameView::mapFromCSSToLayoutUnits(int value) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return value * frame().pageZoomFactor() * frame().frameScaleFactor();
 }
 
 void FrameView::didAddWidgetToRenderTree(Widget& widget)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_widgetsInRenderTree.contains(&widget));
     m_widgetsInRenderTree.add(&widget);
 }
 
 void FrameView::willRemoveWidgetFromRenderTree(Widget& widget)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_widgetsInRenderTree.contains(&widget));
     m_widgetsInRenderTree.remove(&widget);
 }
 
 static Vector<RefPtr<Widget>> collectAndProtectWidgets(const HashSet<Widget*>& set)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<RefPtr<Widget>> widgets;
     copyToVector(set, widgets);
     return widgets;
 }
 
 void FrameView::updateWidgetPositions()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // updateWidgetPosition() can possibly cause layout to be re-entered (via plug-ins running
     // scripts in response to NPP_SetWindow, for example), so we need to keep the Widgets
     // alive during enumeration.
@@ -4954,13 +4954,13 @@ void FrameView::updateWidgetPositions()
 }
 
 void FrameView::notifyWidgets(WidgetNotification notification)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& widget : collectAndProtectWidgets(m_widgetsInRenderTree))
         widget->notifyWidget(notification);
 }
 
 void FrameView::setViewExposedRect(Optional<FloatRect> viewExposedRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_viewExposedRect == viewExposedRect)
         return;
 
@@ -4987,7 +4987,7 @@ void FrameView::setViewExposedRect(Optional<FloatRect> viewExposedRect)
 }
     
 void FrameView::setViewportSizeForCSSViewportUnits(IntSize size)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_hasOverrideViewportSize && m_overrideViewportSize == size)
         return;
     
@@ -5002,7 +5002,7 @@ void FrameView::setViewportSizeForCSSViewportUnits(IntSize size)
 }
     
 IntSize FrameView::viewportSizeForCSSViewportUnits() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_hasOverrideViewportSize)
         return m_overrideViewportSize;
 
@@ -5015,7 +5015,7 @@ IntSize FrameView::viewportSizeForCSSViewportUnits() const
 }
 
 bool FrameView::shouldPlaceBlockDirectionScrollbarOnLeft() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderView() && renderView()->shouldPlaceBlockDirectionScrollbarOnLeft();
 }
     

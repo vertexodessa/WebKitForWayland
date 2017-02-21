@@ -112,7 +112,7 @@ public:
 
 
 Connection::SyncMessageState& Connection::SyncMessageState::singleton()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     static std::once_flag onceFlag;
     static LazyNeverDestroyed<SyncMessageState> syncMessageState;
 
@@ -124,11 +124,11 @@ Connection::SyncMessageState& Connection::SyncMessageState::singleton()
 }
 
 Connection::SyncMessageState::SyncMessageState()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 bool Connection::SyncMessageState::processIncomingMessage(Connection& connection, std::unique_ptr<Decoder>& message)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!message->shouldDispatchMessageWhenWaitingForSyncReply())
         return false;
 
@@ -152,7 +152,7 @@ bool Connection::SyncMessageState::processIncomingMessage(Connection& connection
 }
 
 void Connection::SyncMessageState::dispatchMessages(Connection* allowedConnection)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(RunLoop::isMain());
 
     Vector<ConnectionAndIncomingMessage> messagesToDispatchWhileWaitingForSyncReply;
@@ -186,7 +186,7 @@ void Connection::SyncMessageState::dispatchMessages(Connection* allowedConnectio
 }
 
 void Connection::SyncMessageState::dispatchMessageAndResetDidScheduleDispatchMessagesForConnection(Connection& connection)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     {
         std::lock_guard<Lock> lock(m_mutex);
         ASSERT(m_didScheduleDispatchMessagesWorkSet.contains(&connection));
@@ -197,12 +197,12 @@ void Connection::SyncMessageState::dispatchMessageAndResetDidScheduleDispatchMes
 }
 
 Ref<Connection> Connection::createServerConnection(Identifier identifier, Client& client)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return adoptRef(*new Connection(identifier, true, client));
 }
 
 Ref<Connection> Connection::createClientConnection(Identifier identifier, Client& client)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return adoptRef(*new Connection(identifier, false, client));
 }
 
@@ -221,7 +221,7 @@ Connection::Connection(Identifier identifier, bool isServer, Client& client)
     , m_didReceiveInvalidMessage(false)
     , m_waitingForMessage(nullptr)
     , m_shouldWaitForSyncReplies(true)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(RunLoop::isMain());
 
     platformInitialize(identifier);
@@ -233,26 +233,26 @@ Connection::Connection(Identifier identifier, bool isServer, Client& client)
 }
 
 Connection::~Connection()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!isValid());
 }
 
 void Connection::setOnlySendMessagesAsDispatchWhenWaitingForSyncReplyWhenProcessingSuchAMessage(bool flag)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_isConnected);
 
     m_onlySendMessagesAsDispatchWhenWaitingForSyncReplyWhenProcessingSuchAMessage = flag;
 }
 
 void Connection::setShouldExitOnSyncMessageSendFailure(bool shouldExitOnSyncMessageSendFailure)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_isConnected);
 
     m_shouldExitOnSyncMessageSendFailure = shouldExitOnSyncMessageSendFailure;
 }
 
 void Connection::addWorkQueueMessageReceiver(StringReference messageReceiverName, WorkQueue* workQueue, WorkQueueMessageReceiver* workQueueMessageReceiver)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(RunLoop::isMain());
 
     m_connectionQueue->dispatch([protectedThis = makeRef(*this), messageReceiverName = WTFMove(messageReceiverName), workQueue, workQueueMessageReceiver]() mutable {
@@ -263,7 +263,7 @@ void Connection::addWorkQueueMessageReceiver(StringReference messageReceiverName
 }
 
 void Connection::removeWorkQueueMessageReceiver(StringReference messageReceiverName)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(RunLoop::isMain());
 
     m_connectionQueue->dispatch([protectedThis = makeRef(*this), messageReceiverName = WTFMove(messageReceiverName)]() mutable {
@@ -273,7 +273,7 @@ void Connection::removeWorkQueueMessageReceiver(StringReference messageReceiverN
 }
 
 void Connection::dispatchWorkQueueMessageReceiverMessage(WorkQueueMessageReceiver& workQueueMessageReceiver, Decoder& decoder)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!decoder.isSyncMessage()) {
         workQueueMessageReceiver.didReceiveMessage(*this, decoder);
         return;
@@ -300,14 +300,14 @@ void Connection::dispatchWorkQueueMessageReceiverMessage(WorkQueueMessageReceive
 }
 
 void Connection::setDidCloseOnConnectionWorkQueueCallback(DidCloseOnConnectionWorkQueueCallback callback)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_isConnected);
 
     m_didCloseOnConnectionWorkQueueCallback = callback;    
 }
 
 void Connection::invalidate()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isValid()) {
         // Someone already called invalidate().
         return;
@@ -321,7 +321,7 @@ void Connection::invalidate()
 }
 
 void Connection::markCurrentlyDispatchedMessageAsInvalid()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This should only be called while processing a message.
     ASSERT(m_inDispatchMessageCount > 0);
 
@@ -329,7 +329,7 @@ void Connection::markCurrentlyDispatchedMessageAsInvalid()
 }
 
 std::unique_ptr<Encoder> Connection::createSyncMessageEncoder(StringReference messageReceiverName, StringReference messageName, uint64_t destinationID, uint64_t& syncRequestID)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto encoder = std::make_unique<Encoder>(messageReceiverName, messageName, destinationID);
     encoder->setIsSyncMessage(true);
 
@@ -341,7 +341,7 @@ std::unique_ptr<Encoder> Connection::createSyncMessageEncoder(StringReference me
 }
 
 bool Connection::sendMessage(std::unique_ptr<Encoder> encoder, unsigned messageSendFlags)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isValid())
         return false;
 
@@ -371,17 +371,17 @@ bool Connection::sendMessage(std::unique_ptr<Encoder> encoder, unsigned messageS
 }
 
 bool Connection::sendSyncReply(std::unique_ptr<Encoder> encoder)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return sendMessage(WTFMove(encoder));
 }
 
 std::chrono::milliseconds Connection::timeoutRespectingIgnoreTimeoutsForTesting(std::chrono::milliseconds timeout) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_ignoreTimeoutsForTesting ? std::chrono::milliseconds::max() : timeout;
 }
 
 std::unique_ptr<Decoder> Connection::waitForMessage(StringReference messageReceiverName, StringReference messageName, uint64_t destinationID, std::chrono::milliseconds timeout, unsigned waitForMessageFlags)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(RunLoop::isMain());
 
     timeout = timeoutRespectingIgnoreTimeoutsForTesting(timeout);
@@ -452,7 +452,7 @@ std::unique_ptr<Decoder> Connection::waitForMessage(StringReference messageRecei
 }
 
 std::unique_ptr<Decoder> Connection::sendSyncMessage(uint64_t syncRequestID, std::unique_ptr<Encoder> encoder, std::chrono::milliseconds timeout, unsigned syncSendFlags)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!RunLoop::isMain()) {
         // No flags are supported for synchronous messages sent from secondary threads.
         ASSERT(!syncSendFlags);
@@ -501,7 +501,7 @@ std::unique_ptr<Decoder> Connection::sendSyncMessage(uint64_t syncRequestID, std
 }
 
 std::unique_ptr<Decoder> Connection::sendSyncMessageFromSecondaryThread(uint64_t syncRequestID, std::unique_ptr<Encoder> encoder, std::chrono::milliseconds timeout)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!RunLoop::isMain());
 
     if (!isValid())
@@ -535,7 +535,7 @@ std::unique_ptr<Decoder> Connection::sendSyncMessageFromSecondaryThread(uint64_t
 }
 
 std::unique_ptr<Decoder> Connection::waitForSyncReply(uint64_t syncRequestID, std::chrono::milliseconds timeout, unsigned syncSendFlags)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     timeout = timeoutRespectingIgnoreTimeoutsForTesting(timeout);
     double absoluteTime = currentTime() + (timeout.count() / 1000.0);
 
@@ -585,7 +585,7 @@ std::unique_ptr<Decoder> Connection::waitForSyncReply(uint64_t syncRequestID, st
 }
 
 void Connection::processIncomingSyncReply(std::unique_ptr<Decoder> decoder)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     LockHolder locker(m_syncReplyStateMutex);
 
     // Go through the stack of sync requests that have pending replies and see which one
@@ -622,7 +622,7 @@ void Connection::processIncomingSyncReply(std::unique_ptr<Decoder> decoder)
 }
 
 void Connection::processIncomingMessage(std::unique_ptr<Decoder> message)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!message->messageReceiverName().isEmpty());
     ASSERT(!message->messageName().isEmpty());
 
@@ -697,7 +697,7 @@ void Connection::processIncomingMessage(std::unique_ptr<Decoder> message)
 }
 
 uint64_t Connection::installIncomingSyncMessageCallback(std::function<void ()> callback)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     std::lock_guard<Lock> lock(m_incomingSyncMessageCallbackMutex);
 
     m_nextIncomingSyncMessageCallbackID++;
@@ -711,13 +711,13 @@ uint64_t Connection::installIncomingSyncMessageCallback(std::function<void ()> c
 }
 
 void Connection::uninstallIncomingSyncMessageCallback(uint64_t callbackID)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     std::lock_guard<Lock> lock(m_incomingSyncMessageCallbackMutex);
     m_incomingSyncMessageCallbacks.remove(callbackID);
 }
 
 bool Connection::hasIncomingSyncMessage()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     std::lock_guard<Lock> lock(m_incomingMessagesMutex);
 
     for (auto& message : m_incomingMessages) {
@@ -729,14 +729,14 @@ bool Connection::hasIncomingSyncMessage()
 }
 
 void Connection::postConnectionDidCloseOnConnectionWorkQueue()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_connectionQueue->dispatch([protectedThis = makeRef(*this)]() mutable {
         protectedThis->connectionDidClose();
     });
 }
 
 void Connection::connectionDidClose()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // The connection is now invalid.
     platformInvalidate();
 
@@ -780,12 +780,12 @@ void Connection::connectionDidClose()
 }
 
 bool Connection::canSendOutgoingMessages() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_isConnected && platformCanSendOutgoingMessages();
 }
 
 void Connection::sendOutgoingMessages()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!canSendOutgoingMessages())
         return;
 
@@ -805,7 +805,7 @@ void Connection::sendOutgoingMessages()
 }
 
 void Connection::dispatchSyncMessage(Decoder& decoder)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(decoder.isSyncMessage());
 
     uint64_t syncRequestID = 0;
@@ -840,7 +840,7 @@ void Connection::dispatchSyncMessage(Decoder& decoder)
 }
 
 void Connection::dispatchDidReceiveInvalidMessage(const CString& messageReceiverNameString, const CString& messageNameString)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(RunLoop::isMain());
 
     if (!m_client)
@@ -850,7 +850,7 @@ void Connection::dispatchDidReceiveInvalidMessage(const CString& messageReceiver
 }
 
 void Connection::didFailToSendSyncMessage()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_shouldExitOnSyncMessageSendFailure)
         return;
 
@@ -858,7 +858,7 @@ void Connection::didFailToSendSyncMessage()
 }
 
 void Connection::enqueueIncomingMessage(std::unique_ptr<Decoder> incomingMessage)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     {
         std::lock_guard<Lock> lock(m_incomingMessagesMutex);
         m_incomingMessages.append(WTFMove(incomingMessage));
@@ -870,12 +870,12 @@ void Connection::enqueueIncomingMessage(std::unique_ptr<Decoder> incomingMessage
 }
 
 void Connection::dispatchMessage(Decoder& decoder)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_client->didReceiveMessage(*this, decoder);
 }
 
 void Connection::dispatchMessage(std::unique_ptr<Decoder> message)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_client)
         return;
 
@@ -918,7 +918,7 @@ void Connection::dispatchMessage(std::unique_ptr<Decoder> message)
 }
 
 void Connection::dispatchOneMessage()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     std::unique_ptr<Decoder> message;
 
     {
@@ -933,7 +933,7 @@ void Connection::dispatchOneMessage()
 }
 
 void Connection::wakeUpRunLoop()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     RunLoop::main().wakeUp();
 }
 

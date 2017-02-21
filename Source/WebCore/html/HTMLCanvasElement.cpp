@@ -91,22 +91,22 @@ static size_t activePixelMemory = 0;
 HTMLCanvasElement::HTMLCanvasElement(const QualifiedName& tagName, Document& document)
     : HTMLElement(tagName, document)
     , m_size(defaultWidth, defaultHeight)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasTagName(canvasTag));
 }
 
 Ref<HTMLCanvasElement> HTMLCanvasElement::create(Document& document)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return adoptRef(*new HTMLCanvasElement(canvasTag, document));
 }
 
 Ref<HTMLCanvasElement> HTMLCanvasElement::create(const QualifiedName& tagName, Document& document)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return adoptRef(*new HTMLCanvasElement(tagName, document));
 }
 
 static void removeFromActivePixelMemory(size_t pixelsReleased)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!pixelsReleased)
         return;
 
@@ -117,7 +117,7 @@ static void removeFromActivePixelMemory(size_t pixelsReleased)
 }
     
 HTMLCanvasElement::~HTMLCanvasElement()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& observer : m_observers)
         observer->canvasDestroyed(*this);
 
@@ -127,14 +127,14 @@ HTMLCanvasElement::~HTMLCanvasElement()
 }
 
 void HTMLCanvasElement::parseAttribute(const QualifiedName& name, const AtomicString& value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (name == widthAttr || name == heightAttr)
         reset();
     HTMLElement::parseAttribute(name, value);
 }
 
 RenderPtr<RenderElement> HTMLCanvasElement::createElementRenderer(RenderStyle&& style, const RenderTreePosition& insertionPosition)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame* frame = document().frame();
     if (frame && frame->script().canExecuteScripts(NotAboutToExecuteScript))
         return createRenderer<RenderHTMLCanvas>(*this, WTFMove(style));
@@ -142,38 +142,38 @@ RenderPtr<RenderElement> HTMLCanvasElement::createElementRenderer(RenderStyle&& 
 }
 
 bool HTMLCanvasElement::canContainRangeEndPoint() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 
 bool HTMLCanvasElement::canStartSelection() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 
 void HTMLCanvasElement::addObserver(CanvasObserver& observer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_observers.add(&observer);
 }
 
 void HTMLCanvasElement::removeObserver(CanvasObserver& observer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_observers.remove(&observer);
 }
 
 void HTMLCanvasElement::setHeight(unsigned value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setAttributeWithoutSynchronization(heightAttr, AtomicString::number(limitToOnlyHTMLNonNegative(value, defaultHeight)));
 }
 
 void HTMLCanvasElement::setWidth(unsigned value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setAttributeWithoutSynchronization(widthAttr, AtomicString::number(limitToOnlyHTMLNonNegative(value, defaultWidth)));
 }
 
 #if ENABLE(WEBGL)
 static bool requiresAcceleratedCompositingForWebGL()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(GTK) || PLATFORM(EFL)
     return false;
 #else
@@ -182,7 +182,7 @@ static bool requiresAcceleratedCompositingForWebGL()
 
 }
 static bool shouldEnableWebGL(Settings* settings)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!settings)
         return false;
 
@@ -197,7 +197,7 @@ static bool shouldEnableWebGL(Settings* settings)
 #endif
 
 static inline size_t maxActivePixelMemory()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static size_t maxPixelMemory;
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [] {
@@ -207,7 +207,7 @@ static inline size_t maxActivePixelMemory()
 }
 
 CanvasRenderingContext* HTMLCanvasElement::getContext(const String& type, CanvasContextAttributes* attrs)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (is2dType(type)) {
         if (m_context && !m_context->is2d())
             return nullptr;
@@ -264,7 +264,7 @@ CanvasRenderingContext* HTMLCanvasElement::getContext(const String& type, Canvas
 }
     
 bool HTMLCanvasElement::probablySupportsContext(const String& type, CanvasContextAttributes*)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: Provide implementation that accounts for attributes.
     // https://bugs.webkit.org/show_bug.cgi?id=117093
     if (is2dType(type))
@@ -280,13 +280,13 @@ bool HTMLCanvasElement::probablySupportsContext(const String& type, CanvasContex
 }
 
 bool HTMLCanvasElement::is2dType(const String& type)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return type == "2d";
 }
 
 #if ENABLE(WEBGL)
 bool HTMLCanvasElement::is3dType(const String& type)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Retain support for the legacy "webkit-3d" name.
     return type == "webgl" || type == "experimental-webgl"
 #if ENABLE(WEBGL2)
@@ -297,7 +297,7 @@ bool HTMLCanvasElement::is3dType(const String& type)
 #endif
 
 void HTMLCanvasElement::didDraw(const FloatRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     clearCopiedImage();
 
     FloatRect dirtyRect = rect;
@@ -318,13 +318,13 @@ void HTMLCanvasElement::didDraw(const FloatRect& rect)
 }
 
 void HTMLCanvasElement::notifyObserversCanvasChanged(const FloatRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& observer : m_observers)
         observer->canvasChanged(*this, rect);
 }
 
 void HTMLCanvasElement::reset()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_ignoreReset)
         return;
 
@@ -378,7 +378,7 @@ void HTMLCanvasElement::reset()
 }
 
 bool HTMLCanvasElement::paintsIntoCanvasBuffer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_context);
 #if USE(IOSURFACE_CANVAS_BACKING_STORE)
     if (m_context->is2d())
@@ -396,7 +396,7 @@ bool HTMLCanvasElement::paintsIntoCanvasBuffer() const
 
 
 void HTMLCanvasElement::paint(GraphicsContext& context, const LayoutRect& r)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Clear the dirty rect
     m_dirtyRect = FloatRect();
 
@@ -432,19 +432,19 @@ void HTMLCanvasElement::paint(GraphicsContext& context, const LayoutRect& r)
 
 #if ENABLE(WEBGL)
 bool HTMLCanvasElement::is3D() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_context && m_context->is3d();
 }
 #endif
 
 void HTMLCanvasElement::makeRenderingResultsAvailable()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_context)
         m_context->paintRenderingResultsToCanvas();
 }
 
 void HTMLCanvasElement::makePresentationCopy()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_presentedImage) {
         // The buffer contains the last presented data, so save a copy of it.
         m_presentedImage = buffer()->copyImage(CopyBackingStore, Unscaled);
@@ -452,18 +452,18 @@ void HTMLCanvasElement::makePresentationCopy()
 }
 
 void HTMLCanvasElement::clearPresentationCopy()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_presentedImage = nullptr;
 }
 
 void HTMLCanvasElement::releaseImageBufferAndContext()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_contextStateSaver = nullptr;
     setImageBuffer(nullptr);
 }
     
 void HTMLCanvasElement::setSurfaceSize(const IntSize& size)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_size = size;
     m_hasCreatedImageBuffer = false;
     releaseImageBufferAndContext();
@@ -471,14 +471,14 @@ void HTMLCanvasElement::setSurfaceSize(const IntSize& size)
 }
 
 String HTMLCanvasElement::toEncodingMimeType(const String& mimeType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!MIMETypeRegistry::isSupportedImageMIMETypeForEncoding(mimeType))
         return ASCIILiteral("image/png");
     return mimeType.convertToASCIILowercase();
 }
 
 String HTMLCanvasElement::toDataURL(const String& mimeType, const double* quality, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_originClean) {
         ec = SECURITY_ERR;
         return String();
@@ -504,7 +504,7 @@ String HTMLCanvasElement::toDataURL(const String& mimeType, const double* qualit
 }
 
 RefPtr<ImageData> HTMLCanvasElement::getImageData()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(WEBGL)
     if (!is3D())
         return nullptr;
@@ -518,7 +518,7 @@ RefPtr<ImageData> HTMLCanvasElement::getImageData()
 }
 
 FloatRect HTMLCanvasElement::convertLogicalToDevice(const FloatRect& logicalRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     FloatRect deviceRect(logicalRect);
 
     float x = floorf(deviceRect.x());
@@ -534,26 +534,26 @@ FloatRect HTMLCanvasElement::convertLogicalToDevice(const FloatRect& logicalRect
 }
 
 FloatSize HTMLCanvasElement::convertLogicalToDevice(const FloatSize& logicalSize) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     float width = ceilf(logicalSize.width());
     float height = ceilf(logicalSize.height());
     return FloatSize(width, height);
 }
 
 FloatSize HTMLCanvasElement::convertDeviceToLogical(const FloatSize& deviceSize) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     float width = ceilf(deviceSize.width());
     float height = ceilf(deviceSize.height());
     return FloatSize(width, height);
 }
 
 SecurityOrigin* HTMLCanvasElement::securityOrigin() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return document().securityOrigin();
 }
 
 bool HTMLCanvasElement::shouldAccelerate(const IntSize& size) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if USE(IOSURFACE_CANVAS_BACKING_STORE)
     UNUSED_PARAM(size);
     return document().settings() && document().settings()->canvasUsesAcceleratedDrawing();
@@ -577,21 +577,21 @@ bool HTMLCanvasElement::shouldAccelerate(const IntSize& size) const
 }
 
 size_t HTMLCanvasElement::memoryCost() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_imageBuffer)
         return 0;
     return 4 * m_imageBuffer->internalSize().width() * m_imageBuffer->internalSize().height();
 }
 
 size_t HTMLCanvasElement::externalMemoryCost() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_imageBuffer)
         return 0;
     return 4 * m_imageBuffer->internalSize().width() * m_imageBuffer->internalSize().height();
 }
 
 void HTMLCanvasElement::setUsesDisplayListDrawing(bool usesDisplayListDrawing)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (usesDisplayListDrawing == m_usesDisplayListDrawing)
         return;
     
@@ -602,7 +602,7 @@ void HTMLCanvasElement::setUsesDisplayListDrawing(bool usesDisplayListDrawing)
 }
 
 void HTMLCanvasElement::setTracksDisplayListReplay(bool tracksDisplayListReplay)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (tracksDisplayListReplay == m_tracksDisplayListReplay)
         return;
 
@@ -613,7 +613,7 @@ void HTMLCanvasElement::setTracksDisplayListReplay(bool tracksDisplayListReplay)
 }
 
 String HTMLCanvasElement::displayListAsText(DisplayList::AsTextFlags flags) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_context && is<CanvasRenderingContext2D>(*m_context))
         return downcast<CanvasRenderingContext2D>(*m_context).displayListAsText(flags);
 
@@ -621,7 +621,7 @@ String HTMLCanvasElement::displayListAsText(DisplayList::AsTextFlags flags) cons
 }
 
 String HTMLCanvasElement::replayDisplayListAsText(DisplayList::AsTextFlags flags) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_context && is<CanvasRenderingContext2D>(*m_context))
         return downcast<CanvasRenderingContext2D>(*m_context).replayDisplayListAsText(flags);
 
@@ -629,7 +629,7 @@ String HTMLCanvasElement::replayDisplayListAsText(DisplayList::AsTextFlags flags
 }
 
 void HTMLCanvasElement::createImageBuffer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_imageBuffer);
 
     m_hasCreatedImageBuffer = true;
@@ -687,7 +687,7 @@ void HTMLCanvasElement::createImageBuffer() const
 }
 
 void HTMLCanvasElement::setImageBuffer(std::unique_ptr<ImageBuffer> buffer) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     removeFromActivePixelMemory(memoryCost());
 
     m_imageBuffer = WTFMove(buffer);
@@ -696,12 +696,12 @@ void HTMLCanvasElement::setImageBuffer(std::unique_ptr<ImageBuffer> buffer) cons
 }
 
 GraphicsContext* HTMLCanvasElement::drawingContext() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return buffer() ? &m_imageBuffer->context() : nullptr;
 }
 
 GraphicsContext* HTMLCanvasElement::existingDrawingContext() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_hasCreatedImageBuffer)
         return nullptr;
 
@@ -709,14 +709,14 @@ GraphicsContext* HTMLCanvasElement::existingDrawingContext() const
 }
 
 ImageBuffer* HTMLCanvasElement::buffer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_hasCreatedImageBuffer)
         createImageBuffer();
     return m_imageBuffer.get();
 }
 
 Image* HTMLCanvasElement::copiedImage() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_copiedImage && buffer()) {
         if (m_context)
             m_context->paintRenderingResultsToCanvas();
@@ -726,7 +726,7 @@ Image* HTMLCanvasElement::copiedImage() const
 }
 
 void HTMLCanvasElement::clearImageBuffer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_hasCreatedImageBuffer);
     ASSERT(!m_didClearImageBuffer);
     ASSERT(m_context);
@@ -741,13 +741,13 @@ void HTMLCanvasElement::clearImageBuffer() const
 }
 
 void HTMLCanvasElement::clearCopiedImage()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_copiedImage = nullptr;
     m_didClearImageBuffer = false;
 }
 
 AffineTransform HTMLCanvasElement::baseTransform() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_hasCreatedImageBuffer);
     FloatSize unscaledSize = size();
     FloatSize deviceSize = convertLogicalToDevice(unscaledSize);

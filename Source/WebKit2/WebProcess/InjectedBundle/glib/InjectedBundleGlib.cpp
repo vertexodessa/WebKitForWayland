@@ -42,10 +42,9 @@ using namespace WebCore;
 namespace WebKit {
 
 bool InjectedBundle::initialize(const WebProcessCreationParameters&, API::Object* initializationUserData)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     { 
-        WTF_AUTO_SCOPE0("MODULE_OPEN");
-
+        
         m_platformBundle = dlopen (fileSystemRepresentation(m_path).data(),
                                    RTLD_LAZY);
 
@@ -71,11 +70,11 @@ bool InjectedBundle::initialize(const WebProcessCreationParameters&, API::Object
 }
 
 void InjectedBundle::setBundleParameter(WTF::String const&, IPC::DataReference const&)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 void InjectedBundle::setBundleParameters(const IPC::DataReference&)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 } // namespace WebKit

@@ -45,22 +45,22 @@ namespace XPath {
 Step::Step(Axis axis, NodeTest nodeTest)
     : m_axis(axis)
     , m_nodeTest(WTFMove(nodeTest))
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 Step::Step(Axis axis, NodeTest nodeTest, Vector<std::unique_ptr<Expression>> predicates)
     : m_axis(axis)
     , m_nodeTest(WTFMove(nodeTest))
     , m_predicates(WTFMove(predicates))
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 Step::~Step()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 void Step::optimize()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Evaluate predicates as part of node test if possible to avoid building unnecessary NodeSets.
     // E.g., there is no need to build a set of all "foo" nodes to evaluate "foo[@bar]", we can check the predicate while enumerating.
     // This optimization can be applied to predicates that are not context node list sensitive, or to first predicate that is only context position sensitive, e.g. foo[position() mod 2 = 0].
@@ -75,7 +75,7 @@ void Step::optimize()
 }
 
 void optimizeStepPair(Step& first, Step& second, bool& dropSecondStep)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     dropSecondStep = false;
 
     if (first.m_axis != Step::DescendantOrSelfAxis)
@@ -108,7 +108,7 @@ void optimizeStepPair(Step& first, Step& second, bool& dropSecondStep)
 }
 
 bool Step::predicatesAreContextListInsensitive() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& predicate : m_predicates) {
         if (predicateIsContextPositionSensitive(*predicate) || predicate->isContextSizeSensitive())
             return false;
@@ -123,7 +123,7 @@ bool Step::predicatesAreContextListInsensitive() const
 }
 
 void Step::evaluate(Node& context, NodeSet& nodes) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     EvaluationContext& evaluationContext = Expression::evaluationContext();
     evaluationContext.position = 0;
 
@@ -151,7 +151,7 @@ void Step::evaluate(Node& context, NodeSet& nodes) const
 
 #if !ASSERT_DISABLED
 static inline Node::NodeType primaryNodeType(Step::Axis axis)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (axis) {
         case Step::AttributeAxis:
             return Node::ATTRIBUTE_NODE;
@@ -163,7 +163,7 @@ static inline Node::NodeType primaryNodeType(Step::Axis axis)
 
 // Evaluate NodeTest without considering merged predicates.
 inline bool nodeMatchesBasicTest(Node& node, Step::Axis axis, const Step::NodeTest& nodeTest)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (nodeTest.m_kind) {
         case Step::NodeTest::TextNodeTest:
             return node.nodeType() == Node::TEXT_NODE || node.nodeType() == Node::CDATA_SECTION_NODE;
@@ -219,7 +219,7 @@ inline bool nodeMatchesBasicTest(Node& node, Step::Axis axis, const Step::NodeTe
 }
 
 inline bool nodeMatches(Node& node, Step::Axis axis, const Step::NodeTest& nodeTest)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!nodeMatchesBasicTest(node, axis, nodeTest))
         return false;
 
@@ -240,7 +240,7 @@ inline bool nodeMatches(Node& node, Step::Axis axis, const Step::NodeTest& nodeT
 
 // Result nodes are ordered in axis order. Node test (including merged predicates) is applied.
 void Step::nodesInAxis(Node& context, NodeSet& nodes) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(nodes.isEmpty());
     switch (m_axis) {
         case ChildAxis:

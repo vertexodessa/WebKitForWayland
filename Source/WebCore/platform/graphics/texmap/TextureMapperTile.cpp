@@ -30,7 +30,7 @@ namespace WebCore {
 class GraphicsLayer;
 
 void TextureMapperTile::updateContents(TextureMapper& textureMapper, Image* image, const IntRect& dirtyRect, BitmapTexture::UpdateContentsFlag updateContentsFlag)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect targetRect = enclosingIntRect(m_rect);
     targetRect.intersect(dirtyRect);
     if (targetRect.isEmpty())
@@ -51,7 +51,7 @@ void TextureMapperTile::updateContents(TextureMapper& textureMapper, Image* imag
 }
 
 void TextureMapperTile::updateContents(TextureMapper& textureMapper, GraphicsLayer* sourceLayer, const IntRect& dirtyRect, BitmapTexture::UpdateContentsFlag updateContentsFlag, float scale)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect targetRect = enclosingIntRect(m_rect);
     targetRect.intersect(dirtyRect);
     if (targetRect.isEmpty())
@@ -70,7 +70,7 @@ void TextureMapperTile::updateContents(TextureMapper& textureMapper, GraphicsLay
 }
 
 void TextureMapperTile::paint(TextureMapper& textureMapper, const TransformationMatrix& transform, float opacity, const unsigned exposedEdges)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (texture().get())
         textureMapper.drawTexture(*texture().get(), rect(), transform, opacity, exposedEdges);
 }

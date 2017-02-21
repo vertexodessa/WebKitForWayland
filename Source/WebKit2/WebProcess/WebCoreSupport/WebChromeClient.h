@@ -43,7 +43,7 @@ public:
         : m_cachedMainFrameHasHorizontalScrollbar(false)
         , m_cachedMainFrameHasVerticalScrollbar(false)
         , m_page(page)
-    { WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+    {    AUTO_EASY_THREAD(); EASY_FUNCTION();
     }
     
     WebPage* page() const { return m_page; }

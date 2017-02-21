@@ -26,6 +26,7 @@
 #ifndef WTF_Assertions_h
 #define WTF_Assertions_h
 
+#include <easy/profiler.h>
 #include <wtf/Platform.h>
 
 /*

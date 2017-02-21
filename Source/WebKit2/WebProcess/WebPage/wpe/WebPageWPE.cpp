@@ -92,7 +92,6 @@ PassRefPtr<SharedBuffer> WebPage::cachedResponseDataForURL(const URL&)
 
 String WebPage::platformUserAgent(const URL&) const
 {
-    WTF_AUTO_THREAD_ENABLE(); WTF_SCOPE0(__FUNCTION__);
     notImplemented();
     return String();
 }

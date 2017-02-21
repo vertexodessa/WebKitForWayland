@@ -36,7 +36,7 @@
 namespace WebCore {
 
 void BitmapTexture::updateContents(TextureMapper& textureMapper, GraphicsLayer* sourceLayer, const IntRect& targetRect, const IntPoint& offset, UpdateContentsFlag updateContentsFlag, float scale)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Making an unconditionally unaccelerated buffer here is OK because this code
     // isn't used by any platforms that respect the accelerated bit.
     std::unique_ptr<ImageBuffer> imageBuffer = ImageBuffer::create(targetRect.size(), Unaccelerated);

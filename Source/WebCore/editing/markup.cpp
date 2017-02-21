@@ -100,7 +100,7 @@ private:
 };
 
 static void completeURLs(DocumentFragment* fragment, const String& baseURL)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<AttributeChange> changes;
 
     URL parsedBaseURL(ParsedURLString, baseURL);
@@ -179,11 +179,11 @@ inline StyledMarkupAccumulator::StyledMarkupAccumulator(Vector<Node*>* nodes, EA
     , m_needRelativeStyleWrapper(false)
     , m_needsPositionStyleConversion(needsPositionStyleConversion)
     , m_needClearingDiv(false)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 void StyledMarkupAccumulator::wrapWithNode(Node& node, bool convertBlocksToInlines, RangeFullySelectsNode rangeFullySelectsNode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     StringBuilder markup;
     if (is<Element>(node))
         appendElement(markup, downcast<Element>(node), convertBlocksToInlines && isBlock(&node), rangeFullySelectsNode);
@@ -196,7 +196,7 @@ void StyledMarkupAccumulator::wrapWithNode(Node& node, bool convertBlocksToInlin
 }
 
 void StyledMarkupAccumulator::wrapWithStyleNode(StyleProperties* style, Document& document, bool isBlock)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     StringBuilder openTag;
     appendStyleNodeOpenTag(openTag, style, document, isBlock);
     m_reversedPrecedingMarkup.append(openTag.toString());
@@ -204,7 +204,7 @@ void StyledMarkupAccumulator::wrapWithStyleNode(StyleProperties* style, Document
 }
 
 void StyledMarkupAccumulator::appendStyleNodeOpenTag(StringBuilder& out, StyleProperties* style, Document& document, bool isBlock)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // wrappingStyleForSerialization should have removed -webkit-text-decorations-in-effect
     ASSERT(propertyMissingOrEqualToNone(style, CSSPropertyWebkitTextDecorationsInEffect));
     if (isBlock)
@@ -216,14 +216,14 @@ void StyledMarkupAccumulator::appendStyleNodeOpenTag(StringBuilder& out, StylePr
 }
 
 const String& StyledMarkupAccumulator::styleNodeCloseTag(bool isBlock)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static NeverDestroyed<const String> divClose(ASCIILiteral("</div>"));
     static NeverDestroyed<const String> styleSpanClose(ASCIILiteral("</span>"));
     return isBlock ? divClose : styleSpanClose;
 }
 
 String StyledMarkupAccumulator::takeResults()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     StringBuilder result;
     result.reserveCapacity(totalLength(m_reversedPrecedingMarkup) + length());
 
@@ -237,7 +237,7 @@ String StyledMarkupAccumulator::takeResults()
 }
 
 void StyledMarkupAccumulator::appendText(StringBuilder& out, const Text& text)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);    
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();    
     const bool parentIsTextarea = is<HTMLTextAreaElement>(text.parentElement());
     const bool wrappingSpan = shouldApplyWrappingStyle(text) && !parentIsTextarea;
     if (wrappingSpan) {
@@ -266,7 +266,7 @@ void StyledMarkupAccumulator::appendText(StringBuilder& out, const Text& text)
 }
     
 String StyledMarkupAccumulator::renderedText(const Node& node, const Range* range)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!is<Text>(node))
         return String();
 
@@ -288,7 +288,7 @@ String StyledMarkupAccumulator::renderedText(const Node& node, const Range* rang
 }
 
 String StyledMarkupAccumulator::stringValueForRange(const Node& node, const Range* range)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!range)
         return node.nodeValue();
 
@@ -301,7 +301,7 @@ String StyledMarkupAccumulator::stringValueForRange(const Node& node, const Rang
 }
 
 void StyledMarkupAccumulator::appendCustomAttributes(StringBuilder& out, const Element&element, Namespaces* namespaces)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(ATTACHMENT_ELEMENT)
     if (!is<HTMLAttachmentElement>(element))
         return;
@@ -317,7 +317,7 @@ void StyledMarkupAccumulator::appendCustomAttributes(StringBuilder& out, const E
 }
 
 void StyledMarkupAccumulator::appendElement(StringBuilder& out, const Element& element, bool addDisplayInline, RangeFullySelectsNode rangeFullySelectsNode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const bool documentIsHTML = element.document().isHTMLDocument();
     appendOpenTag(out, element, 0);
 
@@ -376,7 +376,7 @@ void StyledMarkupAccumulator::appendElement(StringBuilder& out, const Element& e
 }
 
 Node* StyledMarkupAccumulator::serializeNodes(Node* startNode, Node* pastEnd)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_highestNodeToBeSerialized) {
         Node* lastClosed = traverseNodesForSerialization(startNode, pastEnd, DoNotEmitString);
         m_highestNodeToBeSerialized = lastClosed;
@@ -389,7 +389,7 @@ Node* StyledMarkupAccumulator::serializeNodes(Node* startNode, Node* pastEnd)
 }
 
 Node* StyledMarkupAccumulator::traverseNodesForSerialization(Node* startNode, Node* pastEnd, NodeTraversalMode traversalMode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const bool shouldEmit = traversalMode == EmitString;
     Vector<Node*> ancestorsToClose;
     Node* next;
@@ -469,7 +469,7 @@ Node* StyledMarkupAccumulator::traverseNodesForSerialization(Node* startNode, No
 }
 
 static Node* ancestorToRetainStructureAndAppearanceForBlock(Node* commonAncestorBlock)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!commonAncestorBlock)
         return nullptr;
 
@@ -488,12 +488,12 @@ static Node* ancestorToRetainStructureAndAppearanceForBlock(Node* commonAncestor
 }
 
 static inline Node* ancestorToRetainStructureAndAppearance(Node* commonAncestor)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return ancestorToRetainStructureAndAppearanceForBlock(enclosingBlock(commonAncestor));
 }
 
 static bool propertyMissingOrEqualToNone(StyleProperties* style, CSSPropertyID propertyID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!style)
         return false;
     RefPtr<CSSValue> value = style->getPropertyCSSValue(propertyID);
@@ -505,7 +505,7 @@ static bool propertyMissingOrEqualToNone(StyleProperties* style, CSSPropertyID p
 }
 
 static bool needInterchangeNewlineAfter(const VisiblePosition& v)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     VisiblePosition next = v.next();
     Node* upstreamNode = next.deepEquivalent().upstream().deprecatedNode();
     Node* downstreamNode = v.deepEquivalent().downstream().deprecatedNode();
@@ -514,7 +514,7 @@ static bool needInterchangeNewlineAfter(const VisiblePosition& v)
 }
 
 static RefPtr<EditingStyle> styleFromMatchedRulesAndInlineDecl(const Node* node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!node->isHTMLElement())
         return nullptr;
 
@@ -527,13 +527,13 @@ static RefPtr<EditingStyle> styleFromMatchedRulesAndInlineDecl(const Node* node)
 }
 
 static bool isElementPresentational(const Node* node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return node->hasTagName(uTag) || node->hasTagName(sTag) || node->hasTagName(strikeTag)
         || node->hasTagName(iTag) || node->hasTagName(emTag) || node->hasTagName(bTag) || node->hasTagName(strongTag);
 }
 
 static Node* highestAncestorToWrapMarkup(const Range* range, EAnnotateForInterchange shouldAnnotate)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* commonAncestor = range->commonAncestorContainer();
     ASSERT(commonAncestor);
     Node* specialCommonAncestor = nullptr;
@@ -581,7 +581,7 @@ static Node* highestAncestorToWrapMarkup(const Range* range, EAnnotateForInterch
 // FIXME: At least, annotation and style info should probably not be included in range.markupString()
 static String createMarkupInternal(Document& document, const Range& range, Vector<Node*>* nodes,
     EAnnotateForInterchange shouldAnnotate, bool convertBlocksToInlines, EAbsoluteURLs shouldResolveURLs)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static NeverDestroyed<const String> interchangeNewlineString(ASCIILiteral("<br class=\"" AppleInterchangeNewline "\">"));
 
     bool collapsed = range.collapsed();
@@ -673,12 +673,12 @@ static String createMarkupInternal(Document& document, const Range& range, Vecto
 }
 
 String createMarkup(const Range& range, Vector<Node*>* nodes, EAnnotateForInterchange shouldAnnotate, bool convertBlocksToInlines, EAbsoluteURLs shouldResolveURLs)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return createMarkupInternal(range.ownerDocument(), range, nodes, shouldAnnotate, convertBlocksToInlines, shouldResolveURLs);
 }
 
 Ref<DocumentFragment> createFragmentFromMarkup(Document& document, const String& markup, const String& baseURL, ParserContentPolicy parserContentPolicy)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We use a fake body element here to trick the HTML parser to using the InBody insertion mode.
     auto fakeBody = HTMLBodyElement::create(document);
     auto fragment = DocumentFragment::create(document);
@@ -703,13 +703,13 @@ Ref<DocumentFragment> createFragmentFromMarkup(Document& document, const String&
 }
 
 String createMarkup(const Node& node, EChildrenOnly childrenOnly, Vector<Node*>* nodes, EAbsoluteURLs shouldResolveURLs, Vector<QualifiedName>* tagNamesToSkip, EFragmentSerialization fragmentSerialization)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     MarkupAccumulator accumulator(nodes, shouldResolveURLs, 0, fragmentSerialization);
     return accumulator.serializeNodes(const_cast<Node&>(node), childrenOnly, tagNamesToSkip);
 }
 
 static void fillContainerFromString(ContainerNode& paragraph, const String& string)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Document& document = paragraph.document();
 
     if (string.isEmpty()) {
@@ -749,7 +749,7 @@ static void fillContainerFromString(ContainerNode& paragraph, const String& stri
 }
 
 bool isPlainTextMarkup(Node* node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(node);
     if (!is<HTMLDivElement>(*node))
         return false;
@@ -773,7 +773,7 @@ bool isPlainTextMarkup(Node* node)
 }
 
 static bool contextPreservesNewline(const Range& context)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     VisiblePosition position(context.startPosition());
     Node* container = position.deepEquivalent().containerNode();
     if (!container || !container->renderer())
@@ -783,7 +783,7 @@ static bool contextPreservesNewline(const Range& context)
 }
 
 Ref<DocumentFragment> createFragmentFromText(Range& context, const String& text)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Document& document = context.ownerDocument();
     Ref<DocumentFragment> fragment = document.createDocumentFragment();
     
@@ -847,7 +847,7 @@ Ref<DocumentFragment> createFragmentFromText(Range& context, const String& text)
 }
 
 String documentTypeString(const Document& document)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     DocumentType* documentType = document.doctype();
     if (!documentType)
         return emptyString();
@@ -855,7 +855,7 @@ String documentTypeString(const Document& document)
 }
 
 String createFullMarkup(const Node& node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: This is never "for interchange". Is that right?
     String markupString = createMarkup(node, IncludeNode, 0);
 
@@ -867,13 +867,13 @@ String createFullMarkup(const Node& node)
 }
 
 String createFullMarkup(const Range& range)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: This is always "for interchange". Is that right?
     return documentTypeString(range.startContainer().document()) + createMarkup(range, 0, AnnotateForInterchange);
 }
 
 String urlToMarkup(const URL& url, const String& title)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     StringBuilder markup;
     markup.appendLiteral("<a href=\"");
     markup.append(url.string());
@@ -884,7 +884,7 @@ String urlToMarkup(const URL& url, const String& title)
 }
 
 RefPtr<DocumentFragment> createFragmentForInnerOuterHTML(Element& contextElement, const String& markup, ParserContentPolicy parserContentPolicy, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Document* document = &contextElement.document();
     if (contextElement.hasTagName(templateTag))
         document = &document->ensureTemplateDocument();
@@ -904,7 +904,7 @@ RefPtr<DocumentFragment> createFragmentForInnerOuterHTML(Element& contextElement
 }
 
 RefPtr<DocumentFragment> createFragmentForTransformToFragment(Document& outputDoc, const String& sourceString, const String& sourceMIMEType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<DocumentFragment> fragment = outputDoc.createDocumentFragment();
     
     if (sourceMIMEType == "text/html") {
@@ -928,7 +928,7 @@ RefPtr<DocumentFragment> createFragmentForTransformToFragment(Document& outputDo
 }
 
 static Vector<Ref<HTMLElement>> collectElementsToRemoveFromFragment(ContainerNode& container)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<Ref<HTMLElement>> toRemove;
     for (auto& element : childrenOfType<HTMLElement>(container)) {
         if (is<HTMLHtmlElement>(element)) {
@@ -943,7 +943,7 @@ static Vector<Ref<HTMLElement>> collectElementsToRemoveFromFragment(ContainerNod
 }
 
 static void removeElementFromFragmentPreservingChildren(DocumentFragment& fragment, HTMLElement& element)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<Node> nextChild;
     for (RefPtr<Node> child = element.firstChild(); child; child = nextChild) {
         nextChild = child->nextSibling();
@@ -954,7 +954,7 @@ static void removeElementFromFragmentPreservingChildren(DocumentFragment& fragme
 }
 
 RefPtr<DocumentFragment> createContextualFragment(Element& element, const String& markup, ParserContentPolicy parserContentPolicy, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (element.ieForbidsInsertHTML()) {
         ec = NOT_SUPPORTED_ERR;
         return nullptr;
@@ -981,18 +981,18 @@ RefPtr<DocumentFragment> createContextualFragment(Element& element, const String
 }
 
 static inline bool hasOneChild(ContainerNode& node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Node* firstChild = node.firstChild();
     return firstChild && !firstChild->nextSibling();
 }
 
 static inline bool hasOneTextChild(ContainerNode& node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasOneChild(node) && node.firstChild()->isTextNode();
 }
 
 static inline bool hasMutationEventListeners(const Document& document)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return document.hasListenerType(Document::DOMSUBTREEMODIFIED_LISTENER)
         || document.hasListenerType(Document::DOMNODEINSERTED_LISTENER)
         || document.hasListenerType(Document::DOMNODEREMOVED_LISTENER)
@@ -1002,13 +1002,13 @@ static inline bool hasMutationEventListeners(const Document& document)
 
 // We can use setData instead of replacing Text node as long as script can't observe the difference.
 static inline bool canUseSetDataOptimization(const Text& containerChild, const ChildListMutationScope& mutationScope)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool authorScriptMayHaveReference = containerChild.refCount();
     return !authorScriptMayHaveReference && !mutationScope.canObserve() && !hasMutationEventListeners(containerChild.document());
 }
 
 void replaceChildrenWithFragment(ContainerNode& container, Ref<DocumentFragment>&& fragment, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<ContainerNode> containerNode(container);
     ChildListMutationScope mutation(containerNode);
 
@@ -1034,7 +1034,7 @@ void replaceChildrenWithFragment(ContainerNode& container, Ref<DocumentFragment>
 }
 
 void replaceChildrenWithText(ContainerNode& container, const String& text, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<ContainerNode> containerNode(container);
     ChildListMutationScope mutation(containerNode);
 

@@ -328,7 +328,7 @@ namespace WebCore {
 
     inline void Frame::init()
     {
-        WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+           AUTO_EASY_THREAD(); EASY_FUNCTION();
         m_loader.init();
     }
 

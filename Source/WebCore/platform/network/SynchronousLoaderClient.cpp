@@ -36,11 +36,11 @@
 namespace WebCore {
 
 SynchronousLoaderClient::~SynchronousLoaderClient()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 ResourceRequest SynchronousLoaderClient::willSendRequest(ResourceHandle* handle, ResourceRequest&& request, ResourceResponse&&)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: This needs to be fixed to follow the redirect correctly even for cross-domain requests.
     if (protocolHostAndPortAreEqual(handle->firstRequest().url(), request.url()))
         return WTFMove(request);
@@ -52,36 +52,36 @@ ResourceRequest SynchronousLoaderClient::willSendRequest(ResourceHandle* handle,
 }
 
 bool SynchronousLoaderClient::shouldUseCredentialStorage(ResourceHandle*)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: We should ask FrameLoaderClient whether using credential storage is globally forbidden.
     return m_allowStoredCredentials;
 }
 
 #if USE(PROTECTION_SPACE_AUTH_CALLBACK)
 bool SynchronousLoaderClient::canAuthenticateAgainstProtectionSpace(ResourceHandle*, const ProtectionSpace&)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: We should ask FrameLoaderClient. <http://webkit.org/b/65196>
     return true;
 }
 #endif
 
 void SynchronousLoaderClient::didReceiveResponse(ResourceHandle*, ResourceResponse&& response)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_response = WTFMove(response);
 }
 
 void SynchronousLoaderClient::didReceiveData(ResourceHandle*, const char* data, unsigned length, int /*encodedDataLength*/)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_data.append(data, length);
 }
 
 void SynchronousLoaderClient::didFinishLoading(ResourceHandle*, double)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_isDone = true;
 }
 
 void SynchronousLoaderClient::didFail(ResourceHandle*, const ResourceError& error)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_error.isNull());
 
     m_error = error;

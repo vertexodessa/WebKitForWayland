@@ -43,16 +43,16 @@ namespace WebKit {
 
 WebProgressTrackerClient::WebProgressTrackerClient(WebPage& webPage)
     : m_webPage(webPage)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
     
 void WebProgressTrackerClient::progressTrackerDestroyed()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     delete this;
 }
     
 void WebProgressTrackerClient::progressStarted(Frame& originatingProgressFrame)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!originatingProgressFrame.isMainFrame())
         return;
 
@@ -61,7 +61,7 @@ void WebProgressTrackerClient::progressStarted(Frame& originatingProgressFrame)
 }
 
 void WebProgressTrackerClient::progressEstimateChanged(Frame& originatingProgressFrame)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!originatingProgressFrame.isMainFrame())
         return;
     
@@ -70,7 +70,7 @@ void WebProgressTrackerClient::progressEstimateChanged(Frame& originatingProgres
 }
 
 void WebProgressTrackerClient::progressFinished(Frame& originatingProgressFrame)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!originatingProgressFrame.isMainFrame())
         return;
 

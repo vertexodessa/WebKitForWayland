@@ -90,12 +90,12 @@ using namespace HTMLNames;
 RenderObject::SetLayoutNeededForbiddenScope::SetLayoutNeededForbiddenScope(RenderObject* renderObject, bool isForbidden)
     : m_renderObject(renderObject)
     , m_preexistingForbidden(m_renderObject->isSetNeedsLayoutForbidden())
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_renderObject->setNeedsLayoutIsForbidden(isForbidden);
 }
 
 RenderObject::SetLayoutNeededForbiddenScope::~SetLayoutNeededForbiddenScope()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_renderObject->setNeedsLayoutIsForbidden(m_preexistingForbidden);
 }
 #endif
@@ -124,7 +124,7 @@ RenderObject::RenderObject(Node& node)
     , m_setNeedsLayoutForbidden(false)
 #endif
     , m_bitfields(node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderView* renderView = node.document().renderView())
         renderView->didCreateRenderer();
 #ifndef NDEBUG
@@ -133,7 +133,7 @@ RenderObject::RenderObject(Node& node)
 }
 
 RenderObject::~RenderObject()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     view().didDestroyRenderer();
 #ifndef NDEBUG
     ASSERT(!m_hasAXObject);
@@ -143,13 +143,13 @@ RenderObject::~RenderObject()
 }
 
 RenderTheme& RenderObject::theme() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(document().page());
     return document().page()->theme();
 }
 
 bool RenderObject::isDescendantOf(const RenderObject* ancestor) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const RenderObject* renderer = this; renderer; renderer = renderer->m_parent) {
         if (renderer == ancestor)
             return true;
@@ -158,17 +158,17 @@ bool RenderObject::isDescendantOf(const RenderObject* ancestor) const
 }
 
 bool RenderObject::isLegend() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return node() && node()->hasTagName(legendTag);
 }
 
 bool RenderObject::isHTMLMarquee() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return node() && node()->renderer() == this && node()->hasTagName(marqueeTag);
 }
 
 void RenderObject::setFlowThreadStateIncludingDescendants(FlowThreadState state)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setFlowThreadState(state);
 
     if (!is<RenderElement>(*this))
@@ -184,7 +184,7 @@ void RenderObject::setFlowThreadStateIncludingDescendants(FlowThreadState state)
 }
 
 void RenderObject::setParent(RenderElement* parent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_parent = parent;
 
     // Only update if our flow thread state is different from our new parent and if we're not a RenderFlowThread.
@@ -196,13 +196,13 @@ void RenderObject::setParent(RenderElement* parent)
 }
 
 void RenderObject::removeFromParent()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (parent())
         parent()->removeChild(*this);
 }
 
 RenderObject* RenderObject::nextInPreOrder() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderObject* o = firstChildSlow())
         return o;
 
@@ -210,7 +210,7 @@ RenderObject* RenderObject::nextInPreOrder() const
 }
 
 RenderObject* RenderObject::nextInPreOrderAfterChildren() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderObject* o;
     if (!(o = nextSibling())) {
         o = parent();
@@ -224,7 +224,7 @@ RenderObject* RenderObject::nextInPreOrderAfterChildren() const
 }
 
 RenderObject* RenderObject::nextInPreOrder(const RenderObject* stayWithin) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderObject* o = firstChildSlow())
         return o;
 
@@ -232,7 +232,7 @@ RenderObject* RenderObject::nextInPreOrder(const RenderObject* stayWithin) const
 }
 
 RenderObject* RenderObject::nextInPreOrderAfterChildren(const RenderObject* stayWithin) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (this == stayWithin)
         return nullptr;
 
@@ -247,7 +247,7 @@ RenderObject* RenderObject::nextInPreOrderAfterChildren(const RenderObject* stay
 }
 
 RenderObject* RenderObject::previousInPreOrder() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderObject* o = previousSibling()) {
         while (RenderObject* last = o->lastChildSlow())
             o = last;
@@ -258,7 +258,7 @@ RenderObject* RenderObject::previousInPreOrder() const
 }
 
 RenderObject* RenderObject::previousInPreOrder(const RenderObject* stayWithin) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (this == stayWithin)
         return nullptr;
 
@@ -266,7 +266,7 @@ RenderObject* RenderObject::previousInPreOrder(const RenderObject* stayWithin) c
 }
 
 RenderObject* RenderObject::childAt(unsigned index) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderObject* child = firstChildSlow();
     for (unsigned i = 0; child && i < index; i++)
         child = child->nextSibling();
@@ -274,7 +274,7 @@ RenderObject* RenderObject::childAt(unsigned index) const
 }
 
 RenderObject* RenderObject::firstLeafChild() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderObject* r = firstChildSlow();
     while (r) {
         RenderObject* n = nullptr;
@@ -287,7 +287,7 @@ RenderObject* RenderObject::firstLeafChild() const
 }
 
 RenderObject* RenderObject::lastLeafChild() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderObject* r = lastChildSlow();
     while (r) {
         RenderObject* n = nullptr;
@@ -303,7 +303,7 @@ RenderObject* RenderObject::lastLeafChild() const
 
 // Non-recursive version of the DFS search.
 RenderObject* RenderObject::traverseNext(const RenderObject* stayWithin, HeightTypeTraverseNextInclusionFunction inclusionFunction, int& currentDepth, int& newFixedDepth) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     BlockContentHeightType overflowType;
 
     // Check for suitable children.
@@ -352,7 +352,7 @@ RenderObject* RenderObject::traverseNext(const RenderObject* stayWithin, HeightT
 #endif // ENABLE(IOS_TEXT_AUTOSIZING)
 
 RenderLayer* RenderObject::enclosingLayer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& renderer : lineageOfType<RenderLayerModelObject>(*this)) {
         if (renderer.hasLayer())
             return renderer.layer();
@@ -361,7 +361,7 @@ RenderLayer* RenderObject::enclosingLayer() const
 }
 
 bool RenderObject::scrollRectToVisible(SelectionRevealMode revealMode, const LayoutRect& rect, const ScrollAlignment& alignX, const ScrollAlignment& alignY)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (revealMode == SelectionRevealMode::DoNotReveal)
         return false;
 
@@ -374,24 +374,24 @@ bool RenderObject::scrollRectToVisible(SelectionRevealMode revealMode, const Lay
 }
 
 RenderBox& RenderObject::enclosingBox() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return *lineageOfType<RenderBox>(const_cast<RenderObject&>(*this)).first();
 }
 
 RenderBoxModelObject& RenderObject::enclosingBoxModelObject() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return *lineageOfType<RenderBoxModelObject>(const_cast<RenderObject&>(*this)).first();
 }
 
 bool RenderObject::fixedPositionedWithNamedFlowContainingBlock() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return ((flowThreadState() == RenderObject::InsideOutOfFlowThread)
         && (style().position() == FixedPosition)
         && (containingBlock()->isOutOfFlowRenderFlowThread()));
 }
 
 static bool hasFixedPosInNamedFlowContainingBlock(const RenderObject* renderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(renderer->flowThreadState() != RenderObject::NotInsideFlowThread);
 
     RenderObject* curr = const_cast<RenderObject*>(renderer);
@@ -405,12 +405,12 @@ static bool hasFixedPosInNamedFlowContainingBlock(const RenderObject* renderer)
 }
 
 RenderBlock* RenderObject::firstLineBlock() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return nullptr;
 }
 
 static inline bool objectIsRelayoutBoundary(const RenderElement* object)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: In future it may be possible to broaden these conditions in order to improve performance.
     if (object->isRenderView())
         return true;
@@ -435,7 +435,7 @@ static inline bool objectIsRelayoutBoundary(const RenderElement* object)
 }
 
 void RenderObject::clearNeedsLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_bitfields.setNeedsLayout(false);
     setEverHadLayout(true);
     setPosChildNeedsLayoutBit(false);
@@ -450,7 +450,7 @@ void RenderObject::clearNeedsLayout()
 }
 
 static void scheduleRelayoutForSubtree(RenderElement& renderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (is<RenderView>(renderer)) {
         downcast<RenderView>(renderer).frameView().scheduleRelayout();
         return;
@@ -461,7 +461,7 @@ static void scheduleRelayoutForSubtree(RenderElement& renderer)
 }
 
 void RenderObject::markContainingBlocksForLayout(ScheduleRelayout scheduleRelayout, RenderElement* newRoot)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(scheduleRelayout == ScheduleRelayout::No || !newRoot);
     ASSERT(!isSetNeedsLayoutForbidden());
 
@@ -519,7 +519,7 @@ void RenderObject::markContainingBlocksForLayout(ScheduleRelayout scheduleRelayo
 
 #ifndef NDEBUG
 void RenderObject::checkBlockPositionedObjectsNeedLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!needsLayout());
 
     if (is<RenderBlock>(*this))
@@ -528,7 +528,7 @@ void RenderObject::checkBlockPositionedObjectsNeedLayout()
 #endif
 
 void RenderObject::setPreferredLogicalWidthsDirty(bool shouldBeDirty, MarkingBehavior markParents)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool alreadyDirty = preferredLogicalWidthsDirty();
     m_bitfields.setPreferredLogicalWidthsDirty(shouldBeDirty);
     if (shouldBeDirty && !alreadyDirty && markParents == MarkContainingBlockChain && (isText() || !style().hasOutOfFlowPosition()))
@@ -536,7 +536,7 @@ void RenderObject::setPreferredLogicalWidthsDirty(bool shouldBeDirty, MarkingBeh
 }
 
 void RenderObject::invalidateContainerPreferredLogicalWidths()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // In order to avoid pathological behavior when inlines are deeply nested, we do include them
     // in the chain that we mark dirty (even though they're kind of irrelevant).
     auto o = isTableCell() ? containingBlock() : container();
@@ -557,19 +557,19 @@ void RenderObject::invalidateContainerPreferredLogicalWidths()
 }
 
 void RenderObject::setLayerNeedsFullRepaint()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasLayer());
     downcast<RenderLayerModelObject>(*this).layer()->setRepaintStatus(NeedsFullRepaint);
 }
 
 void RenderObject::setLayerNeedsFullRepaintForPositionedMovementLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasLayer());
     downcast<RenderLayerModelObject>(*this).layer()->setRepaintStatus(NeedsFullRepaintForPositionedMovementLayout);
 }
 
 RenderBlock* RenderObject::containingBlock() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto containingBlockForRenderer = [](const RenderElement& renderer)
     {
         auto& style = renderer.style();
@@ -592,7 +592,7 @@ RenderBlock* RenderObject::containingBlock() const
 }
 
 RenderBlock* RenderObject::containingBlockForObjectInFlow() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* renderer = parent();
     while (renderer && ((renderer->isInline() && !renderer->isReplaced()) || !renderer->isRenderBlock()))
         renderer = renderer->parent();
@@ -600,7 +600,7 @@ RenderBlock* RenderObject::containingBlockForObjectInFlow() const
 }
 
 void RenderObject::addPDFURLRect(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<LayoutRect> focusRingRects;
     addFocusRingRects(focusRingRects, paintOffset, paintInfo.paintContainer);
     LayoutRect urlRect = unionRect(focusRingRects);
@@ -622,7 +622,7 @@ void RenderObject::addPDFURLRect(PaintInfo& paintInfo, const LayoutPoint& paintO
 // No annotations are added in this class.
 // FIXME: Move to RenderText with absoluteRectsForRange()?
 void RenderObject::collectSelectionRects(Vector<SelectionRect>& rects, unsigned start, unsigned end)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<FloatQuad> quads;
 
     if (!firstChildSlow()) {
@@ -648,7 +648,7 @@ void RenderObject::collectSelectionRects(Vector<SelectionRect>& rects, unsigned 
 #endif
 
 IntRect RenderObject::absoluteBoundingBoxRect(bool useTransforms, bool* wasFixed) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (useTransforms) {
         Vector<FloatQuad> quads;
         absoluteQuads(quads, wasFixed);
@@ -678,7 +678,7 @@ IntRect RenderObject::absoluteBoundingBoxRect(bool useTransforms, bool* wasFixed
 }
 
 void RenderObject::absoluteFocusRingQuads(Vector<FloatQuad>& quads)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<LayoutRect> rects;
     // FIXME: addFocusRingRects() needs to be passed this transform-unaware
     // localToAbsolute() offset here because RenderInline::addFocusRingRects()
@@ -694,7 +694,7 @@ void RenderObject::absoluteFocusRingQuads(Vector<FloatQuad>& quads)
 }
 
 FloatRect RenderObject::absoluteBoundingBoxRectForRange(const Range* range)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!range)
         return FloatRect();
 
@@ -714,7 +714,7 @@ FloatRect RenderObject::absoluteBoundingBoxRectForRange(const Range* range)
 }
 
 void RenderObject::addAbsoluteRectForLayer(LayoutRect& result)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (hasLayer())
         result.unite(absoluteBoundingBoxRectIgnoringTransforms());
 
@@ -727,7 +727,7 @@ void RenderObject::addAbsoluteRectForLayer(LayoutRect& result)
 
 // FIXME: change this to use the subtreePaint terminology
 LayoutRect RenderObject::paintingRootRect(LayoutRect& topLevelRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutRect result = absoluteBoundingBoxRectIgnoringTransforms();
     topLevelRect = result;
     if (is<RenderElement>(*this)) {
@@ -738,7 +738,7 @@ LayoutRect RenderObject::paintingRootRect(LayoutRect& topLevelRect)
 }
 
 RenderLayerModelObject* RenderObject::containerForRepaint() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderLayerModelObject* repaintContainer = nullptr;
 
     if (view().usesCompositing()) {
@@ -775,7 +775,7 @@ RenderLayerModelObject* RenderObject::containerForRepaint() const
 }
 
 void RenderObject::propagateRepaintToParentWithOutlineAutoIfNeeded(const RenderLayerModelObject& repaintContainer, const LayoutRect& repaintRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasOutlineAutoAncestor())
         return;
 
@@ -807,7 +807,7 @@ void RenderObject::propagateRepaintToParentWithOutlineAutoIfNeeded(const RenderL
 }
 
 void RenderObject::repaintUsingContainer(const RenderLayerModelObject* repaintContainer, const LayoutRect& r, bool shouldClipToLayer) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (r.isEmpty())
         return;
 
@@ -846,7 +846,7 @@ void RenderObject::repaintUsingContainer(const RenderLayerModelObject* repaintCo
 }
 
 void RenderObject::repaint() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Don't repaint if we're unrooted (note that view() still returns the view when unrooted)
     if (!isRooted())
         return;
@@ -860,7 +860,7 @@ void RenderObject::repaint() const
 }
 
 void RenderObject::repaintRectangle(const LayoutRect& r, bool shouldClipToLayer) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Don't repaint if we're unrooted (note that view() still returns the view when unrooted)
     if (!isRooted())
         return;
@@ -879,7 +879,7 @@ void RenderObject::repaintRectangle(const LayoutRect& r, bool shouldClipToLayer)
 }
 
 void RenderObject::repaintSlowRepaintObject() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Don't repaint if we're unrooted (note that view() still returns the view when unrooted)
     if (!isRooted())
         return;
@@ -906,12 +906,12 @@ void RenderObject::repaintSlowRepaintObject() const
 }
 
 IntRect RenderObject::pixelSnappedAbsoluteClippedOverflowRect() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return snappedIntRect(absoluteClippedOverflowRect());
 }
 
 bool RenderObject::hasSelfPaintingLayer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasLayer())
         return false;
     auto* layer = downcast<RenderLayerModelObject>(*this).layer();
@@ -921,25 +921,25 @@ bool RenderObject::hasSelfPaintingLayer() const
 }
     
 bool RenderObject::checkForRepaintDuringLayout() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return !document().view()->needsFullRepaint() && everHadLayout() && !hasSelfPaintingLayer();
 }
 
 LayoutRect RenderObject::rectWithOutlineForRepaint(const RenderLayerModelObject* repaintContainer, LayoutUnit outlineWidth) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutRect r(clippedOverflowRectForRepaint(repaintContainer));
     r.inflate(outlineWidth);
     return r;
 }
 
 LayoutRect RenderObject::clippedOverflowRectForRepaint(const RenderLayerModelObject*) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
     return LayoutRect();
 }
 
 LayoutRect RenderObject::computeRectForRepaint(const LayoutRect& rect, const RenderLayerModelObject* repaintContainer, RepaintContext context) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (repaintContainer == this)
         return rect;
 
@@ -957,7 +957,7 @@ LayoutRect RenderObject::computeRectForRepaint(const LayoutRect& rect, const Ren
 }
 
 FloatRect RenderObject::computeFloatRectForRepaint(const FloatRect&, const RenderLayerModelObject*, bool) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
     return FloatRect();
 }
@@ -965,19 +965,19 @@ FloatRect RenderObject::computeFloatRectForRepaint(const FloatRect&, const Rende
 #if ENABLE(TREE_DEBUGGING)
 
 static void showRenderTreeLegend()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     fprintf(stderr, "\n(B)lock/(I)nline/I(N)line-block, (R)elative/A(B)solute/Fi(X)ed/Stick(Y) positioned, (O)verflow clipping, (A)nonymous, (G)enerated, (F)loating, has(L)ayer, (C)omposited, (D)irty layout, Dirty (S)tyle\n");
 }
 
 void RenderObject::showNodeTreeForThis() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!node())
         return;
     node()->showTreeForThis();
 }
 
 void RenderObject::showRenderTreeForThis() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const WebCore::RenderObject* root = this;
     while (root->parent())
         root = root->parent();
@@ -986,7 +986,7 @@ void RenderObject::showRenderTreeForThis() const
 }
 
 void RenderObject::showLineTreeForThis() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!is<RenderBlockFlow>(*this))
         return;
     showRenderTreeLegend();
@@ -995,7 +995,7 @@ void RenderObject::showLineTreeForThis() const
 }
 
 static const RenderFlowThread* flowThreadContainingBlockFromRenderer(const RenderObject* renderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer)
         return nullptr;
 
@@ -1012,7 +1012,7 @@ static const RenderFlowThread* flowThreadContainingBlockFromRenderer(const Rende
 }
 
 void RenderObject::showRegionsInformation() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderFlowThread* ftcb = flowThreadContainingBlockFromRenderer(this);
 
     if (!ftcb) {
@@ -1033,7 +1033,7 @@ void RenderObject::showRegionsInformation() const
 }
 
 void RenderObject::showRenderObject(bool mark, int depth) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isInlineBlockOrInlineTable())
         fputc('N', stderr);
     else if (isInline())
@@ -1149,7 +1149,7 @@ void RenderObject::showRenderObject(bool mark, int depth) const
 }
 
 void RenderObject::showRenderSubTreeAndMark(const RenderObject* markedObject, int depth) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     showRenderObject(markedObject == this, depth);
     if (is<RenderBlockFlow>(*this))
         downcast<RenderBlockFlow>(*this).showLineTreeAndMark(nullptr, depth + 1);
@@ -1161,7 +1161,7 @@ void RenderObject::showRenderSubTreeAndMark(const RenderObject* markedObject, in
 #endif // NDEBUG
 
 SelectionSubtreeRoot& RenderObject::selectionRoot() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderFlowThread* flowThread = flowThreadContainingBlock();
     if (!flowThread)
         return view();
@@ -1178,12 +1178,12 @@ SelectionSubtreeRoot& RenderObject::selectionRoot() const
 }
 
 void RenderObject::selectionStartEnd(unsigned& spos, unsigned& epos) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     selectionRoot().selectionData().selectionStartEndPositions(spos, epos);
 }
 
 FloatPoint RenderObject::localToAbsolute(const FloatPoint& localPoint, MapCoordinatesFlags mode, bool* wasFixed) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TransformState transformState(TransformState::ApplyTransformDirection, localPoint);
     mapLocalToContainer(nullptr, transformState, mode | ApplyContainerFlip, wasFixed);
     transformState.flatten();
@@ -1192,7 +1192,7 @@ FloatPoint RenderObject::localToAbsolute(const FloatPoint& localPoint, MapCoordi
 }
 
 FloatPoint RenderObject::absoluteToLocal(const FloatPoint& containerPoint, MapCoordinatesFlags mode) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TransformState transformState(TransformState::UnapplyInverseTransformDirection, containerPoint);
     mapAbsoluteToLocalPoint(mode, transformState);
     transformState.flatten();
@@ -1201,7 +1201,7 @@ FloatPoint RenderObject::absoluteToLocal(const FloatPoint& containerPoint, MapCo
 }
 
 FloatQuad RenderObject::absoluteToLocalQuad(const FloatQuad& quad, MapCoordinatesFlags mode) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TransformState transformState(TransformState::UnapplyInverseTransformDirection, quad.boundingBox().center(), quad);
     mapAbsoluteToLocalPoint(mode, transformState);
     transformState.flatten();
@@ -1209,7 +1209,7 @@ FloatQuad RenderObject::absoluteToLocalQuad(const FloatQuad& quad, MapCoordinate
 }
 
 void RenderObject::mapLocalToContainer(const RenderLayerModelObject* repaintContainer, TransformState& transformState, MapCoordinatesFlags mode, bool* wasFixed) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (repaintContainer == this)
         return;
 
@@ -1232,7 +1232,7 @@ void RenderObject::mapLocalToContainer(const RenderLayerModelObject* repaintCont
 }
 
 const RenderObject* RenderObject::pushMappingToContainer(const RenderLayerModelObject* ancestorToStopAt, RenderGeometryMap& geometryMap) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_UNUSED(ancestorToStopAt, ancestorToStopAt != this);
 
     auto* container = parent();
@@ -1250,7 +1250,7 @@ const RenderObject* RenderObject::pushMappingToContainer(const RenderLayerModelO
 }
 
 void RenderObject::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, TransformState& transformState) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (auto* parent = this->parent()) {
         parent->mapAbsoluteToLocalPoint(mode, transformState);
         if (is<RenderBox>(*parent))
@@ -1259,7 +1259,7 @@ void RenderObject::mapAbsoluteToLocalPoint(MapCoordinatesFlags mode, TransformSt
 }
 
 bool RenderObject::shouldUseTransformFromContainer(const RenderObject* containerObject) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(3D_TRANSFORMS)
     return hasTransform() || (containerObject && containerObject->style().hasPerspective());
 #else
@@ -1269,7 +1269,7 @@ bool RenderObject::shouldUseTransformFromContainer(const RenderObject* container
 }
 
 void RenderObject::getTransformFromContainer(const RenderObject* containerObject, const LayoutSize& offsetInContainer, TransformationMatrix& transform) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     transform.makeIdentity();
     transform.translate(offsetInContainer.width(), offsetInContainer.height());
     RenderLayer* layer;
@@ -1295,7 +1295,7 @@ void RenderObject::getTransformFromContainer(const RenderObject* containerObject
 }
 
 FloatQuad RenderObject::localToContainerQuad(const FloatQuad& localQuad, const RenderLayerModelObject* repaintContainer, MapCoordinatesFlags mode, bool* wasFixed) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Track the point at the center of the quad's bounding box. As mapLocalToContainer() calls offsetFromContainer(),
     // it will use that point as the reference point to decide which column's transform to apply in multiple-column blocks.
     TransformState transformState(TransformState::ApplyTransformDirection, localQuad.boundingBox().center(), localQuad);
@@ -1306,7 +1306,7 @@ FloatQuad RenderObject::localToContainerQuad(const FloatQuad& localQuad, const R
 }
 
 FloatPoint RenderObject::localToContainerPoint(const FloatPoint& localPoint, const RenderLayerModelObject* repaintContainer, MapCoordinatesFlags mode, bool* wasFixed) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TransformState transformState(TransformState::ApplyTransformDirection, localPoint);
     mapLocalToContainer(repaintContainer, transformState, mode | ApplyContainerFlip, wasFixed);
     transformState.flatten();
@@ -1315,7 +1315,7 @@ FloatPoint RenderObject::localToContainerPoint(const FloatPoint& localPoint, con
 }
 
 LayoutSize RenderObject::offsetFromContainer(RenderElement& container, const LayoutPoint&, bool* offsetDependsOnPoint) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(&container == this->container());
 
     LayoutSize offset;
@@ -1329,7 +1329,7 @@ LayoutSize RenderObject::offsetFromContainer(RenderElement& container, const Lay
 }
 
 LayoutSize RenderObject::offsetFromAncestorContainer(RenderElement& container) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutSize offset;
     LayoutPoint referencePoint;
     const RenderObject* currContainer = this;
@@ -1349,7 +1349,7 @@ LayoutSize RenderObject::offsetFromAncestorContainer(RenderElement& container) c
 }
 
 LayoutRect RenderObject::localCaretRect(InlineBox*, unsigned, LayoutUnit* extraWidthToEndOfLine)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (extraWidthToEndOfLine)
         *extraWidthToEndOfLine = 0;
 
@@ -1357,12 +1357,12 @@ LayoutRect RenderObject::localCaretRect(InlineBox*, unsigned, LayoutUnit* extraW
 }
 
 bool RenderObject::isRooted() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return isDescendantOf(&view());
 }
 
 RespectImageOrientationEnum RenderObject::shouldRespectImageOrientation() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if USE(CG) || USE(CAIRO)
     // This can only be enabled for ports which honor the orientation flag in their drawing code.
     if (document().isImageDocument())
@@ -1374,17 +1374,17 @@ RespectImageOrientationEnum RenderObject::shouldRespectImageOrientation() const
 }
 
 bool RenderObject::hasOutlineAnnotation() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return node() && node()->isLink() && document().printing();
 }
 
 bool RenderObject::hasEntirelyFixedBackground() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return style().hasEntirelyFixedBackground();
 }
 
 static inline RenderElement* containerForElement(const RenderObject& renderer, const RenderLayerModelObject* repaintContainer, bool* repaintContainerSkipped)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This method is extremely similar to containingBlock(), but with a few notable
     // exceptions.
     // (1) For normal flow elements, it just returns the parent.
@@ -1403,18 +1403,18 @@ static inline RenderElement* containerForElement(const RenderObject& renderer, c
 }
 
 RenderElement* RenderObject::container() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return containerForElement(*this, nullptr, nullptr);
 }
 
 RenderElement* RenderObject::container(const RenderLayerModelObject* repaintContainer, bool& repaintContainerSkipped) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     repaintContainerSkipped = false;
     return containerForElement(*this, repaintContainer, &repaintContainerSkipped);
 }
 
 bool RenderObject::isSelectionBorder() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SelectionState st = selectionState();
     return st == SelectionStart
         || st == SelectionEnd
@@ -1424,7 +1424,7 @@ bool RenderObject::isSelectionBorder() const
 }
 
 void RenderObject::willBeDestroyed()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // For accessibility management, notify the parent of the imminent change to its child set.
     // We do it now, before remove(), while the parent pointer is still available.
     if (AXObjectCache* cache = document().existingAXObjectCache())
@@ -1450,7 +1450,7 @@ void RenderObject::willBeDestroyed()
 }
 
 void RenderObject::insertedIntoTree()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: We should ASSERT(isRooted()) here but generated content makes some out-of-order insertion.
 
     if (!isFloating() && parent()->childrenInline())
@@ -1461,7 +1461,7 @@ void RenderObject::insertedIntoTree()
 }
 
 void RenderObject::willBeRemovedFromTree()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: We should ASSERT(isRooted()) but we have some out-of-order removals which would need to be fixed first.
 
     removeFromRenderFlowThread();
@@ -1471,7 +1471,7 @@ void RenderObject::willBeRemovedFromTree()
 }
 
 void RenderObject::removeFromRenderFlowThread()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (flowThreadState() == NotInsideFlowThread)
         return;
 
@@ -1483,7 +1483,7 @@ void RenderObject::removeFromRenderFlowThread()
 }
 
 void RenderObject::removeFromRenderFlowThreadIncludingDescendants(bool shouldUpdateState)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Once we reach another flow thread we don't need to update the flow thread state
     // but we have to continue cleanup the flow thread info.
     if (isRenderFlowThread())
@@ -1513,7 +1513,7 @@ void RenderObject::removeFromRenderFlowThreadIncludingDescendants(bool shouldUpd
 }
 
 void RenderObject::invalidateFlowThreadContainingBlockIncludingDescendants(RenderFlowThread* flowThread)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (flowThreadState() == NotInsideFlowThread)
         return;
 
@@ -1538,7 +1538,7 @@ void RenderObject::invalidateFlowThreadContainingBlockIncludingDescendants(Rende
 }
 
 static void collapseAnonymousTableRowsIfNeeded(const RenderObject& rendererToBeDestroyed)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!is<RenderTableRow>(rendererToBeDestroyed))
         return;
 
@@ -1577,7 +1577,7 @@ static void collapseAnonymousTableRowsIfNeeded(const RenderObject& rendererToBeD
 }
 
 void RenderObject::destroyAndCleanupAnonymousWrappers()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If the tree is destroyed, there is no need for a clean-up phase.
     if (documentBeingDestroyed()) {
         destroy();
@@ -1602,7 +1602,7 @@ void RenderObject::destroyAndCleanupAnonymousWrappers()
 }
 
 void RenderObject::destroy()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_bitfields.setBeingDestroyed(true);
 
 #if PLATFORM(IOS)
@@ -1619,12 +1619,12 @@ void RenderObject::destroy()
 }
 
 VisiblePosition RenderObject::positionForPoint(const LayoutPoint&, const RenderRegion*)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return createVisiblePosition(caretMinOffset(), DOWNSTREAM);
 }
 
 void RenderObject::updateDragState(bool dragOn)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool valueChanged = (dragOn != isDragging());
     setIsDragging(dragOn);
     if (valueChanged && node() && (style().affectedByDrag() || (is<Element>(*node()) && downcast<Element>(*node()).childrenAffectedByDrag())))
@@ -1638,17 +1638,17 @@ void RenderObject::updateDragState(bool dragOn)
 }
 
 bool RenderObject::isComposited() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasLayer() && downcast<RenderLayerModelObject>(*this).layer()->isComposited();
 }
 
 bool RenderObject::isAnonymousInlineBlock() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return isAnonymous() && style().display() == INLINE_BLOCK && style().styleType() == NOPSEUDO && isRenderBlockFlow() && !isRubyRun() && !isRubyBase() && !isRuby(parent());
 }
 
 bool RenderObject::hitTest(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestFilter hitTestFilter)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool inside = false;
     if (hitTestFilter != HitTestSelf) {
         // First test the foreground layer (lines and inlines).
@@ -1671,7 +1671,7 @@ bool RenderObject::hitTest(const HitTestRequest& request, HitTestResult& result,
 }
 
 void RenderObject::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (result.innerNode())
         return;
 
@@ -1693,17 +1693,17 @@ void RenderObject::updateHitTestResult(HitTestResult& result, const LayoutPoint&
 }
 
 bool RenderObject::nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& /*locationInContainer*/, const LayoutPoint& /*accumulatedOffset*/, HitTestAction)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 
 int RenderObject::innerLineHeight() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return style().computedLineHeight();
 }
 
 static Color decorationColor(const RenderStyle* style)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Color result;
     // Check for text decoration color first.
     result = style->visitedDependentColor(CSSPropertyWebkitTextDecorationColor);
@@ -1722,7 +1722,7 @@ static Color decorationColor(const RenderStyle* style)
 
 void RenderObject::getTextDecorationColorsAndStyles(int decorations, Color& underlineColor, Color& overlineColor, Color& linethroughColor,
     TextDecorationStyle& underlineStyle, TextDecorationStyle& overlineStyle, TextDecorationStyle& linethroughStyle, bool firstlineStyle) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderObject* current = this;
     const RenderStyle* styleToUse = nullptr;
     TextDecoration currDecs = TextDecorationNone;
@@ -1777,7 +1777,7 @@ void RenderObject::getTextDecorationColorsAndStyles(int decorations, Color& unde
 
 #if ENABLE(DASHBOARD_SUPPORT)
 void RenderObject::addAnnotatedRegions(Vector<AnnotatedRegionValue>& regions)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Convert the style regions to absolute coordinates.
     if (style().visibility() != VISIBLE || !is<RenderBox>(*this))
         return;
@@ -1812,7 +1812,7 @@ void RenderObject::addAnnotatedRegions(Vector<AnnotatedRegionValue>& regions)
 }
 
 void RenderObject::collectAnnotatedRegions(Vector<AnnotatedRegionValue>& regions)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // RenderTexts don't have their own style, they just use their parent's style,
     // so we don't want to include them.
     if (is<RenderText>(*this))
@@ -1825,12 +1825,12 @@ void RenderObject::collectAnnotatedRegions(Vector<AnnotatedRegionValue>& regions
 #endif
 
 int RenderObject::caretMinOffset() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return 0;
 }
 
 int RenderObject::caretMaxOffset() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isReplaced())
         return node() ? std::max(1U, node()->countChildNodes()) : 1;
     if (isHR())
@@ -1839,22 +1839,22 @@ int RenderObject::caretMaxOffset() const
 }
 
 int RenderObject::previousOffset(int current) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return current - 1;
 }
 
 int RenderObject::previousOffsetForBackwardDeletion(int current) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return current - 1;
 }
 
 int RenderObject::nextOffset(int current) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return current + 1;
 }
 
 void RenderObject::adjustRectForOutlineAndShadow(LayoutRect& rect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit outlineSize = outlineStyleForRepaint().outlineSize();
     if (const ShadowData* boxShadow = style().boxShadow()) {
         boxShadow->adjustRectForShadow(rect, outlineSize);
@@ -1864,12 +1864,12 @@ void RenderObject::adjustRectForOutlineAndShadow(LayoutRect& rect) const
 }
 
 void RenderObject::imageChanged(CachedImage* image, const IntRect* rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     imageChanged(static_cast<WrappedImagePtr>(image), rect);
 }
 
 RenderBoxModelObject* RenderObject::offsetParent() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If any of the following holds true return null and stop this algorithm:
     // A is the root element.
     // A is the HTML body element.
@@ -1914,7 +1914,7 @@ RenderBoxModelObject* RenderObject::offsetParent() const
 }
 
 VisiblePosition RenderObject::createVisiblePosition(int offset, EAffinity affinity) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If this is a non-anonymous renderer in an editable area, then it's simple.
     if (Node* node = nonPseudoNode()) {
         if (!node->hasEditableStyle()) {
@@ -1968,7 +1968,7 @@ VisiblePosition RenderObject::createVisiblePosition(int offset, EAffinity affini
 }
 
 VisiblePosition RenderObject::createVisiblePosition(const Position& position) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (position.isNotNull())
         return VisiblePosition(position);
 
@@ -1977,12 +1977,12 @@ VisiblePosition RenderObject::createVisiblePosition(const Position& position) co
 }
 
 CursorDirective RenderObject::getCursor(const LayoutPoint&, Cursor&) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return SetCursorBasedOnStyle;
 }
 
 bool RenderObject::canUpdateSelectionOnRootLineBoxes()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (needsLayout())
         return false;
 
@@ -1995,29 +1995,29 @@ bool RenderObject::canUpdateSelectionOnRootLineBoxes()
 // - the block doesn't have any special assumption on its text children.
 // This correctly prevents form controls from having such renderers.
 bool RenderObject::canHaveGeneratedChildren() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return canHaveChildren();
 }
 
 Node* RenderObject::generatingPseudoHostElement() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return downcast<PseudoElement>(*node()).hostElement();
 }
 
 void RenderObject::setNeedsBoundariesUpdate()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (auto renderer = parent())
         renderer->setNeedsBoundariesUpdate();
 }
 
 FloatRect RenderObject::objectBoundingBox() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
     return FloatRect();
 }
 
 FloatRect RenderObject::strokeBoundingBox() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
     return FloatRect();
 }
@@ -2025,31 +2025,31 @@ FloatRect RenderObject::strokeBoundingBox() const
 // Returns the smallest rectangle enclosing all of the painted content
 // respecting clipping, masking, filters, opacity, stroke-width and markers
 FloatRect RenderObject::repaintRectInLocalCoordinates() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
     return FloatRect();
 }
 
 AffineTransform RenderObject::localTransform() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static const AffineTransform identity;
     return identity;
 }
 
 const AffineTransform& RenderObject::localToParentTransform() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static const AffineTransform identity;
     return identity;
 }
 
 bool RenderObject::nodeAtFloatPoint(const HitTestRequest&, HitTestResult&, const FloatPoint&, HitTestAction)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
     return false;
 }
 
 RenderNamedFlowFragment* RenderObject::currentRenderNamedFlowFragment() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderFlowThread* flowThread = flowThreadContainingBlock();
     if (!is<RenderNamedFlowThread>(flowThread))
         return nullptr;
@@ -2063,13 +2063,13 @@ RenderNamedFlowFragment* RenderObject::currentRenderNamedFlowFragment() const
 }
 
 RenderFlowThread* RenderObject::locateFlowThreadContainingBlock() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlock* containingBlock = this->containingBlock();
     return containingBlock ? containingBlock->flowThreadContainingBlock() : nullptr;
 }
 
 void RenderObject::calculateBorderStyleColor(const EBorderStyle& style, const BoxSide& side, Color& color)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(style == INSET || style == OUTSET);
     // This values were derived empirically.
     const RGBA32 baseDarkColor = 0xFF202020;
@@ -2089,49 +2089,49 @@ void RenderObject::calculateBorderStyleColor(const EBorderStyle& style, const Bo
 }
 
 void RenderObject::setIsDragging(bool isDragging)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isDragging || hasRareData())
         ensureRareData().setIsDragging(isDragging);
 }
 
 void RenderObject::setHasReflection(bool hasReflection)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (hasReflection || hasRareData())
         ensureRareData().setHasReflection(hasReflection);
 }
 
 void RenderObject::setIsRenderFlowThread(bool isFlowThread)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isFlowThread || hasRareData())
         ensureRareData().setIsRenderFlowThread(isFlowThread);
 }
 
 void RenderObject::setHasOutlineAutoAncestor(bool hasOutlineAutoAncestor)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (hasOutlineAutoAncestor || hasRareData())
         ensureRareData().setHasOutlineAutoAncestor(hasOutlineAutoAncestor);
 }
 
 void RenderObject::setIsRegisteredForVisibleInViewportCallback(bool registered)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (registered || hasRareData())
         ensureRareData().setIsRegisteredForVisibleInViewportCallback(registered);
 }
 
 void RenderObject::setVisibleInViewportState(VisibleInViewportState visible)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (visible != VisibilityUnknown || hasRareData())
         ensureRareData().setVisibleInViewportState(visible);
 }
 
 RenderObject::RareDataHash& RenderObject::rareDataMap()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static NeverDestroyed<RareDataHash> map;
     return map;
 }
 
 RenderObject::RenderObjectRareData RenderObject::rareData() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasRareData())
         return RenderObjectRareData();
 
@@ -2139,13 +2139,13 @@ RenderObject::RenderObjectRareData RenderObject::rareData() const
 }
 
 RenderObject::RenderObjectRareData& RenderObject::ensureRareData()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setHasRareData(true);
     return rareDataMap().add(this, RenderObjectRareData()).iterator->value;
 }
 
 void RenderObject::removeRareData()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     rareDataMap().remove(this);
     setHasRareData(false);
 }
@@ -2153,7 +2153,7 @@ void RenderObject::removeRareData()
 #if ENABLE(TREE_DEBUGGING)
 
 void printRenderTreeForLiveDocuments()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const auto* document : Document::allDocuments()) {
         if (!document->renderView() || document->inPageCache())
             continue;
@@ -2165,7 +2165,7 @@ void printRenderTreeForLiveDocuments()
 }
 
 void printLayerTreeForLiveDocuments()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const auto* document : Document::allDocuments()) {
         if (!document->renderView() || document->inPageCache())
             continue;
@@ -2183,21 +2183,21 @@ void printLayerTreeForLiveDocuments()
 #if ENABLE(TREE_DEBUGGING)
 
 void showNodeTree(const WebCore::RenderObject* object)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!object)
         return;
     object->showNodeTreeForThis();
 }
 
 void showLineTree(const WebCore::RenderObject* object)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!object)
         return;
     object->showLineTreeForThis();
 }
 
 void showRenderTree(const WebCore::RenderObject* object)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!object)
         return;
     object->showRenderTreeForThis();

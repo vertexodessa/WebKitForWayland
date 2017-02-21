@@ -28,33 +28,38 @@
 
 #include <stdlib.h>
 
+thread_local bool enabledForThread {false};
+
 namespace WebKit {
 
-bool gShouldDumpWtfStats = false;
+std::mutex m;
+std::condition_variable cv;
 
-void WtfDumpFileTimer::TimerFired()
+void dumpTraces(int)
 {
-    if (gShouldDumpWtfStats)
-    {
-        std::string msg("III: dumping collected stats to file ");
-        msg +=  m_fname + "\n";
-        write(1, msg.c_str(), msg.size());
-        std::fstream out;
-        out.open(m_fname,
-                 std::ios_base::out | std::ios_base::trunc);
-        wtf::Runtime::GetInstance()->Save(&out);
-        out.close();
-        gShouldDumpWtfStats = false;
+    const char s[] = "!!NOTIFYING!!\n";
+    write(1, s, sizeof(s));
+    fflush(stdout);
+    cv.notify_all();
+}
+
+void watchThread() {
+    while(1) {
+//        std::unique_lock<std::mutex> lock(m);
+//        cv.wait(lock);
+        WTF::sleep(30);
+        std::string fname;
+        fname = "/opt/easy_dump_";
+        fname += std::to_string(syscall(SYS_gettid));
+        fname += ".prof";
+
+        fprintf(stderr, "Dumping to file %s\n", fname.c_str());
+
+        auto blocks_count = profiler::dumpBlocksToFile(fname.c_str());
+        fprintf(stderr, "DumpED to file %s\n", fname.c_str());
+        std::cout << "Blocks count: " << blocks_count << std::endl;
+
     }
-};
-
-    
-void switchDumpVar(int signal)
-{
-    const std::string msg("III: signal to dump the file received! \n");
-
-    write(1, msg.c_str(), msg.size());
-    gShouldDumpWtfStats = true;
 }
 
 bool ChildProcessMainBase::parseCommandLine(int argc, char** argv)

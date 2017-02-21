@@ -40,7 +40,7 @@ namespace WebCore {
 namespace XPath {
 
 const NodeSet& Value::toNodeSet() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isNodeSet())
         Expression::evaluationContext().hadTypeConversionError = true;
 
@@ -53,7 +53,7 @@ const NodeSet& Value::toNodeSet() const
 }    
 
 NodeSet& Value::modifiableNodeSet()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isNodeSet())
         Expression::evaluationContext().hadTypeConversionError = true;
 
@@ -65,7 +65,7 @@ NodeSet& Value::modifiableNodeSet()
 }
 
 bool Value::toBoolean() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (m_type) {
         case NodeSetValue:
             return !m_data->nodeSet.isEmpty();
@@ -81,7 +81,7 @@ bool Value::toBoolean() const
 }
 
 double Value::toNumber() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (m_type) {
         case NodeSetValue:
             return Value(toString()).toNumber();
@@ -113,7 +113,7 @@ double Value::toNumber() const
 }
 
 String Value::toString() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (m_type) {
         case NodeSetValue:
             if (m_data->nodeSet.isEmpty())

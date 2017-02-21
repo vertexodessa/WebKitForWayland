@@ -479,7 +479,7 @@ public:
     WEBCORE_EXPORT SessionID sessionID() const;
     WEBCORE_EXPORT void setSessionID(SessionID);
     WEBCORE_EXPORT void enableLegacyPrivateBrowsing(bool privateBrowsingEnabled);
-    bool usesEphemeralSession() const { WTF_AUTO_THREAD_ENABLE(); WTF_SCOPE0(__FUNCTION__); return m_sessionID.isEphemeral(); }
+    bool usesEphemeralSession() const { return m_sessionID.isEphemeral(); }
 
     MediaProducer::MediaStateFlags mediaState() const { return m_mediaState; }
     void updateIsPlayingMedia(uint64_t);

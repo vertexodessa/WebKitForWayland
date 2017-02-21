@@ -36,26 +36,26 @@ namespace WebCore {
 
 DocumentFragment::DocumentFragment(Document& document, ConstructionType constructionType)
     : ContainerNode(document, constructionType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 Ref<DocumentFragment> DocumentFragment::create(Document& document)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return adoptRef(*new DocumentFragment(document, Node::CreateDocumentFragment));
 }
 
 String DocumentFragment::nodeName() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return ASCIILiteral("#document-fragment");
 }
 
 Node::NodeType DocumentFragment::nodeType() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return DOCUMENT_FRAGMENT_NODE;
 }
 
 bool DocumentFragment::childTypeAllowed(NodeType type) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (type) {
         case ELEMENT_NODE:
         case PROCESSING_INSTRUCTION_NODE:
@@ -69,7 +69,7 @@ bool DocumentFragment::childTypeAllowed(NodeType type) const
 }
 
 Ref<Node> DocumentFragment::cloneNodeInternal(Document& targetDocument, CloningOperation type)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<DocumentFragment> clone = create(targetDocument);
     switch (type) {
     case CloningOperation::OnlySelf:
@@ -83,18 +83,18 @@ Ref<Node> DocumentFragment::cloneNodeInternal(Document& targetDocument, CloningO
 }
 
 void DocumentFragment::parseHTML(const String& source, Element* contextElement, ParserContentPolicy parserContentPolicy)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(contextElement);
     HTMLDocumentParser::parseDocumentFragment(source, *this, *contextElement, parserContentPolicy);
 }
 
 bool DocumentFragment::parseXML(const String& source, Element* contextElement, ParserContentPolicy parserContentPolicy)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return XMLDocumentParser::parseDocumentFragment(source, *this, contextElement, parserContentPolicy);
 }
 
 Element* DocumentFragment::getElementById(const AtomicString& id) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (id.isNull())
         return nullptr;
 

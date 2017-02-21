@@ -44,11 +44,11 @@ using namespace XPath;
     
 inline XPathExpression::XPathExpression(std::unique_ptr<XPath::Expression> expression)
     : m_topExpression(WTFMove(expression))
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 RefPtr<XPathExpression> XPathExpression::createExpression(const String& expression, RefPtr<XPathNSResolver>&& resolver, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto parsedExpression = Parser::parseStatement(expression, WTFMove(resolver), ec);
     if (!parsedExpression)
         return nullptr;
@@ -57,11 +57,11 @@ RefPtr<XPathExpression> XPathExpression::createExpression(const String& expressi
 }
 
 XPathExpression::~XPathExpression()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 RefPtr<XPathResult> XPathExpression::evaluate(Node* contextNode, unsigned short type, XPathResult*, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isValidContextNode(contextNode)) {
         ec = NOT_SUPPORTED_ERR;
         return nullptr;

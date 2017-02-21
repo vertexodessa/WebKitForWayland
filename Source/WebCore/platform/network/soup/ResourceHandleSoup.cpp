@@ -248,41 +248,41 @@ static bool gIgnoreSSLErrors = false;
 
 typedef HashSet<String, ASCIICaseInsensitiveHash> HostsSet;
 static HostsSet& allowsAnyHTTPSCertificateHosts()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     DEPRECATED_DEFINE_STATIC_LOCAL(HostsSet, hosts, ());
     return hosts;
 }
 
 typedef HashMap<String, HostTLSCertificateSet, ASCIICaseInsensitiveHash> CertificatesMap;
 static CertificatesMap& clientCertificates()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     DEPRECATED_DEFINE_STATIC_LOCAL(CertificatesMap, certificates, ());
     return certificates;
 }
 
 ResourceHandleInternal::~ResourceHandleInternal()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 static SoupSession* sessionFromContext(NetworkingContext* context)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!context || !context->isValid())
         return SoupNetworkSession::defaultSession().soupSession();
     return context->storageSession().soupNetworkSession().soupSession();
 }
 
 ResourceHandle::~ResourceHandle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     cleanupSoupRequestOperation(this, true);
 }
 
 SoupSession* ResourceHandleInternal::soupSession()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return sessionFromContext(m_context.get());
 }
 
 bool ResourceHandle::cancelledOrClientless()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!client())
         return true;
 
@@ -290,7 +290,7 @@ bool ResourceHandle::cancelledOrClientless()
 }
 
 void ResourceHandle::ensureReadBuffer()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ResourceHandleInternal* d = getInternal();
 
     if (d->m_soupBuffer)
@@ -310,12 +310,12 @@ void ResourceHandle::ensureReadBuffer()
 }
 
 static bool isAuthenticationFailureStatusCode(int httpStatusCode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return httpStatusCode == SOUP_STATUS_PROXY_AUTHENTICATION_REQUIRED || httpStatusCode == SOUP_STATUS_UNAUTHORIZED;
 }
 
 static bool handleUnignoredTLSErrors(ResourceHandle* handle, SoupMessage* message)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (gIgnoreSSLErrors)
         return false;
 
@@ -340,7 +340,7 @@ static bool handleUnignoredTLSErrors(ResourceHandle* handle, SoupMessage* messag
 }
 
 static void tlsErrorsChangedCallback(SoupMessage* message, GParamSpec*, gpointer data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<ResourceHandle> handle = static_cast<ResourceHandle*>(data);
     if (!handle || handle->cancelledOrClientless())
         return;
@@ -350,7 +350,7 @@ static void tlsErrorsChangedCallback(SoupMessage* message, GParamSpec*, gpointer
 }
 
 static void gotHeadersCallback(SoupMessage* message, gpointer data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ResourceHandle* handle = static_cast<ResourceHandle*>(data);
     if (!handle || handle->cancelledOrClientless())
         return;
@@ -375,7 +375,7 @@ static void gotHeadersCallback(SoupMessage* message, gpointer data)
 }
 
 static void applyAuthenticationToRequest(ResourceHandle* handle, ResourceRequest& request, bool redirect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // m_user/m_pass are credentials given manually, for instance, by the arguments passed to XMLHttpRequest.open().
     ResourceHandleInternal* d = handle->getInternal();
 
@@ -418,7 +418,7 @@ static void applyAuthenticationToRequest(ResourceHandle* handle, ResourceRequest
 // Called each time the message is going to be sent again except the first time.
 // This happens when libsoup handles HTTP authentication.
 static void restartedCallback(SoupMessage*, gpointer data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ResourceHandle* handle = static_cast<ResourceHandle*>(data);
     if (!handle || handle->cancelledOrClientless())
         return;
@@ -428,7 +428,7 @@ static void restartedCallback(SoupMessage*, gpointer data)
 #endif
 
 static bool shouldRedirect(ResourceHandle* handle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ResourceHandleInternal* d = handle->getInternal();
     SoupMessage* message = d->m_soupMessage.get();
 
@@ -443,7 +443,7 @@ static bool shouldRedirect(ResourceHandle* handle)
 }
 
 static bool shouldRedirectAsGET(SoupMessage* message, URL& newURL, bool crossOrigin)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (message->method == SOUP_METHOD_GET || message->method == SOUP_METHOD_HEAD)
         return false;
 
@@ -467,7 +467,7 @@ static bool shouldRedirectAsGET(SoupMessage* message, URL& newURL, bool crossOri
 }
 
 static void continueAfterWillSendRequest(ResourceHandle* handle, ResourceRequest&& request)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // willSendRequest might cancel the load.
     if (handle->cancelledOrClientless())
         return;
@@ -485,7 +485,7 @@ static void continueAfterWillSendRequest(ResourceHandle* handle, ResourceRequest
 }
 
 static void doRedirect(ResourceHandle* handle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ResourceHandleInternal* d = handle->getInternal();
     static const int maxRedirects = 20;
 
@@ -544,7 +544,7 @@ static void doRedirect(ResourceHandle* handle)
 }
 
 static void redirectSkipCallback(GObject*, GAsyncResult* asyncResult, gpointer data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<ResourceHandle> handle = static_cast<ResourceHandle*>(data);
 
     if (handle->cancelledOrClientless()) {
@@ -572,7 +572,7 @@ static void redirectSkipCallback(GObject*, GAsyncResult* asyncResult, gpointer d
 }
 
 static void wroteBodyDataCallback(SoupMessage*, SoupBuffer* buffer, gpointer data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<ResourceHandle> handle = static_cast<ResourceHandle*>(data);
     if (!handle)
         return;
@@ -588,7 +588,7 @@ static void wroteBodyDataCallback(SoupMessage*, SoupBuffer* buffer, gpointer dat
 }
 
 static void cleanupSoupRequestOperation(ResourceHandle* handle, bool isDestroying)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ResourceHandleInternal* d = handle->getInternal();
 
     d->m_soupRequest.clear();
@@ -611,7 +611,7 @@ static void cleanupSoupRequestOperation(ResourceHandle* handle, bool isDestroyin
 }
 
 size_t ResourceHandle::currentStreamPosition() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     GInputStream* baseStream = d->m_inputStream.get();
     while (!G_IS_SEEKABLE(baseStream) && G_IS_FILTER_INPUT_STREAM(baseStream))
         baseStream = g_filter_input_stream_get_base_stream(G_FILTER_INPUT_STREAM(baseStream));
@@ -623,7 +623,7 @@ size_t ResourceHandle::currentStreamPosition() const
 }
 
 static void nextMultipartResponsePartCallback(GObject* /*source*/, GAsyncResult* result, gpointer data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<ResourceHandle> handle = static_cast<ResourceHandle*>(data);
 
     if (handle->cancelledOrClientless()) {
@@ -664,7 +664,7 @@ static void nextMultipartResponsePartCallback(GObject* /*source*/, GAsyncResult*
 }
 
 static void sendRequestCallback(GObject*, GAsyncResult* result, gpointer data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<ResourceHandle> handle = static_cast<ResourceHandle*>(data);
 
     if (handle->cancelledOrClientless()) {
@@ -728,7 +728,7 @@ static void sendRequestCallback(GObject*, GAsyncResult* result, gpointer data)
 }
 
 static void continueAfterDidReceiveResponse(ResourceHandle* handle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (handle->cancelledOrClientless()) {
         cleanupSoupRequestOperation(handle);
         return;
@@ -748,7 +748,7 @@ static void continueAfterDidReceiveResponse(ResourceHandle* handle)
 }
 
 static bool addFileToSoupMessageBody(SoupMessage* message, const String& fileNameString, size_t offset, size_t lengthToSend, unsigned long& totalBodySize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     GUniqueOutPtr<GError> error;
     CString fileName = fileSystemRepresentation(fileNameString);
     GMappedFile* fileMapping = g_mapped_file_new(fileName.data(), false, &error.outPtr());
@@ -770,7 +770,7 @@ static bool addFileToSoupMessageBody(SoupMessage* message, const String& fileNam
 }
 
 static bool blobIsOutOfDate(const BlobDataItem& blobItem)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(blobItem.type() == BlobDataItem::Type::File);
     if (!isValidFileTime(blobItem.file()->expectedModificationTime()))
         return false;
@@ -783,7 +783,7 @@ static bool blobIsOutOfDate(const BlobDataItem& blobItem)
 }
 
 static void addEncodedBlobItemToSoupMessageBody(SoupMessage* message, const BlobDataItem& blobItem, unsigned long& totalBodySize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (blobItem.type() == BlobDataItem::Type::Data) {
         totalBodySize += blobItem.length();
         soup_message_body_append(message->request_body, SOUP_MEMORY_TEMPORARY, blobItem.data().data()->data() + blobItem.offset(), blobItem.length());
@@ -798,7 +798,7 @@ static void addEncodedBlobItemToSoupMessageBody(SoupMessage* message, const Blob
 }
 
 static void addEncodedBlobToSoupMessageBody(SoupMessage* message, const FormDataElement& element, unsigned long& totalBodySize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<BlobData> blobData = static_cast<BlobRegistryImpl&>(blobRegistry()).getBlobDataFromURL(URL(ParsedURLString, element.m_url));
     if (!blobData)
         return;
@@ -808,7 +808,7 @@ static void addEncodedBlobToSoupMessageBody(SoupMessage* message, const FormData
 }
 
 static bool addFormElementsToSoupMessage(SoupMessage* message, const char*, FormData* httpBody, unsigned long& totalBodySize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     soup_message_body_set_accumulate(message->request_body, FALSE);
     size_t numElements = httpBody->elements().size();
     for (size_t i = 0; i < numElements; i++) {
@@ -839,24 +839,24 @@ static bool addFormElementsToSoupMessage(SoupMessage* message, const char*, Form
 
 #if ENABLE(WEB_TIMING)
 static double milisecondsSinceRequest(double requestTime)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return (monotonicallyIncreasingTime() - requestTime) * 1000.0;
 }
 
 void ResourceHandle::didStartRequest()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     getInternal()->m_response.networkLoadTiming().requestStart = milisecondsSinceRequest(m_requestTime);
 }
 
 #if SOUP_CHECK_VERSION(2, 49, 91)
 static void startingCallback(SoupMessage*, ResourceHandle* handle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     handle->didStartRequest();
 }
 #endif // SOUP_CHECK_VERSION(2, 49, 91)
 
 static void networkEventCallback(SoupMessage*, GSocketClientEvent event, GIOStream*, gpointer data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ResourceHandle* handle = static_cast<ResourceHandle*>(data);
     if (!handle)
         return;
@@ -909,7 +909,7 @@ static void networkEventCallback(SoupMessage*, GSocketClientEvent event, GIOStre
 #endif
 
 static bool createSoupMessageForHandleAndRequest(ResourceHandle* handle, const ResourceRequest& request)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(handle);
 
     ResourceHandleInternal* d = handle->getInternal();
@@ -978,7 +978,7 @@ static bool createSoupMessageForHandleAndRequest(ResourceHandle* handle, const R
 }
 
 static bool createSoupRequestAndMessageForHandle(ResourceHandle* handle, const ResourceRequest& request)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ResourceHandleInternal* d = handle->getInternal();
 
     GUniquePtr<SoupURI> soupURI = request.createSoupURI();
@@ -1004,7 +1004,7 @@ static bool createSoupRequestAndMessageForHandle(ResourceHandle* handle, const R
 }
 
 bool ResourceHandle::start()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!d->m_soupMessage);
 
     // The frame could be null if the ResourceHandle is not associated to any
@@ -1037,7 +1037,7 @@ bool ResourceHandle::start()
 }
 
 RefPtr<ResourceHandle> ResourceHandle::releaseForDownload(ResourceHandleClient* downloadClient)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We don't adopt the ref, as it will be released by cleanupSoupRequestOperation, which should always run.
     ResourceHandle* newHandle = new ResourceHandle(d->m_context.get(), firstRequest(), nullptr, d->m_defersLoading, d->m_shouldContentSniff);
     newHandle->relaxAdoptionRequirement();
@@ -1053,13 +1053,13 @@ RefPtr<ResourceHandle> ResourceHandle::releaseForDownload(ResourceHandleClient* 
 }
 
 void ResourceHandle::timeoutFired()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     client()->didFail(this, ResourceError::timeoutError(firstRequest().url()));
     cancel();
 }
 
 void ResourceHandle::sendPendingRequest()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(WEB_TIMING)
     m_requestTime = monotonicallyIncreasingTime();
 #endif
@@ -1075,7 +1075,7 @@ void ResourceHandle::sendPendingRequest()
 }
 
 void ResourceHandle::cancel()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     d->m_cancelled = true;
     if (d->m_soupMessage)
         soup_session_cancel_message(d->soupSession(), d->m_soupMessage.get(), SOUP_STATUS_CANCELLED);
@@ -1084,34 +1084,34 @@ void ResourceHandle::cancel()
 }
 
 bool ResourceHandle::shouldUseCredentialStorage()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return (!client() || client()->shouldUseCredentialStorage(this)) && firstRequest().url().protocolIsInHTTPFamily();
 }
 
 void ResourceHandle::setHostAllowsAnyHTTPSCertificate(const String& host)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     allowsAnyHTTPSCertificateHosts().add(host);
 }
 
 void ResourceHandle::setClientCertificate(const String& host, GTlsCertificate* certificate)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     clientCertificates().add(host, HostTLSCertificateSet()).iterator->value.add(certificate);
 }
 
 void ResourceHandle::setIgnoreSSLErrors(bool ignoreSSLErrors)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     gIgnoreSSLErrors = ignoreSSLErrors;
 }
 
 #if PLATFORM(GTK)
 void getCredentialFromPersistentStoreCallback(const Credential& credential, void* data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static_cast<ResourceHandle*>(data)->continueDidReceiveAuthenticationChallenge(credential);
 }
 #endif
 
 void ResourceHandle::continueDidReceiveAuthenticationChallenge(const Credential& credentialFromPersistentStorage)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!d->m_currentWebChallenge.isNull());
     AuthenticationChallenge& challenge = d->m_currentWebChallenge;
 
@@ -1132,7 +1132,7 @@ void ResourceHandle::continueDidReceiveAuthenticationChallenge(const Credential&
 }
 
 void ResourceHandle::didReceiveAuthenticationChallenge(const AuthenticationChallenge& challenge)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(d->m_currentWebChallenge.isNull());
 
     // FIXME: Per the specification, the user shouldn't be asked for credentials if there were incorrect ones provided explicitly.
@@ -1178,7 +1178,7 @@ void ResourceHandle::didReceiveAuthenticationChallenge(const AuthenticationChall
 }
 
 void ResourceHandle::receivedRequestToContinueWithoutCredential(const AuthenticationChallenge& challenge)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!challenge.isNull());
     if (challenge != d->m_currentWebChallenge)
         return;
@@ -1188,7 +1188,7 @@ void ResourceHandle::receivedRequestToContinueWithoutCredential(const Authentica
 }
 
 void ResourceHandle::receivedCredential(const AuthenticationChallenge& challenge, const Credential& credential)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!challenge.isNull());
     if (challenge != d->m_currentWebChallenge)
         return;
@@ -1224,7 +1224,7 @@ void ResourceHandle::receivedCredential(const AuthenticationChallenge& challenge
 }
 
 void ResourceHandle::receivedCancellation(const AuthenticationChallenge& challenge)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!challenge.isNull());
     if (challenge != d->m_currentWebChallenge)
         return;
@@ -1245,19 +1245,19 @@ void ResourceHandle::receivedCancellation(const AuthenticationChallenge& challen
 }
 
 void ResourceHandle::receivedRequestToPerformDefaultHandling(const AuthenticationChallenge&)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
 }
 
 void ResourceHandle::receivedChallengeRejection(const AuthenticationChallenge& challenge)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This is only used by layout tests, soup based ports don't implement this.
     notImplemented();
     receivedRequestToContinueWithoutCredential(challenge);
 }
 
 static bool waitingToSendRequest(ResourceHandle* handle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We need to check for d->m_soupRequest because the request may have raised a failure
     // (for example invalid URLs). We cannot  simply check for d->m_scheduledFailure because
     // it's cleared as soon as the failure event is fired.
@@ -1265,7 +1265,7 @@ static bool waitingToSendRequest(ResourceHandle* handle)
 }
 
 void ResourceHandle::platformSetDefersLoading(bool defersLoading)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (cancelledOrClientless())
         return;
 
@@ -1291,7 +1291,7 @@ void ResourceHandle::platformSetDefersLoading(bool defersLoading)
 }
 
 void ResourceHandle::platformLoadResourceSynchronously(NetworkingContext* context, const ResourceRequest& request, StoredCredentials storedCredentials, ResourceError& error, ResourceResponse& response, Vector<char>& data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!loadingSynchronousRequest);
     if (loadingSynchronousRequest) // In practice this cannot happen, but if for some reason it does,
         return;                    // we want to avoid accidentally going into an infinite loop of requests.
@@ -1309,7 +1309,7 @@ void ResourceHandle::platformLoadResourceSynchronously(NetworkingContext* contex
 }
 
 static void readCallback(GObject*, GAsyncResult* asyncResult, gpointer data)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<ResourceHandle> handle = static_cast<ResourceHandle*>(data);
 
     if (handle->cancelledOrClientless()) {
@@ -1372,13 +1372,13 @@ static void readCallback(GObject*, GAsyncResult* asyncResult, gpointer data)
 }
 
 void ResourceHandle::continueWillSendRequest(ResourceRequest&& request)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!client() || client()->usesAsyncCallbacks());
     continueAfterWillSendRequest(this, WTFMove(request));
 }
 
 void ResourceHandle::continueDidReceiveResponse()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!client() || client()->usesAsyncCallbacks());
     continueAfterDidReceiveResponse(this);
 }

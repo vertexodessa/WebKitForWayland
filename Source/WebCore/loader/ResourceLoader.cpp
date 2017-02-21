@@ -65,16 +65,16 @@ ResourceLoader::ResourceLoader(Frame& frame, ResourceLoaderOptions options)
     , m_documentLoader(frame.loader().activeDocumentLoader())
     , m_defersLoading(options.defersLoadingPolicy == DefersLoadingPolicy::AllowDefersLoading && frame.page()->defersLoading())
     , m_options(options)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 ResourceLoader::~ResourceLoader()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_reachedTerminalState);
 }
 
 void ResourceLoader::finishNetworkLoad()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     platformStrategies()->loaderStrategy()->remove(this);
 
     if (m_handle) {
@@ -85,7 +85,7 @@ void ResourceLoader::finishNetworkLoad()
 }
 
 void ResourceLoader::releaseResources()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_reachedTerminalState);
     
     // It's possible that when we release the handle, it will be
@@ -110,7 +110,7 @@ void ResourceLoader::releaseResources()
 }
 
 bool ResourceLoader::init(const ResourceRequest& r)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_handle);
     ASSERT(m_request.isNull());
     ASSERT(m_deferredRequest.isNull());
@@ -163,7 +163,7 @@ bool ResourceLoader::init(const ResourceRequest& r)
 }
 
 void ResourceLoader::deliverResponseAndData(const ResourceResponse& response, RefPtr<SharedBuffer>&& buffer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<ResourceLoader> protectedThis(*this);
 
     didReceiveResponse(response);
@@ -181,7 +181,7 @@ void ResourceLoader::deliverResponseAndData(const ResourceResponse& response, Re
 }
 
 void ResourceLoader::start()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_handle);
     ASSERT(!m_request.isNull());
     ASSERT(m_deferredRequest.isNull());
@@ -212,7 +212,7 @@ void ResourceLoader::start()
 }
 
 void ResourceLoader::setDefersLoading(bool defers)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_options.defersLoadingPolicy == DefersLoadingPolicy::DisallowDefersLoading)
         return;
 
@@ -229,14 +229,14 @@ void ResourceLoader::setDefersLoading(bool defers)
 }
 
 FrameLoader* ResourceLoader::frameLoader() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_frame)
         return nullptr;
     return &m_frame->loader();
 }
 
 void ResourceLoader::loadDataURL()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto url = m_request.url();
     ASSERT(url.protocolIsData());
 
@@ -270,7 +270,7 @@ void ResourceLoader::loadDataURL()
 }
 
 void ResourceLoader::setDataBufferingPolicy(DataBufferingPolicy dataBufferingPolicy)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_options.dataBufferingPolicy = dataBufferingPolicy;
 
     // Reset any already buffered data
@@ -279,7 +279,7 @@ void ResourceLoader::setDataBufferingPolicy(DataBufferingPolicy dataBufferingPol
 }
 
 void ResourceLoader::willSwitchToSubstituteResource()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_documentLoader->isSubstituteLoadPending(this));
     platformStrategies()->loaderStrategy()->remove(this);
     if (m_handle)
@@ -287,7 +287,7 @@ void ResourceLoader::willSwitchToSubstituteResource()
 }
 
 void ResourceLoader::addDataOrBuffer(const char* data, unsigned length, SharedBuffer* buffer, DataPayloadType dataPayloadType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_options.dataBufferingPolicy == DoNotBufferData)
         return;
 
@@ -306,18 +306,18 @@ void ResourceLoader::addDataOrBuffer(const char* data, unsigned length, SharedBu
 }
 
 void ResourceLoader::clearResourceData()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_resourceData)
         m_resourceData->clear();
 }
 
 bool ResourceLoader::isSubresourceLoader()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 
 void ResourceLoader::willSendRequestInternal(ResourceRequest& request, const ResourceResponse& redirectResponse)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Protect this in this delegate method since the additional processing can do
     // anything including possibly derefing this; one example of this is Radar 3266216.
     Ref<ResourceLoader> protectedThis(*this);
@@ -389,17 +389,17 @@ void ResourceLoader::willSendRequestInternal(ResourceRequest& request, const Res
 }
 
 void ResourceLoader::willSendRequest(ResourceRequest&& request, const ResourceResponse& redirectResponse, std::function<void(ResourceRequest&&)>&& callback)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     willSendRequestInternal(request, redirectResponse);
     callback(WTFMove(request));
 }
 
 void ResourceLoader::didSendData(unsigned long long, unsigned long long)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 static void logResourceResponseSource(Frame* frame, ResourceResponse::Source source)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame || !frame->page())
         return;
 
@@ -424,7 +424,7 @@ static void logResourceResponseSource(Frame* frame, ResourceResponse::Source sou
 }
 
 void ResourceLoader::didReceiveResponse(const ResourceResponse& r)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_reachedTerminalState);
 
     // Protect this in this delegate method since the additional processing can do
@@ -468,7 +468,7 @@ void ResourceLoader::didReceiveResponse(const ResourceResponse& r)
 }
 
 void ResourceLoader::didReceiveData(const char* data, unsigned length, long long encodedDataLength, DataPayloadType dataPayloadType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // The following assertions are not quite valid here, since a subclass
     // might override didReceiveData in a way that invalidates them. This
     // happens with the steps listed in 3266216
@@ -479,12 +479,12 @@ void ResourceLoader::didReceiveData(const char* data, unsigned length, long long
 }
 
 void ResourceLoader::didReceiveBuffer(Ref<SharedBuffer>&& buffer, long long encodedDataLength, DataPayloadType dataPayloadType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didReceiveDataOrBuffer(nullptr, 0, WTFMove(buffer), encodedDataLength, dataPayloadType);
 }
 
 void ResourceLoader::didReceiveDataOrBuffer(const char* data, unsigned length, RefPtr<SharedBuffer>&& buffer, long long encodedDataLength, DataPayloadType dataPayloadType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This method should only get data+length *OR* a SharedBuffer.
     ASSERT(!buffer || (!data && !length));
 
@@ -502,7 +502,7 @@ void ResourceLoader::didReceiveDataOrBuffer(const char* data, unsigned length, R
 }
 
 void ResourceLoader::didFinishLoading(double finishTime)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didFinishLoadingOnePart(finishTime);
 
     // If the load has been cancelled by a delegate in response to didFinishLoad(), do not release
@@ -513,7 +513,7 @@ void ResourceLoader::didFinishLoading(double finishTime)
 }
 
 void ResourceLoader::didFinishLoadingOnePart(double finishTime)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If load has been cancelled after finishing (which could happen with a
     // JavaScript that changes the window location), do nothing.
     if (wasCancelled())
@@ -528,7 +528,7 @@ void ResourceLoader::didFinishLoadingOnePart(double finishTime)
 }
 
 void ResourceLoader::didFail(const ResourceError& error)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (wasCancelled())
         return;
     ASSERT(!m_reachedTerminalState);
@@ -542,7 +542,7 @@ void ResourceLoader::didFail(const ResourceError& error)
 }
 
 void ResourceLoader::cleanupForError(const ResourceError& error)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (FormData* data = m_request.httpBody())
         data->removeGeneratedFilesIfNeeded();
 
@@ -554,12 +554,12 @@ void ResourceLoader::cleanupForError(const ResourceError& error)
 }
 
 void ResourceLoader::cancel()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     cancel(ResourceError());
 }
 
 void ResourceLoader::cancel(const ResourceError& error)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If the load has already completed - succeeded, failed, or previously cancelled - do nothing.
     if (m_reachedTerminalState)
         return;
@@ -609,27 +609,27 @@ void ResourceLoader::cancel(const ResourceError& error)
 }
 
 ResourceError ResourceLoader::cancelledError()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frameLoader()->cancelledError(m_request);
 }
 
 ResourceError ResourceLoader::blockedError()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frameLoader()->client().blockedError(m_request);
 }
 
 ResourceError ResourceLoader::blockedByContentBlockerError()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frameLoader()->client().blockedByContentBlockerError(m_request);
 }
 
 ResourceError ResourceLoader::cannotShowURLError()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frameLoader()->client().cannotShowURLError(m_request);
 }
 
 ResourceRequest ResourceLoader::willSendRequest(ResourceHandle*, ResourceRequest&& request, ResourceResponse&& redirectResponse)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (documentLoader()->applicationCacheHost()->maybeLoadFallbackForRedirect(this, request, redirectResponse))
         return WTFMove(request);
     willSendRequestInternal(request, redirectResponse);
@@ -637,51 +637,51 @@ ResourceRequest ResourceLoader::willSendRequest(ResourceHandle*, ResourceRequest
 }
 
 void ResourceLoader::didSendData(ResourceHandle*, unsigned long long bytesSent, unsigned long long totalBytesToBeSent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didSendData(bytesSent, totalBytesToBeSent);
 }
 
 void ResourceLoader::didReceiveResponse(ResourceHandle*, ResourceResponse&& response)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (documentLoader()->applicationCacheHost()->maybeLoadFallbackForResponse(this, response))
         return;
     didReceiveResponse(response);
 }
 
 void ResourceLoader::didReceiveData(ResourceHandle*, const char* data, unsigned length, int encodedDataLength)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didReceiveData(data, length, encodedDataLength, DataPayloadBytes);
 }
 
 void ResourceLoader::didReceiveBuffer(ResourceHandle*, Ref<SharedBuffer>&& buffer, int encodedDataLength)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didReceiveBuffer(WTFMove(buffer), encodedDataLength, DataPayloadBytes);
 }
 
 void ResourceLoader::didFinishLoading(ResourceHandle*, double finishTime)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didFinishLoading(finishTime);
 }
 
 void ResourceLoader::didFail(ResourceHandle*, const ResourceError& error)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (documentLoader()->applicationCacheHost()->maybeLoadFallbackForError(this, error))
         return;
     didFail(error);
 }
 
 void ResourceLoader::wasBlocked(ResourceHandle*)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didFail(blockedError());
 }
 
 void ResourceLoader::cannotShowURL(ResourceHandle*)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didFail(cannotShowURLError());
 }
 
 bool ResourceLoader::shouldUseCredentialStorage()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_options.allowCredentials == DoNotAllowStoredCredentials)
         return false;
 
@@ -690,14 +690,14 @@ bool ResourceLoader::shouldUseCredentialStorage()
 }
 
 bool ResourceLoader::isAllowedToAskUserForCredentials() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_options.clientCredentialPolicy == ClientCredentialPolicy::CannotAskClientForCredentials)
         return false;
     return m_options.credentials == FetchOptions::Credentials::Include || (m_options.credentials == FetchOptions::Credentials::SameOrigin && m_frame->document()->securityOrigin()->canRequest(originalRequest().url()));
 }
 
 void ResourceLoader::didReceiveAuthenticationChallenge(const AuthenticationChallenge& challenge)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_handle->hasAuthenticationChallenge());
 
     // Protect this in this delegate method since the additional processing can do
@@ -723,7 +723,7 @@ void ResourceLoader::didReceiveAuthenticationChallenge(const AuthenticationChall
 #if USE(PROTECTION_SPACE_AUTH_CALLBACK)
 
 bool ResourceLoader::canAuthenticateAgainstProtectionSpace(const ProtectionSpace& protectionSpace)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<ResourceLoader> protectedThis(*this);
     return frameLoader()->client().canAuthenticateAgainstProtectionSpace(documentLoader(), identifier(), protectionSpace);
 }
@@ -733,27 +733,27 @@ bool ResourceLoader::canAuthenticateAgainstProtectionSpace(const ProtectionSpace
 #if PLATFORM(IOS)
 
 RetainPtr<CFDictionaryRef> ResourceLoader::connectionProperties(ResourceHandle*)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frameLoader()->connectionProperties(this);
 }
 
 #endif
 
 void ResourceLoader::receivedCancellation(const AuthenticationChallenge&)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     cancel();
 }
 
 #if PLATFORM(COCOA) && !USE(CFNETWORK)
 
 void ResourceLoader::schedule(SchedulePair& pair)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_handle)
         m_handle->schedule(pair);
 }
 
 void ResourceLoader::unschedule(SchedulePair& pair)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_handle)
         m_handle->unschedule(pair);
 }
@@ -762,14 +762,14 @@ void ResourceLoader::unschedule(SchedulePair& pair)
 
 #if USE(QUICK_LOOK)
 void ResourceLoader::didCreateQuickLookHandle(QuickLookHandle& handle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_isQuickLookResource = true;
     frameLoader()->client().didCreateQuickLookHandle(handle);
 }
 #endif
 
 bool ResourceLoader::isAlwaysOnLoggingAllowed() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return frameLoader() && frameLoader()->isAlwaysOnLoggingAllowed();
 }
 

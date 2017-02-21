@@ -67,12 +67,12 @@ namespace WebCore {
 #define PCLOG(...) LOG(PageCache, "%*s%s", indentLevel*4, "", makeString(__VA_ARGS__).utf8().data())
 
 static inline void logPageCacheFailureDiagnosticMessage(DiagnosticLoggingClient& client, const String& reason)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     client.logDiagnosticMessageWithValue(DiagnosticLoggingKeys::pageCacheKey(), DiagnosticLoggingKeys::failureKey(), reason, ShouldSample::Yes);
 }
 
 static inline void logPageCacheFailureDiagnosticMessage(Page* page, const String& reason)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!page)
         return;
 
@@ -80,7 +80,7 @@ static inline void logPageCacheFailureDiagnosticMessage(Page* page, const String
 }
 
 static bool canCacheFrame(Frame& frame, DiagnosticLoggingClient& diagnosticLoggingClient, unsigned indentLevel)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     PCLOG("+---");
     FrameLoader& frameLoader = frame.loader();
 
@@ -189,7 +189,7 @@ static bool canCacheFrame(Frame& frame, DiagnosticLoggingClient& diagnosticLoggi
 }
 
 static bool canCachePage(Page& page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     unsigned indentLevel = 0;
     PCLOG("--------\n Determining if page can be cached:");
 
@@ -271,13 +271,13 @@ static bool canCachePage(Page& page)
 }
 
 PageCache& PageCache::singleton()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static NeverDestroyed<PageCache> globalPageCache;
     return globalPageCache;
 }
     
 bool PageCache::canCache(Page& page) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_maxSize) {
         logPageCacheFailureDiagnosticMessage(&page, DiagnosticLoggingKeys::isDisabledKey());
         return false;
@@ -292,19 +292,19 @@ bool PageCache::canCache(Page& page) const
 }
 
 void PageCache::pruneToSizeNow(unsigned size, PruningReason pruningReason)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TemporaryChange<unsigned> change(m_maxSize, size);
     prune(pruningReason);
 }
 
 void PageCache::setMaxSize(unsigned maxSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_maxSize = maxSize;
     prune(PruningReason::None);
 }
 
 unsigned PageCache::frameCount() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     unsigned frameCount = m_items.size();
     for (auto& item : m_items) {
         ASSERT(item->m_cachedPage);
@@ -315,7 +315,7 @@ unsigned PageCache::frameCount() const
 }
 
 void PageCache::markPagesForVisitedLinkStyleRecalc()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& item : m_items) {
         ASSERT(item->m_cachedPage);
         item->m_cachedPage->markForVisitedLinkStyleRecalc();
@@ -323,7 +323,7 @@ void PageCache::markPagesForVisitedLinkStyleRecalc()
 }
 
 void PageCache::markPagesForFullStyleRecalc(Page& page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& item : m_items) {
         CachedPage& cachedPage = *item->m_cachedPage;
         if (&page.mainFrame() == &cachedPage.cachedMainFrame()->view()->frame())
@@ -332,7 +332,7 @@ void PageCache::markPagesForFullStyleRecalc(Page& page)
 }
 
 void PageCache::markPagesForDeviceOrPageScaleChanged(Page& page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& item : m_items) {
         CachedPage& cachedPage = *item->m_cachedPage;
         if (&page.mainFrame() == &cachedPage.cachedMainFrame()->view()->frame())
@@ -341,7 +341,7 @@ void PageCache::markPagesForDeviceOrPageScaleChanged(Page& page)
 }
 
 void PageCache::markPagesForContentsSizeChanged(Page& page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& item : m_items) {
         CachedPage& cachedPage = *item->m_cachedPage;
         if (&page.mainFrame() == &cachedPage.cachedMainFrame()->view()->frame())
@@ -351,7 +351,7 @@ void PageCache::markPagesForContentsSizeChanged(Page& page)
 
 #if ENABLE(VIDEO_TRACK)
 void PageCache::markPagesForCaptionPreferencesChanged()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& item : m_items) {
         ASSERT(item->m_cachedPage);
         item->m_cachedPage->markForCaptionPreferencesChanged();
@@ -360,7 +360,7 @@ void PageCache::markPagesForCaptionPreferencesChanged()
 #endif
 
 static String pruningReasonToDiagnosticLoggingKey(PruningReason pruningReason)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (pruningReason) {
     case PruningReason::MemoryPressure:
         return DiagnosticLoggingKeys::prunedDueToMemoryPressureKey();
@@ -376,7 +376,7 @@ static String pruningReasonToDiagnosticLoggingKey(PruningReason pruningReason)
 }
 
 static void setInPageCache(Page& page, bool isInPageCache)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (Frame* frame = &page.mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (auto* document = frame->document())
             document->setInPageCache(isInPageCache);
@@ -384,7 +384,7 @@ static void setInPageCache(Page& page, bool isInPageCache)
 }
 
 static void firePageHideEventRecursively(Frame& frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* document = frame.document();
     if (!document)
         return;
@@ -402,7 +402,7 @@ static void firePageHideEventRecursively(Frame& frame)
 }
 
 void PageCache::addIfCacheable(HistoryItem& item, Page* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (item.isInPageCache())
         return;
 
@@ -438,7 +438,7 @@ void PageCache::addIfCacheable(HistoryItem& item, Page* page)
 }
 
 std::unique_ptr<CachedPage> PageCache::take(HistoryItem& item, Page* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!item.m_cachedPage) {
         if (item.m_pruningReason != PruningReason::None)
             logPageCacheFailureDiagnosticMessage(page, pruningReasonToDiagnosticLoggingKey(item.m_pruningReason));
@@ -458,7 +458,7 @@ std::unique_ptr<CachedPage> PageCache::take(HistoryItem& item, Page* page)
 }
 
 CachedPage* PageCache::get(HistoryItem& item, Page* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     CachedPage* cachedPage = item.m_cachedPage.get();
     if (!cachedPage) {
         if (item.m_pruningReason != PruningReason::None)
@@ -476,7 +476,7 @@ CachedPage* PageCache::get(HistoryItem& item, Page* page)
 }
 
 void PageCache::remove(HistoryItem& item)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Safely ignore attempts to remove items not in the cache.
     if (!item.m_cachedPage)
         return;
@@ -486,7 +486,7 @@ void PageCache::remove(HistoryItem& item)
 }
 
 void PageCache::prune(PruningReason pruningReason)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     while (pageCount() > maxSize()) {
         auto oldestItem = m_items.takeFirst();
         oldestItem->m_cachedPage = nullptr;

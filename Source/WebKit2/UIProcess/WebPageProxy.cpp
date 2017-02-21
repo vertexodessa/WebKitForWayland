@@ -918,7 +918,6 @@ void WebPageProxy::addPlatformLoadParameters(LoadParameters&)
 
 RefPtr<API::Navigation> WebPageProxy::loadRequest(const ResourceRequest& request, ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicy, API::Object* userData)
 {
-    WTF_AUTO_THREAD_ENABLE(); WTF_SCOPE0(__FUNCTION__);
     if (m_isClosed)
         return nullptr;
 

@@ -66,24 +66,24 @@ private:
 RenderTreeUpdater::Parent::Parent(ContainerNode& root)
     : element(is<Document>(root) ? nullptr : downcast<Element>(&root))
     , renderTreePosition(RenderTreePosition(*root.renderer()))
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 RenderTreeUpdater::Parent::Parent(Element& element, Style::Change styleChange)
     : element(&element)
     , styleChange(styleChange)
     , renderTreePosition(element.renderer() ? makeOptional(RenderTreePosition(*element.renderer())) : Nullopt)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 
 RenderTreeUpdater::RenderTreeUpdater(Document& document)
     : m_document(document)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 static ContainerNode* findRenderingRoot(ContainerNode& node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (node.renderer())
         return &node;
     for (auto& ancestor : composedTreeAncestors(node)) {
@@ -96,7 +96,7 @@ static ContainerNode* findRenderingRoot(ContainerNode& node)
 }
 
 static ListHashSet<ContainerNode*> findRenderingRoots(Style::Update& update)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ListHashSet<ContainerNode*> renderingRoots;
     for (auto* root : update.roots()) {
         auto* renderingRoot = findRenderingRoot(*root);
@@ -108,7 +108,7 @@ static ListHashSet<ContainerNode*> findRenderingRoots(Style::Update& update)
 }
 
 void RenderTreeUpdater::commit(std::unique_ptr<Style::Update> styleUpdate)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(&m_document == &styleUpdate->document());
 
     if (!m_document.shouldCreateRenderers() || !m_document.renderView())
@@ -125,7 +125,7 @@ void RenderTreeUpdater::commit(std::unique_ptr<Style::Update> styleUpdate)
 }
 
 static bool shouldCreateRenderer(const Element& element, const RenderElement& parentRenderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!parentRenderer.canHaveChildren() && !(element.isPseudoElement() && parentRenderer.canHaveGeneratedChildren()))
         return false;
     if (parentRenderer.element() && !parentRenderer.element()->childShouldCreateRenderer(element))
@@ -134,7 +134,7 @@ static bool shouldCreateRenderer(const Element& element, const RenderElement& pa
 }
 
 void RenderTreeUpdater::updateRenderTree(ContainerNode& root)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(root.renderer());
     ASSERT(m_parentStack.isEmpty());
 
@@ -191,7 +191,7 @@ void RenderTreeUpdater::updateRenderTree(ContainerNode& root)
 }
 
 RenderTreePosition& RenderTreeUpdater::renderTreePosition()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (unsigned i = m_parentStack.size(); i; --i) {
         if (auto& position = m_parentStack[i - 1].renderTreePosition)
             return *position;
@@ -201,14 +201,14 @@ RenderTreePosition& RenderTreeUpdater::renderTreePosition()
 }
 
 void RenderTreeUpdater::pushParent(Element& element, Style::Change changeType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_parentStack.append(Parent(element, changeType));
 
     updateBeforeOrAfterPseudoElement(element, BEFORE);
 }
 
 void RenderTreeUpdater::popParent()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto& parent = m_parentStack.last();
 
     if (parent.element) {
@@ -221,7 +221,7 @@ void RenderTreeUpdater::popParent()
 }
 
 void RenderTreeUpdater::popParentsToDepth(unsigned depth)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_parentStack.size() >= depth);
 
     while (m_parentStack.size() > depth)
@@ -229,7 +229,7 @@ void RenderTreeUpdater::popParentsToDepth(unsigned depth)
 }
 
 static bool pseudoStyleCacheIsInvalid(RenderElement* renderer, RenderStyle* newStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderStyle& currentStyle = renderer->style();
 
     const PseudoStyleCache* pseudoStyleCache = currentStyle.cachedPseudoStyles();
@@ -262,7 +262,7 @@ static bool pseudoStyleCacheIsInvalid(RenderElement* renderer, RenderStyle* newS
 }
 
 void RenderTreeUpdater::updateElementRenderer(Element& element, Style::ElementUpdate& update)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(IOS)
     CheckForVisibilityChange checkForVisibilityChange(element);
 #endif
@@ -309,7 +309,7 @@ void RenderTreeUpdater::updateElementRenderer(Element& element, Style::ElementUp
 
 #if ENABLE(CSS_REGIONS)
 static RenderNamedFlowThread* moveToFlowThreadIfNeeded(Element& element, const RenderStyle& style)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!element.shouldMoveToFlowThread(style))
         return nullptr;
 
@@ -321,7 +321,7 @@ static RenderNamedFlowThread* moveToFlowThreadIfNeeded(Element& element, const R
 #endif
 
 void RenderTreeUpdater::createRenderer(Element& element, RenderStyle&& style)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!shouldCreateRenderer(element, renderTreePosition().parent()))
         return;
 
@@ -376,7 +376,7 @@ void RenderTreeUpdater::createRenderer(Element& element, RenderStyle&& style)
 }
 
 static bool textRendererIsNeeded(const Text& textNode, const RenderTreePosition& renderTreePosition)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderElement& parentRenderer = renderTreePosition.parent();
     if (!parentRenderer.canHaveChildren())
         return false;
@@ -419,7 +419,7 @@ static bool textRendererIsNeeded(const Text& textNode, const RenderTreePosition&
 }
 
 static void createTextRenderer(Text& textNode, RenderTreePosition& renderTreePosition)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!textNode.renderer());
 
     auto newRenderer = textNode.createTextRenderer(renderTreePosition.parent().style());
@@ -439,7 +439,7 @@ static void createTextRenderer(Text& textNode, RenderTreePosition& renderTreePos
 }
 
 void RenderTreeUpdater::updateTextRenderer(Text& text)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool hasRenderer = text.renderer();
     bool needsRenderer = textRendererIsNeeded(text, renderTreePosition());
     if (hasRenderer) {
@@ -456,7 +456,7 @@ void RenderTreeUpdater::updateTextRenderer(Text& text)
 }
 
 void RenderTreeUpdater::invalidateWhitespaceOnlyTextSiblingsAfterAttachIfNeeded(Node& current)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: This needs to traverse in composed tree order.
 
     // This function finds sibling text renderers where the results of textRendererIsNeeded may have changed as a result of
@@ -482,7 +482,7 @@ void RenderTreeUpdater::invalidateWhitespaceOnlyTextSiblingsAfterAttachIfNeeded(
 }
 
 static bool needsPseudoElement(Element& current, PseudoId pseudoId)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!current.renderer() || !current.renderer()->canHaveGeneratedChildren())
         return false;
     if (current.isPseudoElement())
@@ -493,7 +493,7 @@ static bool needsPseudoElement(Element& current, PseudoId pseudoId)
 }
 
 void RenderTreeUpdater::updateBeforeOrAfterPseudoElement(Element& current, PseudoId pseudoId)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     PseudoElement* pseudoElement = pseudoId == BEFORE ? current.beforePseudoElement() : current.afterPseudoElement();
 
     auto* renderer = pseudoElement ? pseudoElement->renderer() : nullptr;
@@ -537,7 +537,7 @@ void RenderTreeUpdater::updateBeforeOrAfterPseudoElement(Element& current, Pseud
 }
 
 void RenderTreeUpdater::tearDownRenderers(Element& root, TeardownType teardownType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WidgetHierarchyUpdatesSuspensionScope suspendWidgetHierarchyUpdates;
 
     Vector<Element*, 30> teardownStack;
@@ -583,7 +583,7 @@ void RenderTreeUpdater::tearDownRenderers(Element& root, TeardownType teardownTy
 }
 
 void RenderTreeUpdater::tearDownRenderer(Text& text)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* renderer = text.renderer();
     if (!renderer)
         return;
@@ -593,7 +593,7 @@ void RenderTreeUpdater::tearDownRenderer(Text& text)
 
 #if PLATFORM(IOS)
 static EVisibility elementImplicitVisibility(const Element& element)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* renderer = element.renderer();
     if (!renderer)
         return VISIBLE;
@@ -620,11 +620,11 @@ CheckForVisibilityChange::CheckForVisibilityChange(const Element& element)
     , m_previousDisplay(element.renderStyle() ? element.renderStyle()->display() : NONE)
     , m_previousVisibility(element.renderStyle() ? element.renderStyle()->visibility() : HIDDEN)
     , m_previousImplicitVisibility(WKObservingContentChanges() && WKObservedContentChange() != WKContentVisibilityChange ? elementImplicitVisibility(element) : VISIBLE)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 CheckForVisibilityChange::~CheckForVisibilityChange()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!WKObservingContentChanges())
         return;
     if (m_element.isInUserAgentShadowTree())

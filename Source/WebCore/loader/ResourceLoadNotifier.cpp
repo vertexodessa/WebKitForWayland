@@ -51,28 +51,28 @@ namespace WebCore {
 
 ResourceLoadNotifier::ResourceLoadNotifier(Frame& frame)
     : m_frame(frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 void ResourceLoadNotifier::didReceiveAuthenticationChallenge(ResourceLoader* loader, const AuthenticationChallenge& currentWebChallenge)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didReceiveAuthenticationChallenge(loader->identifier(), loader->documentLoader(), currentWebChallenge);
 }
 
 void ResourceLoadNotifier::didReceiveAuthenticationChallenge(unsigned long identifier, DocumentLoader* loader, const AuthenticationChallenge& currentWebChallenge)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_frame.loader().client().dispatchDidReceiveAuthenticationChallenge(loader, identifier, currentWebChallenge);
 }
 
 void ResourceLoadNotifier::willSendRequest(ResourceLoader* loader, ResourceRequest& clientRequest, const ResourceResponse& redirectResponse)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_frame.loader().applyUserAgent(clientRequest);
 
     dispatchWillSendRequest(loader->documentLoader(), loader->identifier(), clientRequest, redirectResponse);
 }
 
 void ResourceLoadNotifier::didReceiveResponse(ResourceLoader* loader, const ResourceResponse& r)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     loader->documentLoader()->addResponse(r);
 
     if (Page* page = m_frame.page())
@@ -82,7 +82,7 @@ void ResourceLoadNotifier::didReceiveResponse(ResourceLoader* loader, const Reso
 }
 
 void ResourceLoadNotifier::didReceiveData(ResourceLoader* loader, const char* data, int dataLength, int encodedDataLength)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Page* page = m_frame.page())
         page->progress().incrementProgress(loader->identifier(), dataLength);
 
@@ -90,14 +90,14 @@ void ResourceLoadNotifier::didReceiveData(ResourceLoader* loader, const char* da
 }
 
 void ResourceLoadNotifier::didFinishLoad(ResourceLoader* loader, double finishTime)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);    
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();    
     if (Page* page = m_frame.page())
         page->progress().completeProgress(loader->identifier());
     dispatchDidFinishLoading(loader->documentLoader(), loader->identifier(), finishTime);
 }
 
 void ResourceLoadNotifier::didFailToLoad(ResourceLoader* loader, const ResourceError& error)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Page* page = m_frame.page())
         page->progress().completeProgress(loader->identifier());
 
@@ -110,12 +110,12 @@ void ResourceLoadNotifier::didFailToLoad(ResourceLoader* loader, const ResourceE
 }
 
 void ResourceLoadNotifier::assignIdentifierToInitialRequest(unsigned long identifier, DocumentLoader* loader, const ResourceRequest& request)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_frame.loader().client().assignIdentifierToInitialRequest(identifier, loader, request);
 }
 
 void ResourceLoadNotifier::dispatchWillSendRequest(DocumentLoader* loader, unsigned long identifier, ResourceRequest& request, const ResourceResponse& redirectResponse)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if USE(QUICK_LOOK)
     // Always allow QuickLook-generated URLs based on the protocol scheme.
     if (!request.isNull() && request.url().protocolIs(QLPreviewProtocol()))
@@ -144,7 +144,7 @@ void ResourceLoadNotifier::dispatchWillSendRequest(DocumentLoader* loader, unsig
 }
 
 void ResourceLoadNotifier::dispatchDidReceiveResponse(DocumentLoader* loader, unsigned long identifier, const ResourceResponse& r, ResourceLoader* resourceLoader)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Notifying the FrameLoaderClient may cause the frame to be destroyed.
     Ref<Frame> protect(m_frame);
     m_frame.loader().client().dispatchDidReceiveResponse(loader, identifier, r);
@@ -154,7 +154,7 @@ void ResourceLoadNotifier::dispatchDidReceiveResponse(DocumentLoader* loader, un
 }
 
 void ResourceLoadNotifier::dispatchDidReceiveData(DocumentLoader* loader, unsigned long identifier, const char* data, int dataLength, int encodedDataLength)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Notifying the FrameLoaderClient may cause the frame to be destroyed.
     Ref<Frame> protect(m_frame);
     m_frame.loader().client().dispatchDidReceiveContentLength(loader, identifier, dataLength);
@@ -163,7 +163,7 @@ void ResourceLoadNotifier::dispatchDidReceiveData(DocumentLoader* loader, unsign
 }
 
 void ResourceLoadNotifier::dispatchDidFinishLoading(DocumentLoader* loader, unsigned long identifier, double finishTime)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Notifying the FrameLoaderClient may cause the frame to be destroyed.
     Ref<Frame> protect(m_frame);
     m_frame.loader().client().dispatchDidFinishLoading(loader, identifier);
@@ -172,7 +172,7 @@ void ResourceLoadNotifier::dispatchDidFinishLoading(DocumentLoader* loader, unsi
 }
 
 void ResourceLoadNotifier::dispatchDidFailLoading(DocumentLoader* loader, unsigned long identifier, const ResourceError& error)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Notifying the FrameLoaderClient may cause the frame to be destroyed.
     Ref<Frame> protect(m_frame);
     m_frame.loader().client().dispatchDidFailLoading(loader, identifier, error);
@@ -181,7 +181,7 @@ void ResourceLoadNotifier::dispatchDidFailLoading(DocumentLoader* loader, unsign
 }
 
 void ResourceLoadNotifier::sendRemainingDelegateMessages(DocumentLoader* loader, unsigned long identifier, const ResourceRequest& request, const ResourceResponse& response, const char* data, int dataLength, int encodedDataLength, const ResourceError& error)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If the request is null, willSendRequest cancelled the load. We should
     // only dispatch didFailLoading in this case.
     if (request.isNull()) {

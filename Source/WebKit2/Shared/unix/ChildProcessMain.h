@@ -39,6 +39,9 @@
 #include <wtf/macros.h>
 #include <unistd.h>
 
+#include <condition_variable>
+#include <mutex>
+
 namespace WebKit {
 
 class ChildProcessMainBase {
@@ -53,23 +56,23 @@ protected:
     ChildProcessInitializationParameters m_parameters;
 };
 
-extern bool gShouldDumpWtfStats;
-void switchDumpVar(int signal);
 
-#define DUMP_PREFIX "/opt/"
+extern std::mutex m;
+extern std::condition_variable cv;
 
-class WtfDumpFileTimer {
-  public:
-  WtfDumpFileTimer(std::string fname) : m_fname(fname) { }
-    void TimerFired();
-  private:
-    std::string m_fname;
-};
+void dumpTraces(int);
+void watchThread();
 
 template<typename ChildProcessType, typename ChildProcessMainType>
 int ChildProcessMain(int argc, char** argv)
 {
-    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+
+    EASY_PROFILER_ENABLE;
+    EASY_MAIN_THREAD;
+    profiler::startListen();
+
+
+    AUTO_EASY_THREAD(); EASY_FUNCTION();
     ChildProcessMainType childMain;
 
     InitializeWebKit2();
@@ -82,20 +85,12 @@ int ChildProcessMain(int argc, char** argv)
 
     ChildProcessType::singleton().initialize(childMain.initializationParameters());
 
-    int sig = SIGUSR1;
+    int sig = SIGUSR2;
     fprintf(stderr, "III: installing signal handler (%d)!\n", sig);
-    signal(sig, switchDumpVar);
+    signal(sig, dumpTraces);
 
-    std::string fname;
-    fname = DUMP_PREFIX;
-    fname += std::to_string(syscall(SYS_gettid));
-    fname += ".webkittrace.wtf-trace";
-
-    WtfDumpFileTimer wtfDumpFileTimer(fname);
-
-    RunLoop::Timer<WtfDumpFileTimer> t(RunLoop::main(), &wtfDumpFileTimer, &WtfDumpFileTimer::TimerFired);
-
-    t.startRepeating(5);
+    std::thread t(watchThread);
+    t.detach();
 
     RunLoop::run();
     childMain.platformFinalize();

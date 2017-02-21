@@ -117,13 +117,13 @@ using namespace HTMLNames;
 using namespace XMLNames;
 
 static HashMap<Element*, Vector<RefPtr<Attr>>>& attrNodeListMap()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static NeverDestroyed<HashMap<Element*, Vector<RefPtr<Attr>>>> map;
     return map;
 }
 
 static Vector<RefPtr<Attr>>* attrNodeListForElement(Element& element)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!element.hasSyntheticAttrChildNodes())
         return nullptr;
     ASSERT(attrNodeListMap().contains(&element));
@@ -131,7 +131,7 @@ static Vector<RefPtr<Attr>>* attrNodeListForElement(Element& element)
 }
 
 static Vector<RefPtr<Attr>>& ensureAttrNodeListForElement(Element& element)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (element.hasSyntheticAttrChildNodes()) {
         ASSERT(attrNodeListMap().contains(&element));
         return attrNodeListMap().find(&element)->value;
@@ -142,7 +142,7 @@ static Vector<RefPtr<Attr>>& ensureAttrNodeListForElement(Element& element)
 }
 
 static void removeAttrNodeListForElement(Element& element)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(element.hasSyntheticAttrChildNodes());
     ASSERT(attrNodeListMap().contains(&element));
     attrNodeListMap().remove(&element);
@@ -150,7 +150,7 @@ static void removeAttrNodeListForElement(Element& element)
 }
 
 static Attr* findAttrNodeInList(Vector<RefPtr<Attr>>& attrNodeList, const QualifiedName& name)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& node : attrNodeList) {
         if (node->qualifiedName().matches(name))
             return node.get();
@@ -159,7 +159,7 @@ static Attr* findAttrNodeInList(Vector<RefPtr<Attr>>& attrNodeList, const Qualif
 }
 
 static Attr* findAttrNodeInList(Vector<RefPtr<Attr>>& attrNodeList, const AtomicString& localName, bool shouldIgnoreAttributeCase)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const AtomicString& caseAdjustedName = shouldIgnoreAttributeCase ? localName.convertToASCIILowercase() : localName;
     for (auto& node : attrNodeList) {
         if (node->qualifiedName().localName() == caseAdjustedName)
@@ -169,18 +169,18 @@ static Attr* findAttrNodeInList(Vector<RefPtr<Attr>>& attrNodeList, const Atomic
 }
 
 Ref<Element> Element::create(const QualifiedName& tagName, Document& document)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return adoptRef(*new Element(tagName, document, CreateElement));
 }
 
 Element::Element(const QualifiedName& tagName, Document& document, ConstructionType type)
     : ContainerNode(document, type)
     , m_tagName(tagName)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 Element::~Element()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #ifndef NDEBUG
     if (document().hasLivingRenderTree()) {
         // When the document is not destroyed, an element that was part of a named flow
@@ -205,74 +205,74 @@ Element::~Element()
 }
 
 inline ElementRareData* Element::elementRareData() const
-{//  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{//     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_WITH_SECURITY_IMPLICATION(hasRareData());
     return static_cast<ElementRareData*>(rareData());
 }
 
 inline ElementRareData& Element::ensureElementRareData()
-{//  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{//     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return static_cast<ElementRareData&>(ensureRareData());
 }
 
 void Element::clearTabIndexExplicitlyIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (hasRareData())
         elementRareData()->clearTabIndexExplicitly();
 }
 
 void Element::setTabIndexExplicitly(int tabIndex)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setTabIndexExplicitly(tabIndex);
 }
 
 bool Element::tabIndexSetExplicitly() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() && elementRareData()->tabIndexSetExplicitly();
 }
 
 bool Element::supportsFocus() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return tabIndexSetExplicitly();
 }
 
 Element* Element::focusDelegate()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return this;
 }
 
 int Element::tabIndex() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() ? elementRareData()->tabIndex() : 0;
 }
 
 void Element::setTabIndex(int value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setIntegralAttribute(tabindexAttr, value);
 }
 
 bool Element::isKeyboardFocusable(KeyboardEvent*) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return isFocusable() && tabIndex() >= 0;
 }
 
 bool Element::isMouseFocusable() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return isFocusable();
 }
 
 bool Element::shouldUseInputMethod()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return computeEditability(UserSelectAllIsAlwaysNonEditable, ShouldUpdateStyle::Update) != Editability::ReadOnly;
 }
 
 static bool isForceEvent(const PlatformMouseEvent& platformEvent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return platformEvent.type() == PlatformEvent::MouseForceChanged || platformEvent.type() == PlatformEvent::MouseForceDown || platformEvent.type() == PlatformEvent::MouseForceUp;
 }
 
 bool Element::dispatchMouseEvent(const PlatformMouseEvent& platformEvent, const AtomicString& eventType, int detail, Element* relatedTarget)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isDisabledFormControl())
         return false;
 
@@ -309,7 +309,7 @@ bool Element::dispatchMouseEvent(const PlatformMouseEvent& platformEvent, const 
 
 
 bool Element::dispatchWheelEvent(const PlatformWheelEvent& event)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<WheelEvent> wheelEvent = WheelEvent::create(event, document().defaultView());
 
     // Events with no deltas are important because they convey platform information about scroll gestures
@@ -324,7 +324,7 @@ bool Element::dispatchWheelEvent(const PlatformWheelEvent& event)
 }
 
 bool Element::dispatchKeyEvent(const PlatformKeyboardEvent& platformEvent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<KeyboardEvent> event = KeyboardEvent::create(platformEvent, document().defaultView());
     if (Frame* frame = document().frame()) {
         if (frame->eventHandler().accessibilityPreventsEventPropogation(event))
@@ -334,17 +334,17 @@ bool Element::dispatchKeyEvent(const PlatformKeyboardEvent& platformEvent)
 }
 
 void Element::dispatchSimulatedClick(Event* underlyingEvent, SimulatedClickMouseEventOptions eventOptions, SimulatedClickVisualOptions visualOptions)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     simulateClick(*this, underlyingEvent, eventOptions, visualOptions, SimulatedClickCreationOptions::FromUserAgent);
 }
 
 void Element::dispatchSimulatedClickForBindings(Event* underlyingEvent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     simulateClick(*this, underlyingEvent, SendNoEvents, DoNotShowPressedLook, SimulatedClickCreationOptions::FromBindings);
 }
 
 Ref<Node> Element::cloneNodeInternal(Document& targetDocument, CloningOperation type)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (type) {
     case CloningOperation::OnlySelf:
     case CloningOperation::SelfWithTemplateContent:
@@ -356,14 +356,14 @@ Ref<Node> Element::cloneNodeInternal(Document& targetDocument, CloningOperation 
 }
 
 Ref<Element> Element::cloneElementWithChildren(Document& targetDocument)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<Element> clone = cloneElementWithoutChildren(targetDocument);
     cloneChildNodes(clone);
     return clone;
 }
 
 Ref<Element> Element::cloneElementWithoutChildren(Document& targetDocument)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<Element> clone = cloneElementWithoutAttributesAndChildren(targetDocument);
     // This will catch HTML elements in the wrong namespace that are not correctly copied.
     // This is a sanity check as HTML overloads some of the DOM methods.
@@ -374,12 +374,12 @@ Ref<Element> Element::cloneElementWithoutChildren(Document& targetDocument)
 }
 
 Ref<Element> Element::cloneElementWithoutAttributesAndChildren(Document& targetDocument)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return targetDocument.createElement(tagQName(), false);
 }
 
 Ref<Attr> Element::detachAttribute(unsigned index)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(elementData());
 
     const Attribute& attribute = elementData()->attributeAt(index);
@@ -395,7 +395,7 @@ Ref<Attr> Element::detachAttribute(unsigned index)
 }
 
 bool Element::removeAttribute(const QualifiedName& name)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!elementData())
         return false;
 
@@ -408,7 +408,7 @@ bool Element::removeAttribute(const QualifiedName& name)
 }
 
 void Element::setBooleanAttribute(const QualifiedName& name, bool value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (value)
         setAttribute(name, emptyAtom);
     else
@@ -416,7 +416,7 @@ void Element::setBooleanAttribute(const QualifiedName& name, bool value)
 }
 
 NamedNodeMap& Element::attributes() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ElementRareData& rareData = const_cast<Element*>(this)->ensureElementRareData();
     if (NamedNodeMap* attributeMap = rareData.attributeMap())
         return *attributeMap;
@@ -426,17 +426,17 @@ NamedNodeMap& Element::attributes() const
 }
 
 Node::NodeType Element::nodeType() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return ELEMENT_NODE;
 }
 
 bool Element::hasAttribute(const QualifiedName& name) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasAttributeNS(name.namespaceURI(), name.localName());
 }
 
 void Element::synchronizeAllAttributes() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!elementData())
         return;
     if (elementData()->styleAttributeIsDirty()) {
@@ -451,7 +451,7 @@ void Element::synchronizeAllAttributes() const
 }
 
 ALWAYS_INLINE void Element::synchronizeAttribute(const QualifiedName& name) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!elementData())
         return;
     if (UNLIKELY(name == styleAttr && elementData()->styleAttributeIsDirty())) {
@@ -467,14 +467,14 @@ ALWAYS_INLINE void Element::synchronizeAttribute(const QualifiedName& name) cons
 }
 
 static ALWAYS_INLINE bool isStyleAttribute(const Element& element, const AtomicString& attributeLocalName)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (shouldIgnoreAttributeCase(element))
         return equalLettersIgnoringASCIICase(attributeLocalName, "style");
     return attributeLocalName == styleAttr.localName();
 }
 
 ALWAYS_INLINE void Element::synchronizeAttribute(const AtomicString& localName) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This version of synchronizeAttribute() is streamlined for the case where you don't have a full QualifiedName,
     // e.g when called from DOM API.
     if (!elementData())
@@ -492,7 +492,7 @@ ALWAYS_INLINE void Element::synchronizeAttribute(const AtomicString& localName) 
 }
 
 const AtomicString& Element::getAttribute(const QualifiedName& name) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!elementData())
         return nullAtom;
     synchronizeAttribute(name);
@@ -502,7 +502,7 @@ const AtomicString& Element::getAttribute(const QualifiedName& name) const
 }
 
 Vector<String> Element::getAttributeNames() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<String> attributesVector;
     if (!hasAttributes())
         return attributesVector;
@@ -515,7 +515,7 @@ Vector<String> Element::getAttributeNames() const
 }
 
 bool Element::isFocusable() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!inDocument() || !supportsFocus())
         return false;
 
@@ -539,31 +539,31 @@ bool Element::isFocusable() const
 }
 
 bool Element::isUserActionElementInActiveChain() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(isUserActionElement());
     return document().userActionElements().isInActiveChain(this);
 }
 
 bool Element::isUserActionElementActive() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(isUserActionElement());
     return document().userActionElements().isActive(this);
 }
 
 bool Element::isUserActionElementFocused() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(isUserActionElement());
     return document().userActionElements().isFocused(this);
 }
 
 bool Element::isUserActionElementHovered() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(isUserActionElement());
     return document().userActionElements().isHovered(this);
 }
 
 void Element::setActive(bool flag, bool pause)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (flag == active())
         return;
 
@@ -612,7 +612,7 @@ void Element::setActive(bool flag, bool pause)
 }
 
 void Element::setFocus(bool flag)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (flag == focused())
         return;
 
@@ -624,7 +624,7 @@ void Element::setFocus(bool flag)
 }
 
 void Element::setHovered(bool flag)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (flag == hovered())
         return;
 
@@ -650,7 +650,7 @@ void Element::setHovered(bool flag)
 }
 
 void Element::scrollIntoView(bool alignToTop) 
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     if (!renderer())
@@ -665,7 +665,7 @@ void Element::scrollIntoView(bool alignToTop)
 }
 
 void Element::scrollIntoViewIfNeeded(bool centerIfNeeded)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     if (!renderer())
@@ -679,7 +679,7 @@ void Element::scrollIntoViewIfNeeded(bool centerIfNeeded)
 }
 
 void Element::scrollIntoViewIfNotVisible(bool centerIfNotVisible)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
     
     if (!renderer())
@@ -693,7 +693,7 @@ void Element::scrollIntoViewIfNotVisible(bool centerIfNotVisible)
 }
     
 void Element::scrollByUnits(int units, ScrollGranularity granularity)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     auto* renderer = this->renderer();
@@ -713,17 +713,17 @@ void Element::scrollByUnits(int units, ScrollGranularity granularity)
 }
 
 void Element::scrollByLines(int lines)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     scrollByUnits(lines, ScrollByLine);
 }
 
 void Element::scrollByPages(int pages)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     scrollByUnits(pages, ScrollByPage);
 }
 
 static double localZoomForRenderer(const RenderElement& renderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: This does the wrong thing if two opposing zooms are in effect and canceled each
     // other out, but the alternative is that we'd have to crawl up the whole render tree every
     // time (or store an additional bit in the RenderStyle to indicate that a zoom was specified).
@@ -746,7 +746,7 @@ static double localZoomForRenderer(const RenderElement& renderer)
 }
 
 static double adjustForLocalZoom(LayoutUnit value, const RenderElement& renderer, double& zoomFactor)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     zoomFactor = localZoomForRenderer(renderer);
     if (zoomFactor == 1)
         return value.toDouble();
@@ -756,17 +756,17 @@ static double adjustForLocalZoom(LayoutUnit value, const RenderElement& renderer
 enum LegacyCSSOMElementMetricsRoundingStrategy { Round, Floor };
 
 static bool subpixelMetricsEnabled(const Document& document)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return document.settings() && document.settings()->subpixelCSSOMElementMetricsEnabled();
 }
 
 static double convertToNonSubpixelValueIfNeeded(double value, const Document& document, LegacyCSSOMElementMetricsRoundingStrategy roundStrategy = Round)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return subpixelMetricsEnabled(document) ? value : roundStrategy == Round ? round(value) : floor(value);
 }
 
 double Element::offsetLeft()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
     if (RenderBoxModelObject* renderer = renderBoxModelObject()) {
         LayoutUnit offsetLeft = subpixelMetricsEnabled(renderer->document()) ? renderer->offsetLeft() : LayoutUnit(roundToInt(renderer->offsetLeft()));
@@ -778,7 +778,7 @@ double Element::offsetLeft()
 }
 
 double Element::offsetTop()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
     if (RenderBoxModelObject* renderer = renderBoxModelObject()) {
         LayoutUnit offsetTop = subpixelMetricsEnabled(renderer->document()) ? renderer->offsetTop() : LayoutUnit(roundToInt(renderer->offsetTop()));
@@ -790,7 +790,7 @@ double Element::offsetTop()
 }
 
 double Element::offsetWidth()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIfDimensionsOutOfDate(*this, WidthDimensionsCheck);
     if (RenderBoxModelObject* renderer = renderBoxModelObject()) {
         LayoutUnit offsetWidth = subpixelMetricsEnabled(renderer->document()) ? renderer->offsetWidth() : LayoutUnit(roundToInt(renderer->offsetWidth()));
@@ -800,7 +800,7 @@ double Element::offsetWidth()
 }
 
 double Element::offsetHeight()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIfDimensionsOutOfDate(*this, HeightDimensionsCheck);
     if (RenderBoxModelObject* renderer = renderBoxModelObject()) {
         LayoutUnit offsetHeight = subpixelMetricsEnabled(renderer->document()) ? renderer->offsetHeight() : LayoutUnit(roundToInt(renderer->offsetHeight()));
@@ -810,7 +810,7 @@ double Element::offsetHeight()
 }
 
 Element* Element::bindingsOffsetParent()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Element* element = offsetParent();
     if (!element || !element->isInShadowTree())
         return element;
@@ -818,7 +818,7 @@ Element* Element::bindingsOffsetParent()
 }
 
 Element* Element::offsetParent()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
     auto renderer = this->renderer();
     if (!renderer)
@@ -830,7 +830,7 @@ Element* Element::offsetParent()
 }
 
 double Element::clientLeft()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     if (RenderBox* renderer = renderBox()) {
@@ -841,7 +841,7 @@ double Element::clientLeft()
 }
 
 double Element::clientTop()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     if (RenderBox* renderer = renderBox()) {
@@ -852,7 +852,7 @@ double Element::clientTop()
 }
 
 double Element::clientWidth()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIfDimensionsOutOfDate(*this, WidthDimensionsCheck);
 
     if (!document().hasLivingRenderTree())
@@ -873,7 +873,7 @@ double Element::clientWidth()
 }
 
 double Element::clientHeight()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIfDimensionsOutOfDate(*this, HeightDimensionsCheck);
     if (!document().hasLivingRenderTree())
         return 0;
@@ -893,7 +893,7 @@ double Element::clientHeight()
 }
 
 int Element::scrollLeft()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     if (RenderBox* rend = renderBox())
@@ -902,7 +902,7 @@ int Element::scrollLeft()
 }
 
 int Element::scrollTop()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     if (RenderBox* rend = renderBox())
@@ -911,7 +911,7 @@ int Element::scrollTop()
 }
 
 void Element::setScrollLeft(int newLeft)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     if (RenderBox* renderer = renderBox()) {
@@ -922,7 +922,7 @@ void Element::setScrollLeft(int newLeft)
 }
 
 void Element::setScrollTop(int newTop)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     if (RenderBox* renderer = renderBox()) {
@@ -933,7 +933,7 @@ void Element::setScrollTop(int newTop)
 }
 
 int Element::scrollWidth()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIfDimensionsOutOfDate(*this, WidthDimensionsCheck);
     if (RenderBox* rend = renderBox())
         return adjustForAbsoluteZoom(rend->scrollWidth(), *rend);
@@ -941,7 +941,7 @@ int Element::scrollWidth()
 }
 
 int Element::scrollHeight()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIfDimensionsOutOfDate(*this, HeightDimensionsCheck);
     if (RenderBox* rend = renderBox())
         return adjustForAbsoluteZoom(rend->scrollHeight(), *rend);
@@ -949,7 +949,7 @@ int Element::scrollHeight()
 }
 
 IntRect Element::boundsInRootViewSpace()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     FrameView* view = document().view();
@@ -982,7 +982,7 @@ IntRect Element::boundsInRootViewSpace()
 }
 
 static bool layoutOverflowRectContainsAllDescendants(const RenderBox& renderBox)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (renderBox.isRenderView())
         return true;
 
@@ -1019,7 +1019,7 @@ static bool layoutOverflowRectContainsAllDescendants(const RenderBox& renderBox)
 }
 
 LayoutRect Element::absoluteEventBounds(bool& boundsIncludeAllDescendantElements, bool& includesFixedPositionElements)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     boundsIncludeAllDescendantElements = false;
     includesFixedPositionElements = false;
 
@@ -1076,7 +1076,7 @@ LayoutRect Element::absoluteEventBounds(bool& boundsIncludeAllDescendantElements
 }
 
 LayoutRect Element::absoluteEventBoundsOfElementAndDescendants(bool& includesFixedPositionElements)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool boundsIncludeDescendants;
     LayoutRect result = absoluteEventBounds(boundsIncludeDescendants, includesFixedPositionElements);
     if (boundsIncludeDescendants)
@@ -1093,7 +1093,7 @@ LayoutRect Element::absoluteEventBoundsOfElementAndDescendants(bool& includesFix
 }
 
 LayoutRect Element::absoluteEventHandlerBounds(bool& includesFixedPositionElements)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This is not web-exposed, so don't call the FOUC-inducing updateLayoutIgnorePendingStylesheets().
     FrameView* frameView = document().view();
     if (!frameView)
@@ -1106,7 +1106,7 @@ LayoutRect Element::absoluteEventHandlerBounds(bool& includesFixedPositionElemen
 }
 
 Ref<ClientRectList> Element::getClientRects()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     RenderBoxModelObject* renderBoxModelObject = this->renderBoxModelObject();
@@ -1123,7 +1123,7 @@ Ref<ClientRectList> Element::getClientRects()
 }
 
 Ref<ClientRect> Element::getBoundingClientRect()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     Vector<FloatQuad> quads;
@@ -1151,21 +1151,21 @@ Ref<ClientRect> Element::getBoundingClientRect()
 }
 
 IntRect Element::clientRect() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderObject* renderer = this->renderer())
         return document().view()->contentsToRootView(renderer->absoluteBoundingBoxRect());
     return IntRect();
 }
     
 IntRect Element::screenRect() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderObject* renderer = this->renderer())
         return document().view()->contentsToScreen(renderer->absoluteBoundingBoxRect());
     return IntRect();
 }
 
 const AtomicString& Element::getAttribute(const AtomicString& localName) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!elementData())
         return nullAtom;
     synchronizeAttribute(localName);
@@ -1175,12 +1175,12 @@ const AtomicString& Element::getAttribute(const AtomicString& localName) const
 }
 
 const AtomicString& Element::getAttributeNS(const AtomicString& namespaceURI, const AtomicString& localName) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return getAttribute(QualifiedName(nullAtom, localName, namespaceURI));
 }
 
 void Element::setAttribute(const AtomicString& localName, const AtomicString& value, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!Document::isValidName(localName)) {
         ec = INVALID_CHARACTER_ERR;
         return;
@@ -1195,26 +1195,26 @@ void Element::setAttribute(const AtomicString& localName, const AtomicString& va
 }
 
 void Element::setAttribute(const QualifiedName& name, const AtomicString& value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     synchronizeAttribute(name);
     unsigned index = elementData() ? elementData()->findAttributeIndexByName(name) : ElementData::attributeNotFound;
     setAttributeInternal(index, name, value, NotInSynchronizationOfLazyAttribute);
 }
 
 void Element::setAttributeWithoutSynchronization(const QualifiedName& name, const AtomicString& value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     unsigned index = elementData() ? elementData()->findAttributeIndexByName(name) : ElementData::attributeNotFound;
     setAttributeInternal(index, name, value, NotInSynchronizationOfLazyAttribute);
 }
 
 void Element::setSynchronizedLazyAttribute(const QualifiedName& name, const AtomicString& value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     unsigned index = elementData() ? elementData()->findAttributeIndexByName(name) : ElementData::attributeNotFound;
     setAttributeInternal(index, name, value, InSynchronizationOfLazyAttribute);
 }
 
 inline void Element::setAttributeInternal(unsigned index, const QualifiedName& name, const AtomicString& newValue, SynchronizationOfLazyAttribute inSynchronizationOfLazyAttribute)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (newValue.isNull()) {
         if (index != ElementData::attributeNotFound)
             removeAttributeInternal(index, inSynchronizationOfLazyAttribute);
@@ -1253,14 +1253,14 @@ inline void Element::setAttributeInternal(unsigned index, const QualifiedName& n
 }
 
 static inline AtomicString makeIdForStyleResolution(const AtomicString& value, bool inQuirksMode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (inQuirksMode)
         return value.convertToASCIILowercase();
     return value;
 }
 
 void Element::attributeChanged(const QualifiedName& name, const AtomicString& oldValue, const AtomicString& newValue, AttributeModificationReason)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool valueIsSameAsBefore = oldValue == newValue;
 
     if (!valueIsSameAsBefore) {
@@ -1312,7 +1312,7 @@ void Element::attributeChanged(const QualifiedName& name, const AtomicString& ol
 
 template <typename CharacterType>
 static inline bool classStringHasClassName(const CharacterType* characters, unsigned length)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(length > 0);
 
     unsigned i = 0;
@@ -1326,7 +1326,7 @@ static inline bool classStringHasClassName(const CharacterType* characters, unsi
 }
 
 static inline bool classStringHasClassName(const AtomicString& newClassString)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     unsigned length = newClassString.length();
 
     if (!length)
@@ -1338,7 +1338,7 @@ static inline bool classStringHasClassName(const AtomicString& newClassString)
 }
 
 void Element::classAttributeChanged(const AtomicString& newClassString)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Note: We'll need ElementData, but it doesn't have to be UniqueElementData.
     if (!elementData())
         ensureUniqueElementData();
@@ -1360,7 +1360,7 @@ void Element::classAttributeChanged(const AtomicString& newClassString)
 }
 
 URL Element::absoluteLinkURL() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isLink())
         return URL();
 
@@ -1378,7 +1378,7 @@ URL Element::absoluteLinkURL() const
 
 #if ENABLE(TOUCH_EVENTS)
 bool Element::allowsDoubleTapGesture() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (renderStyle() && renderStyle()->touchAction() != TouchAction::Auto)
         return false;
 
@@ -1388,7 +1388,7 @@ bool Element::allowsDoubleTapGesture() const
 #endif
 
 StyleResolver& Element::styleResolver()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (auto* shadowRoot = containingShadowRoot())
         return shadowRoot->styleResolver();
 
@@ -1396,13 +1396,13 @@ StyleResolver& Element::styleResolver()
 }
 
 ElementStyle Element::resolveStyle(const RenderStyle* parentStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return styleResolver().styleForElement(*this, parentStyle);
 }
 
 #if ENABLE(WEB_ANIMATIONS)
 WebAnimationVector Element::getAnimations()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto checkTarget = [this](AnimationEffect const& effect)
     {
         return (static_cast<KeyframeEffect const&>(effect).target() == this);
@@ -1416,12 +1416,12 @@ WebAnimationVector Element::getAnimations()
 #endif
 
 bool Element::hasDisplayContents() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() && elementRareData()->hasDisplayContents();
 }
 
 void Element::setHasDisplayContents(bool value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (hasDisplayContents() == value)
         return;
     ensureElementRareData().setHasDisplayContents(value);
@@ -1433,17 +1433,17 @@ void Element::setHasDisplayContents(bool value)
 // code or configuration change if a new event handler is defined.
 
 static inline bool isEventHandlerAttribute(const Attribute& attribute)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return attribute.name().namespaceURI().isNull() && attribute.name().localName().startsWith("on");
 }
 
 bool Element::isJavaScriptURLAttribute(const Attribute& attribute) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return isURLAttribute(attribute) && protocolIsJavaScript(stripLeadingAndTrailingHTMLSpaces(attribute.value()));
 }
 
 void Element::stripScriptingAttributes(Vector<Attribute>& attributeVector) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     size_t destination = 0;
     for (size_t source = 0; source < attributeVector.size(); ++source) {
         if (isEventHandlerAttribute(attributeVector[source])
@@ -1460,7 +1460,7 @@ void Element::stripScriptingAttributes(Vector<Attribute>& attributeVector) const
 }
 
 void Element::parserSetAttributes(const Vector<Attribute>& attributeVector)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!inDocument());
     ASSERT(!parentNode());
     ASSERT(!m_elementData);
@@ -1481,11 +1481,11 @@ void Element::parserSetAttributes(const Vector<Attribute>& attributeVector)
 }
 
 void Element::parserDidSetAttributes()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 void Element::didMoveToNewDocument(Document* oldDocument)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Node::didMoveToNewDocument(oldDocument);
 
     if (oldDocument->inQuirksMode() != document().inQuirksMode()) {
@@ -1498,13 +1498,13 @@ void Element::didMoveToNewDocument(Document* oldDocument)
 }
 
 bool Element::hasAttributes() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     synchronizeAllAttributes();
     return elementData() && elementData()->length();
 }
 
 bool Element::hasEquivalentAttributes(const Element* other) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     synchronizeAllAttributes();
     other->synchronizeAllAttributes();
     if (elementData() == other->elementData())
@@ -1517,17 +1517,17 @@ bool Element::hasEquivalentAttributes(const Element* other) const
 }
 
 String Element::nodeName() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_tagName.toString();
 }
 
 String Element::nodeNamePreservingCase() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_tagName.toString();
 }
 
 void Element::setPrefix(const AtomicString& prefix, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ec = 0;
     checkSetPrefix(prefix, ec);
     if (ec)
@@ -1537,22 +1537,22 @@ void Element::setPrefix(const AtomicString& prefix, ExceptionCode& ec)
 }
 
 const AtomicString& Element::imageSourceURL() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return attributeWithoutSynchronization(srcAttr);
 }
 
 bool Element::rendererIsNeeded(const RenderStyle& style)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return style.display() != NONE && style.display() != CONTENTS;
 }
 
 RenderPtr<RenderElement> Element::createElementRenderer(RenderStyle&& style, const RenderTreePosition&)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return RenderElement::createFor(*this, WTFMove(style));
 }
 
 Node::InsertionNotificationRequest Element::insertedInto(ContainerNode& insertionPoint)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool wasInDocument = inDocument();
     // need to do superclass processing first so inDocument() is true
     // by the time we reach updateId
@@ -1610,7 +1610,7 @@ Node::InsertionNotificationRequest Element::insertedInto(ContainerNode& insertio
 }
 
 void Element::removedFrom(ContainerNode& insertionPoint)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(FULLSCREEN_API)
     if (containsFullScreenElement())
         setContainsFullScreenElementOnAncestorsCrossingFrameBoundaries(false);
@@ -1676,19 +1676,19 @@ void Element::removedFrom(ContainerNode& insertionPoint)
 }
 
 void Element::unregisterNamedFlowContentElement()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isNamedFlowContentElement() && document().renderView())
         document().renderView()->flowThreadController().unregisterNamedFlowContentElement(*this);
 }
 
 ShadowRoot* Element::shadowRoot() const
-{//  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{//     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() ? elementRareData()->shadowRoot() : nullptr;
 }
 
 
 void Element::addShadowRoot(Ref<ShadowRoot>&& newShadowRoot)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!shadowRoot());
 
     ShadowRoot& shadowRoot = newShadowRoot.get();
@@ -1711,7 +1711,7 @@ void Element::addShadowRoot(Ref<ShadowRoot>&& newShadowRoot)
 }
 
 void Element::removeShadowRoot()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<ShadowRoot> oldRoot = shadowRoot();
     if (!oldRoot)
         return;
@@ -1729,7 +1729,7 @@ void Element::removeShadowRoot()
 }
 
 RefPtr<ShadowRoot> Element::createShadowRoot(ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (alwaysCreateUserAgentShadowRoot())
         ensureUserAgentShadowRoot();
 
@@ -1739,7 +1739,7 @@ RefPtr<ShadowRoot> Element::createShadowRoot(ExceptionCode& ec)
 
 
 static bool canAttachAuthorShadowRoot(const Element& element)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static NeverDestroyed<HashSet<AtomicString>> tagNames = [] {
         static const HTMLQualifiedName* const tagList[] = {
             &articleTag,
@@ -1774,7 +1774,7 @@ static bool canAttachAuthorShadowRoot(const Element& element)
 }
 
 RefPtr<ShadowRoot> Element::attachShadow(const ShadowRootInit& init, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!canAttachAuthorShadowRoot(*this)) {
         ec = NOT_SUPPORTED_ERR;
         return nullptr;
@@ -1791,7 +1791,7 @@ RefPtr<ShadowRoot> Element::attachShadow(const ShadowRootInit& init, ExceptionCo
 }
 
 ShadowRoot* Element::shadowRootForBindings(JSC::ExecState& state) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ShadowRoot* root = shadowRoot();
     if (!root)
         return nullptr;
@@ -1805,7 +1805,7 @@ ShadowRoot* Element::shadowRootForBindings(JSC::ExecState& state) const
 
 
 ShadowRoot* Element::userAgentShadowRoot() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (ShadowRoot* shadowRoot = this->shadowRoot()) {
         ASSERT(shadowRoot->mode() == ShadowRoot::Mode::UserAgent);
         return shadowRoot;
@@ -1814,7 +1814,7 @@ ShadowRoot* Element::userAgentShadowRoot() const
 }
 
 ShadowRoot& Element::ensureUserAgentShadowRoot()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ShadowRoot* shadowRoot = userAgentShadowRoot();
     if (!shadowRoot) {
         addShadowRoot(ShadowRoot::create(document(), ShadowRoot::Mode::UserAgent));
@@ -1824,12 +1824,12 @@ ShadowRoot& Element::ensureUserAgentShadowRoot()
 }
 
 const AtomicString& Element::shadowPseudoId() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return pseudo();
 }
 
 bool Element::childTypeAllowed(NodeType type) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (type) {
     case ELEMENT_NODE:
     case TEXT_NODE:
@@ -1844,7 +1844,7 @@ bool Element::childTypeAllowed(NodeType type) const
 }
 
 static void checkForEmptyStyleChange(Element& element)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (element.styleAffectedByEmpty()) {
         auto* style = element.renderStyle();
         if (!style || (!style->emptyState() || element.hasChildNodes()))
@@ -1855,7 +1855,7 @@ static void checkForEmptyStyleChange(Element& element)
 enum SiblingCheckType { FinishedParsingChildren, SiblingElementRemoved, Other };
 
 static void checkForSiblingStyleChanges(Element& parent, SiblingCheckType checkType, Element* elementBeforeChange, Element* elementAfterChange)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // :empty selector.
     checkForEmptyStyleChange(parent);
 
@@ -1931,7 +1931,7 @@ static void checkForSiblingStyleChanges(Element& parent, SiblingCheckType checkT
 }
 
 void Element::childrenChanged(const ChildChange& change)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ContainerNode::childrenChanged(change);
     if (change.source == ChildChangeSourceParser)
         checkForEmptyStyleChange(*this);
@@ -1961,34 +1961,34 @@ void Element::childrenChanged(const ChildChange& change)
 }
 
 void Element::setAttributeEventListener(const AtomicString& eventType, const QualifiedName& attributeName, const AtomicString& attributeValue)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setAttributeEventListener(eventType, JSLazyEventListener::create(*this, attributeName, attributeValue));
 }
 
 void Element::setIsNamedFlowContentElement()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setIsNamedFlowContentElement(true);
 }
 
 void Element::clearIsNamedFlowContentElement()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setIsNamedFlowContentElement(false);
 }
 
 void Element::removeAllEventListeners()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ContainerNode::removeAllEventListeners();
     if (ShadowRoot* shadowRoot = this->shadowRoot())
         shadowRoot->removeAllEventListeners();
 }
 
 void Element::beginParsingChildren()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     clearIsParsingChildrenFinished();
 }
 
 void Element::finishParsingChildren()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ContainerNode::finishParsingChildren();
     setIsParsingChildrenFinished();
     checkForSiblingStyleChanges(*this, FinishedParsingChildren, ElementTraversal::lastChild(*this), nullptr);
@@ -1996,7 +1996,7 @@ void Element::finishParsingChildren()
 
 #if ENABLE(TREE_DEBUGGING)
 void Element::formatForDebugger(char* buffer, unsigned length) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     StringBuilder result;
     String s;
 
@@ -2023,13 +2023,13 @@ void Element::formatForDebugger(char* buffer, unsigned length) const
 #endif
 
 const Vector<RefPtr<Attr>>& Element::attrNodeList()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasSyntheticAttrChildNodes());
     return *attrNodeListForElement(*this);
 }
 
 RefPtr<Attr> Element::setAttributeNode(Attr& attrNode, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<Attr> oldAttrNode = attrIfExists(attrNode.qualifiedName().localName(), shouldIgnoreAttributeCase(*this));
     if (oldAttrNode.get() == &attrNode)
         return &attrNode; // This Attr is already attached to the element.
@@ -2072,7 +2072,7 @@ RefPtr<Attr> Element::setAttributeNode(Attr& attrNode, ExceptionCode& ec)
 }
 
 RefPtr<Attr> Element::setAttributeNodeNS(Attr& attrNode, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<Attr> oldAttrNode = attrIfExists(attrNode.qualifiedName());
     if (oldAttrNode.get() == &attrNode)
         return &attrNode; // This Attr is already attached to the element.
@@ -2105,7 +2105,7 @@ RefPtr<Attr> Element::setAttributeNodeNS(Attr& attrNode, ExceptionCode& ec)
 }
 
 RefPtr<Attr> Element::removeAttributeNode(Attr& attr, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (attr.ownerElement() != this) {
         ec = NOT_FOUND_ERR;
         return nullptr;
@@ -2134,7 +2134,7 @@ RefPtr<Attr> Element::removeAttributeNode(Attr& attr, ExceptionCode& ec)
 }
 
 bool Element::parseAttributeName(QualifiedName& out, const AtomicString& namespaceURI, const AtomicString& qualifiedName, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     String prefix, localName;
     if (!Document::parseQualifiedName(qualifiedName, prefix, localName, ec))
         return false;
@@ -2152,7 +2152,7 @@ bool Element::parseAttributeName(QualifiedName& out, const AtomicString& namespa
 }
 
 void Element::setAttributeNS(const AtomicString& namespaceURI, const AtomicString& qualifiedName, const AtomicString& value, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     QualifiedName parsedName = anyName;
     if (!parseAttributeName(parsedName, namespaceURI, qualifiedName, ec))
         return;
@@ -2160,7 +2160,7 @@ void Element::setAttributeNS(const AtomicString& namespaceURI, const AtomicStrin
 }
 
 void Element::removeAttributeInternal(unsigned index, SynchronizationOfLazyAttribute inSynchronizationOfLazyAttribute)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_WITH_SECURITY_IMPLICATION(index < attributeCount());
 
     UniqueElementData& elementData = ensureUniqueElementData();
@@ -2188,7 +2188,7 @@ void Element::removeAttributeInternal(unsigned index, SynchronizationOfLazyAttri
 }
 
 void Element::addAttributeInternal(const QualifiedName& name, const AtomicString& value, SynchronizationOfLazyAttribute inSynchronizationOfLazyAttribute)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (inSynchronizationOfLazyAttribute) {
         ensureUniqueElementData().addAttribute(name, value);
         return;
@@ -2203,7 +2203,7 @@ void Element::addAttributeInternal(const QualifiedName& name, const AtomicString
 }
 
 bool Element::removeAttribute(const AtomicString& name)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!elementData())
         return false;
 
@@ -2220,12 +2220,12 @@ bool Element::removeAttribute(const AtomicString& name)
 }
 
 bool Element::removeAttributeNS(const AtomicString& namespaceURI, const AtomicString& localName)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return removeAttribute(QualifiedName(nullAtom, localName, namespaceURI));
 }
 
 RefPtr<Attr> Element::getAttributeNode(const AtomicString& localName)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!elementData())
         return nullptr;
     synchronizeAttribute(localName);
@@ -2236,7 +2236,7 @@ RefPtr<Attr> Element::getAttributeNode(const AtomicString& localName)
 }
 
 RefPtr<Attr> Element::getAttributeNodeNS(const AtomicString& namespaceURI, const AtomicString& localName)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!elementData())
         return 0;
     QualifiedName qName(nullAtom, localName, namespaceURI);
@@ -2248,7 +2248,7 @@ RefPtr<Attr> Element::getAttributeNodeNS(const AtomicString& namespaceURI, const
 }
 
 bool Element::hasAttribute(const AtomicString& localName) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!elementData())
         return false;
     synchronizeAttribute(localName);
@@ -2256,7 +2256,7 @@ bool Element::hasAttribute(const AtomicString& localName) const
 }
 
 bool Element::hasAttributeNS(const AtomicString& namespaceURI, const AtomicString& localName) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!elementData())
         return false;
     QualifiedName qName(nullAtom, localName, namespaceURI);
@@ -2265,12 +2265,12 @@ bool Element::hasAttributeNS(const AtomicString& namespaceURI, const AtomicStrin
 }
 
 CSSStyleDeclaration* Element::cssomStyle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return nullptr;
 }
 
 void Element::focus(bool restorePreviousSelection, FocusDirection direction)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!inDocument())
         return;
 
@@ -2327,7 +2327,7 @@ void Element::focus(bool restorePreviousSelection, FocusDirection direction)
 }
 
 void Element::updateFocusAppearanceAfterAttachIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasRareData())
         return;
     ElementRareData* data = elementRareData();
@@ -2339,7 +2339,7 @@ void Element::updateFocusAppearanceAfterAttachIfNeeded()
 }
 
 void Element::updateFocusAppearance(SelectionRestorationMode, SelectionRevealMode revealMode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isRootEditableElement()) {
         // Keep frame alive in this method, since setSelection() may release the last reference to |frame|.
         RefPtr<Frame> frame = document().frame();
@@ -2362,7 +2362,7 @@ void Element::updateFocusAppearance(SelectionRestorationMode, SelectionRevealMod
 }
 
 void Element::blur()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     cancelFocusAppearanceUpdate();
     if (treeScope().focusedElement() == this) {
         if (Frame* frame = document().frame())
@@ -2373,21 +2373,21 @@ void Element::blur()
 }
 
 void Element::dispatchFocusInEvent(const AtomicString& eventType, RefPtr<Element>&& oldFocusedElement)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_WITH_SECURITY_IMPLICATION(!NoEventDispatchAssertion::isEventDispatchForbidden());
     ASSERT(eventType == eventNames().focusinEvent || eventType == eventNames().DOMFocusInEvent);
     dispatchScopedEvent(FocusEvent::create(eventType, true, false, document().defaultView(), 0, WTFMove(oldFocusedElement)));
 }
 
 void Element::dispatchFocusOutEvent(const AtomicString& eventType, RefPtr<Element>&& newFocusedElement)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_WITH_SECURITY_IMPLICATION(!NoEventDispatchAssertion::isEventDispatchForbidden());
     ASSERT(eventType == eventNames().focusoutEvent || eventType == eventNames().DOMFocusOutEvent);
     dispatchScopedEvent(FocusEvent::create(eventType, true, false, document().defaultView(), 0, WTFMove(newFocusedElement)));
 }
 
 void Element::dispatchFocusEvent(RefPtr<Element>&& oldFocusedElement, FocusDirection)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (document().page())
         document().page()->chrome().client().elementDidFocus(this);
 
@@ -2395,7 +2395,7 @@ void Element::dispatchFocusEvent(RefPtr<Element>&& oldFocusedElement, FocusDirec
 }
 
 void Element::dispatchBlurEvent(RefPtr<Element>&& newFocusedElement)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (document().page())
         document().page()->chrome().client().elementDidBlur(this);
 
@@ -2404,7 +2404,7 @@ void Element::dispatchBlurEvent(RefPtr<Element>&& newFocusedElement)
 
 #if ENABLE(MOUSE_FORCE_EVENTS)
 bool Element::dispatchMouseForceWillBegin()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!document().hasListenerType(Document::FORCEWILLBEGIN_LISTENER))
         return false;
 
@@ -2423,13 +2423,13 @@ bool Element::dispatchMouseForceWillBegin()
 }
 #else
 bool Element::dispatchMouseForceWillBegin()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 #endif // #if ENABLE(MOUSE_FORCE_EVENTS)
 
 void Element::mergeWithNextTextNode(Text& node, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Node* next = node.nextSibling();
     if (!is<Text>(next))
         return;
@@ -2441,17 +2441,17 @@ void Element::mergeWithNextTextNode(Text& node, ExceptionCode& ec)
 }
 
 String Element::innerHTML() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return createMarkup(*this, ChildrenOnly);
 }
 
 String Element::outerHTML() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return createMarkup(*this);
 }
 
 void Element::setOuterHTML(const String& html, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Element* p = parentElement();
     if (!is<HTMLElement>(p)) {
         ec = NO_MODIFICATION_ALLOWED_ERR;
@@ -2475,7 +2475,7 @@ void Element::setOuterHTML(const String& html, ExceptionCode& ec)
 
 
 void Element::setInnerHTML(const String& html, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RefPtr<DocumentFragment> fragment = createFragmentForInnerOuterHTML(*this, html, AllowScriptingContent, ec)) {
         ContainerNode* container = this;
 
@@ -2487,7 +2487,7 @@ void Element::setInnerHTML(const String& html, ExceptionCode& ec)
 }
 
 String Element::innerText()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We need to update layout, since plainText uses line boxes in the render tree.
     document().updateLayoutIgnorePendingStylesheets();
 
@@ -2498,7 +2498,7 @@ String Element::innerText()
 }
 
 String Element::outerText()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Getting outerText is the same as getting innerText, only
     // setting is different. You would think this should get the plain
     // text for the outer range, but this is wrong, <br> for instance
@@ -2508,40 +2508,40 @@ String Element::outerText()
 }
 
 String Element::title() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return String();
 }
 
 const AtomicString& Element::pseudo() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return attributeWithoutSynchronization(pseudoAttr);
 }
 
 void Element::setPseudo(const AtomicString& value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setAttributeWithoutSynchronization(pseudoAttr, value);
 }
 
 LayoutSize Element::minimumSizeForResizing() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() ? elementRareData()->minimumSizeForResizing() : defaultMinimumSizeForResizing();
 }
 
 void Element::setMinimumSizeForResizing(const LayoutSize& size)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasRareData() && size == defaultMinimumSizeForResizing())
         return;
     ensureElementRareData().setMinimumSizeForResizing(size);
 }
 
 void Element::willBecomeFullscreenElement()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& child : descendantsOfType<Element>(*this))
         child.ancestorWillEnterFullscreen();
 }
 
 static PseudoElement* beforeOrAfterPseudoElement(Element& host, PseudoId pseudoElementSpecifier)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (pseudoElementSpecifier) {
     case BEFORE:
         return host.beforePseudoElement();
@@ -2553,7 +2553,7 @@ static PseudoElement* beforeOrAfterPseudoElement(Element& host, PseudoId pseudoE
 }
 
 const RenderStyle* Element::existingComputedStyle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (auto* renderTreeStyle = renderStyle())
         return renderTreeStyle;
 
@@ -2564,7 +2564,7 @@ const RenderStyle* Element::existingComputedStyle()
 }
 
 const RenderStyle& Element::resolveComputedStyle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(inDocument());
     ASSERT(!existingComputedStyle());
 
@@ -2593,7 +2593,7 @@ const RenderStyle& Element::resolveComputedStyle()
 }
 
 const RenderStyle* Element::computedStyle(PseudoId pseudoElementSpecifier)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (PseudoElement* pseudoElement = beforeOrAfterPseudoElement(*this, pseudoElementSpecifier))
         return pseudoElement->computedStyle();
 
@@ -2613,7 +2613,7 @@ const RenderStyle* Element::computedStyle(PseudoId pseudoElementSpecifier)
 }
 
 bool Element::needsStyleInvalidation() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!inRenderedDocument())
         return false;
     if (styleChangeType() >= FullStyleChange)
@@ -2625,43 +2625,43 @@ bool Element::needsStyleInvalidation() const
 }
 
 void Element::setStyleAffectedByEmpty()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setStyleAffectedByEmpty(true);
 }
 
 void Element::setStyleAffectedByFocusWithin()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setStyleAffectedByFocusWithin(true);
 }
 
 void Element::setStyleAffectedByActive()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setStyleAffectedByActive(true);
 }
 
 void Element::setChildrenAffectedByDrag()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setChildrenAffectedByDrag(true);
 }
 
 void Element::setChildrenAffectedByBackwardPositionalRules()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setChildrenAffectedByBackwardPositionalRules(true);
 }
 
 void Element::setChildrenAffectedByPropertyBasedBackwardPositionalRules()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setChildrenAffectedByPropertyBasedBackwardPositionalRules(true);
 }
 
 void Element::setChildIndex(unsigned index)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ElementRareData& rareData = ensureElementRareData();
     rareData.setChildIndex(index);
 }
 
 bool Element::hasFlagsSetDuringStylingOfChildren() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (childrenAffectedByHover() || childrenAffectedByFirstChildRules() || childrenAffectedByLastChildRules())
         return true;
 
@@ -2674,65 +2674,65 @@ bool Element::hasFlagsSetDuringStylingOfChildren() const
 }
 
 bool Element::rareDataStyleAffectedByEmpty() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasRareData());
     return elementRareData()->styleAffectedByEmpty();
 }
 
 bool Element::rareDataStyleAffectedByFocusWithin() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasRareData());
     return elementRareData()->styleAffectedByFocusWithin();
 }
 
 bool Element::rareDataIsNamedFlowContentElement() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasRareData());
     return elementRareData()->isNamedFlowContentElement();
 }
 
 bool Element::rareDataStyleAffectedByActive() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasRareData());
     return elementRareData()->styleAffectedByActive();
 }
 
 bool Element::rareDataChildrenAffectedByDrag() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasRareData());
     return elementRareData()->childrenAffectedByDrag();
 }
 
 bool Element::rareDataChildrenAffectedByBackwardPositionalRules() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasRareData());
     return elementRareData()->childrenAffectedByBackwardPositionalRules();
 }
 
 bool Element::rareDataChildrenAffectedByPropertyBasedBackwardPositionalRules() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasRareData());
     return elementRareData()->childrenAffectedByPropertyBasedBackwardPositionalRules();
 }
 
 unsigned Element::rareDataChildIndex() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasRareData());
     return elementRareData()->childIndex();
 }
 
 void Element::setRegionOversetState(RegionOversetState state)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setRegionOversetState(state);
 }
 
 RegionOversetState Element::regionOversetState() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() ? elementRareData()->regionOversetState() : RegionUndefined;
 }
 
 AtomicString Element::computeInheritedLanguage() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (const ElementData* elementData = this->elementData()) {
         if (const Attribute* attribute = elementData->findLanguageAttribute())
             return attribute->value();
@@ -2756,12 +2756,12 @@ AtomicString Element::computeInheritedLanguage() const
 }
 
 Locale& Element::locale() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return document().getCachedLocale(computeInheritedLanguage());
 }
 
 void Element::cancelFocusAppearanceUpdate()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (hasRareData())
         elementRareData()->setNeedsFocusAppearanceUpdateSoonAfterAttach(false);
     if (document().focusedElement() == this)
@@ -2769,7 +2769,7 @@ void Element::cancelFocusAppearanceUpdate()
 }
 
 void Element::normalizeAttributes()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasAttributes())
         return;
 
@@ -2786,27 +2786,27 @@ void Element::normalizeAttributes()
 }
 
 PseudoElement* Element::beforePseudoElement() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() ? elementRareData()->beforePseudoElement() : nullptr;
 }
 
 PseudoElement* Element::afterPseudoElement() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() ? elementRareData()->afterPseudoElement() : nullptr;
 }
 
 void Element::setBeforePseudoElement(Ref<PseudoElement>&& element)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setBeforePseudoElement(WTFMove(element));
 }
 
 void Element::setAfterPseudoElement(Ref<PseudoElement>&& element)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setAfterPseudoElement(WTFMove(element));
 }
 
 static void disconnectPseudoElement(PseudoElement* pseudoElement)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!pseudoElement)
         return;
     if (pseudoElement->renderer())
@@ -2816,7 +2816,7 @@ static void disconnectPseudoElement(PseudoElement* pseudoElement)
 }
 
 void Element::clearBeforePseudoElement()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasRareData())
         return;
     disconnectPseudoElement(elementRareData()->beforePseudoElement());
@@ -2824,7 +2824,7 @@ void Element::clearBeforePseudoElement()
 }
 
 void Element::clearAfterPseudoElement()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasRareData())
         return;
     disconnectPseudoElement(elementRareData()->afterPseudoElement());
@@ -2832,38 +2832,38 @@ void Element::clearAfterPseudoElement()
 }
 
 bool Element::matchesValidPseudoClass() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 
 bool Element::matchesInvalidPseudoClass() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 
 bool Element::matchesReadWritePseudoClass() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 
 bool Element::matchesIndeterminatePseudoClass() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return shouldAppearIndeterminate();
 }
 
 bool Element::matchesDefaultPseudoClass() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 
 bool Element::matches(const String& selector, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SelectorQuery* selectorQuery = document().selectorQueryForString(selector, ec);
     return selectorQuery && selectorQuery->matches(*this);
 }
 
 Element* Element::closest(const String& selector, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SelectorQuery* selectorQuery = document().selectorQueryForString(selector, ec);
     if (selectorQuery)
         return selectorQuery->closest(*this);
@@ -2871,17 +2871,17 @@ Element* Element::closest(const String& selector, ExceptionCode& ec)
 }
 
 bool Element::shouldAppearIndeterminate() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 
 bool Element::mayCauseRepaintInsideViewport(const IntRect* visibleRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderer() && renderer()->mayCauseRepaintInsideViewport(visibleRect);
 }
 
 DOMTokenList& Element::classList()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ElementRareData& data = ensureElementRareData();
     if (!data.classList())
         data.setClassList(std::make_unique<DOMTokenList>(*this, HTMLNames::classAttr));
@@ -2889,7 +2889,7 @@ DOMTokenList& Element::classList()
 }
 
 DatasetDOMStringMap& Element::dataset()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ElementRareData& data = ensureElementRareData();
     if (!data.dataset())
         data.setDataset(std::make_unique<DatasetDOMStringMap>(*this));
@@ -2897,7 +2897,7 @@ DatasetDOMStringMap& Element::dataset()
 }
 
 URL Element::getURLAttribute(const QualifiedName& name) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if !ASSERT_DISABLED
     if (elementData()) {
         if (const Attribute* attribute = findAttributeByName(name))
@@ -2908,7 +2908,7 @@ URL Element::getURLAttribute(const QualifiedName& name) const
 }
 
 URL Element::getNonEmptyURLAttribute(const QualifiedName& name) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if !ASSERT_DISABLED
     if (elementData()) {
         if (const Attribute* attribute = findAttributeByName(name))
@@ -2922,39 +2922,39 @@ URL Element::getNonEmptyURLAttribute(const QualifiedName& name) const
 }
 
 int Element::getIntegralAttribute(const QualifiedName& attributeName) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return parseHTMLInteger(getAttribute(attributeName)).valueOr(0);
 }
 
 void Element::setIntegralAttribute(const QualifiedName& attributeName, int value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setAttribute(attributeName, AtomicString::number(value));
 }
 
 unsigned Element::getUnsignedIntegralAttribute(const QualifiedName& attributeName) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return parseHTMLNonNegativeInteger(getAttribute(attributeName)).valueOr(0);
 }
 
 void Element::setUnsignedIntegralAttribute(const QualifiedName& attributeName, unsigned value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setAttribute(attributeName, AtomicString::number(limitToOnlyHTMLNonNegative(value)));
 }
 
 #if ENABLE(INDIE_UI)
 void Element::setUIActions(const AtomicString& actions)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setAttribute(uiactionsAttr, actions);
 }
 
 const AtomicString& Element::UIActions() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return getAttribute(uiactionsAttr);
 }
 #endif
 
 bool Element::childShouldCreateRenderer(const Node& child) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Only create renderers for SVG elements whose parents are SVG elements, or for proper <svg xmlns="svgNS"> subdocuments.
     if (child.isSVGElement()) {
         ASSERT(!isSVGElement());
@@ -2966,34 +2966,34 @@ bool Element::childShouldCreateRenderer(const Node& child) const
 
 #if ENABLE(FULLSCREEN_API)
 void Element::webkitRequestFullscreen()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().requestFullScreenForElement(this, ALLOW_KEYBOARD_INPUT, Document::EnforceIFrameAllowFullScreenRequirement);
 }
 
 void Element::webkitRequestFullScreen(unsigned short flags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().requestFullScreenForElement(this, (flags | LEGACY_MOZILLA_REQUEST), Document::EnforceIFrameAllowFullScreenRequirement);
 }
 
 bool Element::containsFullScreenElement() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() && elementRareData()->containsFullScreenElement();
 }
 
 void Element::setContainsFullScreenElement(bool flag)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setContainsFullScreenElement(flag);
     setNeedsStyleRecalc(SyntheticStyleChange);
 }
 
 static Element* parentCrossingFrameBoundaries(Element* element)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(element);
     return element->parentElement() ? element->parentElement() : element->document().ownerElement();
 }
 
 void Element::setContainsFullScreenElementOnAncestorsCrossingFrameBoundaries(bool flag)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Element* element = this;
     while ((element = parentCrossingFrameBoundaries(element)))
         element->setContainsFullScreenElement(flag);
@@ -3002,14 +3002,14 @@ void Element::setContainsFullScreenElementOnAncestorsCrossingFrameBoundaries(boo
 
 #if ENABLE(POINTER_LOCK)
 void Element::requestPointerLock()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (document().page())
         document().page()->pointerLockController().requestPointerLock(this);
 }
 #endif
 
 SpellcheckAttributeState Element::spellcheckAttributeState() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const AtomicString& value = attributeWithoutSynchronization(HTMLNames::spellcheckAttr);
     if (value.isNull())
         return SpellcheckAttributeDefault;
@@ -3021,7 +3021,7 @@ SpellcheckAttributeState Element::spellcheckAttributeState() const
 }
 
 bool Element::isSpellCheckingEnabled() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const Element* element = this; element; element = element->parentOrShadowHostElement()) {
         switch (element->spellcheckAttributeState()) {
         case SpellcheckAttributeTrue:
@@ -3037,7 +3037,7 @@ bool Element::isSpellCheckingEnabled() const
 }
 
 RenderNamedFlowFragment* Element::renderNamedFlowFragment() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (renderer() && renderer()->isRenderNamedFlowFragmentContainer())
         return downcast<RenderBlockFlow>(*renderer()).renderNamedFlowFragment();
 
@@ -3047,7 +3047,7 @@ RenderNamedFlowFragment* Element::renderNamedFlowFragment() const
 #if ENABLE(CSS_REGIONS)
 
 bool Element::shouldMoveToFlowThread(const RenderStyle& styleToUse) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(FULLSCREEN_API)
     if (document().webkitIsFullScreen() && document().webkitCurrentFullScreenElement() == this)
         return false;
@@ -3063,7 +3063,7 @@ bool Element::shouldMoveToFlowThread(const RenderStyle& styleToUse) const
 }
 
 const AtomicString& Element::webkitRegionOverset() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     document().updateLayoutIgnorePendingStylesheets();
 
     static NeverDestroyed<AtomicString> undefinedState("undefined", AtomicString::ConstructFromLiteral);
@@ -3092,7 +3092,7 @@ const AtomicString& Element::webkitRegionOverset() const
 }
 
 Vector<RefPtr<Range>> Element::webkitGetRegionFlowRanges() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<RefPtr<Range>> rangeObjects;
     document().updateLayoutIgnorePendingStylesheets();
     auto* renderer = this->renderer();
@@ -3108,7 +3108,7 @@ Vector<RefPtr<Range>> Element::webkitGetRegionFlowRanges() const
 
 #ifndef NDEBUG
 bool Element::fastAttributeLookupAllowed(const QualifiedName& name) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (name == HTMLNames::styleAttr)
         return false;
 
@@ -3121,13 +3121,13 @@ bool Element::fastAttributeLookupAllowed(const QualifiedName& name) const
 
 #ifdef DUMP_NODE_STATISTICS
 bool Element::hasNamedNodeMap() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() && elementRareData()->attributeMap();
 }
 #endif
 
 inline void Element::updateName(const AtomicString& oldName, const AtomicString& newName)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isInTreeScope())
         return;
 
@@ -3144,7 +3144,7 @@ inline void Element::updateName(const AtomicString& oldName, const AtomicString&
 }
 
 void Element::updateNameForTreeScope(TreeScope& scope, const AtomicString& oldName, const AtomicString& newName)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(oldName != newName);
 
     if (!oldName.isEmpty())
@@ -3154,7 +3154,7 @@ void Element::updateNameForTreeScope(TreeScope& scope, const AtomicString& oldNa
 }
 
 void Element::updateNameForDocument(HTMLDocument& document, const AtomicString& oldName, const AtomicString& newName)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(oldName != newName);
 
     if (WindowNameCollection::elementMatchesIfNameAttributeMatch(*this)) {
@@ -3175,7 +3175,7 @@ void Element::updateNameForDocument(HTMLDocument& document, const AtomicString& 
 }
 
 inline void Element::updateId(const AtomicString& oldId, const AtomicString& newId, NotifyObservers notifyObservers)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isInTreeScope())
         return;
 
@@ -3192,7 +3192,7 @@ inline void Element::updateId(const AtomicString& oldId, const AtomicString& new
 }
 
 void Element::updateIdForTreeScope(TreeScope& scope, const AtomicString& oldId, const AtomicString& newId, NotifyObservers notifyObservers)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(isInTreeScope());
     ASSERT(oldId != newId);
 
@@ -3203,7 +3203,7 @@ void Element::updateIdForTreeScope(TreeScope& scope, const AtomicString& oldId, 
 }
 
 void Element::updateIdForDocument(HTMLDocument& document, const AtomicString& oldId, const AtomicString& newId, HTMLDocumentNamedItemMapsUpdatingCondition condition)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(inDocument());
     ASSERT(oldId != newId);
 
@@ -3225,7 +3225,7 @@ void Element::updateIdForDocument(HTMLDocument& document, const AtomicString& ol
 }
 
 void Element::updateLabel(TreeScope& scope, const AtomicString& oldForAttributeValue, const AtomicString& newForAttributeValue)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasTagName(labelTag));
 
     if (!inDocument())
@@ -3241,7 +3241,7 @@ void Element::updateLabel(TreeScope& scope, const AtomicString& oldForAttributeV
 }
 
 void Element::willModifyAttribute(const QualifiedName& name, const AtomicString& oldValue, const AtomicString& newValue)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (name == HTMLNames::idAttr)
         updateId(oldValue, newValue, NotifyObservers::No); // Will notify observers after the attribute is actually changed.
     else if (name == HTMLNames::nameAttr)
@@ -3258,54 +3258,54 @@ void Element::willModifyAttribute(const QualifiedName& name, const AtomicString&
 }
 
 void Element::didAddAttribute(const QualifiedName& name, const AtomicString& value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     attributeChanged(name, nullAtom, value);
     InspectorInstrumentation::didModifyDOMAttr(document(), *this, name.localName(), value);
     dispatchSubtreeModifiedEvent();
 }
 
 void Element::didModifyAttribute(const QualifiedName& name, const AtomicString& oldValue, const AtomicString& newValue)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     attributeChanged(name, oldValue, newValue);
     InspectorInstrumentation::didModifyDOMAttr(document(), *this, name.localName(), newValue);
     // Do not dispatch a DOMSubtreeModified event here; see bug 81141.
 }
 
 void Element::didRemoveAttribute(const QualifiedName& name, const AtomicString& oldValue)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     attributeChanged(name, oldValue, nullAtom);
     InspectorInstrumentation::didRemoveDOMAttr(document(), *this, name.localName());
     dispatchSubtreeModifiedEvent();
 }
 
 IntPoint Element::savedLayerScrollPosition() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() ? elementRareData()->savedLayerScrollPosition() : IntPoint();
 }
 
 void Element::setSavedLayerScrollPosition(const IntPoint& position)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (position.isZero() && !hasRareData())
         return;
     ensureElementRareData().setSavedLayerScrollPosition(position);
 }
 
 RefPtr<Attr> Element::attrIfExists(const AtomicString& localName, bool shouldIgnoreAttributeCase)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (auto* attrNodeList = attrNodeListForElement(*this))
         return findAttrNodeInList(*attrNodeList, localName, shouldIgnoreAttributeCase);
     return nullptr;
 }
 
 RefPtr<Attr> Element::attrIfExists(const QualifiedName& name)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (auto* attrNodeList = attrNodeListForElement(*this))
         return findAttrNodeInList(*attrNodeList, name);
     return nullptr;
 }
 
 Ref<Attr> Element::ensureAttr(const QualifiedName& name)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto& attrNodeList = ensureAttrNodeListForElement(*this);
     RefPtr<Attr> attrNode = findAttrNodeInList(attrNodeList, name);
     if (!attrNode) {
@@ -3317,7 +3317,7 @@ Ref<Attr> Element::ensureAttr(const QualifiedName& name)
 }
 
 void Element::detachAttrNodeFromElementWithValue(Attr* attrNode, const AtomicString& value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasSyntheticAttrChildNodes());
     attrNode->detachFromElementWithValue(value);
 
@@ -3331,7 +3331,7 @@ void Element::detachAttrNodeFromElementWithValue(Attr* attrNode, const AtomicStr
 }
 
 void Element::detachAllAttrNodesFromElement()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* attrNodeList = attrNodeListForElement(*this);
     ASSERT(attrNodeList);
 
@@ -3344,7 +3344,7 @@ void Element::detachAllAttrNodesFromElement()
 }
 
 void Element::resetComputedStyle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasRareData() || !elementRareData()->computedStyle())
         return;
 
@@ -3361,7 +3361,7 @@ void Element::resetComputedStyle()
 }
 
 void Element::clearStyleDerivedDataBeforeDetachingRenderer()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     unregisterNamedFlowContentElement();
     cancelFocusAppearanceUpdate();
     clearBeforePseudoElement();
@@ -3374,7 +3374,7 @@ void Element::clearStyleDerivedDataBeforeDetachingRenderer()
 }
 
 void Element::clearHoverAndActiveStatusBeforeDetachingRenderer()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isUserActionElement())
         return;
     if (hovered())
@@ -3385,49 +3385,49 @@ void Element::clearHoverAndActiveStatusBeforeDetachingRenderer()
 }
 
 bool Element::willRecalcStyle(Style::Change)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasCustomStyleResolveCallbacks());
     return true;
 }
 
 void Element::didRecalcStyle(Style::Change)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasCustomStyleResolveCallbacks());
 }
 
 void Element::willResetComputedStyle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasCustomStyleResolveCallbacks());
 }
 
 void Element::willAttachRenderers()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasCustomStyleResolveCallbacks());
 }
 
 void Element::didAttachRenderers()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasCustomStyleResolveCallbacks());
 }
 
 void Element::willDetachRenderers()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasCustomStyleResolveCallbacks());
 }
 
 void Element::didDetachRenderers()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasCustomStyleResolveCallbacks());
 }
 
 Optional<ElementStyle> Element::resolveCustomStyle(const RenderStyle&, const RenderStyle*)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(hasCustomStyleResolveCallbacks());
     return Nullopt;
 }
 
 void Element::cloneAttributesFromElement(const Element& other)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (hasSyntheticAttrChildNodes())
         detachAllAttrNodesFromElement();
 
@@ -3470,13 +3470,13 @@ void Element::cloneAttributesFromElement(const Element& other)
 }
 
 void Element::cloneDataFromElement(const Element& other)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     cloneAttributesFromElement(other);
     copyNonAttributePropertiesFromElement(other);
 }
 
 void Element::createUniqueElementData()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_elementData)
         m_elementData = UniqueElementData::create();
     else
@@ -3484,32 +3484,32 @@ void Element::createUniqueElementData()
 }
 
 bool Element::hasPendingResources() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasRareData() && elementRareData()->hasPendingResources();
 }
 
 void Element::setHasPendingResources()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setHasPendingResources(true);
 }
 
 void Element::clearHasPendingResources()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ensureElementRareData().setHasPendingResources(false);
 }
 
 bool Element::canContainRangeEndPoint() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return !equalLettersIgnoringASCIICase(attributeWithoutSynchronization(roleAttr), "img");
 }
 
 String Element::completeURLsInAttributeValue(const URL& base, const Attribute& attribute) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return URL(base, attribute.value()).string();
 }
 
 bool Element::ieForbidsInsertHTML() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: Supposedly IE disallows setting innerHTML, outerHTML
     // and createContextualFragment on these tags. We have no tests to
     // verify this however, so this list could be totally wrong.
@@ -3548,7 +3548,7 @@ bool Element::ieForbidsInsertHTML() const
 }
 
 Node* Element::insertAdjacent(const String& where, Ref<Node>&& newChild, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // In Internet Explorer if the element has no parent and where is "beforeBegin" or "afterEnd",
     // a document fragment is created and the elements appended in the correct order. This document
     // fragment isn't returned anywhere.
@@ -3577,7 +3577,7 @@ Node* Element::insertAdjacent(const String& where, Ref<Node>&& newChild, Excepti
 }
 
 Element* Element::insertAdjacentElement(const String& where, Element& newChild, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Node* returnValue = insertAdjacent(where, newChild, ec);
     ASSERT_WITH_SECURITY_IMPLICATION(!returnValue || is<Element>(*returnValue));
     return downcast<Element>(returnValue);
@@ -3585,7 +3585,7 @@ Element* Element::insertAdjacentElement(const String& where, Element& newChild, 
 
 // Step 1 of https://w3c.github.io/DOM-Parsing/#dom-element-insertadjacenthtml.
 static Element* contextElementForInsertion(const String& where, Element* element, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (equalLettersIgnoringASCIICase(where, "beforebegin") || equalLettersIgnoringASCIICase(where, "afterend")) {
         auto* parent = element->parentElement();
         if (!parent) {
@@ -3601,7 +3601,7 @@ static Element* contextElementForInsertion(const String& where, Element* element
 }
 
 void Element::insertAdjacentHTML(const String& where, const String& markup, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Element* contextElement = contextElementForInsertion(where, this, ec);
     if (!contextElement)
         return;
@@ -3612,7 +3612,7 @@ void Element::insertAdjacentHTML(const String& where, const String& markup, Exce
 }
 
 void Element::insertAdjacentText(const String& where, const String& text, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     insertAdjacent(where, document().createTextNode(text), ec);
 }
 

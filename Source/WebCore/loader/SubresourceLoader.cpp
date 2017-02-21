@@ -66,12 +66,12 @@ DEFINE_DEBUG_ONLY_GLOBAL(WTF::RefCountedLeakCounter, subresourceLoaderCounter, (
 SubresourceLoader::RequestCountTracker::RequestCountTracker(CachedResourceLoader& cachedResourceLoader, const CachedResource& resource)
     : m_cachedResourceLoader(cachedResourceLoader)
     , m_resource(resource)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_cachedResourceLoader.incrementRequestCount(m_resource);
 }
 
 SubresourceLoader::RequestCountTracker::~RequestCountTracker()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_cachedResourceLoader.decrementRequestCount(m_resource);
 }
 
@@ -81,7 +81,7 @@ SubresourceLoader::SubresourceLoader(Frame& frame, CachedResource& resource, con
     , m_loadingMultipartContent(false)
     , m_state(Uninitialized)
     , m_requestCountTracker(InPlace, frame.document()->cachedResourceLoader(), resource)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #ifndef NDEBUG
     subresourceLoaderCounter.increment();
 #endif
@@ -91,7 +91,7 @@ SubresourceLoader::SubresourceLoader(Frame& frame, CachedResource& resource, con
 }
 
 SubresourceLoader::~SubresourceLoader()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_state != Initialized);
     ASSERT(reachedTerminalState());
 #ifndef NDEBUG
@@ -100,7 +100,7 @@ SubresourceLoader::~SubresourceLoader()
 }
 
 RefPtr<SubresourceLoader> SubresourceLoader::create(Frame& frame, CachedResource& resource, const ResourceRequest& request, const ResourceLoaderOptions& options)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<SubresourceLoader> subloader(adoptRef(new SubresourceLoader(frame, resource, options)));
 #if PLATFORM(IOS)
     if (!IOSApplication::isWebProcess()) {
@@ -118,7 +118,7 @@ RefPtr<SubresourceLoader> SubresourceLoader::create(Frame& frame, CachedResource
     
 #if PLATFORM(IOS)
 bool SubresourceLoader::startLoading()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!IOSApplication::isWebProcess());
     if (!init(m_iOSOriginalRequest))
         return false;
@@ -129,12 +129,12 @@ bool SubresourceLoader::startLoading()
 #endif
 
 CachedResource* SubresourceLoader::cachedResource()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_resource;
 }
 
 void SubresourceLoader::cancelIfNotFinishing()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_state != Initialized)
         return;
 
@@ -142,7 +142,7 @@ void SubresourceLoader::cancelIfNotFinishing()
 }
 
 bool SubresourceLoader::init(const ResourceRequest& request)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!ResourceLoader::init(request))
         return false;
 
@@ -159,12 +159,12 @@ bool SubresourceLoader::init(const ResourceRequest& request)
 }
 
 bool SubresourceLoader::isSubresourceLoader()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return true;
 }
 
 void SubresourceLoader::willSendRequestInternal(ResourceRequest& newRequest, const ResourceResponse& redirectResponse)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Store the previous URL because the call to ResourceLoader::willSendRequest will modify it.
     URL previousURL = request().url();
     Ref<SubresourceLoader> protectedThis(*this);
@@ -232,14 +232,14 @@ void SubresourceLoader::willSendRequestInternal(ResourceRequest& newRequest, con
 }
 
 void SubresourceLoader::didSendData(unsigned long long bytesSent, unsigned long long totalBytesToBeSent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_state == Initialized);
     Ref<SubresourceLoader> protectedThis(*this);
     m_resource->didSendData(bytesSent, totalBytesToBeSent);
 }
 
 void SubresourceLoader::didReceiveResponse(const ResourceResponse& response)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!response.isNull());
     ASSERT(m_state == Initialized);
 
@@ -312,17 +312,17 @@ void SubresourceLoader::didReceiveResponse(const ResourceResponse& response)
 }
 
 void SubresourceLoader::didReceiveData(const char* data, unsigned length, long long encodedDataLength, DataPayloadType dataPayloadType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didReceiveDataOrBuffer(data, length, nullptr, encodedDataLength, dataPayloadType);
 }
 
 void SubresourceLoader::didReceiveBuffer(Ref<SharedBuffer>&& buffer, long long encodedDataLength, DataPayloadType dataPayloadType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     didReceiveDataOrBuffer(nullptr, 0, WTFMove(buffer), encodedDataLength, dataPayloadType);
 }
 
 void SubresourceLoader::didReceiveDataOrBuffer(const char* data, int length, RefPtr<SharedBuffer>&& prpBuffer, long long encodedDataLength, DataPayloadType dataPayloadType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_resource->response().httpStatusCode() >= 400 && !m_resource->shouldIgnoreHTTPStatusCodeErrors())
         return;
     ASSERT(!m_resource->resourceToRevalidate());
@@ -344,7 +344,7 @@ void SubresourceLoader::didReceiveDataOrBuffer(const char* data, int length, Ref
 }
 
 bool SubresourceLoader::checkForHTTPStatusCodeError()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_resource->response().httpStatusCode() < 400 || m_resource->shouldIgnoreHTTPStatusCodeErrors())
         return false;
 
@@ -355,7 +355,7 @@ bool SubresourceLoader::checkForHTTPStatusCodeError()
 }
 
 static void logResourceLoaded(Frame* frame, CachedResource::Type type)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame || !frame->page())
         return;
 
@@ -404,7 +404,7 @@ static void logResourceLoaded(Frame* frame, CachedResource::Type type)
 }
 
 bool SubresourceLoader::checkRedirectionCrossOriginAccessControl(const ResourceRequest& previousRequest, const ResourceResponse& redirectResponse, ResourceRequest& newRequest, String& errorMessage)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool crossOriginFlag = m_resource->isCrossOrigin();
     bool isNextRequestCrossOrigin = m_origin && !m_origin->canRequest(newRequest.url());
 
@@ -447,7 +447,7 @@ bool SubresourceLoader::checkRedirectionCrossOriginAccessControl(const ResourceR
 }
 
 void SubresourceLoader::didFinishLoading(double finishTime)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_state != Initialized)
         return;
     ASSERT(!reachedTerminalState());
@@ -476,7 +476,7 @@ void SubresourceLoader::didFinishLoading(double finishTime)
 }
 
 void SubresourceLoader::didFail(const ResourceError& error)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_state != Initialized)
         return;
     ASSERT(!reachedTerminalState());
@@ -499,7 +499,7 @@ void SubresourceLoader::didFail(const ResourceError& error)
 }
 
 void SubresourceLoader::willCancel(const ResourceError& error)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(IOS)
     // Since we defer initialization to scheduling time on iOS but
     // CachedResourceLoader stores resources in the memory cache immediately,
@@ -526,7 +526,7 @@ void SubresourceLoader::willCancel(const ResourceError& error)
 }
 
 void SubresourceLoader::didCancel(const ResourceError&)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_state == Uninitialized)
         return;
 
@@ -535,7 +535,7 @@ void SubresourceLoader::didCancel(const ResourceError&)
 }
 
 void SubresourceLoader::notifyDone()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (reachedTerminalState())
         return;
 
@@ -551,7 +551,7 @@ void SubresourceLoader::notifyDone()
 }
 
 void SubresourceLoader::releaseResources()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!reachedTerminalState());
 #if PLATFORM(IOS)
     if (m_state != Uninitialized && m_state != CancelledWhileInitializing)

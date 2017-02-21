@@ -65,11 +65,11 @@ private:
 WebInspectorClient::WebInspectorClient(WebPage* page)
     : m_page(page)
     , m_highlightOverlay(nullptr)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 WebInspectorClient::~WebInspectorClient()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto layer : m_paintRectLayers) {
         layer->removeFromParent();
         delete layer;
@@ -80,7 +80,7 @@ WebInspectorClient::~WebInspectorClient()
 }
 
 void WebInspectorClient::inspectedPageDestroyed()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (WebInspector* inspector = m_page->inspector(WebPage::LazyCreationPolicy::UseExistingOnly))
         inspector->close();
 
@@ -88,26 +88,26 @@ void WebInspectorClient::inspectedPageDestroyed()
 }
 
 Inspector::FrontendChannel* WebInspectorClient::openLocalFrontend(InspectorController* controller)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->inspector()->openFrontendConnection(controller->isUnderTest());
 
     return m_page->inspector();
 }
 
 void WebInspectorClient::bringFrontendToFront()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_page->inspector())
         m_page->inspector()->bringToFront();
 }
 
 void WebInspectorClient::didResizeMainFrame(Frame*)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_page->inspector())
         m_page->inspector()->updateDockingAvailability();
 }
 
 void WebInspectorClient::highlight()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if !PLATFORM(IOS)
     if (!m_highlightOverlay) {
         auto highlightOverlay = PageOverlay::create(*this);
@@ -126,7 +126,7 @@ void WebInspectorClient::highlight()
 }
 
 void WebInspectorClient::hideHighlight()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if !PLATFORM(IOS)
     if (m_highlightOverlay && m_page->mainFrame())
         m_page->mainFrame()->pageOverlayController().uninstallPageOverlay(m_highlightOverlay, PageOverlay::FadeMode::Fade);
@@ -136,7 +136,7 @@ void WebInspectorClient::hideHighlight()
 }
 
 void WebInspectorClient::showPaintRect(const FloatRect& rect)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_paintRectOverlay) {
         m_paintRectOverlay = PageOverlay::create(*this, PageOverlay::OverlayType::Document);
         m_page->mainFrame()->pageOverlayController().installPageOverlay(m_paintRectOverlay, PageOverlay::FadeMode::DoNotFade);
@@ -169,7 +169,7 @@ void WebInspectorClient::showPaintRect(const FloatRect& rect)
 }
 
 void WebInspectorClient::animationEndedForLayer(const GraphicsLayer* layer)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const_cast<GraphicsLayer*>(layer)->removeFromParent();
     m_paintRectLayers.remove(const_cast<GraphicsLayer*>(layer));
     delete layer;
@@ -177,17 +177,17 @@ void WebInspectorClient::animationEndedForLayer(const GraphicsLayer* layer)
 
 #if PLATFORM(IOS)
 void WebInspectorClient::showInspectorIndication()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->showInspectorIndication();
 }
 
 void WebInspectorClient::hideInspectorIndication()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->hideInspectorIndication();
 }
 
 void WebInspectorClient::didSetSearchingForNode(bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (enabled)
         m_page->enableInspectorNodeSearch();
     else
@@ -196,13 +196,13 @@ void WebInspectorClient::didSetSearchingForNode(bool enabled)
 #endif
 
 void WebInspectorClient::elementSelectionChanged(bool active)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_page->inspector())
         m_page->inspector()->elementSelectionChanged(active);
 }
 
 void WebInspectorClient::willMoveToPage(PageOverlay&, Page* page)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (page)
         return;
 
@@ -212,16 +212,16 @@ void WebInspectorClient::willMoveToPage(PageOverlay&, Page* page)
 }
 
 void WebInspectorClient::didMoveToPage(PageOverlay&, Page*)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 void WebInspectorClient::drawRect(PageOverlay&, WebCore::GraphicsContext& context, const WebCore::IntRect& /*dirtyRect*/)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->corePage()->inspectorController().drawHighlight(context);
 }
 
 bool WebInspectorClient::mouseEvent(PageOverlay&, const PlatformMouseEvent&)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return false;
 }
 

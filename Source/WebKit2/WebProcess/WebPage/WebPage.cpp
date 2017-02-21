@@ -279,7 +279,7 @@ private:
 DEFINE_DEBUG_ONLY_GLOBAL(WTF::RefCountedLeakCounter, webPageCounter, ("WebPage"));
 
 Ref<WebPage> WebPage::create(uint64_t pageID, const WebPageCreationParameters& parameters)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<WebPage> page = adoptRef(*new WebPage(pageID, parameters));
 
     if (page->pageGroup()->isVisibleToInjectedBundle() && WebProcess::singleton().injectedBundle())
@@ -384,7 +384,7 @@ WebPage::WebPage(uint64_t pageID, const WebPageCreationParameters& parameters)
     , m_mainFrameProgressCompleted(false)
     , m_shouldDispatchFakeMouseMoveEvents(true)
     , m_userInterfaceLayoutDirection(parameters.userInterfaceLayoutDirection)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     ASSERT(m_pageID);
 
@@ -572,7 +572,7 @@ WebPage::WebPage(uint64_t pageID, const WebPageCreationParameters& parameters)
 }
 
 void WebPage::reinitializeWebPage(const WebPageCreationParameters& parameters)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (m_viewState != parameters.viewState)
         setViewState(parameters.viewState, false, Vector<uint64_t>());
@@ -581,7 +581,7 @@ void WebPage::reinitializeWebPage(const WebPageCreationParameters& parameters)
 }
 
 void WebPage::setPageActivityState(PageActivityState::Flags activityState)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     PageActivityState::Flags changed = m_activityState ^ activityState;
     m_activityState = activityState;
 
@@ -590,7 +590,7 @@ void WebPage::setPageActivityState(PageActivityState::Flags activityState)
 }
 
 void WebPage::updateUserActivity()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Start the activity to prevent AppNap if the page activity is in progress,
     // the page is visible and non-idle, or process suppression is disabled.
     if (m_activityState || !(m_viewState & ViewState::IsVisuallyIdle) || !m_processSuppressionEnabled)
@@ -600,7 +600,7 @@ void WebPage::updateUserActivity()
 }
 
 WebPage::~WebPage()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (m_backForwardList)
         m_backForwardList->detach();
@@ -645,22 +645,22 @@ WebPage::~WebPage()
 }
 
 void WebPage::dummy(bool&)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 IPC::Connection* WebPage::messageSenderConnection()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return WebProcess::singleton().parentProcessConnection();
 }
 
 uint64_t WebPage::messageSenderDestinationID()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return pageID();
 }
 
 #if ENABLE(CONTEXT_MENUS)
 void WebPage::setInjectedBundleContextMenuClient(std::unique_ptr<API::InjectedBundle::PageContextMenuClient> contextMenuClient)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!contextMenuClient) {
         m_contextMenuClient = std::make_unique<API::InjectedBundle::PageContextMenuClient>();
         return;
@@ -671,12 +671,12 @@ void WebPage::setInjectedBundleContextMenuClient(std::unique_ptr<API::InjectedBu
 #endif
 
 void WebPage::initializeInjectedBundleEditorClient(WKBundlePageEditorClientBase* client)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_editorClient.initialize(client);
 }
 
 void WebPage::setInjectedBundleFormClient(std::unique_ptr<API::InjectedBundle::FormClient> formClient)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!formClient) {
         m_formClient = std::make_unique<API::InjectedBundle::FormClient>();
         return;
@@ -686,7 +686,7 @@ void WebPage::setInjectedBundleFormClient(std::unique_ptr<API::InjectedBundle::F
 }
 
 void WebPage::initializeInjectedBundleLoaderClient(WKBundlePageLoaderClientBase* client)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     m_loaderClient.initialize(client);
 
@@ -706,17 +706,17 @@ void WebPage::initializeInjectedBundleLoaderClient(WKBundlePageLoaderClientBase*
 }
 
 void WebPage::initializeInjectedBundlePolicyClient(WKBundlePagePolicyClientBase* client)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_policyClient.initialize(client);
 }
 
 void WebPage::initializeInjectedBundleResourceLoadClient(WKBundlePageResourceLoadClientBase* client)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_resourceLoadClient.initialize(client);
 }
 
 void WebPage::setInjectedBundleUIClient(std::unique_ptr<API::InjectedBundle::PageUIClient> uiClient)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!uiClient) {
         m_uiClient = std::make_unique<API::InjectedBundle::PageUIClient>();
         return;
@@ -727,19 +727,19 @@ void WebPage::setInjectedBundleUIClient(std::unique_ptr<API::InjectedBundle::Pag
 
 #if ENABLE(FULLSCREEN_API)
 void WebPage::initializeInjectedBundleFullScreenClient(WKBundlePageFullScreenClientBase* client)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_fullScreenClient.initialize(client);
 }
 #endif
 
 void WebPage::initializeInjectedBundleDiagnosticLoggingClient(WKBundlePageDiagnosticLoggingClientBase* client)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_logDiagnosticMessageClient.initialize(client);
 }
 
 #if ENABLE(NETSCAPE_PLUGIN_API)
 PassRefPtr<Plugin> WebPage::createPlugin(WebFrame* frame, HTMLPlugInElement* pluginElement, const Plugin::Parameters& parameters, String& newMIMEType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     String frameURLString = frame->coreFrame()->loader().documentLoader()->responseURL().string();
     String pageURLString = m_page->mainFrame().loader().documentLoader()->responseURL().string();
 
@@ -799,18 +799,18 @@ PassRefPtr<Plugin> WebPage::createPlugin(WebFrame* frame, HTMLPlugInElement* plu
 
 #if ENABLE(WEBGL) && !PLATFORM(COCOA)
 WebCore::WebGLLoadPolicy WebPage::webGLPolicyForURL(WebFrame*, const String& /* url */)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return WebGLAllowCreation;
 }
 
 WebCore::WebGLLoadPolicy WebPage::resolveWebGLPolicyForURL(WebFrame*, const String& /* url */)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return WebGLAllowCreation;
 }
 #endif
 
 EditorState WebPage::editorState(IncludePostLayoutDataHint shouldIncludePostLayoutData) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
 
     EditorState result;
@@ -906,19 +906,19 @@ EditorState WebPage::editorState(IncludePostLayoutDataHint shouldIncludePostLayo
 }
 
 String WebPage::renderTreeExternalRepresentation() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     return externalRepresentation(m_mainFrame->coreFrame(), RenderAsTextBehaviorNormal);
 }
 
 String WebPage::renderTreeExternalRepresentationForPrinting() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     return externalRepresentation(m_mainFrame->coreFrame(), RenderAsTextPrintingMode);
 }
 
 uint64_t WebPage::renderTreeSize() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (!m_page)
         return 0;
@@ -926,14 +926,14 @@ uint64_t WebPage::renderTreeSize() const
 }
 
 void WebPage::setTracksRepaints(bool trackRepaints)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (FrameView* view = mainFrameView())
         view->setTracksRepaints(trackRepaints);
 }
 
 bool WebPage::isTrackingRepaints() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (FrameView* view = mainFrameView())
         return view->isTrackingRepaints();
@@ -942,13 +942,13 @@ bool WebPage::isTrackingRepaints() const
 }
 
 void WebPage::resetTrackedRepaints()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (FrameView* view = mainFrameView())
         view->resetTrackedRepaints();
 }
 
 Ref<API::Array> WebPage::trackedRepaintRects()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     FrameView* view = mainFrameView();
     if (!view)
         return API::Array::create();
@@ -963,7 +963,7 @@ Ref<API::Array> WebPage::trackedRepaintRects()
 }
 
 PluginView* WebPage::focusedPluginViewForFrame(Frame& frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame.document()->isPluginDocument())
         return 0;
 
@@ -977,7 +977,7 @@ PluginView* WebPage::focusedPluginViewForFrame(Frame& frame)
 }
 
 PluginView* WebPage::pluginViewForFrame(Frame* frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame->document()->isPluginDocument())
         return 0;
 
@@ -987,7 +987,7 @@ PluginView* WebPage::pluginViewForFrame(Frame* frame)
 }
 
 void WebPage::executeEditingCommand(const String& commandName, const String& argument)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
 
     if (PluginView* pluginView = focusedPluginViewForFrame(frame)) {
@@ -999,7 +999,7 @@ void WebPage::executeEditingCommand(const String& commandName, const String& arg
 }
 
 void WebPage::setEditable(bool editable)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setEditable(editable);
     m_page->setTabKeyCyclesThroughElements(!editable);
     Frame& frame = m_page->focusController().focusedOrMainFrame();
@@ -1012,7 +1012,7 @@ void WebPage::setEditable(bool editable)
 }
 
 bool WebPage::isEditingCommandEnabled(const String& commandName)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
 
     if (PluginView* pluginView = focusedPluginViewForFrame(frame))
@@ -1023,23 +1023,23 @@ bool WebPage::isEditingCommandEnabled(const String& commandName)
 }
     
 void WebPage::clearMainFrameName()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Frame* frame = mainFrame())
         frame->tree().clearName();
 }
 
 void WebPage::enterAcceleratedCompositingMode(GraphicsLayer* layer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_drawingArea->setRootCompositingLayer(layer);
 }
 
 void WebPage::exitAcceleratedCompositingMode()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_drawingArea->setRootCompositingLayer(0);
 }
 
 void WebPage::close()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (m_isClosed)
         return;
@@ -1131,7 +1131,7 @@ void WebPage::close()
 }
 
 void WebPage::tryClose()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SendStopResponsivenessTimer stopper(this);
 
     if (!corePage()->userInputBridge().tryClosePage()) {
@@ -1143,13 +1143,13 @@ void WebPage::tryClose()
 }
 
 void WebPage::sendClose()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     send(Messages::WebPageProxy::ClosePage(false));
 }
 
 void WebPage::loadURLInFrame(const String& url, uint64_t frameID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     WebFrame* frame = WebProcess::singleton().webFrame(frameID);
     if (!frame)
@@ -1160,13 +1160,13 @@ void WebPage::loadURLInFrame(const String& url, uint64_t frameID)
 
 #if !PLATFORM(COCOA)
 void WebPage::platformDidReceiveLoadParameters(const LoadParameters& loadParameters)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
 }
 #endif
 
 void WebPage::loadRequest(const LoadParameters& loadParameters)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     SendStopResponsivenessTimer stopper(this);
 
@@ -1191,7 +1191,7 @@ void WebPage::loadRequest(const LoadParameters& loadParameters)
 }
 
 void WebPage::loadDataImpl(uint64_t navigationID, PassRefPtr<SharedBuffer> sharedBuffer, const String& MIMEType, const String& encodingName, const URL& baseURL, const URL& unreachableURL, const UserData& userData)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     SendStopResponsivenessTimer stopper(this);
 
@@ -1210,7 +1210,7 @@ void WebPage::loadDataImpl(uint64_t navigationID, PassRefPtr<SharedBuffer> share
 }
 
 void WebPage::loadStringImpl(uint64_t navigationID, const String& htmlString, const String& MIMEType, const URL& baseURL, const URL& unreachableURL, const UserData& userData)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (!htmlString.isNull() && htmlString.is8Bit()) {
         RefPtr<SharedBuffer> sharedBuffer = SharedBuffer::create(reinterpret_cast<const char*>(htmlString.characters8()), htmlString.length() * sizeof(LChar));
@@ -1222,7 +1222,7 @@ void WebPage::loadStringImpl(uint64_t navigationID, const String& htmlString, co
 }
 
 void WebPage::loadData(const LoadParameters& loadParameters)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     platformDidReceiveLoadParameters(loadParameters);
 
@@ -1232,7 +1232,7 @@ void WebPage::loadData(const LoadParameters& loadParameters)
 }
 
 void WebPage::loadString(const LoadParameters& loadParameters)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     platformDidReceiveLoadParameters(loadParameters);
 
@@ -1241,7 +1241,7 @@ void WebPage::loadString(const LoadParameters& loadParameters)
 }
 
 void WebPage::loadAlternateHTMLString(const LoadParameters& loadParameters)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     platformDidReceiveLoadParameters(loadParameters);
 
     URL baseURL = loadParameters.baseURLString.isEmpty() ? blankURL() : URL(URL(), loadParameters.baseURLString);
@@ -1253,7 +1253,7 @@ void WebPage::loadAlternateHTMLString(const LoadParameters& loadParameters)
 }
 
 void WebPage::navigateToPDFLinkWithSimulatedClick(const String& url, IntPoint documentPoint, IntPoint screenPoint)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame* mainFrame = m_mainFrame->coreFrame();
     Document* mainFrameDocument = mainFrame->document();
     if (!mainFrameDocument)
@@ -1270,7 +1270,7 @@ void WebPage::navigateToPDFLinkWithSimulatedClick(const String& url, IntPoint do
 }
 
 void WebPage::stopLoadingFrame(uint64_t frameID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     WebFrame* frame = WebProcess::singleton().webFrame(frameID);
     if (!frame)
@@ -1280,7 +1280,7 @@ void WebPage::stopLoadingFrame(uint64_t frameID)
 }
 
 void WebPage::stopLoading()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     SendStopResponsivenessTimer stopper(this);
 
@@ -1288,17 +1288,17 @@ void WebPage::stopLoading()
 }
 
 bool WebPage::defersLoading() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->defersLoading();
 }
 
 void WebPage::setDefersLoading(bool defersLoading)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setDefersLoading(defersLoading);
 }
 
 void WebPage::reload(uint64_t navigationID, bool reloadFromOrigin, bool contentBlockersEnabled, const SandboxExtension::Handle& sandboxExtensionHandle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     SendStopResponsivenessTimer stopper(this);
 
@@ -1310,7 +1310,7 @@ void WebPage::reload(uint64_t navigationID, bool reloadFromOrigin, bool contentB
 }
 
 void WebPage::goForward(uint64_t navigationID, uint64_t backForwardItemID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SendStopResponsivenessTimer stopper(this);
 
     HistoryItem* item = WebBackForwardListProxy::itemForID(backForwardItemID);
@@ -1325,7 +1325,7 @@ void WebPage::goForward(uint64_t navigationID, uint64_t backForwardItemID)
 }
 
 void WebPage::goBack(uint64_t navigationID, uint64_t backForwardItemID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SendStopResponsivenessTimer stopper(this);
 
     HistoryItem* item = WebBackForwardListProxy::itemForID(backForwardItemID);
@@ -1340,7 +1340,7 @@ void WebPage::goBack(uint64_t navigationID, uint64_t backForwardItemID)
 }
 
 void WebPage::goToBackForwardItem(uint64_t navigationID, uint64_t backForwardItemID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SendStopResponsivenessTimer stopper(this);
 
     HistoryItem* item = WebBackForwardListProxy::itemForID(backForwardItemID);
@@ -1355,24 +1355,24 @@ void WebPage::goToBackForwardItem(uint64_t navigationID, uint64_t backForwardIte
 }
 
 void WebPage::tryRestoreScrollPosition()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->mainFrame().loader().history().restoreScrollPositionAndViewState();
 }
 
 void WebPage::layoutIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (m_mainFrame->coreFrame()->view())
         m_mainFrame->coreFrame()->view()->updateLayoutAndStyleIfNeededRecursive();
 }
 
 WebPage* WebPage::fromCorePage(Page* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return static_cast<WebChromeClient&>(page->chrome().client()).page();
 }
 
 void WebPage::setSize(const WebCore::IntSize& viewSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (m_viewSize == viewSize)
         return;
@@ -1390,7 +1390,7 @@ void WebPage::setSize(const WebCore::IntSize& viewSize)
 
 #if USE(COORDINATED_GRAPHICS)
 void WebPage::sendViewportAttributesChanged()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     FrameView* view = m_page->mainFrame().view();
     ASSERT(view && view->useFixedLayout());
 
@@ -1440,7 +1440,7 @@ void WebPage::sendViewportAttributesChanged()
 #endif
 
 void WebPage::scrollMainFrameIfNotAtMaxScrollPosition(const IntSize& scrollOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     FrameView* frameView = m_page->mainFrame().view();
 
     ScrollPosition scrollPosition = frameView->scrollPosition();
@@ -1461,7 +1461,7 @@ void WebPage::scrollMainFrameIfNotAtMaxScrollPosition(const IntSize& scrollOffse
 }
 
 void WebPage::drawRect(GraphicsContext& graphicsContext, const IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     GraphicsContextStateSaver stateSaver(graphicsContext);
     graphicsContext.clip(rect);
@@ -1470,7 +1470,7 @@ void WebPage::drawRect(GraphicsContext& graphicsContext, const IntRect& rect)
 }
 
 double WebPage::textZoomFactor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     PluginView* pluginView = pluginViewForFrame(&m_page->mainFrame());
     if (pluginView && pluginView->requiresUnifiedScaleFactor()) {
         if (pluginView->handlesPageScaleFactor())
@@ -1485,7 +1485,7 @@ double WebPage::textZoomFactor() const
 }
 
 void WebPage::setTextZoomFactor(double zoomFactor)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     PluginView* pluginView = pluginViewForFrame(&m_page->mainFrame());
     if (pluginView && pluginView->requiresUnifiedScaleFactor()) {
         if (pluginView->handlesPageScaleFactor())
@@ -1502,7 +1502,7 @@ void WebPage::setTextZoomFactor(double zoomFactor)
 }
 
 double WebPage::pageZoomFactor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     PluginView* pluginView = pluginViewForFrame(&m_page->mainFrame());
     if (pluginView && pluginView->requiresUnifiedScaleFactor()) {
         if (pluginView->handlesPageScaleFactor())
@@ -1517,7 +1517,7 @@ double WebPage::pageZoomFactor() const
 }
 
 void WebPage::setPageZoomFactor(double zoomFactor)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     PluginView* pluginView = pluginViewForFrame(&m_page->mainFrame());
     if (pluginView && pluginView->requiresUnifiedScaleFactor()) {
         if (pluginView->handlesPageScaleFactor())
@@ -1534,7 +1534,7 @@ void WebPage::setPageZoomFactor(double zoomFactor)
 }
 
 void WebPage::setPageAndTextZoomFactors(double pageZoomFactor, double textZoomFactor)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     PluginView* pluginView = pluginViewForFrame(&m_page->mainFrame());
     if (pluginView && pluginView->requiresUnifiedScaleFactor()) {
         if (pluginView->handlesPageScaleFactor())
@@ -1551,14 +1551,14 @@ void WebPage::setPageAndTextZoomFactors(double pageZoomFactor, double textZoomFa
 }
 
 void WebPage::windowScreenDidChange(uint32_t displayID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
 
     m_page->chrome().windowScreenDidChange(static_cast<PlatformDisplayID>(displayID));
 }
 
 void WebPage::scalePage(double scale, const IntPoint& origin)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
 
     double totalScale = scale * viewScaleFactor();
@@ -1603,7 +1603,7 @@ void WebPage::scalePage(double scale, const IntPoint& origin)
 }
 
 void WebPage::scalePageInViewCoordinates(double scale, IntPoint centerInViewCoordinates)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     double totalScale = scale * viewScaleFactor();
     if (totalScale == totalScaleFactor())
         return;
@@ -1615,7 +1615,7 @@ void WebPage::scalePageInViewCoordinates(double scale, IntPoint centerInViewCoor
 }
 
 double WebPage::totalScaleFactor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     PluginView* pluginView = pluginViewForFrame(&m_page->mainFrame());
     if (pluginView && pluginView->handlesPageScaleFactor())
         return pluginView->pageScaleFactor();
@@ -1624,17 +1624,17 @@ double WebPage::totalScaleFactor() const
 }
 
 double WebPage::pageScaleFactor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return totalScaleFactor() / viewScaleFactor();
 }
 
 double WebPage::viewScaleFactor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->viewScaleFactor();
 }
 
 void WebPage::scaleView(double scale)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (viewScaleFactor() == scale)
         return;
 
@@ -1652,7 +1652,7 @@ void WebPage::scaleView(double scale)
 }
 
 void WebPage::setDeviceScaleFactor(float scaleFactor)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (scaleFactor == m_page->deviceScaleFactor())
         return;
 
@@ -1679,12 +1679,12 @@ void WebPage::setDeviceScaleFactor(float scaleFactor)
 }
 
 float WebPage::deviceScaleFactor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->deviceScaleFactor();
 }
 
 void WebPage::setUseFixedLayout(bool fixed)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Do not overwrite current settings if initially setting it to false.
     if (m_useFixedLayout == fixed)
         return;
@@ -1722,7 +1722,7 @@ void WebPage::setUseFixedLayout(bool fixed)
 }
 
 bool WebPage::setFixedLayoutSize(const IntSize& size)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     FrameView* view = mainFrameView();
     if (!view || view->fixedLayoutSize() == size)
         return false;
@@ -1734,7 +1734,7 @@ bool WebPage::setFixedLayoutSize(const IntSize& size)
 }
 
 IntSize WebPage::fixedLayoutSize() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     FrameView* view = mainFrameView();
     if (!view)
         return IntSize();
@@ -1742,68 +1742,68 @@ IntSize WebPage::fixedLayoutSize() const
 }
 
 void WebPage::listenForLayoutMilestones(uint32_t milestones)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_page)
         return;
     m_page->addLayoutMilestones(static_cast<LayoutMilestones>(milestones));
 }
 
 void WebPage::setSuppressScrollbarAnimations(bool suppressAnimations)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setShouldSuppressScrollbarAnimations(suppressAnimations);
 }
     
 void WebPage::setEnableVerticalRubberBanding(bool enableVerticalRubberBanding)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setVerticalScrollElasticity(enableVerticalRubberBanding ? ScrollElasticityAllowed : ScrollElasticityNone);
 }
     
 void WebPage::setEnableHorizontalRubberBanding(bool enableHorizontalRubberBanding)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setHorizontalScrollElasticity(enableHorizontalRubberBanding ? ScrollElasticityAllowed : ScrollElasticityNone);
 }
 
 void WebPage::setBackgroundExtendsBeyondPage(bool backgroundExtendsBeyondPage)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_page->settings().backgroundShouldExtendBeyondPage() != backgroundExtendsBeyondPage)
         m_page->settings().setBackgroundShouldExtendBeyondPage(backgroundExtendsBeyondPage);
 }
 
 void WebPage::setPaginationMode(uint32_t mode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Pagination pagination = m_page->pagination();
     pagination.mode = static_cast<Pagination::Mode>(mode);
     m_page->setPagination(pagination);
 }
 
 void WebPage::setPaginationBehavesLikeColumns(bool behavesLikeColumns)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Pagination pagination = m_page->pagination();
     pagination.behavesLikeColumns = behavesLikeColumns;
     m_page->setPagination(pagination);
 }
 
 void WebPage::setPageLength(double pageLength)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Pagination pagination = m_page->pagination();
     pagination.pageLength = pageLength;
     m_page->setPagination(pagination);
 }
 
 void WebPage::setGapBetweenPages(double gap)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Pagination pagination = m_page->pagination();
     pagination.gap = gap;
     m_page->setPagination(pagination);
 }
 
 void WebPage::setPaginationLineGridEnabled(bool lineGridEnabled)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setPaginationLineGridEnabled(lineGridEnabled);
 }
 
 void WebPage::postInjectedBundleMessage(const String& messageName, const UserData& userData)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto& webProcess = WebProcess::singleton();
     InjectedBundle* injectedBundle = webProcess.injectedBundle();
     if (!injectedBundle)
@@ -1813,7 +1813,7 @@ void WebPage::postInjectedBundleMessage(const String& messageName, const UserDat
 }
 
 void WebPage::postSynchronousInjectedBundleMessage(const String& messageName, const UserData& userData)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto& webProcess = WebProcess::singleton();
     InjectedBundle* injectedBundle = webProcess.injectedBundle();
     if (!injectedBundle)
@@ -1824,7 +1824,7 @@ void WebPage::postSynchronousInjectedBundleMessage(const String& messageName, co
 
 #if !PLATFORM(IOS)
 void WebPage::setHeaderPageBanner(PassRefPtr<PageBanner> pageBanner)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_headerBanner)
         m_headerBanner->detachFromPage();
 
@@ -1835,12 +1835,12 @@ void WebPage::setHeaderPageBanner(PassRefPtr<PageBanner> pageBanner)
 }
 
 PageBanner* WebPage::headerPageBanner()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_headerBanner.get();
 }
 
 void WebPage::setFooterPageBanner(PassRefPtr<PageBanner> pageBanner)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_footerBanner)
         m_footerBanner->detachFromPage();
 
@@ -1851,12 +1851,12 @@ void WebPage::setFooterPageBanner(PassRefPtr<PageBanner> pageBanner)
 }
 
 PageBanner* WebPage::footerPageBanner()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_footerBanner.get();
 }
 
 void WebPage::hidePageBanners()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_headerBanner)
         m_headerBanner->hide();
     if (m_footerBanner)
@@ -1864,7 +1864,7 @@ void WebPage::hidePageBanners()
 }
 
 void WebPage::showPageBanners()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_headerBanner)
         m_headerBanner->showIfHidden();
     if (m_footerBanner)
@@ -1873,7 +1873,7 @@ void WebPage::showPageBanners()
 #endif // !PLATFORM(IOS)
 
 void WebPage::takeSnapshot(IntRect snapshotRect, IntSize bitmapSize, uint32_t options, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SnapshotOptions snapshotOptions = static_cast<SnapshotOptions>(options);
     snapshotOptions |= SnapshotOptionsShareable;
 
@@ -1887,7 +1887,7 @@ void WebPage::takeSnapshot(IntRect snapshotRect, IntSize bitmapSize, uint32_t op
 }
 
 PassRefPtr<WebImage> WebPage::scaledSnapshotWithOptions(const IntRect& rect, double additionalScaleFactor, SnapshotOptions options)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect snapshotRect = rect;
     IntSize bitmapSize = snapshotRect.size();
     if (options & SnapshotOptionsPrinting) {
@@ -1907,7 +1907,7 @@ PassRefPtr<WebImage> WebPage::scaledSnapshotWithOptions(const IntRect& rect, dou
 }
 
 PassRefPtr<WebImage> WebPage::snapshotAtSize(const IntRect& rect, const IntSize& bitmapSize, SnapshotOptions options)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     
 
     Frame* coreFrame = m_mainFrame->coreFrame();
@@ -1967,7 +1967,7 @@ PassRefPtr<WebImage> WebPage::snapshotAtSize(const IntRect& rect, const IntSize&
 }
 
 PassRefPtr<WebImage> WebPage::snapshotNode(WebCore::Node& node, SnapshotOptions options, unsigned maximumPixelCount)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     Frame* coreFrame = m_mainFrame->coreFrame();
     if (!coreFrame)
@@ -2021,7 +2021,7 @@ PassRefPtr<WebImage> WebPage::snapshotNode(WebCore::Node& node, SnapshotOptions 
 }
 
 void WebPage::pageDidScroll()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(IOS)
     if (!m_inDynamicSizeUpdate)
         m_dynamicSizeUpdateHistory.clear();
@@ -2034,7 +2034,7 @@ void WebPage::pageDidScroll()
 }
 
 void WebPage::pageStoppedScrolling()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Maintain the current history item's scroll position up-to-date.
     if (Frame* frame = m_mainFrame->coreFrame())
         frame->loader().history().saveScrollPositionAndViewStateToItem(frame->loader().history().currentItem());
@@ -2042,7 +2042,7 @@ void WebPage::pageStoppedScrolling()
 
 #if USE(COORDINATED_GRAPHICS)
 void WebPage::pageDidRequestScroll(const IntPoint& point)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if USE(COORDINATED_GRAPHICS_THREADED)
     drawingArea()->scroll(IntRect(point, IntSize()), IntSize());
 #elif USE(COORDINATED_GRAPHICS_MULTIPROCESS)
@@ -2053,14 +2053,14 @@ void WebPage::pageDidRequestScroll(const IntPoint& point)
 
 #if ENABLE(CONTEXT_MENUS)
 WebContextMenu* WebPage::contextMenu()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_contextMenu)
         m_contextMenu = WebContextMenu::create(this);
     return m_contextMenu.get();
 }
 
 WebContextMenu* WebPage::contextMenuAtPointInWindow(const IntPoint& point)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     corePage()->contextMenuController().clearContextMenu();
     
     // Simulate a mouse click to generate the correct menu.
@@ -2081,12 +2081,12 @@ static const WebEvent* g_currentEvent = 0;
 // WebEvents. When we get the event handling sorted out, this should go away and the Widgets should get the correct
 // platform events passed to the event handler code.
 const WebEvent* WebPage::currentEvent()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return g_currentEvent;
 }
 
 void WebPage::setLayerTreeStateIsFrozen(bool frozen)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* drawingArea = this->drawingArea();
     if (!drawingArea)
         return;
@@ -2095,14 +2095,14 @@ void WebPage::setLayerTreeStateIsFrozen(bool frozen)
 }
 
 void WebPage::callVolatilityCompletionHandlers()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto completionHandlers = WTFMove(m_markLayersAsVolatileCompletionHandlers);
     for (auto& completionHandler : completionHandlers)
         completionHandler();
 }
 
 void WebPage::layerVolatilityTimerFired()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto newInterval = 2 * m_layerVolatilityTimer.repeatIntervalMS();
     bool didSucceed = markLayersVolatileImmediatelyIfPossible();
     if (didSucceed || newInterval > maximumLayerVolatilityTimerInterval) {
@@ -2117,12 +2117,12 @@ void WebPage::layerVolatilityTimerFired()
 }
 
 bool WebPage::markLayersVolatileImmediatelyIfPossible()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return !drawingArea() || drawingArea()->markLayersVolatileImmediatelyIfPossible();
 }
 
 void WebPage::markLayersVolatile(std::function<void ()> completionHandler)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RELEASE_LOG_IF_ALLOWED("%p - WebPage::markLayersVolatile()", this);
 
     if (m_layerVolatilityTimer.isActive())
@@ -2148,7 +2148,7 @@ void WebPage::markLayersVolatile(std::function<void ()> completionHandler)
 }
 
 void WebPage::cancelMarkLayersVolatile()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RELEASE_LOG_IF_ALLOWED("%p - WebPage::cancelMarkLayersVolatile()", this);
     m_layerVolatilityTimer.stop();
     m_markLayersAsVolatileCompletionHandlers.clear();
@@ -2173,7 +2173,7 @@ private:
 
 #if ENABLE(CONTEXT_MENUS)
 static bool isContextClick(const PlatformMouseEvent& event)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(COCOA)
     return WebEventFactory::shouldBeHandledAsContextClick(event);
 #else
@@ -2182,7 +2182,7 @@ static bool isContextClick(const PlatformMouseEvent& event)
 }
 
 static bool handleContextMenuEvent(const PlatformMouseEvent& platformMouseEvent, WebPage* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint point = page->corePage()->mainFrame().view()->windowToContents(platformMouseEvent.position());
     HitTestResult result = page->corePage()->mainFrame().eventHandler().hitTestResultAtPoint(point);
 
@@ -2199,7 +2199,7 @@ static bool handleContextMenuEvent(const PlatformMouseEvent& platformMouseEvent,
 #endif
 
 static bool handleMouseEvent(const WebMouseEvent& mouseEvent, WebPage* page, bool onlyUpdateScrollbars)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = page->corePage()->mainFrame();
     if (!frame.view())
         return false;
@@ -2240,7 +2240,7 @@ static bool handleMouseEvent(const WebMouseEvent& mouseEvent, WebPage* page, boo
 }
 
 void WebPage::mouseEvent(const WebMouseEvent& mouseEvent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_userIsInteracting = true;
 
     m_page->pageThrottler().didReceiveUserInput();
@@ -2289,7 +2289,7 @@ void WebPage::mouseEvent(const WebMouseEvent& mouseEvent)
 }
 
 static bool handleWheelEvent(const WebWheelEvent& wheelEvent, Page* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = page->mainFrame();
     if (!frame.view())
         return false;
@@ -2299,7 +2299,7 @@ static bool handleWheelEvent(const WebWheelEvent& wheelEvent, Page* page)
 }
 
 void WebPage::wheelEvent(const WebWheelEvent& wheelEvent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->pageThrottler().didReceiveUserInput();
 
     CurrentEvent currentEvent(wheelEvent);
@@ -2310,7 +2310,7 @@ void WebPage::wheelEvent(const WebWheelEvent& wheelEvent)
 }
 
 static bool handleKeyEvent(const WebKeyboardEvent& keyboardEvent, Page* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!page->mainFrame().view())
         return false;
 
@@ -2320,7 +2320,7 @@ static bool handleKeyEvent(const WebKeyboardEvent& keyboardEvent, Page* page)
 }
 
 void WebPage::keyEvent(const WebKeyboardEvent& keyboardEvent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_userIsInteracting = true;
 
     m_page->pageThrottler().didReceiveUserInput();
@@ -2338,7 +2338,7 @@ void WebPage::keyEvent(const WebKeyboardEvent& keyboardEvent)
 }
 
 void WebPage::validateCommand(const String& commandName, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool isEnabled = false;
     int32_t state = 0;
     Frame& frame = m_page->focusController().focusedOrMainFrame();
@@ -2354,12 +2354,12 @@ void WebPage::validateCommand(const String& commandName, uint64_t callbackID)
 }
 
 void WebPage::executeEditCommand(const String& commandName, const String& argument)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     executeEditingCommand(commandName, argument);
 }
 
 void WebPage::restoreSessionInternal(const Vector<BackForwardListItemState>& itemStates, WasRestoredByAPIRequest restoredByAPIRequest)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const auto& itemState : itemStates) {
         auto historyItem = toHistoryItem(itemState.pageState);
         historyItem->setWasRestoredFromSession(restoredByAPIRequest == WasRestoredByAPIRequest::Yes);
@@ -2368,13 +2368,13 @@ void WebPage::restoreSessionInternal(const Vector<BackForwardListItemState>& ite
 }
 
 void WebPage::restoreSession(const Vector<BackForwardListItemState>& itemStates)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     restoreSessionInternal(itemStates, WasRestoredByAPIRequest::Yes);
 }
 
 #if ENABLE(TOUCH_EVENTS)
 static bool handleTouchEvent(const WebTouchEvent& touchEvent, Page* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!page->mainFrame().view())
         return false;
 
@@ -2384,7 +2384,7 @@ static bool handleTouchEvent(const WebTouchEvent& touchEvent, Page* page)
 
 #if ENABLE(IOS_TOUCH_EVENTS)
 void WebPage::dispatchTouchEvent(const WebTouchEvent& touchEvent, bool& handled)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_userIsInteracting = true;
 
     m_lastInteractionLocation = touchEvent.position();
@@ -2395,7 +2395,7 @@ void WebPage::dispatchTouchEvent(const WebTouchEvent& touchEvent, bool& handled)
 }
 
 void WebPage::touchEventSync(const WebTouchEvent& touchEvent, bool& handled)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     EventDispatcher::TouchEventQueue queuedEvents;
     WebProcess::singleton().eventDispatcher().getQueuedTouchEventsForPage(*this, queuedEvents);
     dispatchAsynchronousTouchEvents(queuedEvents);
@@ -2404,7 +2404,7 @@ void WebPage::touchEventSync(const WebTouchEvent& touchEvent, bool& handled)
 }
 #elif ENABLE(TOUCH_EVENTS)
 void WebPage::touchEvent(const WebTouchEvent& touchEvent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     CurrentEvent currentEvent(touchEvent);
 
     bool handled = handleTouchEvent(touchEvent, m_page.get());
@@ -2415,7 +2415,7 @@ void WebPage::touchEvent(const WebTouchEvent& touchEvent)
 
 #if ENABLE(MAC_GESTURE_EVENTS)
 static bool handleGestureEvent(const WebGestureEvent& event, Page* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!page->mainFrame().view())
         return false;
 
@@ -2423,7 +2423,7 @@ static bool handleGestureEvent(const WebGestureEvent& event, Page* page)
 }
 
 void WebPage::gestureEvent(const WebGestureEvent& gestureEvent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     CurrentEvent currentEvent(gestureEvent);
     bool handled = handleGestureEvent(gestureEvent, m_page.get());
     send(Messages::WebPageProxy::DidReceiveEvent(static_cast<uint32_t>(gestureEvent.type()), handled));
@@ -2432,39 +2432,39 @@ void WebPage::gestureEvent(const WebGestureEvent& gestureEvent)
 #endif
 
 bool WebPage::scroll(Page* page, ScrollDirection direction, ScrollGranularity granularity)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return page->userInputBridge().scrollRecursively(direction, granularity);
 }
 
 bool WebPage::logicalScroll(Page* page, ScrollLogicalDirection direction, ScrollGranularity granularity)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return page->userInputBridge().logicalScrollRecursively(direction, granularity);
 }
 
 bool WebPage::scrollBy(uint32_t scrollDirection, uint32_t scrollGranularity)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return scroll(m_page.get(), static_cast<ScrollDirection>(scrollDirection), static_cast<ScrollGranularity>(scrollGranularity));
 }
 
 void WebPage::centerSelectionInVisibleArea()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     frame.selection().revealSelection(SelectionRevealMode::Reveal, ScrollAlignment::alignCenterAlways);
     m_findController.showFindIndicatorInSelection();
 }
 
 bool WebPage::isControlledByAutomation() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->isControlledByAutomation();
 }
 
 void WebPage::setControlledByAutomation(bool controlled)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setControlledByAutomation(controlled);
 }
 
 void WebPage::insertNewlineInQuotedContent()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     if (frame.selection().isNone())
         return;
@@ -2473,18 +2473,18 @@ void WebPage::insertNewlineInQuotedContent()
 
 #if ENABLE(REMOTE_INSPECTOR)
 void WebPage::setAllowsRemoteInspection(bool allow)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setRemoteInspectionAllowed(allow);
 }
 
 void WebPage::setRemoteInspectionNameOverride(const String& name)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setRemoteInspectionNameOverride(name);
 }
 #endif
 
 void WebPage::setDrawsBackground(bool drawsBackground)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_drawsBackground == drawsBackground)
         return;
 
@@ -2501,7 +2501,7 @@ void WebPage::setDrawsBackground(bool drawsBackground)
 
 #if PLATFORM(COCOA)
 void WebPage::setTopContentInsetFenced(float contentInset, IPC::Attachment fencePort)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_drawingArea->addFence(MachSendRight::create(fencePort.port()));
 
     setTopContentInset(contentInset);
@@ -2511,7 +2511,7 @@ void WebPage::setTopContentInsetFenced(float contentInset, IPC::Attachment fence
 #endif
 
 void WebPage::setTopContentInset(float contentInset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (contentInset == m_page->topContentInset())
         return;
 
@@ -2522,7 +2522,7 @@ void WebPage::setTopContentInset(float contentInset)
 }
 
 void WebPage::viewWillStartLiveResize()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_page)
         return;
 
@@ -2533,7 +2533,7 @@ void WebPage::viewWillStartLiveResize()
 }
 
 void WebPage::viewWillEndLiveResize()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_page)
         return;
 
@@ -2544,7 +2544,7 @@ void WebPage::viewWillEndLiveResize()
 }
 
 void WebPage::setInitialFocus(bool forward, bool isKeyboardEventValid, const WebKeyboardEvent& event, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
 
     if (!m_page)
@@ -2569,13 +2569,13 @@ void WebPage::setInitialFocus(bool forward, bool isKeyboardEventValid, const Web
 }
 
 void WebPage::setCanStartMediaTimerFired()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_page)
         m_page->setCanStartMedia(true);
 }
 
 void WebPage::updateIsInWindow(bool isInitialState)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool isInWindow = m_viewState & WebCore::ViewState::IsInWindow;
 
     if (!isInWindow) {
@@ -2600,7 +2600,7 @@ void WebPage::updateIsInWindow(bool isInitialState)
 }
 
 void WebPage::setViewState(ViewState::Flags viewState, bool wantsDidUpdateViewState, const Vector<uint64_t>& callbackIDs)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ViewState::Flags changed = m_viewState ^ viewState;
     m_viewState = viewState;
 
@@ -2618,7 +2618,7 @@ void WebPage::setViewState(ViewState::Flags viewState, bool wantsDidUpdateViewSt
 }
 
 void WebPage::setLayerHostingMode(unsigned layerHostingMode)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_layerHostingMode = static_cast<LayerHostingMode>(layerHostingMode);
 
     m_drawingArea->setLayerHostingMode(m_layerHostingMode);
@@ -2628,7 +2628,7 @@ void WebPage::setLayerHostingMode(unsigned layerHostingMode)
 }
 
 void WebPage::setSessionID(SessionID sessionID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (sessionID.isEphemeral())
         WebProcess::singleton().ensurePrivateBrowsingSession(sessionID);
@@ -2636,7 +2636,7 @@ void WebPage::setSessionID(SessionID sessionID)
 }
 
 void WebPage::didReceivePolicyDecision(uint64_t frameID, uint64_t listenerID, uint32_t policyAction, uint64_t navigationID, DownloadID downloadID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* frame = WebProcess::singleton().webFrame(frameID);
     if (!frame)
         return;
@@ -2644,7 +2644,7 @@ void WebPage::didReceivePolicyDecision(uint64_t frameID, uint64_t listenerID, ui
 }
 
 void WebPage::didStartPageTransition()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     m_drawingArea->setLayerTreeStateIsFrozen(true);
 
@@ -2660,7 +2660,7 @@ void WebPage::didStartPageTransition()
 }
 
 void WebPage::didCompletePageTransition()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
 #if USE(COORDINATED_GRAPHICS_MULTIPROCESS)
     // m_mainFrame can be null since r170163.
@@ -2674,18 +2674,18 @@ void WebPage::didCompletePageTransition()
 }
 
 void WebPage::show()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     send(Messages::WebPageProxy::ShowPage());
 }
 
 String WebPage::userAgent(const URL& webCoreURL) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return userAgent(nullptr, webCoreURL);
 }
 
 String WebPage::userAgent(WebFrame* frame, const URL& webcoreURL) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (frame && m_loaderClient.client().userAgentForURL) {
         API::String* apiString = m_loaderClient.userAgentForURL(frame, API::URL::create(webcoreURL).ptr());
         if (apiString)
@@ -2699,29 +2699,29 @@ String WebPage::userAgent(WebFrame* frame, const URL& webcoreURL) const
 }
     
 void WebPage::setUserAgent(const String& userAgent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_userAgent = userAgent;
 }
 
 void WebPage::suspendActiveDOMObjectsAndAnimations()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->suspendActiveDOMObjectsAndAnimations();
 }
 
 void WebPage::resumeActiveDOMObjectsAndAnimations()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->resumeActiveDOMObjectsAndAnimations();
 }
 
 IntPoint WebPage::screenToRootView(const IntPoint& point)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint windowPoint;
     sendSync(Messages::WebPageProxy::ScreenToRootView(point), Messages::WebPageProxy::ScreenToRootView::Reply(windowPoint));
     return windowPoint;
 }
     
 IntRect WebPage::rootViewToScreen(const IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect screenRect;
     sendSync(Messages::WebPageProxy::RootViewToScreen(rect), Messages::WebPageProxy::RootViewToScreen::Reply(screenRect));
     return screenRect;
@@ -2729,14 +2729,14 @@ IntRect WebPage::rootViewToScreen(const IntRect& rect)
     
 #if PLATFORM(IOS)
 IntPoint WebPage::accessibilityScreenToRootView(const IntPoint& point)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint windowPoint;
     sendSync(Messages::WebPageProxy::AccessibilityScreenToRootView(point), Messages::WebPageProxy::AccessibilityScreenToRootView::Reply(windowPoint));
     return windowPoint;
 }
 
 IntRect WebPage::rootViewToAccessibilityScreen(const IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect screenRect;
     sendSync(Messages::WebPageProxy::RootViewToAccessibilityScreen(rect), Messages::WebPageProxy::RootViewToAccessibilityScreen::Reply(screenRect));
     return screenRect;
@@ -2744,13 +2744,13 @@ IntRect WebPage::rootViewToAccessibilityScreen(const IntRect& rect)
 #endif
 
 KeyboardUIMode WebPage::keyboardUIMode()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool fullKeyboardAccessEnabled = WebProcess::singleton().fullKeyboardAccessEnabled();
     return static_cast<KeyboardUIMode>((fullKeyboardAccessEnabled ? KeyboardAccessFull : KeyboardAccessDefault) | (m_tabToLinks ? KeyboardAccessTabsToLinks : 0));
 }
 
 void WebPage::runJavaScriptInMainFrame(const String& script, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     // NOTE: We need to be careful when running scripts that the objects we depend on don't
     // disappear during script execution.
@@ -2772,14 +2772,14 @@ void WebPage::runJavaScriptInMainFrame(const String& script, uint64_t callbackID
 }
 
 void WebPage::getContentsAsString(uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     String resultString = m_mainFrame->contentsAsString();
     send(Messages::WebPageProxy::StringCallback(resultString, callbackID));
 }
 
 #if ENABLE(MHTML)
 void WebPage::getContentsAsMHTMLData(uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<SharedBuffer> buffer = MHTMLArchive::generateMHTMLData(m_page.get());
 
     // FIXME: Use SharedBufferDataReference.
@@ -2791,14 +2791,14 @@ void WebPage::getContentsAsMHTMLData(uint64_t callbackID)
 #endif
 
 void WebPage::getRenderTreeExternalRepresentation(uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     String resultString = renderTreeExternalRepresentation();
     send(Messages::WebPageProxy::StringCallback(resultString, callbackID));
 }
 
 static Frame* frameWithSelection(Page* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (Frame* frame = &page->mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (frame->selection().isRange())
             return frame;
@@ -2808,7 +2808,7 @@ static Frame* frameWithSelection(Page* page)
 }
 
 void WebPage::getSelectionAsWebArchiveData(uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(COCOA)
     RetainPtr<CFDataRef> data;
     if (Frame* frame = frameWithSelection(m_page.get()))
@@ -2824,7 +2824,7 @@ void WebPage::getSelectionAsWebArchiveData(uint64_t callbackID)
 }
 
 void WebPage::getSelectionOrContentsAsString(uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     String resultString = m_mainFrame->selectionAsString();
     if (resultString.isEmpty())
         resultString = m_mainFrame->contentsAsString();
@@ -2832,7 +2832,7 @@ void WebPage::getSelectionOrContentsAsString(uint64_t callbackID)
 }
 
 void WebPage::getSourceForFrame(uint64_t frameID, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     String resultString;
     if (WebFrame* frame = WebProcess::singleton().webFrame(frameID))
@@ -2842,7 +2842,7 @@ void WebPage::getSourceForFrame(uint64_t frameID, uint64_t callbackID)
 }
 
 void WebPage::getMainResourceDataOfFrame(uint64_t frameID, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<SharedBuffer> buffer;
     if (WebFrame* frame = WebProcess::singleton().webFrame(frameID)) {
         if (PluginView* pluginView = pluginViewForFrame(frame->coreFrame()))
@@ -2861,7 +2861,7 @@ void WebPage::getMainResourceDataOfFrame(uint64_t frameID, uint64_t callbackID)
 }
 
 static RefPtr<SharedBuffer> resourceDataForFrame(Frame* frame, const URL& resourceURL)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     DocumentLoader* loader = frame->loader().documentLoader();
     if (!loader)
         return nullptr;
@@ -2874,7 +2874,7 @@ static RefPtr<SharedBuffer> resourceDataForFrame(Frame* frame, const URL& resour
 }
 
 void WebPage::getResourceDataFromFrame(uint64_t frameID, const String& resourceURLString, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<SharedBuffer> buffer;
     if (WebFrame* frame = WebProcess::singleton().webFrame(frameID)) {
         URL resourceURL(URL(), resourceURLString);
@@ -2893,7 +2893,7 @@ void WebPage::getResourceDataFromFrame(uint64_t frameID, const String& resourceU
 }
 
 void WebPage::getWebArchiveOfFrame(uint64_t frameID, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(COCOA)
     RetainPtr<CFDataRef> data;
     if (WebFrame* frame = WebProcess::singleton().webFrame(frameID))
@@ -2911,12 +2911,12 @@ void WebPage::getWebArchiveOfFrame(uint64_t frameID, uint64_t callbackID)
 }
 
 void WebPage::forceRepaintWithoutCallback()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_drawingArea->forceRepaint();
 }
 
 void WebPage::forceRepaint(uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (m_drawingArea->forceRepaintAsync(callbackID))
         return;
@@ -2926,13 +2926,13 @@ void WebPage::forceRepaint(uint64_t callbackID)
 }
 
 void WebPage::preferencesDidChange(const WebPreferencesStore& store)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebPreferencesStore::removeTestRunnerOverrides();
     updatePreferences(store);
 }
 
 void WebPage::updatePreferences(const WebPreferencesStore& store)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     Settings& settings = m_page->settings();
 
@@ -3254,7 +3254,7 @@ void WebPage::updatePreferences(const WebPreferencesStore& store)
 
 #if ENABLE(DATA_DETECTION)
 void WebPage::setDataDetectionResults(NSArray *detectionResults)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     DataDetectionResult dataDetectionResult;
     dataDetectionResult.results = detectionResults;
     send(Messages::WebPageProxy::SetDataDetectionResult(dataDetectionResult));
@@ -3263,7 +3263,7 @@ void WebPage::setDataDetectionResults(NSArray *detectionResults)
 
 #if PLATFORM(COCOA)
 void WebPage::willCommitLayerTree(RemoteLayerTreeTransaction& layerTransaction)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     layerTransaction.setContentsSize(corePage()->mainFrame().view()->contentsSize());
     layerTransaction.setScrollOrigin(corePage()->mainFrame().view()->scrollOrigin());
     layerTransaction.setPageScaleFactor(corePage()->pageScaleFactor());
@@ -3285,7 +3285,7 @@ void WebPage::willCommitLayerTree(RemoteLayerTreeTransaction& layerTransaction)
 }
 
 void WebPage::didFlushLayerTreeAtTime(std::chrono::milliseconds timestamp)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(IOS)
     if (m_oldestNonStableUpdateVisibleContentRectsTimestamp != std::chrono::milliseconds::zero()) {
         std::chrono::milliseconds elapsed = timestamp - m_oldestNonStableUpdateVisibleContentRectsTimestamp;
@@ -3300,7 +3300,7 @@ void WebPage::didFlushLayerTreeAtTime(std::chrono::milliseconds timestamp)
 #endif
 
 WebInspector* WebPage::inspector(LazyCreationPolicy behavior)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_isClosed)
         return nullptr;
     if (!m_inspector && behavior == LazyCreationPolicy::CreateIfNeeded)
@@ -3309,7 +3309,7 @@ WebInspector* WebPage::inspector(LazyCreationPolicy behavior)
 }
 
 WebInspectorUI* WebPage::inspectorUI()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_isClosed)
         return nullptr;
     if (!m_inspectorUI)
@@ -3319,14 +3319,14 @@ WebInspectorUI* WebPage::inspectorUI()
 
 #if (PLATFORM(IOS) && HAVE(AVKIT)) || (PLATFORM(MAC) && ENABLE(VIDEO_PRESENTATION_MODE))
 WebPlaybackSessionManager& WebPage::playbackSessionManager()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_playbackSessionManager)
         m_playbackSessionManager = WebPlaybackSessionManager::create(*this);
     return *m_playbackSessionManager;
 }
 
 WebVideoFullscreenManager& WebPage::videoFullscreenManager()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_videoFullscreenManager)
         m_videoFullscreenManager = WebVideoFullscreenManager::create(*this, playbackSessionManager());
     return *m_videoFullscreenManager;
@@ -3335,14 +3335,14 @@ WebVideoFullscreenManager& WebPage::videoFullscreenManager()
 
 #if PLATFORM(IOS)
 void WebPage::setAllowsMediaDocumentInlinePlayback(bool allows)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setAllowsMediaDocumentInlinePlayback(allows);
 }
 #endif
 
 #if ENABLE(FULLSCREEN_API)
 WebFullScreenManager* WebPage::fullScreenManager()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_fullScreenManager)
         m_fullScreenManager = WebFullScreenManager::create(this);
     return m_fullScreenManager.get();
@@ -3350,7 +3350,7 @@ WebFullScreenManager* WebPage::fullScreenManager()
 #endif
 
 NotificationPermissionRequestManager* WebPage::notificationPermissionRequestManager()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_notificationPermissionRequestManager)
         return m_notificationPermissionRequestManager.get();
 
@@ -3360,7 +3360,7 @@ NotificationPermissionRequestManager* WebPage::notificationPermissionRequestMana
 
 #if !PLATFORM(GTK) && !PLATFORM(COCOA) && !PLATFORM(WPE)
 bool WebPage::handleEditingKeyboardEvent(KeyboardEvent* evt)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Node* node = evt->target()->toNode();
     ASSERT(node);
     Frame* frame = node->document().frame();
@@ -3398,7 +3398,7 @@ bool WebPage::handleEditingKeyboardEvent(KeyboardEvent* evt)
 
 #if PLATFORM(GTK)
 void WebPage::performDragControllerAction(uint64_t action, WebCore::DragData dragData)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_page) {
         send(Messages::WebPageProxy::DidPerformDragControllerAction(DragOperationNone, false, 0));
         DataObjectGtk* data = const_cast<DataObjectGtk*>(dragData.platformData());
@@ -3436,7 +3436,7 @@ void WebPage::performDragControllerAction(uint64_t action, WebCore::DragData dra
 
 #else
 void WebPage::performDragControllerAction(uint64_t action, WebCore::IntPoint clientPosition, WebCore::IntPoint globalPosition, uint64_t draggingSourceOperationMask, const String& dragStorageName, uint32_t flags, const SandboxExtension::Handle& sandboxExtensionHandle, const SandboxExtension::HandleArray& sandboxExtensionsHandleArray)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_page) {
         send(Messages::WebPageProxy::DidPerformDragControllerAction(DragOperationNone, false, 0));
         return;
@@ -3485,7 +3485,7 @@ void WebPage::performDragControllerAction(uint64_t action, WebCore::IntPoint cli
 #endif
 
 void WebPage::dragEnded(WebCore::IntPoint clientPosition, WebCore::IntPoint globalPosition, uint64_t operation)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint adjustedClientPosition(clientPosition.x() + m_page->dragController().dragOffset().x(), clientPosition.y() + m_page->dragController().dragOffset().y());
     IntPoint adjustedGlobalPosition(globalPosition.x() + m_page->dragController().dragOffset().x(), globalPosition.y() + m_page->dragController().dragOffset().y());
 
@@ -3499,12 +3499,12 @@ void WebPage::dragEnded(WebCore::IntPoint clientPosition, WebCore::IntPoint glob
 }
 
 void WebPage::willPerformLoadDragDestinationAction()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_sandboxExtensionTracker.willPerformLoadDragDestinationAction(WTFMove(m_pendingDropSandboxExtension));
 }
 
 void WebPage::mayPerformUploadDragDestinationAction()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (size_t i = 0; i < m_pendingDropExtensionsForFileUpload.size(); i++)
         m_pendingDropExtensionsForFileUpload[i]->consumePermanently();
     m_pendingDropExtensionsForFileUpload.clear();
@@ -3513,27 +3513,27 @@ void WebPage::mayPerformUploadDragDestinationAction()
 #endif // ENABLE(DRAG_SUPPORT)
 
 WebUndoStep* WebPage::webUndoStep(uint64_t stepID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_undoStepMap.get(stepID);
 }
 
 void WebPage::addWebUndoStep(uint64_t stepID, WebUndoStep* entry)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_undoStepMap.set(stepID, entry);
 }
 
 void WebPage::removeWebEditCommand(uint64_t stepID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_undoStepMap.remove(stepID);
 }
 
 bool WebPage::isAlwaysOnLoggingAllowed() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return corePage() && corePage()->isAlwaysOnLoggingAllowed();
 }
 
 void WebPage::unapplyEditCommand(uint64_t stepID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebUndoStep* step = webUndoStep(stepID);
     if (!step)
         return;
@@ -3542,7 +3542,7 @@ void WebPage::unapplyEditCommand(uint64_t stepID)
 }
 
 void WebPage::reapplyEditCommand(uint64_t stepID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebUndoStep* step = webUndoStep(stepID);
     if (!step)
         return;
@@ -3553,80 +3553,80 @@ void WebPage::reapplyEditCommand(uint64_t stepID)
 }
 
 void WebPage::didRemoveEditCommand(uint64_t commandID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     removeWebEditCommand(commandID);
 }
 
 void WebPage::setActivePopupMenu(WebPopupMenu* menu)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_activePopupMenu = menu;
 }
 
 #if ENABLE(INPUT_TYPE_COLOR)
 void WebPage::setActiveColorChooser(WebColorChooser* colorChooser)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_activeColorChooser = colorChooser;
 }
 
 void WebPage::didEndColorPicker()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_activeColorChooser->didEndChooser();
 }
 
 void WebPage::didChooseColor(const WebCore::Color& color)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_activeColorChooser->didChooseColor(color);
 }
 #endif
 
 void WebPage::setActiveOpenPanelResultListener(PassRefPtr<WebOpenPanelResultListener> openPanelResultListener)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_activeOpenPanelResultListener = openPanelResultListener;
 }
 
 bool WebPage::findStringFromInjectedBundle(const String& target, FindOptions options)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->findString(target, options);
 }
 
 void WebPage::findString(const String& string, uint32_t options, uint32_t maxMatchCount)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_findController.findString(string, static_cast<FindOptions>(options), maxMatchCount);
 }
 
 void WebPage::findStringMatches(const String& string, uint32_t options, uint32_t maxMatchCount)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_findController.findStringMatches(string, static_cast<FindOptions>(options), maxMatchCount);
 }
 
 void WebPage::getImageForFindMatch(uint32_t matchIndex)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_findController.getImageForFindMatch(matchIndex);
 }
 
 void WebPage::selectFindMatch(uint32_t matchIndex)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_findController.selectFindMatch(matchIndex);
 }
 
 void WebPage::hideFindUI()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_findController.hideFindUI();
 }
 
 void WebPage::countStringMatches(const String& string, uint32_t options, uint32_t maxMatchCount)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_findController.countStringMatches(string, static_cast<FindOptions>(options), maxMatchCount);
 }
 
 void WebPage::didChangeSelectedIndexForActivePopupMenu(int32_t newIndex)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     changeSelectedIndex(newIndex);
     m_activePopupMenu = nullptr;
 }
 
 void WebPage::changeSelectedIndex(int32_t index)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_activePopupMenu)
         return;
 
@@ -3635,7 +3635,7 @@ void WebPage::changeSelectedIndex(int32_t index)
 
 #if PLATFORM(IOS)
 void WebPage::didChooseFilesForOpenPanelWithDisplayStringAndIcon(const Vector<String>& files, const String& displayString, const IPC::DataReference& iconData)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_activeOpenPanelResultListener)
         return;
 
@@ -3653,7 +3653,7 @@ void WebPage::didChooseFilesForOpenPanelWithDisplayStringAndIcon(const Vector<St
 #endif
 
 void WebPage::didChooseFilesForOpenPanel(const Vector<String>& files)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_activeOpenPanelResultListener)
         return;
 
@@ -3662,13 +3662,13 @@ void WebPage::didChooseFilesForOpenPanel(const Vector<String>& files)
 }
 
 void WebPage::didCancelForOpenPanel()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_activeOpenPanelResultListener = nullptr;
 }
 
 #if ENABLE(SANDBOX_EXTENSIONS)
 void WebPage::extendSandboxForFileFromOpenPanel(const SandboxExtension::Handle& handle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool result = SandboxExtension::consumePermanently(handle);
     if (!result) {
         // We have reports of cases where this fails for some unknown reason, <rdar://problem/10156710>.
@@ -3679,43 +3679,43 @@ void WebPage::extendSandboxForFileFromOpenPanel(const SandboxExtension::Handle& 
 
 #if ENABLE(GEOLOCATION)
 void WebPage::didReceiveGeolocationPermissionDecision(uint64_t geolocationID, bool allowed)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_geolocationPermissionRequestManager.didReceiveGeolocationPermissionDecision(geolocationID, allowed);
 }
 #endif
 
 void WebPage::didReceiveNotificationPermissionDecision(uint64_t notificationID, bool allowed)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     notificationPermissionRequestManager()->didReceiveNotificationPermissionDecision(notificationID, allowed);
 }
 
 #if ENABLE(MEDIA_STREAM)
 void WebPage::didReceiveUserMediaPermissionDecision(uint64_t userMediaID, bool allowed, const String& audioDeviceUID, const String& videoDeviceUID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_userMediaPermissionRequestManager.didReceiveUserMediaPermissionDecision(userMediaID, allowed, audioDeviceUID, videoDeviceUID);
 }
 
 void WebPage::didCompleteUserMediaPermissionCheck(uint64_t userMediaID, const String& mediaDeviceIdentifierHashSalt, bool allowed)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_userMediaPermissionRequestManager.didCompleteUserMediaPermissionCheck(userMediaID, mediaDeviceIdentifierHashSalt, allowed);
 }
 #endif
 
 #if !PLATFORM(IOS)
 void WebPage::advanceToNextMisspelling(bool startBeforeSelection)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     frame.editor().advanceToNextMisspelling(startBeforeSelection);
 }
 #endif
 
 void WebPage::changeSpellingToWord(const String& word)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     replaceSelectionWithText(&m_page->focusController().focusedOrMainFrame(), word);
 }
 
 void WebPage::unmarkAllMisspellings()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (Frame* frame = &m_page->mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (Document* document = frame->document())
             document->markers().removeMarkers(DocumentMarker::Spelling);
@@ -3723,7 +3723,7 @@ void WebPage::unmarkAllMisspellings()
 }
 
 void WebPage::unmarkAllBadGrammar()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (Frame* frame = &m_page->mainFrame(); frame; frame = frame->tree().traverseNext()) {
         if (Document* document = frame->document())
             document->markers().removeMarkers(DocumentMarker::Grammar);
@@ -3732,23 +3732,23 @@ void WebPage::unmarkAllBadGrammar()
 
 #if USE(APPKIT)
 void WebPage::uppercaseWord()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->focusController().focusedOrMainFrame().editor().uppercaseWord();
 }
 
 void WebPage::lowercaseWord()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->focusController().focusedOrMainFrame().editor().lowercaseWord();
 }
 
 void WebPage::capitalizeWord()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->focusController().focusedOrMainFrame().editor().capitalizeWord();
 }
 #endif
     
 void WebPage::setTextForActivePopupMenu(int32_t index)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_activePopupMenu)
         return;
 
@@ -3757,7 +3757,7 @@ void WebPage::setTextForActivePopupMenu(int32_t index)
 
 #if PLATFORM(GTK)
 void WebPage::failedToShowPopupMenu()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_activePopupMenu)
         return;
 
@@ -3767,7 +3767,7 @@ void WebPage::failedToShowPopupMenu()
 
 #if ENABLE(CONTEXT_MENUS)
 void WebPage::didSelectItemFromActiveContextMenu(const WebContextMenuItemData& item)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_contextMenu)
         return;
 
@@ -3777,7 +3777,7 @@ void WebPage::didSelectItemFromActiveContextMenu(const WebContextMenuItemData& i
 #endif
 
 void WebPage::replaceSelectionWithText(Frame* frame, const String& text)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool selectReplacement = true;
     bool smartReplace = false;
     return frame->editor().replaceSelectionWithText(text, selectReplacement, smartReplace);
@@ -3785,13 +3785,13 @@ void WebPage::replaceSelectionWithText(Frame* frame, const String& text)
 
 #if !PLATFORM(IOS)
 void WebPage::clearSelection()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->focusController().focusedOrMainFrame().selection().clear();
 }
 #endif
 
 void WebPage::restoreSelectionInFocusedEditableElement()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     if (!frame.selection().isNone())
         return;
@@ -3803,7 +3803,7 @@ void WebPage::restoreSelectionInFocusedEditableElement()
 }
 
 bool WebPage::mainFrameHasCustomContentProvider() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Frame* frame = mainFrame()) {
         WebFrameLoaderClient* webFrameLoaderClient = toWebFrameLoaderClient(frame->loader().client());
         ASSERT(webFrameLoaderClient);
@@ -3814,12 +3814,12 @@ bool WebPage::mainFrameHasCustomContentProvider() const
 }
 
 void WebPage::addMIMETypeWithCustomContentProvider(const String& mimeType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_mimeTypesWithCustomContentProviders.add(mimeType);
 }
 
 void WebPage::updateMainFrameScrollOffsetPinning()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->mainFrame();
     ScrollPosition scrollPosition = frame.view()->scrollPosition();
     ScrollPosition maximumScrollPosition = frame.view()->maximumScrollPosition();
@@ -3841,7 +3841,7 @@ void WebPage::updateMainFrameScrollOffsetPinning()
 }
 
 void WebPage::mainFrameDidLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     unsigned pageCount = m_page->pageCount();
     if (pageCount != m_cachedPageCount) {
         send(Messages::WebPageProxy::DidChangePageCount(pageCount));
@@ -3862,7 +3862,7 @@ void WebPage::mainFrameDidLayout()
 }
 
 void WebPage::addPluginView(PluginView* pluginView)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_pluginViews.contains(pluginView));
 
     m_pluginViews.add(pluginView);
@@ -3874,7 +3874,7 @@ void WebPage::addPluginView(PluginView* pluginView)
 }
 
 void WebPage::removePluginView(PluginView* pluginView)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_pluginViews.contains(pluginView));
 
     m_pluginViews.remove(pluginView);
@@ -3884,7 +3884,7 @@ void WebPage::removePluginView(PluginView* pluginView)
 }
 
 void WebPage::sendSetWindowFrame(const FloatRect& windowFrame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(COCOA)
     m_hasCachedWindowFrame = false;
 #endif
@@ -3893,7 +3893,7 @@ void WebPage::sendSetWindowFrame(const FloatRect& windowFrame)
 
 #if PLATFORM(COCOA)
 void WebPage::windowAndViewFramesChanged(const FloatRect& windowFrameInScreenCoordinates, const FloatRect& windowFrameInUnflippedScreenCoordinates, const FloatRect& viewFrameInWindowCoordinates, const FloatPoint& accessibilityViewCoordinates)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_windowFrameInScreenCoordinates = windowFrameInScreenCoordinates;
     m_windowFrameInUnflippedScreenCoordinates = windowFrameInUnflippedScreenCoordinates;
     m_viewFrameInWindowCoordinates = viewFrameInWindowCoordinates;
@@ -3908,7 +3908,7 @@ void WebPage::windowAndViewFramesChanged(const FloatRect& windowFrameInScreenCoo
 #endif
 
 void WebPage::setMainFrameIsScrollable(bool isScrollable)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_mainFrameIsScrollable = isScrollable;
     m_drawingArea->mainFrameScrollabilityChanged(isScrollable);
 
@@ -3919,12 +3919,12 @@ void WebPage::setMainFrameIsScrollable(bool isScrollable)
 }
 
 bool WebPage::windowIsFocused() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->focusController().isActive();
 }
 
 bool WebPage::windowAndWebPageAreFocused() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isVisible())
         return false;
 
@@ -3932,8 +3932,7 @@ bool WebPage::windowAndWebPageAreFocused() const
 }
 
 void WebPage::didReceiveMessage(IPC::Connection& connection, IPC::Decoder& decoder)
-{  WTF_AUTO_SCOPE0(( std::string(decoder.messageReceiverName()) + " " + decoder.messageName() +" " + __PRETTY_FUNCTION__ ).c_str() );
-
+{  
 #if USE(COORDINATED_GRAPHICS_MULTIPROCESS)
     if (decoder.messageReceiverName() == Messages::CoordinatedLayerTreeHost::messageReceiverName()) {
         if (m_drawingArea)
@@ -3965,13 +3964,13 @@ void WebPage::didReceiveMessage(IPC::Connection& connection, IPC::Decoder& decod
 }
 
 void WebPage::didReceiveSyncMessage(IPC::Connection& connection, IPC::Decoder& decoder, std::unique_ptr<IPC::Encoder>& replyEncoder)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     didReceiveSyncWebPageMessage(connection, decoder, replyEncoder);
 }
     
 InjectedBundleBackForwardList* WebPage::backForwardList()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_backForwardList)
         m_backForwardList = InjectedBundleBackForwardList::create(this);
     return m_backForwardList.get();
@@ -3979,18 +3978,18 @@ InjectedBundleBackForwardList* WebPage::backForwardList()
 
 #if ENABLE(ASYNC_SCROLLING)
 ScrollingCoordinator* WebPage::scrollingCoordinator() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->scrollingCoordinator();
 }
 #endif
 
 WebPage::SandboxExtensionTracker::~SandboxExtensionTracker()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     invalidate();
 }
 
 void WebPage::SandboxExtensionTracker::invalidate()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_pendingProvisionalSandboxExtension = nullptr;
 
     if (m_provisionalSandboxExtension) {
@@ -4005,12 +4004,12 @@ void WebPage::SandboxExtensionTracker::invalidate()
 }
 
 void WebPage::SandboxExtensionTracker::willPerformLoadDragDestinationAction(PassRefPtr<SandboxExtension> pendingDropSandboxExtension)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     setPendingProvisionalSandboxExtension(pendingDropSandboxExtension);
 }
 
 void WebPage::SandboxExtensionTracker::beginLoad(WebFrame* frame, const SandboxExtension::Handle& handle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     ASSERT_UNUSED(frame, frame->isMainFrame());
 
@@ -4018,12 +4017,12 @@ void WebPage::SandboxExtensionTracker::beginLoad(WebFrame* frame, const SandboxE
 }
 
 void WebPage::SandboxExtensionTracker::setPendingProvisionalSandboxExtension(PassRefPtr<SandboxExtension> pendingProvisionalSandboxExtension)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_pendingProvisionalSandboxExtension = pendingProvisionalSandboxExtension;    
 }
 
 static bool shouldReuseCommittedSandboxExtension(WebFrame* frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(frame->isMainFrame());
 
     FrameLoader& frameLoader = frame->coreFrame()->loader();
@@ -4045,7 +4044,7 @@ static bool shouldReuseCommittedSandboxExtension(WebFrame* frame)
 }
 
 void WebPage::SandboxExtensionTracker::didStartProvisionalLoad(WebFrame* frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (!frame->isMainFrame())
         return;
@@ -4067,7 +4066,7 @@ void WebPage::SandboxExtensionTracker::didStartProvisionalLoad(WebFrame* frame)
 }
 
 void WebPage::SandboxExtensionTracker::didCommitProvisionalLoad(WebFrame* frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (!frame->isMainFrame())
         return;
@@ -4082,7 +4081,7 @@ void WebPage::SandboxExtensionTracker::didCommitProvisionalLoad(WebFrame* frame)
 }
 
 void WebPage::SandboxExtensionTracker::didFailProvisionalLoad(WebFrame* frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (!frame->isMainFrame())
         return;
@@ -4099,7 +4098,7 @@ void WebPage::SandboxExtensionTracker::didFailProvisionalLoad(WebFrame* frame)
 }
 
 bool WebPage::hasLocalDataForURL(const URL& url)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (url.isLocalFile())
         return true;
 
@@ -4111,30 +4110,30 @@ bool WebPage::hasLocalDataForURL(const URL& url)
 }
 
 void WebPage::setCustomTextEncodingName(const String& encoding)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->mainFrame().loader().reloadWithOverrideEncoding(encoding);
 }
 
 void WebPage::didRemoveBackForwardItem(uint64_t itemID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebBackForwardListProxy::removeItem(itemID);
 }
 
 #if PLATFORM(COCOA)
 
 bool WebPage::isSpeaking()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool result;
     return sendSync(Messages::WebPageProxy::GetIsSpeaking(), Messages::WebPageProxy::GetIsSpeaking::Reply(result)) && result;
 }
 
 void WebPage::speak(const String& string)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     send(Messages::WebPageProxy::Speak(string));
 }
 
 void WebPage::stopSpeaking()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     send(Messages::WebPageProxy::StopSpeaking());
 }
 
@@ -4142,7 +4141,7 @@ void WebPage::stopSpeaking()
 
 #if PLATFORM(MAC)
 RetainPtr<PDFDocument> WebPage::pdfDocumentForPrintingFrame(Frame* coreFrame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Document* document = coreFrame->document();
     if (!is<PluginDocument>(document))
         return nullptr;
@@ -4156,7 +4155,7 @@ RetainPtr<PDFDocument> WebPage::pdfDocumentForPrintingFrame(Frame* coreFrame)
 #endif // PLATFORM(MAC)
 
 void WebPage::beginPrinting(uint64_t frameID, const PrintInfo& printInfo)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* frame = WebProcess::singleton().webFrame(frameID);
     if (!frame)
         return;
@@ -4186,13 +4185,13 @@ void WebPage::beginPrinting(uint64_t frameID, const PrintInfo& printInfo)
 }
 
 void WebPage::endPrinting()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     drawingArea()->setLayerTreeStateIsFrozen(false);
     m_printContext = nullptr;
 }
 
 void WebPage::computePagesForPrinting(uint64_t frameID, const PrintInfo& printInfo, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<IntRect> resultPageRects;
     double resultTotalScaleFactorForPrinting = 1;
     computePagesForPrintingImpl(frameID, printInfo, resultPageRects, resultTotalScaleFactorForPrinting);
@@ -4200,7 +4199,7 @@ void WebPage::computePagesForPrinting(uint64_t frameID, const PrintInfo& printIn
 }
 
 void WebPage::computePagesForPrintingImpl(uint64_t frameID, const PrintInfo& printInfo, Vector<WebCore::IntRect>& resultPageRects, double& resultTotalScaleFactorForPrinting)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(resultPageRects.isEmpty());
 
     beginPrinting(frameID, printInfo);
@@ -4221,7 +4220,7 @@ void WebPage::computePagesForPrintingImpl(uint64_t frameID, const PrintInfo& pri
 
 #if PLATFORM(COCOA)
 void WebPage::drawRectToImage(uint64_t frameID, const PrintInfo& printInfo, const IntRect& rect, const WebCore::IntSize& imageSize, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* frame = WebProcess::singleton().webFrame(frameID);
     Frame* coreFrame = frame ? frame->coreFrame() : 0;
 
@@ -4266,14 +4265,14 @@ void WebPage::drawRectToImage(uint64_t frameID, const PrintInfo& printInfo, cons
 }
 
 void WebPage::drawPagesToPDF(uint64_t frameID, const PrintInfo& printInfo, uint32_t first, uint32_t count, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RetainPtr<CFMutableDataRef> pdfPageData;
     drawPagesToPDFImpl(frameID, printInfo, first, count, pdfPageData);
     send(Messages::WebPageProxy::DataCallback(IPC::DataReference(CFDataGetBytePtr(pdfPageData.get()), CFDataGetLength(pdfPageData.get())), callbackID));
 }
 
 void WebPage::drawPagesToPDFImpl(uint64_t frameID, const PrintInfo& printInfo, uint32_t first, uint32_t count, RetainPtr<CFMutableDataRef>& pdfPageData)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* frame = WebProcess::singleton().webFrame(frameID);
     Frame* coreFrame = frame ? frame->coreFrame() : 0;
 
@@ -4324,7 +4323,7 @@ void WebPage::drawPagesToPDFImpl(uint64_t frameID, const PrintInfo& printInfo, u
 
 #elif PLATFORM(GTK)
 void WebPage::drawPagesForPrinting(uint64_t frameID, const PrintInfo& printInfo, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     beginPrinting(frameID, printInfo);
     if (m_printContext && m_printOperation) {
         m_printOperation->startPrint(m_printContext.get(), callbackID);
@@ -4335,26 +4334,26 @@ void WebPage::drawPagesForPrinting(uint64_t frameID, const PrintInfo& printInfo,
 }
 
 void WebPage::didFinishPrintOperation(const WebCore::ResourceError& error, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     send(Messages::WebPageProxy::PrintFinishedCallback(error, callbackID));
     m_printOperation = nullptr;
 }
 #endif
 
 void WebPage::savePDFToFileInDownloadsFolder(const String& suggestedFilename, const String& originatingURLString, const uint8_t* data, unsigned long size)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     send(Messages::WebPageProxy::SavePDFToFileInDownloadsFolder(suggestedFilename, originatingURLString, IPC::DataReference(data, size)));
 }
 
 #if PLATFORM(COCOA)
 void WebPage::savePDFToTemporaryFolderAndOpenWithNativeApplication(const String& suggestedFilename, const String& originatingURLString, const uint8_t* data, unsigned long size, const String& pdfUUID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     send(Messages::WebPageProxy::SavePDFToTemporaryFolderAndOpenWithNativeApplication(suggestedFilename, originatingURLString, IPC::DataReference(data, size), pdfUUID));
 }
 #endif
 
 void WebPage::addResourceRequest(unsigned long identifier, const WebCore::ResourceRequest& request)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!request.url().protocolIsInHTTPFamily())
         return;
 
@@ -4369,7 +4368,7 @@ void WebPage::addResourceRequest(unsigned long identifier, const WebCore::Resour
 }
 
 void WebPage::removeResourceRequest(unsigned long identifier)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_trackedNetworkResourceRequestIdentifiers.remove(identifier))
         return;
 
@@ -4378,29 +4377,29 @@ void WebPage::removeResourceRequest(unsigned long identifier)
 }
 
 void WebPage::setMediaVolume(float volume)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setMediaVolume(volume);
 }
 
 void WebPage::setMuted(bool muted)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setMuted(muted);
 }
 
 #if ENABLE(MEDIA_SESSION)
 void WebPage::handleMediaEvent(uint32_t eventType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->handleMediaEvent(static_cast<MediaEventType>(eventType));
 }
 
 void WebPage::setVolumeOfMediaElement(double volume, uint64_t elementID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setVolumeOfMediaElement(volume, elementID);
 }
 #endif
 
 void WebPage::setMayStartMediaWhenInWindow(bool mayStartMedia)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (mayStartMedia == m_mayStartMediaWhenInWindow)
         return;
 
@@ -4410,7 +4409,7 @@ void WebPage::setMayStartMediaWhenInWindow(bool mayStartMedia)
 }
 
 void WebPage::runModal()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (m_isClosed)
         return;
@@ -4427,7 +4426,7 @@ void WebPage::runModal()
 }
 
 bool WebPage::canHandleRequest(const WebCore::ResourceRequest& request)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     if (SchemeRegistry::shouldLoadURLSchemeAsEmptyDocument(request.url().protocol()))
         return true;
@@ -4440,36 +4439,36 @@ bool WebPage::canHandleRequest(const WebCore::ResourceRequest& request)
 
 #if USE(COORDINATED_GRAPHICS_MULTIPROCESS)
 void WebPage::commitPageTransitionViewport()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_drawingArea->setLayerTreeStateIsFrozen(false);
 }
 #endif
 
 #if PLATFORM(COCOA)
 void WebPage::handleAlternativeTextUIResult(const String& result)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     frame.editor().handleAlternativeTextUIResult(result);
 }
 #endif
 
 void WebPage::simulateMouseDown(int button, WebCore::IntPoint position, int clickCount, WKEventModifiers modifiers, double time)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     mouseEvent(WebMouseEvent(WebMouseEvent::MouseDown, static_cast<WebMouseEvent::Button>(button), position, position, 0, 0, 0, clickCount, static_cast<WebMouseEvent::Modifiers>(modifiers), time, WebCore::ForceAtClick, WebMouseEvent::NoTap));
 }
 
 void WebPage::simulateMouseUp(int button, WebCore::IntPoint position, int clickCount, WKEventModifiers modifiers, double time)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     mouseEvent(WebMouseEvent(WebMouseEvent::MouseUp, static_cast<WebMouseEvent::Button>(button), position, position, 0, 0, 0, clickCount, static_cast<WebMouseEvent::Modifiers>(modifiers), time, WebCore::ForceAtClick, WebMouseEvent::NoTap));
 }
 
 void WebPage::simulateMouseMotion(WebCore::IntPoint position, double time)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     mouseEvent(WebMouseEvent(WebMouseEvent::MouseMove, WebMouseEvent::NoButton, position, position, 0, 0, 0, 0, WebMouseEvent::Modifiers(), time, 0, WebMouseEvent::NoTap));
 }
 
 void WebPage::setCompositionForTesting(const String& compositionString, uint64_t from, uint64_t length)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     if (!frame.editor().canEdit())
         return;
@@ -4480,13 +4479,13 @@ void WebPage::setCompositionForTesting(const String& compositionString, uint64_t
 }
 
 bool WebPage::hasCompositionForTesting()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     return frame.editor().hasComposition();
 }
 
 void WebPage::confirmCompositionForTesting(const String& compositionString)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     if (!frame.editor().canEdit())
         return;
@@ -4497,7 +4496,7 @@ void WebPage::confirmCompositionForTesting(const String& compositionString)
 }
 
 void WebPage::wheelEventHandlersChanged(bool hasHandlers)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_hasWheelEventHandlers == hasHandlers)
         return;
 
@@ -4506,7 +4505,7 @@ void WebPage::wheelEventHandlersChanged(bool hasHandlers)
 }
 
 static bool hasEnabledHorizontalScrollbar(ScrollableArea* scrollableArea)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Scrollbar* scrollbar = scrollableArea->horizontalScrollbar())
         return scrollbar->enabled();
 
@@ -4514,7 +4513,7 @@ static bool hasEnabledHorizontalScrollbar(ScrollableArea* scrollableArea)
 }
 
 static bool pageContainsAnyHorizontalScrollbars(Frame* mainFrame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (FrameView* frameView = mainFrame->view()) {
         if (hasEnabledHorizontalScrollbar(frameView))
             return true;
@@ -4543,7 +4542,7 @@ static bool pageContainsAnyHorizontalScrollbars(Frame* mainFrame)
 }
 
 void WebPage::recomputeShortCircuitHorizontalWheelEventsState()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool canShortCircuitHorizontalWheelEvents = !m_hasWheelEventHandlers;
 
     if (canShortCircuitHorizontalWheelEvents) {
@@ -4560,12 +4559,12 @@ void WebPage::recomputeShortCircuitHorizontalWheelEventsState()
 }
 
 MainFrame* WebPage::mainFrame() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page ? &m_page->mainFrame() : nullptr;
 }
 
 FrameView* WebPage::mainFrameView() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Frame* frame = mainFrame())
         return frame->view();
     
@@ -4573,7 +4572,7 @@ FrameView* WebPage::mainFrameView() const
 }
 
 void WebPage::setScrollingPerformanceLoggingEnabled(bool enabled)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_scrollingPerformanceLoggingEnabled = enabled;
 
     FrameView* frameView = m_mainFrame->coreFrame()->view();
@@ -4584,7 +4583,7 @@ void WebPage::setScrollingPerformanceLoggingEnabled(bool enabled)
 }
 
 bool WebPage::canPluginHandleResponse(const ResourceResponse& response)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(NETSCAPE_PLUGIN_API)
     uint32_t pluginLoadPolicy;
     bool allowOnlyApplicationPlugins = !m_mainFrame->coreFrame()->loader().subframeLoader().allowPlugins();
@@ -4604,7 +4603,7 @@ bool WebPage::canPluginHandleResponse(const ResourceResponse& response)
 }
 
 bool WebPage::shouldUseCustomContentProviderForResponse(const ResourceResponse& response)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If a plug-in exists that claims to support this response, it should take precedence over the custom content provider.
     return m_mimeTypesWithCustomContentProviders.contains(response.mimeType()) && !canPluginHandleResponse(response);
 }
@@ -4612,7 +4611,7 @@ bool WebPage::shouldUseCustomContentProviderForResponse(const ResourceResponse& 
 #if PLATFORM(COCOA)
 
 void WebPage::insertTextAsync(const String& text, const EditingRange& replacementEditingRange, bool registerUndoGroup, uint32_t editingRangeIsRelativeTo)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
 
     if (replacementEditingRange.location != notFound) {
@@ -4633,7 +4632,7 @@ void WebPage::insertTextAsync(const String& text, const EditingRange& replacemen
 }
 
 void WebPage::getMarkedRangeAsync(uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
 
     RefPtr<Range> range = frame.editor().compositionRange();
@@ -4648,7 +4647,7 @@ void WebPage::getMarkedRangeAsync(uint64_t callbackID)
 }
 
 void WebPage::getSelectedRangeAsync(uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
 
     size_t location;
@@ -4663,7 +4662,7 @@ void WebPage::getSelectedRangeAsync(uint64_t callbackID)
 }
 
 void WebPage::characterIndexForPointAsync(const WebCore::IntPoint& point, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     uint64_t index = notFound;
 
     HitTestResult result = m_page->mainFrame().eventHandler().hitTestResultAtPoint(point);
@@ -4681,7 +4680,7 @@ void WebPage::characterIndexForPointAsync(const WebCore::IntPoint& point, uint64
 }
 
 void WebPage::firstRectForCharacterRangeAsync(const EditingRange& editingRange, uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     IntRect result(IntPoint(0, 0), IntSize(0, 0));
     
@@ -4698,7 +4697,7 @@ void WebPage::firstRectForCharacterRangeAsync(const EditingRange& editingRange, 
 }
 
 void WebPage::setCompositionAsync(const String& text, Vector<CompositionUnderline> underlines, const EditingRange& selection, const EditingRange& replacementEditingRange)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
 
     if (frame.selection().selection().isContentEditable()) {
@@ -4714,7 +4713,7 @@ void WebPage::setCompositionAsync(const String& text, Vector<CompositionUnderlin
 }
 
 void WebPage::confirmCompositionAsync()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     frame.editor().confirmComposition();
 }
@@ -4723,7 +4722,7 @@ void WebPage::confirmCompositionAsync()
 
 #if PLATFORM(GTK)
 static Frame* targetFrameForEditing(WebPage* page)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& targetFrame = page->corePage()->focusController().focusedOrMainFrame();
 
     Editor& editor = targetFrame.editor();
@@ -4744,7 +4743,7 @@ static Frame* targetFrameForEditing(WebPage* page)
 }
 
 void WebPage::confirmComposition(const String& compositionString, int64_t selectionStart, int64_t selectionLength)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame* targetFrame = targetFrameForEditing(this);
     if (!targetFrame) {
         send(Messages::WebPageProxy::EditorStateChanged(editorState()));
@@ -4770,7 +4769,7 @@ void WebPage::confirmComposition(const String& compositionString, int64_t select
 }
 
 void WebPage::setComposition(const String& text, const Vector<CompositionUnderline>& underlines, uint64_t selectionStart, uint64_t selectionLength, uint64_t replacementStart, uint64_t replacementLength)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame* targetFrame = targetFrameForEditing(this);
     if (!targetFrame || !targetFrame->selection().selection().isContentEditable()) {
         send(Messages::WebPageProxy::EditorStateChanged(editorState()));
@@ -4793,7 +4792,7 @@ void WebPage::setComposition(const String& text, const Vector<CompositionUnderli
 }
 
 void WebPage::cancelComposition()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Frame* targetFrame = targetFrameForEditing(this))
         targetFrame->editor().cancelComposition();
     send(Messages::WebPageProxy::EditorStateChanged(editorState()));
@@ -4801,7 +4800,7 @@ void WebPage::cancelComposition()
 #endif
 
 void WebPage::didChangeSelection()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame& frame = m_page->focusController().focusedOrMainFrame();
     FrameView* view = frame.view();
 
@@ -4837,7 +4836,7 @@ void WebPage::didChangeSelection()
 }
 
 void WebPage::resetAssistedNodeForFrame(WebFrame* frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_assistedNode)
         return;
     if (m_assistedNode->document().frame() == frame->coreFrame()) {
@@ -4851,7 +4850,7 @@ void WebPage::resetAssistedNodeForFrame(WebFrame* frame)
 }
 
 void WebPage::elementDidFocus(WebCore::Node* node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_assistedNode == node && m_isAssistingNodeDueToUserInteraction)
         return;
 
@@ -4878,7 +4877,7 @@ void WebPage::elementDidFocus(WebCore::Node* node)
 }
 
 void WebPage::elementDidBlur(WebCore::Node* node)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_assistedNode == node) {
         m_hasPendingBlurNotification = true;
         RefPtr<WebPage> protectedThis(this);
@@ -4899,7 +4898,7 @@ void WebPage::elementDidBlur(WebCore::Node* node)
 }
 
 void WebPage::sendPostLayoutEditorStateIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_isEditorStateMissingPostLayoutData)
         return;
 
@@ -4908,12 +4907,12 @@ void WebPage::sendPostLayoutEditorStateIfNeeded()
 }
 
 void WebPage::discardedComposition()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     send(Messages::WebPageProxy::CompositionWasCanceled(editorState()));
 }
 
 void WebPage::setMinimumLayoutSize(const IntSize& minimumLayoutSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_minimumLayoutSize == minimumLayoutSize)
         return;
 
@@ -4932,7 +4931,7 @@ void WebPage::setMinimumLayoutSize(const IntSize& minimumLayoutSize)
 }
 
 void WebPage::setAutoSizingShouldExpandToViewHeight(bool shouldExpand)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_autoSizingShouldExpandToViewHeight == shouldExpand)
         return;
 
@@ -4942,12 +4941,12 @@ void WebPage::setAutoSizingShouldExpandToViewHeight(bool shouldExpand)
 }
 
 bool WebPage::isSmartInsertDeleteEnabled()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->settings().smartInsertDeleteEnabled();
 }
 
 void WebPage::setSmartInsertDeleteEnabled(bool enabled)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_page->settings().smartInsertDeleteEnabled() != enabled) {
         m_page->settings().setSmartInsertDeleteEnabled(enabled);
         setSelectTrailingWhitespaceEnabled(!enabled);
@@ -4955,12 +4954,12 @@ void WebPage::setSmartInsertDeleteEnabled(bool enabled)
 }
 
 bool WebPage::isSelectTrailingWhitespaceEnabled()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->settings().selectTrailingWhitespaceEnabled();
 }
 
 void WebPage::setSelectTrailingWhitespaceEnabled(bool enabled)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_page->settings().selectTrailingWhitespaceEnabled() != enabled) {
         m_page->settings().setSelectTrailingWhitespaceEnabled(enabled);
         setSmartInsertDeleteEnabled(!enabled);
@@ -4968,7 +4967,7 @@ void WebPage::setSelectTrailingWhitespaceEnabled(bool enabled)
 }
 
 bool WebPage::canShowMIMEType(const String& MIMEType) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (MIMETypeRegistry::canShowMIMEType(MIMEType))
         return true;
 
@@ -4987,12 +4986,12 @@ bool WebPage::canShowMIMEType(const String& MIMEType) const
 }
 
 void WebPage::addTextCheckingRequest(uint64_t requestID, PassRefPtr<TextCheckingRequest> request)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_pendingTextCheckingRequestMap.add(requestID, request);
 }
 
 void WebPage::didFinishCheckingText(uint64_t requestID, const Vector<TextCheckingResult>& result)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<TextCheckingRequest> request = m_pendingTextCheckingRequestMap.take(requestID);
     if (!request)
         return;
@@ -5001,7 +5000,7 @@ void WebPage::didFinishCheckingText(uint64_t requestID, const Vector<TextCheckin
 }
 
 void WebPage::didCancelCheckingText(uint64_t requestID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<TextCheckingRequest> request = m_pendingTextCheckingRequestMap.take(requestID);
     if (!request)
         return;
@@ -5010,7 +5009,7 @@ void WebPage::didCancelCheckingText(uint64_t requestID)
 }
 
 void WebPage::willReplaceMultipartContent(const WebFrame& frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
 #if PLATFORM(IOS)
     if (!frame.isMainFrame())
@@ -5021,7 +5020,7 @@ void WebPage::willReplaceMultipartContent(const WebFrame& frame)
 }
 
 void WebPage::didReplaceMultipartContent(const WebFrame& frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
 #if PLATFORM(IOS)
     if (!frame.isMainFrame())
@@ -5034,7 +5033,7 @@ void WebPage::didReplaceMultipartContent(const WebFrame& frame)
 }
 
 void WebPage::didCommitLoad(WebFrame* frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
 #if PLATFORM(IOS)
     frame->setFirstLayerTreeTransactionIDAfterDidCommitLoad(downcast<RemoteLayerTreeDrawingArea>(*m_drawingArea).nextTransactionID());
@@ -5106,7 +5105,7 @@ void WebPage::didCommitLoad(WebFrame* frame)
 }
 
 void WebPage::didFinishLoad(WebFrame* frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
 #if ENABLE(PRIMARY_SNAPSHOTTED_PLUGIN_HEURISTIC)
     if (!frame->isMainFrame())
@@ -5132,7 +5131,7 @@ static const float minimumOverlappingImageToPluginDimensionScale = .9;
 
 #if ENABLE(PRIMARY_SNAPSHOTTED_PLUGIN_HEURISTIC)
 void WebPage::determinePrimarySnapshottedPlugInTimerFired()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_page)
         return;
     
@@ -5143,7 +5142,7 @@ void WebPage::determinePrimarySnapshottedPlugInTimerFired()
 #endif
 
 void WebPage::determinePrimarySnapshottedPlugIn()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_page->settings().plugInSnapshottingEnabled())
         return;
 
@@ -5250,7 +5249,7 @@ void WebPage::determinePrimarySnapshottedPlugIn()
 }
 
 void WebPage::resetPrimarySnapshottedPlugIn()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_readyToFindPrimarySnapshottedPlugin = false;
     m_didFindPrimarySnapshottedPlugin = false;
     m_numberOfPrimarySnapshotDetectionAttempts = 0;
@@ -5258,7 +5257,7 @@ void WebPage::resetPrimarySnapshottedPlugIn()
 }
 
 bool WebPage::matchesPrimaryPlugIn(const String& pageOrigin, const String& pluginOrigin, const String& mimeType) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_didFindPrimarySnapshottedPlugin)
         return false;
 
@@ -5266,7 +5265,7 @@ bool WebPage::matchesPrimaryPlugIn(const String& pageOrigin, const String& plugi
 }
 
 bool WebPage::plugInIntersectsSearchRect(HTMLPlugInImageElement& plugInImageElement)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     MainFrame& mainFrame = corePage()->mainFrame();
     if (!mainFrame.view())
         return false;
@@ -5286,7 +5285,7 @@ bool WebPage::plugInIntersectsSearchRect(HTMLPlugInImageElement& plugInImageElem
 }
 
 bool WebPage::plugInIsPrimarySize(WebCore::HTMLPlugInImageElement& plugInImageElement, unsigned& candidatePlugInArea)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* renderer = plugInImageElement.renderer();
     if (!is<RenderBox>(renderer))
         return false;
@@ -5307,7 +5306,7 @@ bool WebPage::plugInIsPrimarySize(WebCore::HTMLPlugInImageElement& plugInImageEl
 #endif // ENABLE(PRIMARY_SNAPSHOTTED_PLUGIN_HEURISTIC)
 
 PassRefPtr<Range> WebPage::currentSelectionAsRange()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame* frame = frameWithSelection(m_page.get());
     if (!frame)
         return 0;
@@ -5316,13 +5315,13 @@ PassRefPtr<Range> WebPage::currentSelectionAsRange()
 }
 
 void WebPage::reportUsedFeatures()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<String> namedFeatures;
     m_loaderClient.featuresUsedInPage(this, namedFeatures);
 }
 
 unsigned WebPage::extendIncrementalRenderingSuppression()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     unsigned token = m_maximumRenderingSuppressionToken + 1;
     while (!HashSet<unsigned>::isValidValue(token) || m_activeRenderingSuppressionTokens.contains(token))
         token++;
@@ -5336,7 +5335,7 @@ unsigned WebPage::extendIncrementalRenderingSuppression()
 }
 
 void WebPage::stopExtendingIncrementalRenderingSuppression(unsigned token)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_activeRenderingSuppressionTokens.remove(token))
         return;
 
@@ -5344,13 +5343,13 @@ void WebPage::stopExtendingIncrementalRenderingSuppression(unsigned token)
 }
     
 void WebPage::setScrollPinningBehavior(uint32_t pinning)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_scrollPinningBehavior = static_cast<ScrollPinningBehavior>(pinning);
     m_page->mainFrame().view()->setScrollPinningBehavior(m_scrollPinningBehavior);
 }
 
 void WebPage::setScrollbarOverlayStyle(WTF::Optional<uint32_t> scrollbarStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (scrollbarStyle)
         m_scrollbarOverlayStyle = static_cast<ScrollbarOverlayStyle>(scrollbarStyle.value());
     else
@@ -5359,7 +5358,7 @@ void WebPage::setScrollbarOverlayStyle(WTF::Optional<uint32_t> scrollbarStyle)
 }
 
 Ref<DocumentLoader> WebPage::createDocumentLoader(Frame& frame, const ResourceRequest& request, const SubstituteData& substituteData)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Ref<WebDocumentLoader> documentLoader = WebDocumentLoader::create(request, substituteData);
 
     if (frame.isMainFrame()) {
@@ -5373,7 +5372,7 @@ Ref<DocumentLoader> WebPage::createDocumentLoader(Frame& frame, const ResourceRe
 }
 
 void WebPage::updateCachedDocumentLoader(WebDocumentLoader& documentLoader, Frame& frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_pendingNavigationID && frame.isMainFrame()) {
         documentLoader.setNavigationID(m_pendingNavigationID);
         m_pendingNavigationID = 0;
@@ -5381,7 +5380,7 @@ void WebPage::updateCachedDocumentLoader(WebDocumentLoader& documentLoader, Fram
 }
 
 void WebPage::getBytecodeProfile(uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!JSDOMWindow::commonVM().m_perBytecodeProfiler) {
         send(Messages::WebPageProxy::StringCallback(String(), callbackID));
         return;
@@ -5393,7 +5392,7 @@ void WebPage::getBytecodeProfile(uint64_t callbackID)
 }
 
 PassRefPtr<WebCore::Range> WebPage::rangeFromEditingRange(WebCore::Frame& frame, const EditingRange& range, EditingRangeIsRelativeTo editingRangeIsRelativeTo)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(range.location != notFound);
 
     // Sanitize the input, because TextIterator::rangeFromLocationAndLength takes signed integers.
@@ -5432,7 +5431,7 @@ PassRefPtr<WebCore::Range> WebPage::rangeFromEditingRange(WebCore::Frame& frame,
 }
     
 void WebPage::didChangeScrollOffsetForFrame(Frame* frame)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!frame->isMainFrame())
         return;
 
@@ -5445,13 +5444,13 @@ void WebPage::didChangeScrollOffsetForFrame(Frame* frame)
 }
 
 void WebPage::postMessage(const String& messageName, API::Object* messageBody)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     send(Messages::WebPageProxy::HandleMessage(messageName, UserData(WebProcess::singleton().transformObjectsToHandles(messageBody))));
 }
 
 void WebPage::postSynchronousMessageForTesting(const String& messageName, API::Object* messageBody, RefPtr<API::Object>& returnData)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 
     UserData returnUserData;
 
@@ -5463,7 +5462,7 @@ void WebPage::postSynchronousMessageForTesting(const String& messageName, API::O
 }
 
 void WebPage::clearWheelEventTestTrigger()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_page)
         return;
 
@@ -5471,7 +5470,7 @@ void WebPage::clearWheelEventTestTrigger()
 }
 
 void WebPage::setShouldScaleViewToFitDocument(bool shouldScaleViewToFitDocument)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_drawingArea)
         return;
 
@@ -5479,31 +5478,31 @@ void WebPage::setShouldScaleViewToFitDocument(bool shouldScaleViewToFitDocument)
 }
 
 void WebPage::imageOrMediaDocumentSizeChanged(const IntSize& newSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     send(Messages::WebPageProxy::ImageOrMediaDocumentSizeChanged(newSize));
 }
 
 void WebPage::addUserScript(const String& source, WebCore::UserContentInjectedFrames injectedFrames, WebCore::UserScriptInjectionTime injectionTime)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebCore::UserScript userScript{ source, WebCore::blankURL(), Vector<String>(), Vector<String>(), injectionTime, injectedFrames };
 
     m_userContentController->addUserScript(*InjectedBundleScriptWorld::normalWorld(), WTFMove(userScript));
 }
 
 void WebPage::addUserStyleSheet(const String& source, WebCore::UserContentInjectedFrames injectedFrames)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebCore::UserStyleSheet userStyleSheet{ source, WebCore::blankURL(), Vector<String>(), Vector<String>(), injectedFrames, UserStyleUserLevel };
 
     m_userContentController->addUserStyleSheet(*InjectedBundleScriptWorld::normalWorld(), WTFMove(userStyleSheet));
 }
 
 void WebPage::removeAllUserContent()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_userContentController->removeAllUserContent();
 }
 
 void WebPage::dispatchDidReachLayoutMilestone(WebCore::LayoutMilestones milestones)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<API::Object> userData;
     injectedBundleLoaderClient().didReachLayoutMilestone(this, milestones, userData);
 
@@ -5518,17 +5517,17 @@ void WebPage::dispatchDidReachLayoutMilestone(WebCore::LayoutMilestones mileston
 }
 
 void WebPage::didRestoreScrollPosition()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     send(Messages::WebPageProxy::DidRestoreScrollPosition());
 }
 
 void WebPage::setResourceCachingDisabled(bool disabled)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setResourceCachingDisabled(disabled);
 }
 
 void WebPage::setUserInterfaceLayoutDirection(uint32_t direction)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_userInterfaceLayoutDirection = static_cast<WebCore::UserInterfaceLayoutDirection>(direction);
     m_page->setUserInterfaceLayoutDirection(m_userInterfaceLayoutDirection);
 }
@@ -5536,7 +5535,7 @@ void WebPage::setUserInterfaceLayoutDirection(uint32_t direction)
 #if ENABLE(GAMEPAD)
 
 void WebPage::gamepadActivity(const Vector<GamepadData>& gamepadDatas)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebGamepadProvider::singleton().gamepadActivity(gamepadDatas);
 }
 

@@ -275,7 +275,7 @@ list(APPEND WebKit2_LIBRARIES
     ${HARFBUZZ_LIBRARIES}
     ${LIBSOUP_LIBRARIES}
     WPE
-     libwtf.a
+     -leasy_profiler
 )
 
 if (ENABLE_BREAKPAD)

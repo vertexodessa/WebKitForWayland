@@ -28,7 +28,7 @@
 namespace WebCore {
 
 RefPtr<Document> DOMParser::parseFromString(const String& str, const String& contentType, ExceptionCode& ec)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (contentType != "text/html"
         && contentType != "text/xml"
         && contentType != "application/xml"

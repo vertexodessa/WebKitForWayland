@@ -255,7 +255,7 @@ private:
 };
 
 void makeMatrixRenderable(TransformationMatrix& matrix, bool has3DRendering)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if !ENABLE(3D_TRANSFORMS)
     UNUSED_PARAM(has3DRendering);
     matrix.makeAffine();
@@ -325,7 +325,7 @@ RenderLayer::RenderLayer(RenderLayerModelObject& rendererLayerModelObject)
     , m_staticInlinePosition(0)
     , m_staticBlockPosition(0)
     , m_enclosingPaginationLayer(nullptr)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_isNormalFlowOnly = shouldBeNormalFlowOnly();
     m_isSelfPaintingLayer = shouldBeSelfPaintingLayer();
 
@@ -348,7 +348,7 @@ RenderLayer::RenderLayer(RenderLayerModelObject& rendererLayerModelObject)
 }
 
 RenderLayer::~RenderLayer()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (inResizeMode() && !renderer().documentBeingDestroyed())
         renderer().frame().eventHandler().resizeLayerDestroyed();
 
@@ -385,7 +385,7 @@ RenderLayer::~RenderLayer()
 }
 
 String RenderLayer::name() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     StringBuilder name;
     name.append(renderer().renderName());
 
@@ -417,12 +417,12 @@ String RenderLayer::name() const
 }
 
 RenderLayerCompositor& RenderLayer::compositor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderer().view().compositor();
 }
 
 void RenderLayer::contentChanged(ContentChangeType changeType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if ((changeType == CanvasChanged || changeType == VideoChanged || changeType == FullScreenChanged || changeType == ImageChanged) && compositor().updateLayerCompositingState(*this))
         compositor().setCompositingLayersNeedRebuild();
 
@@ -431,12 +431,12 @@ void RenderLayer::contentChanged(ContentChangeType changeType)
 }
 
 bool RenderLayer::canRender3DTransforms() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return compositor().canRender3DTransforms();
 }
 
 bool RenderLayer::paintsWithFilters() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().hasFilter())
         return false;
         
@@ -450,7 +450,7 @@ bool RenderLayer::paintsWithFilters() const
 }
 
 bool RenderLayer::requiresFullLayerImageForFilters() const 
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!paintsWithFilters())
         return false;
     FilterEffectRenderer* renderer = filterRenderer();
@@ -458,13 +458,13 @@ bool RenderLayer::requiresFullLayerImageForFilters() const
 }
 
 FilterEffectRenderer* RenderLayer::filterRenderer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     FilterInfo* filterInfo = FilterInfo::getIfExists(*this);
     return filterInfo ? filterInfo->renderer() : nullptr;
 }
 
 void RenderLayer::updateLayerPositionsAfterLayout(const RenderLayer* rootLayer, UpdateLayerPositionsFlags flags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderGeometryMap geometryMap(UseTransforms);
     if (this != rootLayer)
         geometryMap.pushMappingsToAncestor(parent(), nullptr);
@@ -472,7 +472,7 @@ void RenderLayer::updateLayerPositionsAfterLayout(const RenderLayer* rootLayer, 
 }
 
 void RenderLayer::updateLayerPositions(RenderGeometryMap* geometryMap, UpdateLayerPositionsFlags flags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     updateLayerPosition(); // For relpositioned layers or non-positioned layers,
                            // we need to keep in sync, since we may have shifted relative
                            // to our parent layer.
@@ -592,7 +592,7 @@ void RenderLayer::updateLayerPositions(RenderGeometryMap* geometryMap, UpdateLay
 }
 
 LayoutRect RenderLayer::repaintRectIncludingNonCompositingDescendants() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutRect repaintRect = m_repaintRect;
     for (RenderLayer* child = firstChild(); child; child = child->nextSibling()) {
         // Don't include repaint rects for composited child layers; they will paint themselves and have a different origin.
@@ -605,7 +605,7 @@ LayoutRect RenderLayer::repaintRectIncludingNonCompositingDescendants() const
 }
 
 void RenderLayer::setAncestorChainHasSelfPaintingLayerDescendant()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (RenderLayer* layer = this; layer; layer = layer->parent()) {
         if (!layer->m_hasSelfPaintingLayerDescendantDirty && layer->hasSelfPaintingLayerDescendant())
             break;
@@ -616,7 +616,7 @@ void RenderLayer::setAncestorChainHasSelfPaintingLayerDescendant()
 }
 
 void RenderLayer::dirtyAncestorChainHasSelfPaintingLayerDescendantStatus()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (RenderLayer* layer = this; layer; layer = layer->parent()) {
         layer->m_hasSelfPaintingLayerDescendantDirty = true;
         // If we have reached a self-painting layer, we know our parent should have a self-painting descendant
@@ -629,7 +629,7 @@ void RenderLayer::dirtyAncestorChainHasSelfPaintingLayerDescendantStatus()
 }
 
 bool RenderLayer::acceleratedCompositingForOverflowScrollEnabled() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderer().frame().settings().acceleratedCompositingForOverflowScrollEnabled();
 }
 
@@ -711,7 +711,7 @@ bool RenderLayer::acceleratedCompositingForOverflowScrollEnabled() const
 //
 //  And we would conclude that C could be promoted.
 void RenderLayer::updateDescendantsAreContiguousInStackingOrder()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isStackingContext() || !acceleratedCompositingForOverflowScrollEnabled())
         return;
 
@@ -755,7 +755,7 @@ void RenderLayer::updateDescendantsAreContiguousInStackingOrder()
 }
 
 void RenderLayer::updateDescendantsAreContiguousInStackingOrderRecursive(const HashMap<const RenderLayer*, int>& lookup, int& minIndex, int& maxIndex, int& count, bool firstIteration)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isStackingContext() && !firstIteration) {
         if (lookup.contains(this)) {
             minIndex = std::min(minIndex, lookup.get(this));
@@ -787,7 +787,7 @@ void RenderLayer::updateDescendantsAreContiguousInStackingOrderRecursive(const H
 }
 
 void RenderLayer::computeRepaintRects(const RenderLayerModelObject* repaintContainer, const RenderGeometryMap* geometryMap)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_visibleContentStatusDirty);
 
     if (!isSelfPaintingLayer()) {
@@ -802,7 +802,7 @@ void RenderLayer::computeRepaintRects(const RenderLayerModelObject* repaintConta
 
 
 void RenderLayer::computeRepaintRectsIncludingDescendants()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: computeRepaintRects() has to walk up the parent chain for every layer to compute the rects.
     // We should make this more efficient.
     // FIXME: it's wrong to call this when layout is not up-to-date, which we do.
@@ -813,7 +813,7 @@ void RenderLayer::computeRepaintRectsIncludingDescendants()
 }
 
 void RenderLayer::clearRepaintRects()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_visibleContentStatusDirty);
 
     m_hasComputedRepaintRect = false;
@@ -822,7 +822,7 @@ void RenderLayer::clearRepaintRects()
 }
 
 void RenderLayer::updateLayerPositionsAfterDocumentScroll()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(this == renderer().view().layer());
 
     RenderGeometryMap geometryMap(UseTransforms);
@@ -830,7 +830,7 @@ void RenderLayer::updateLayerPositionsAfterDocumentScroll()
 }
 
 void RenderLayer::updateLayerPositionsAfterOverflowScroll()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderGeometryMap geometryMap(UseTransforms);
     if (this != renderer().view().layer())
         geometryMap.pushMappingsToAncestor(parent(), nullptr);
@@ -841,7 +841,7 @@ void RenderLayer::updateLayerPositionsAfterOverflowScroll()
 }
 
 void RenderLayer::updateLayerPositionsAfterScroll(RenderGeometryMap* geometryMap, UpdateLayerPositionsAfterScrollFlags flags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: This shouldn't be needed, but there are some corner cases where
     // these flags are still dirty. Update so that the check below is valid.
     updateDescendantDependentFlags();
@@ -904,7 +904,7 @@ void RenderLayer::updateLayerPositionsAfterScroll(RenderGeometryMap* geometryMap
 }
 
 void RenderLayer::positionNewlyCreatedOverflowControls()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!backing()->hasUnpositionedOverflowControlsLayers())
         return;
 
@@ -919,7 +919,7 @@ void RenderLayer::positionNewlyCreatedOverflowControls()
 #if ENABLE(CSS_COMPOSITING)
 
 void RenderLayer::updateBlendMode()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool hadBlendMode = m_blendMode != BlendModeNormal;
     if (parent() && hadBlendMode != hasBlendMode()) {
         if (hasBlendMode())
@@ -934,7 +934,7 @@ void RenderLayer::updateBlendMode()
 }
 
 void RenderLayer::updateAncestorChainHasBlendingDescendants()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto* layer = this; layer; layer = layer->parent()) {
         if (!layer->hasNotIsolatedBlendingDescendantsStatusDirty() && layer->hasNotIsolatedBlendingDescendants())
             break;
@@ -949,7 +949,7 @@ void RenderLayer::updateAncestorChainHasBlendingDescendants()
 }
 
 void RenderLayer::dirtyAncestorChainHasBlendingDescendants()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto* layer = this; layer; layer = layer->parent()) {
         if (layer->hasNotIsolatedBlendingDescendantsStatusDirty())
             break;
@@ -963,7 +963,7 @@ void RenderLayer::dirtyAncestorChainHasBlendingDescendants()
 #endif
 
 void RenderLayer::updateTransform()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool hasTransform = renderer().hasTransform();
     bool had3DTransform = has3DTransform();
 
@@ -991,7 +991,7 @@ void RenderLayer::updateTransform()
 }
 
 TransformationMatrix RenderLayer::currentTransform(RenderStyle::ApplyTransformOrigin applyOrigin) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_transform)
         return TransformationMatrix();
     
@@ -1019,7 +1019,7 @@ TransformationMatrix RenderLayer::currentTransform(RenderStyle::ApplyTransformOr
 }
 
 TransformationMatrix RenderLayer::renderableTransform(PaintBehavior paintBehavior) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_transform)
         return TransformationMatrix();
     
@@ -1033,7 +1033,7 @@ TransformationMatrix RenderLayer::renderableTransform(PaintBehavior paintBehavio
 }
 
 RenderLayer* RenderLayer::enclosingOverflowClipLayer(IncludeSelfOrNot includeSelf) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderLayer* layer = (includeSelf == IncludeSelf) ? this : parent();
     while (layer) {
         if (layer->renderer().hasOverflowClip())
@@ -1047,7 +1047,7 @@ RenderLayer* RenderLayer::enclosingOverflowClipLayer(IncludeSelfOrNot includeSel
 // FIXME: This is terrible. Bring back a cached bit for this someday. This crawl is going to slow down all
 // painting of content inside paginated layers.
 bool RenderLayer::hasCompositedLayerInEnclosingPaginationChain() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // No enclosing layer means no compositing in the chain.
     if (!m_enclosingPaginationLayer)
         return false;
@@ -1081,7 +1081,7 @@ bool RenderLayer::hasCompositedLayerInEnclosingPaginationChain() const
 }
 
 void RenderLayer::updatePagination()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_enclosingPaginationLayer = nullptr;
     
     if (!parent())
@@ -1124,7 +1124,7 @@ void RenderLayer::updatePagination()
 }
 
 bool RenderLayer::canBeStackingContainer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isStackingContext() || !stackingContainer())
         return true;
 
@@ -1132,7 +1132,7 @@ bool RenderLayer::canBeStackingContainer() const
 }
 
 void RenderLayer::setHasVisibleContent()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__); 
+{     AUTO_EASY_THREAD(); EASY_FUNCTION(); 
     if (m_hasVisibleContent && !m_visibleContentStatusDirty) {
         ASSERT(!parent() || parent()->hasVisibleDescendant());
         return;
@@ -1157,14 +1157,14 @@ void RenderLayer::setHasVisibleContent()
 }
 
 void RenderLayer::dirtyVisibleContentStatus() 
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__); 
+{     AUTO_EASY_THREAD(); EASY_FUNCTION(); 
     m_visibleContentStatusDirty = true; 
     if (parent())
         parent()->dirtyAncestorChainVisibleDescendantStatus();
 }
 
 void RenderLayer::dirtyAncestorChainVisibleDescendantStatus()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (RenderLayer* layer = this; layer; layer = layer->parent()) {
         if (layer->m_visibleDescendantStatusDirty)
             break;
@@ -1174,7 +1174,7 @@ void RenderLayer::dirtyAncestorChainVisibleDescendantStatus()
 }
 
 void RenderLayer::setAncestorChainHasVisibleDescendant()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (RenderLayer* layer = this; layer; layer = layer->parent()) {
         if (!layer->m_visibleDescendantStatusDirty && layer->hasVisibleDescendant())
             break;
@@ -1185,7 +1185,7 @@ void RenderLayer::setAncestorChainHasVisibleDescendant()
 }
 
 void RenderLayer::updateDescendantDependentFlags(HashSet<const RenderObject*>* outOfFlowDescendantContainingBlocks)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_visibleDescendantStatusDirty || m_hasSelfPaintingLayerDescendantDirty || m_hasOutOfFlowPositionedDescendantDirty || hasNotIsolatedBlendingDescendantsStatusDirty()) {
         bool hasVisibleDescendant = false;
         bool hasSelfPaintingLayerDescendant = false;
@@ -1279,7 +1279,7 @@ void RenderLayer::updateDescendantDependentFlags(HashSet<const RenderObject*>* o
 }
 
 void RenderLayer::dirty3DTransformedDescendantStatus()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderLayer* curr = stackingContainer();
     if (curr)
         curr->m_3DTransformedDescendantStatusDirty = true;
@@ -1294,7 +1294,7 @@ void RenderLayer::dirty3DTransformedDescendantStatus()
 
 // Return true if this layer or any preserve-3d descendants have 3d.
 bool RenderLayer::update3DTransformedDescendantStatus()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_3DTransformedDescendantStatusDirty) {
         m_has3DTransformedDescendant = false;
 
@@ -1325,7 +1325,7 @@ bool RenderLayer::update3DTransformedDescendantStatus()
 }
 
 bool RenderLayer::updateLayerPosition()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutPoint localPoint;
     LayoutSize inlineBoundingBoxOffset; // We don't put this into the RenderLayer x/y for inlines, so we need to subtract it out when done.
     if (renderer().isInline() && is<RenderInline>(renderer())) {
@@ -1393,7 +1393,7 @@ bool RenderLayer::updateLayerPosition()
 }
 
 TransformationMatrix RenderLayer::perspectiveTransform() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     if (!box)
         return TransformationMatrix();
@@ -1424,7 +1424,7 @@ TransformationMatrix RenderLayer::perspectiveTransform() const
 }
 
 FloatPoint RenderLayer::perspectiveOrigin() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().hasTransformRelatedProperty())
         return FloatPoint();
 
@@ -1436,7 +1436,7 @@ FloatPoint RenderLayer::perspectiveOrigin() const
 }
 
 RenderLayer* RenderLayer::stackingContainer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderLayer* layer = parent();
     while (layer && !layer->isStackingContainer())
         layer = layer->parent();
@@ -1446,7 +1446,7 @@ RenderLayer* RenderLayer::stackingContainer() const
 }
 
 static inline bool isContainerForPositioned(RenderLayer& layer, EPosition position)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (position) {
     case FixedPosition:
         return layer.renderer().canContainFixedPositionObjects();
@@ -1461,7 +1461,7 @@ static inline bool isContainerForPositioned(RenderLayer& layer, EPosition positi
 }
 
 RenderLayer* RenderLayer::enclosingAncestorForPosition(EPosition position) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderLayer* curr = parent();
     while (curr && !isContainerForPositioned(*curr, position))
         curr = curr->parent();
@@ -1470,7 +1470,7 @@ RenderLayer* RenderLayer::enclosingAncestorForPosition(EPosition position) const
 }
 
 static RenderLayer* parentLayerCrossFrame(const RenderLayer& layer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (layer.parent())
         return layer.parent();
 
@@ -1486,7 +1486,7 @@ static RenderLayer* parentLayerCrossFrame(const RenderLayer& layer)
 }
 
 RenderLayer* RenderLayer::enclosingScrollableLayer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (RenderLayer* nextLayer = parentLayerCrossFrame(*this); nextLayer; nextLayer = parentLayerCrossFrame(*nextLayer)) {
         if (is<RenderBox>(nextLayer->renderer()) && downcast<RenderBox>(nextLayer->renderer()).canBeScrolledAndHasScrollableArea())
             return nextLayer;
@@ -1496,12 +1496,12 @@ RenderLayer* RenderLayer::enclosingScrollableLayer() const
 }
 
 IntRect RenderLayer::scrollableAreaBoundingBox(bool* isInsideFixed) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderer().absoluteBoundingBoxRect(/* useTransforms */ true, isInsideFixed);
 }
 
 bool RenderLayer::isRubberBandInProgress() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(RUBBER_BANDING)
     if (!scrollsOverflow())
         return false;
@@ -1514,13 +1514,13 @@ bool RenderLayer::isRubberBandInProgress() const
 }
 
 bool RenderLayer::forceUpdateScrollbarsOnMainThreadForPerformanceTesting() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Page* page = renderer().frame().page();
     return page && page->settings().forceUpdateScrollbarsOnMainThreadForPerformanceTesting();
 }
 
 RenderLayer* RenderLayer::enclosingTransformedAncestor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderLayer* curr = parent();
     while (curr && !curr->isRootLayer() && !curr->transform())
         curr = curr->parent();
@@ -1529,12 +1529,12 @@ RenderLayer* RenderLayer::enclosingTransformedAncestor() const
 }
 
 static inline const RenderLayer* compositingContainer(const RenderLayer& layer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return layer.isNormalFlowOnly() ? layer.parent() : layer.stackingContainer();
 }
 
 inline bool RenderLayer::shouldRepaintAfterLayout() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_repaintStatus == NeedsNormalRepaint)
         return true;
 
@@ -1545,12 +1545,12 @@ inline bool RenderLayer::shouldRepaintAfterLayout() const
 }
 
 bool compositedWithOwnBackingStore(const RenderLayer& layer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return layer.isComposited() && !layer.backing()->paintsIntoCompositedAncestor();
 }
 
 RenderLayer* RenderLayer::enclosingCompositingLayer(IncludeSelfOrNot includeSelf) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (includeSelf == IncludeSelf && isComposited())
         return const_cast<RenderLayer*>(this);
 
@@ -1563,7 +1563,7 @@ RenderLayer* RenderLayer::enclosingCompositingLayer(IncludeSelfOrNot includeSelf
 }
 
 RenderLayer* RenderLayer::enclosingCompositingLayerForRepaint(IncludeSelfOrNot includeSelf) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (includeSelf == IncludeSelf && compositedWithOwnBackingStore(*this))
         return const_cast<RenderLayer*>(this);
 
@@ -1576,7 +1576,7 @@ RenderLayer* RenderLayer::enclosingCompositingLayerForRepaint(IncludeSelfOrNot i
 }
 
 RenderLayer* RenderLayer::enclosingFilterLayer(IncludeSelfOrNot includeSelf) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderLayer* curr = (includeSelf == IncludeSelf) ? this : parent();
     for (; curr; curr = curr->parent()) {
         if (curr->requiresFullLayerImageForFilters())
@@ -1587,7 +1587,7 @@ RenderLayer* RenderLayer::enclosingFilterLayer(IncludeSelfOrNot includeSelf) con
 }
 
 RenderLayer* RenderLayer::enclosingFilterRepaintLayer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const RenderLayer* curr = this; curr; curr = curr->parent()) {
         if ((curr != this && curr->requiresFullLayerImageForFilters()) || compositedWithOwnBackingStore(*curr) || curr->isRootLayer())
             return const_cast<RenderLayer*>(curr);
@@ -1596,7 +1596,7 @@ RenderLayer* RenderLayer::enclosingFilterRepaintLayer() const
 }
 
 void RenderLayer::setFilterBackendNeedsRepaintingInRect(const LayoutRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (rect.isEmpty())
         return;
     
@@ -1635,7 +1635,7 @@ void RenderLayer::setFilterBackendNeedsRepaintingInRect(const LayoutRect& rect)
 }
 
 bool RenderLayer::hasAncestorWithFilterOutsets() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const RenderLayer* curr = this; curr; curr = curr->parent()) {
         if (curr->renderer().style().hasFilterOutsets())
             return true;
@@ -1644,7 +1644,7 @@ bool RenderLayer::hasAncestorWithFilterOutsets() const
 }
 
 RenderLayer* RenderLayer::clippingRootForPainting() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isComposited())
         return const_cast<RenderLayer*>(this);
 
@@ -1664,13 +1664,13 @@ RenderLayer* RenderLayer::clippingRootForPainting() const
 }
 
 LayoutPoint RenderLayer::absoluteToContents(const LayoutPoint& absolutePoint) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We don't use convertToLayerCoords because it doesn't know about transforms
     return LayoutPoint(renderer().absoluteToLocal(absolutePoint, UseTransforms));
 }
 
 bool RenderLayer::cannotBlitToWindow() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isTransparent() || hasReflection() || hasTransform())
         return true;
     if (!parent())
@@ -1679,7 +1679,7 @@ bool RenderLayer::cannotBlitToWindow() const
 }
 
 RenderLayer* RenderLayer::transparentPaintingAncestor()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isComposited())
         return nullptr;
 
@@ -1706,7 +1706,7 @@ static LayoutRect transparencyClipBox(const RenderLayer&, const RenderLayer* roo
 
 static void expandClipRectForRegionAndReflection(LayoutRect& clipRect, const RenderLayer& layer, const RenderLayer* rootLayer,
     TransparencyClipBoxBehavior transparencyBehavior, PaintBehavior paintBehavior)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If this is a region, then the painting is actually done by its flow thread's layer.
     if (layer.renderer().isRenderNamedFlowFragmentContainer()) {
         RenderBlockFlow& regionContainer = downcast<RenderBlockFlow>(layer.renderer());
@@ -1724,7 +1724,7 @@ static void expandClipRectForRegionAndReflection(LayoutRect& clipRect, const Ren
 
 static void expandClipRectForDescendantsAndReflection(LayoutRect& clipRect, const RenderLayer& layer, const RenderLayer* rootLayer,
     TransparencyClipBoxBehavior transparencyBehavior, PaintBehavior paintBehavior)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If we have a mask, then the clip is limited to the border box area (and there is
     // no need to examine child layers).
     if (!layer.renderer().hasMask()) {
@@ -1752,7 +1752,7 @@ static void expandClipRectForDescendantsAndReflection(LayoutRect& clipRect, cons
 
 static LayoutRect transparencyClipBox(const RenderLayer& layer, const RenderLayer* rootLayer, TransparencyClipBoxBehavior transparencyBehavior,
     TransparencyClipBoxMode transparencyMode, PaintBehavior paintBehavior)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: Although this function completely ignores CSS-imposed clipping, we did already intersect with the
     // paintDirtyRect, and that should cut down on the amount we have to paint.  Still it
     // would be better to respect clips.
@@ -1796,12 +1796,12 @@ static LayoutRect transparencyClipBox(const RenderLayer& layer, const RenderLaye
 }
 
 static LayoutRect paintingExtent(const RenderLayer& currentLayer, const RenderLayer* rootLayer, const LayoutRect& paintDirtyRect, PaintBehavior paintBehavior)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return intersection(transparencyClipBox(currentLayer, rootLayer, PaintingTransparencyClipBox, RootOfTransparencyClipBox, paintBehavior), paintDirtyRect);
 }
 
 void RenderLayer::beginTransparencyLayers(GraphicsContext& context, const LayerPaintingInfo& paintingInfo, const LayoutRect& dirtyRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (context.paintingDisabled() || (paintsWithTransparency(paintingInfo.paintBehavior) && m_usedTransparency))
         return;
 
@@ -1839,14 +1839,14 @@ void RenderLayer::beginTransparencyLayers(GraphicsContext& context, const LayerP
 
 #if PLATFORM(IOS)
 void RenderLayer::willBeDestroyed()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderLayerBacking* layerBacking = backing())
         layerBacking->layerWillBeDestroyed();
 }
 #endif
 
 void RenderLayer::addChild(RenderLayer* child, RenderLayer* beforeChild)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderLayer* prevSibling = beforeChild ? beforeChild->previousSibling() : lastChild();
     if (prevSibling) {
         child->setPreviousSibling(prevSibling);
@@ -1893,7 +1893,7 @@ void RenderLayer::addChild(RenderLayer* child, RenderLayer* beforeChild)
 }
 
 RenderLayer* RenderLayer::removeChild(RenderLayer* oldChild)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().documentBeingDestroyed())
         compositor().layerWillBeRemoved(*this, *oldChild);
 
@@ -1940,7 +1940,7 @@ RenderLayer* RenderLayer::removeChild(RenderLayer* oldChild)
 }
 
 void RenderLayer::removeOnlyThisLayer()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_parent)
         return;
 
@@ -1979,7 +1979,7 @@ void RenderLayer::removeOnlyThisLayer()
 }
 
 void RenderLayer::insertOnlyThisLayer()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_parent && renderer().parent()) {
         // We need to connect ourselves when our renderer() has a parent.
         // Find our enclosingLayer and add ourselves.
@@ -1998,14 +1998,14 @@ void RenderLayer::insertOnlyThisLayer()
 }
 
 void RenderLayer::convertToPixelSnappedLayerCoords(const RenderLayer* ancestorLayer, IntPoint& roundedLocation, ColumnOffsetAdjustment adjustForColumns) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutPoint location = convertToLayerCoords(ancestorLayer, roundedLocation, adjustForColumns);
     roundedLocation = roundedIntPoint(location);
 }
 
 // Returns the layer reached on the walk up towards the ancestor.
 static inline const RenderLayer* accumulateOffsetTowardsAncestor(const RenderLayer* layer, const RenderLayer* ancestorLayer, LayoutPoint& location, RenderLayer::ColumnOffsetAdjustment adjustForColumns)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(ancestorLayer != layer);
 
     const RenderLayerModelObject& renderer = layer->renderer();
@@ -2133,7 +2133,7 @@ static inline const RenderLayer* accumulateOffsetTowardsAncestor(const RenderLay
 }
 
 LayoutPoint RenderLayer::convertToLayerCoords(const RenderLayer* ancestorLayer, const LayoutPoint& location, ColumnOffsetAdjustment adjustForColumns) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (ancestorLayer == this)
         return location;
 
@@ -2145,13 +2145,13 @@ LayoutPoint RenderLayer::convertToLayerCoords(const RenderLayer* ancestorLayer, 
 }
 
 LayoutSize RenderLayer::offsetFromAncestor(const RenderLayer* ancestorLayer, ColumnOffsetAdjustment adjustForColumns) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return toLayoutSize(convertToLayerCoords(ancestorLayer, LayoutPoint(), adjustForColumns));
 }
 
 #if PLATFORM(IOS)
 bool RenderLayer::hasAcceleratedTouchScrolling() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(ACCELERATED_OVERFLOW_SCROLLING)
     if (!scrollsOverflow())
         return false;
@@ -2168,13 +2168,13 @@ bool RenderLayer::hasAcceleratedTouchScrolling() const
 }
 
 bool RenderLayer::hasTouchScrollableOverflow() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasAcceleratedTouchScrolling() && (hasScrollableHorizontalOverflow() || hasScrollableVerticalOverflow());
 }
 
 #if ENABLE(TOUCH_EVENTS)
 bool RenderLayer::handleTouchEvent(const PlatformTouchEvent& touchEvent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If we have accelerated scrolling, let the scrolling be handled outside of WebKit.
     if (hasTouchScrollableOverflow())
         return false;
@@ -2186,7 +2186,7 @@ bool RenderLayer::handleTouchEvent(const PlatformTouchEvent& touchEvent)
 
 #if ENABLE(IOS_TOUCH_EVENTS)
 void RenderLayer::registerAsTouchEventListenerForScrolling()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().element() || m_registeredAsTouchEventListenerForScrolling)
         return;
     
@@ -2195,7 +2195,7 @@ void RenderLayer::registerAsTouchEventListenerForScrolling()
 }
 
 void RenderLayer::unregisterAsTouchEventListenerForScrolling()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().element() || !m_registeredAsTouchEventListenerForScrolling)
         return;
 
@@ -2205,22 +2205,22 @@ void RenderLayer::unregisterAsTouchEventListenerForScrolling()
 #endif // ENABLE(IOS_TOUCH_EVENTS)
 
 bool RenderLayer::usesCompositedScrolling() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return isComposited() && backing()->scrollingLayer();
 }
 
 bool RenderLayer::usesAsyncScrolling() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasAcceleratedTouchScrolling() && usesCompositedScrolling();
 }
 
 bool RenderLayer::needsCompositedScrolling() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_needsCompositedScrolling;
 }
 
 void RenderLayer::updateNeedsCompositedScrolling()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool oldNeedsCompositedScrolling = m_needsCompositedScrolling;
 
     if (!renderer().view().frameView().containsScrollableArea(this))
@@ -2268,12 +2268,12 @@ static inline int adjustedScrollDelta(int beginningDelta) {
 }
 
 static inline IntSize adjustedScrollDelta(const IntSize& delta)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return IntSize(adjustedScrollDelta(delta.width()), adjustedScrollDelta(delta.height()));
 }
 
 void RenderLayer::panScrollFromPoint(const IntPoint& sourcePoint)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint lastKnownMousePosition = renderer().frame().eventHandler().lastKnownMousePosition();
     
     // We need to check if the last known mouse position is out of the window. When the mouse is out of the window, the position is incoherent
@@ -2295,7 +2295,7 @@ void RenderLayer::panScrollFromPoint(const IntPoint& sourcePoint)
 
 // FIXME: unify with the scrollRectToVisible() code below.
 void RenderLayer::scrollByRecursively(const IntSize& delta, ScrollOffsetClamping clamp, ScrollableArea** scrolledArea)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (delta.isZero())
         return;
 
@@ -2330,31 +2330,31 @@ void RenderLayer::scrollByRecursively(const IntSize& delta, ScrollOffsetClamping
 }
 
 void RenderLayer::scrollToXPosition(int x, ScrollOffsetClamping clamp)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollPosition position(x, m_scrollPosition.y());
     scrollToOffset(scrollOffsetFromPosition(position), clamp);
 }
 
 void RenderLayer::scrollToYPosition(int y, ScrollOffsetClamping clamp)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollPosition position(m_scrollPosition.x(), y);
     scrollToOffset(scrollOffsetFromPosition(position), clamp);
 }
 
 ScrollOffset RenderLayer::clampScrollOffset(const ScrollOffset& scrollOffset) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return scrollOffset.constrainedBetween(IntPoint(), maximumScrollOffset());
 }
 
 void RenderLayer::scrollToOffset(const ScrollOffset& scrollOffset, ScrollOffsetClamping clamp)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollOffset newScrollOffset = clamp == ScrollOffsetClamped ? clampScrollOffset(scrollOffset) : scrollOffset;
     if (newScrollOffset != this->scrollOffset())
         scrollToOffsetWithoutAnimation(newScrollOffset);
 }
 
 void RenderLayer::scrollTo(const ScrollPosition& position)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     if (!box)
         return;
@@ -2456,7 +2456,7 @@ void RenderLayer::scrollTo(const ScrollPosition& position)
 }
 
 static inline bool frameElementAndViewPermitScroll(HTMLFrameElementBase* frameElementBase, FrameView& frameView)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If scrollbars aren't explicitly forbidden, permit scrolling.
     if (frameElementBase && frameElementBase->scrollingMode() != ScrollbarAlwaysOff)
         return true;
@@ -2471,7 +2471,7 @@ static inline bool frameElementAndViewPermitScroll(HTMLFrameElementBase* frameEl
 }
 
 bool RenderLayer::allowsCurrentScroll() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().hasOverflowClip())
         return false;
 
@@ -2494,7 +2494,7 @@ bool RenderLayer::allowsCurrentScroll() const
 }
 
 void RenderLayer::scrollRectToVisible(SelectionRevealMode revealMode, const LayoutRect& rect, const ScrollAlignment& alignX, const ScrollAlignment& alignY)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LOG_WITH_STREAM(Scrolling, stream << "Layer " << this << " scrollRectToVisible " << rect);
 
     RenderLayer* parentLayer = nullptr;
@@ -2584,7 +2584,7 @@ void RenderLayer::scrollRectToVisible(SelectionRevealMode revealMode, const Layo
 }
 
 void RenderLayer::updateCompositingLayersAfterScroll()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (compositor().inCompositingMode()) {
         // Our stacking container is guaranteed to contain all of our descendants that may need
         // repositioning, so update compositing layers from there.
@@ -2598,7 +2598,7 @@ void RenderLayer::updateCompositingLayersAfterScroll()
 }
 
 LayoutRect RenderLayer::getRectToExpose(const LayoutRect &visibleRect, const LayoutRect &visibleRectRelativeToDocument, const LayoutRect &exposeRect, const ScrollAlignment& alignX, const ScrollAlignment& alignY)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Determine the appropriate X behavior.
     ScrollBehavior scrollX;
     LayoutRect exposeRectX(exposeRect.x(), visibleRect.y(), exposeRect.width(), visibleRect.height());
@@ -2671,13 +2671,13 @@ LayoutRect RenderLayer::getRectToExpose(const LayoutRect &visibleRect, const Lay
 }
 
 void RenderLayer::autoscroll(const IntPoint& position)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint currentDocumentPosition = renderer().view().frameView().windowToContents(position);
     scrollRectToVisible(SelectionRevealMode::Reveal, LayoutRect(currentDocumentPosition, LayoutSize(1, 1)), ScrollAlignment::alignToEdgeIfNeeded, ScrollAlignment::alignToEdgeIfNeeded);
 }
 
 bool RenderLayer::canResize() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We need a special case for <iframe> because they never have
     // hasOverflowClip(). However, they do "implicitly" clip their contents, so
     // we want to allow resizing them also.
@@ -2685,7 +2685,7 @@ bool RenderLayer::canResize() const
 }
 
 void RenderLayer::resize(const PlatformMouseEvent& evt, const LayoutSize& oldOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: This should be possible on generated content but is not right now.
     if (!inResizeMode() || !canResize() || !renderer().element())
         return;
@@ -2749,18 +2749,18 @@ void RenderLayer::resize(const PlatformMouseEvent& evt, const LayoutSize& oldOff
 }
 
 int RenderLayer::scrollSize(ScrollbarOrientation orientation) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Scrollbar* scrollbar = ((orientation == HorizontalScrollbar) ? m_hBar : m_vBar).get();
     return scrollbar ? (scrollbar->totalSize() - scrollbar->visibleSize()) : 0;
 }
 
 void RenderLayer::setScrollOffset(const ScrollOffset& offset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     scrollTo(scrollPositionFromOffset(offset));
 }
 
 int RenderLayer::scrollOffset(ScrollbarOrientation orientation) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (orientation == HorizontalScrollbar)
         return scrollOffset().x();
 
@@ -2771,7 +2771,7 @@ int RenderLayer::scrollOffset(ScrollbarOrientation orientation) const
 }
 
 IntRect RenderLayer::visibleContentRectInternal(VisibleContentRectIncludesScrollbars scrollbarInclusion, VisibleContentRectBehavior) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntSize scrollbarSpace;
     if (showsOverflowControls() && scrollbarInclusion == IncludeScrollbars)
         scrollbarSpace = scrollbarIntrusion();
@@ -2781,7 +2781,7 @@ IntRect RenderLayer::visibleContentRectInternal(VisibleContentRectIncludesScroll
 }
 
 IntSize RenderLayer::overhangAmount() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(RUBBER_BANDING)
     if (!renderer().frame().settings().rubberBandingForSubScrollableRegionsEnabled())
         return IntSize();
@@ -2807,20 +2807,20 @@ IntSize RenderLayer::overhangAmount() const
 }
 
 bool RenderLayer::isActive() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Page* page = renderer().frame().page();
     return page && page->focusController().isActive();
 }
 
 static int cornerStart(const RenderLayer& layer, int minX, int maxX, int thickness)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (layer.shouldPlaceBlockDirectionScrollbarOnLeft())
         return minX + layer.renderer().style().borderLeftWidth();
     return maxX - thickness - layer.renderer().style().borderRightWidth();
 }
 
 static LayoutRect cornerRect(const RenderLayer& layer, const LayoutRect& bounds)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     int horizontalThickness;
     int verticalThickness;
     if (!layer.verticalScrollbar() && !layer.horizontalScrollbar()) {
@@ -2844,7 +2844,7 @@ static LayoutRect cornerRect(const RenderLayer& layer, const LayoutRect& bounds)
 }
 
 IntRect RenderLayer::scrollCornerRect() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We have a scrollbar corner when a non overlay scrollbar is visible and not filling the entire length of the box.
     // This happens when:
     // (a) A resizer is present and at least one non overlay scrollbar is present
@@ -2859,7 +2859,7 @@ IntRect RenderLayer::scrollCornerRect() const
 }
 
 static LayoutRect resizerCornerRect(const RenderLayer& layer, const LayoutRect& bounds)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(layer.renderer().isBox());
     if (layer.renderer().style().resize() == RESIZE_NONE)
         return LayoutRect();
@@ -2867,7 +2867,7 @@ static LayoutRect resizerCornerRect(const RenderLayer& layer, const LayoutRect& 
 }
 
 LayoutRect RenderLayer::scrollCornerAndResizerRect() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     if (!box)
         return LayoutRect();
@@ -2878,13 +2878,13 @@ LayoutRect RenderLayer::scrollCornerAndResizerRect() const
 }
 
 bool RenderLayer::isScrollCornerVisible() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(renderer().isBox());
     return !scrollCornerRect().isEmpty();
 }
 
 IntRect RenderLayer::convertFromScrollbarToContainingView(const Scrollbar& scrollbar, const IntRect& scrollbarRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect rect = scrollbarRect;
     rect.move(scrollbarOffset(scrollbar));
 
@@ -2892,28 +2892,28 @@ IntRect RenderLayer::convertFromScrollbarToContainingView(const Scrollbar& scrol
 }
 
 IntRect RenderLayer::convertFromContainingViewToScrollbar(const Scrollbar& scrollbar, const IntRect& parentRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect rect = renderer().view().frameView().convertFromContainingViewToRenderer(&renderer(), parentRect);
     rect.move(-scrollbarOffset(scrollbar));
     return rect;
 }
 
 IntPoint RenderLayer::convertFromScrollbarToContainingView(const Scrollbar& scrollbar, const IntPoint& scrollbarPoint) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint point = scrollbarPoint;
     point.move(scrollbarOffset(scrollbar));
     return renderer().view().frameView().convertFromRendererToContainingView(&renderer(), point);
 }
 
 IntPoint RenderLayer::convertFromContainingViewToScrollbar(const Scrollbar& scrollbar, const IntPoint& parentPoint) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntPoint point = renderer().view().frameView().convertFromContainingViewToRenderer(&renderer(), parentPoint);
     point.move(-scrollbarOffset(scrollbar));
     return point;
 }
 
 IntSize RenderLayer::visibleSize() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     if (!box)
         return IntSize();
@@ -2922,12 +2922,12 @@ IntSize RenderLayer::visibleSize() const
 }
 
 IntSize RenderLayer::contentsSize() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return IntSize(scrollWidth(), scrollHeight());
 }
 
 IntSize RenderLayer::scrollableContentsSize() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntSize contentsSize = this->contentsSize();
 
     if (!hasScrollableHorizontalOverflow())
@@ -2940,7 +2940,7 @@ IntSize RenderLayer::scrollableContentsSize() const
 }
 
 void RenderLayer::availableContentSizeChanged(AvailableSizeChangeReason reason)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ScrollableArea::availableContentSizeChanged(reason);
 
     if (reason == AvailableSizeChangeReason::ScrollbarsChanged) {
@@ -2951,25 +2951,25 @@ void RenderLayer::availableContentSizeChanged(AvailableSizeChangeReason reason)
 }
 
 bool RenderLayer::shouldSuspendScrollAnimations() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderer().view().frameView().shouldSuspendScrollAnimations();
 }
 
 #if PLATFORM(IOS)
 void RenderLayer::didStartScroll()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Page* page = renderer().frame().page())
         page->chrome().client().didStartOverflowScroll();
 }
 
 void RenderLayer::didEndScroll()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Page* page = renderer().frame().page())
         page->chrome().client().didEndOverflowScroll();
 }
     
 void RenderLayer::didUpdateScroll()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Send this notification when we scroll, since this is how we keep selection updated.
     if (Page* page = renderer().frame().page())
         page->chrome().client().didLayout(ChromeClient::Scroll);
@@ -2977,17 +2977,17 @@ void RenderLayer::didUpdateScroll()
 #endif
 
 IntPoint RenderLayer::lastKnownMousePosition() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderer().frame().eventHandler().lastKnownMousePosition();
 }
 
 bool RenderLayer::isHandlingWheelEvent() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderer().frame().eventHandler().isHandlingWheelEvent();
 }
 
 IntRect RenderLayer::rectForHorizontalScrollbar(const IntRect& borderBoxRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_hBar)
         return IntRect();
 
@@ -3001,7 +3001,7 @@ IntRect RenderLayer::rectForHorizontalScrollbar(const IntRect& borderBoxRect) co
 }
 
 IntRect RenderLayer::rectForVerticalScrollbar(const IntRect& borderBoxRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_vBar)
         return IntRect();
 
@@ -3015,7 +3015,7 @@ IntRect RenderLayer::rectForVerticalScrollbar(const IntRect& borderBoxRect) cons
 }
 
 LayoutUnit RenderLayer::verticalScrollbarStart(int minX, int maxX) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderBox* box = renderBox();
     if (shouldPlaceBlockDirectionScrollbarOnLeft())
         return minX + box->borderLeft();
@@ -3023,7 +3023,7 @@ LayoutUnit RenderLayer::verticalScrollbarStart(int minX, int maxX) const
 }
 
 LayoutUnit RenderLayer::horizontalScrollbarStart(int minX) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderBox* box = renderBox();
     int x = minX + box->borderLeft();
     if (shouldPlaceBlockDirectionScrollbarOnLeft())
@@ -3032,7 +3032,7 @@ LayoutUnit RenderLayer::horizontalScrollbarStart(int minX) const
 }
 
 IntSize RenderLayer::scrollbarOffset(const Scrollbar& scrollbar) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
 
     if (&scrollbar == m_vBar.get())
@@ -3046,7 +3046,7 @@ IntSize RenderLayer::scrollbarOffset(const Scrollbar& scrollbar) const
 }
 
 void RenderLayer::invalidateScrollbarRect(Scrollbar& scrollbar, const IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!showsOverflowControls())
         return;
 
@@ -3079,7 +3079,7 @@ void RenderLayer::invalidateScrollbarRect(Scrollbar& scrollbar, const IntRect& r
 }
 
 void RenderLayer::invalidateScrollCornerRect(const IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!showsOverflowControls())
         return;
 
@@ -3095,7 +3095,7 @@ void RenderLayer::invalidateScrollCornerRect(const IntRect& rect)
 }
 
 static inline RenderElement* rendererForScrollbar(RenderLayerModelObject& renderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Element* element = renderer.element()) {
         if (ShadowRoot* shadowRoot = element->containingShadowRoot()) {
             if (shadowRoot->mode() == ShadowRoot::Mode::UserAgent)
@@ -3107,7 +3107,7 @@ static inline RenderElement* rendererForScrollbar(RenderLayerModelObject& render
 }
 
 PassRefPtr<Scrollbar> RenderLayer::createScrollbar(ScrollbarOrientation orientation)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<Scrollbar> widget;
     RenderElement* actualRenderer = rendererForScrollbar(renderer());
     bool hasCustomScrollbarStyle = actualRenderer->isBox() && actualRenderer->style().hasPseudoStyle(SCROLLBAR);
@@ -3126,7 +3126,7 @@ PassRefPtr<Scrollbar> RenderLayer::createScrollbar(ScrollbarOrientation orientat
 }
 
 void RenderLayer::destroyScrollbar(ScrollbarOrientation orientation)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<Scrollbar>& scrollbar = orientation == HorizontalScrollbar ? m_hBar : m_vBar;
     if (!scrollbar)
         return;
@@ -3139,7 +3139,7 @@ void RenderLayer::destroyScrollbar(ScrollbarOrientation orientation)
 }
 
 bool RenderLayer::scrollsOverflow() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!is<RenderBox>(renderer()))
         return false;
 
@@ -3147,7 +3147,7 @@ bool RenderLayer::scrollsOverflow() const
 }
 
 void RenderLayer::setHasHorizontalScrollbar(bool hasScrollbar)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (hasScrollbar == hasHorizontalScrollbar())
         return;
 
@@ -3178,7 +3178,7 @@ void RenderLayer::setHasHorizontalScrollbar(bool hasScrollbar)
 }
 
 void RenderLayer::setHasVerticalScrollbar(bool hasScrollbar)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (hasScrollbar == hasVerticalScrollbar())
         return;
 
@@ -3209,7 +3209,7 @@ void RenderLayer::setHasVerticalScrollbar(bool hasScrollbar)
 }
 
 ScrollableArea* RenderLayer::enclosingScrollableArea() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (RenderLayer* scrollableLayer = enclosingScrollableLayer())
         return scrollableLayer;
 
@@ -3219,12 +3219,12 @@ ScrollableArea* RenderLayer::enclosingScrollableArea() const
 }
 
 bool RenderLayer::isScrollableOrRubberbandable()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderer().isScrollableOrRubberbandableBox();
 }
 
 bool RenderLayer::hasScrollableOrRubberbandableAncestor()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (RenderLayer* nextLayer = parentLayerCrossFrame(*this); nextLayer; nextLayer = parentLayerCrossFrame(*nextLayer)) {
         if (nextLayer->isScrollableOrRubberbandable())
             return true;
@@ -3235,7 +3235,7 @@ bool RenderLayer::hasScrollableOrRubberbandableAncestor()
 
 #if ENABLE(CSS_SCROLL_SNAP)
 void RenderLayer::updateSnapOffsets()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: Extend support beyond HTMLElements.
     if (!is<HTMLElement>(enclosingElement()) || !enclosingElement()->renderBox())
         return;
@@ -3245,7 +3245,7 @@ void RenderLayer::updateSnapOffsets()
 }
 
 bool RenderLayer::isScrollSnapInProgress() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!scrollsOverflow())
         return false;
     
@@ -3257,17 +3257,17 @@ bool RenderLayer::isScrollSnapInProgress() const
 #endif
 
 bool RenderLayer::usesMockScrollAnimator() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return Settings::usesMockScrollAnimator();
 }
 
 void RenderLayer::logMockScrollAnimatorMessage(const String& message) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     renderer().document().addConsoleMessage(MessageSource::Other, MessageLevel::Debug, "RenderLayer: " + message);
 }
 
 int RenderLayer::verticalScrollbarWidth(OverlayScrollbarSizeRelevancy relevancy) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_vBar
         || !showsOverflowControls()
         || (m_vBar->isOverlayScrollbar() && (relevancy == IgnoreOverlayScrollbarSize || !m_vBar->shouldParticipateInHitTesting())))
@@ -3277,7 +3277,7 @@ int RenderLayer::verticalScrollbarWidth(OverlayScrollbarSizeRelevancy relevancy)
 }
 
 int RenderLayer::horizontalScrollbarHeight(OverlayScrollbarSizeRelevancy relevancy) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_hBar
         || !showsOverflowControls()
         || (m_hBar->isOverlayScrollbar() && (relevancy == IgnoreOverlayScrollbarSize || !m_hBar->shouldParticipateInHitTesting())))
@@ -3287,7 +3287,7 @@ int RenderLayer::horizontalScrollbarHeight(OverlayScrollbarSizeRelevancy relevan
 }
 
 IntSize RenderLayer::offsetFromResizeCorner(const IntPoint& absolutePoint) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Currently the resize corner is either the bottom right corner or the bottom left corner.
     // FIXME: This assumes the location is 0, 0. Is this guaranteed to always be the case?
     IntSize elementSize = size();
@@ -3299,12 +3299,12 @@ IntSize RenderLayer::offsetFromResizeCorner(const IntPoint& absolutePoint) const
 }
 
 bool RenderLayer::hasOverflowControls() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_hBar || m_vBar || m_scrollCorner || renderer().style().resize() != RESIZE_NONE;
 }
 
 void RenderLayer::positionOverflowControls(const IntSize& offsetFromRoot)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_hBar && !m_vBar && !canResize())
         return;
     
@@ -3337,7 +3337,7 @@ void RenderLayer::positionOverflowControls(const IntSize& offsetFromRoot)
 }
 
 int RenderLayer::scrollWidth() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(renderBox());
     if (m_scrollDimensionsDirty)
         const_cast<RenderLayer*>(this)->computeScrollDimensions();
@@ -3346,7 +3346,7 @@ int RenderLayer::scrollWidth() const
 }
 
 int RenderLayer::scrollHeight() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(renderBox());
     if (m_scrollDimensionsDirty)
         const_cast<RenderLayer*>(this)->computeScrollDimensions();
@@ -3355,7 +3355,7 @@ int RenderLayer::scrollHeight() const
 }
 
 LayoutUnit RenderLayer::overflowTop() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     LayoutRect overflowRect(box->layoutOverflowRect());
     box->flipForWritingMode(overflowRect);
@@ -3363,7 +3363,7 @@ LayoutUnit RenderLayer::overflowTop() const
 }
 
 LayoutUnit RenderLayer::overflowBottom() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     LayoutRect overflowRect(box->layoutOverflowRect());
     box->flipForWritingMode(overflowRect);
@@ -3371,7 +3371,7 @@ LayoutUnit RenderLayer::overflowBottom() const
 }
 
 LayoutUnit RenderLayer::overflowLeft() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     LayoutRect overflowRect(box->layoutOverflowRect());
     box->flipForWritingMode(overflowRect);
@@ -3379,7 +3379,7 @@ LayoutUnit RenderLayer::overflowLeft() const
 }
 
 LayoutUnit RenderLayer::overflowRight() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     LayoutRect overflowRect(box->layoutOverflowRect());
     box->flipForWritingMode(overflowRect);
@@ -3387,7 +3387,7 @@ LayoutUnit RenderLayer::overflowRight() const
 }
 
 void RenderLayer::computeScrollDimensions()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     ASSERT(box);
 
@@ -3404,45 +3404,45 @@ void RenderLayer::computeScrollDimensions()
 }
 
 bool RenderLayer::hasScrollableHorizontalOverflow() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasHorizontalOverflow() && renderBox()->scrollsOverflowX();
 }
 
 bool RenderLayer::hasScrollableVerticalOverflow() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasVerticalOverflow() && renderBox()->scrollsOverflowY();
 }
 
 bool RenderLayer::hasHorizontalOverflow() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_scrollDimensionsDirty);
 
     return scrollWidth() > roundToInt(renderBox()->clientWidth());
 }
 
 bool RenderLayer::hasVerticalOverflow() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_scrollDimensionsDirty);
 
     return scrollHeight() > roundToInt(renderBox()->clientHeight());
 }
 
 static bool styleRequiresScrollbar(const RenderStyle& style, ScrollbarOrientation axis)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     EOverflow overflow = axis == ScrollbarOrientation::HorizontalScrollbar ? style.overflowX() : style.overflowY();
     bool overflowScrollActsLikeAuto = overflow == OSCROLL && !style.hasPseudoStyle(SCROLLBAR) && ScrollbarTheme::theme().usesOverlayScrollbars();
     return overflow == OSCROLL && !overflowScrollActsLikeAuto;
 }
 
 static bool styleDefinesAutomaticScrollbar(const RenderStyle& style, ScrollbarOrientation axis)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     EOverflow overflow = axis == ScrollbarOrientation::HorizontalScrollbar ? style.overflowX() : style.overflowY();
     bool overflowScrollActsLikeAuto = overflow == OSCROLL && !style.hasPseudoStyle(SCROLLBAR) && ScrollbarTheme::theme().usesOverlayScrollbars();
     return overflow == OAUTO || overflow == OOVERLAY || overflowScrollActsLikeAuto;
 }
 
 void RenderLayer::updateScrollbarsAfterLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     ASSERT(box);
 
@@ -3513,7 +3513,7 @@ void RenderLayer::updateScrollbarsAfterLayout()
 }
 
 void RenderLayer::updateScrollInfoAfterLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox* box = renderBox();
     if (!box)
         return;
@@ -3560,7 +3560,7 @@ void RenderLayer::updateScrollInfoAfterLayout()
 }
 
 bool RenderLayer::overflowControlsIntersectRect(const IntRect& localRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const IntRect borderBox = snappedIntRect(renderBox()->borderBoxRect());
 
     if (rectForHorizontalScrollbar(borderBox).intersects(localRect))
@@ -3579,7 +3579,7 @@ bool RenderLayer::overflowControlsIntersectRect(const IntRect& localRect) const
 }
 
 bool RenderLayer::showsOverflowControls() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(IOS)
     // Don't render (custom) scrollbars if we have accelerated scrolling.
     if (hasAcceleratedTouchScrolling())
@@ -3590,7 +3590,7 @@ bool RenderLayer::showsOverflowControls() const
 }
 
 void RenderLayer::paintOverflowControls(GraphicsContext& context, const IntPoint& paintOffset, const IntRect& damageRect, bool paintingOverlayControls)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Don't do anything if we have no overflow.
     if (!renderer().hasOverflowClip())
         return;
@@ -3654,7 +3654,7 @@ void RenderLayer::paintOverflowControls(GraphicsContext& context, const IntPoint
 }
 
 void RenderLayer::paintScrollCorner(GraphicsContext& context, const IntPoint& paintOffset, const IntRect& damageRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect absRect = scrollCornerRect();
     absRect.moveBy(paintOffset);
     if (!absRect.intersects(damageRect))
@@ -3677,7 +3677,7 @@ void RenderLayer::paintScrollCorner(GraphicsContext& context, const IntPoint& pa
 }
 
 void RenderLayer::drawPlatformResizerImage(GraphicsContext& context, const LayoutRect& resizerCornerRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<Image> resizeCornerImage;
     FloatSize cornerResizerSize;
     if (renderer().document().deviceScaleFactor() >= 2) {
@@ -3708,7 +3708,7 @@ void RenderLayer::drawPlatformResizerImage(GraphicsContext& context, const Layou
 }
 
 void RenderLayer::paintResizer(GraphicsContext& context, const LayoutPoint& paintOffset, const LayoutRect& damageRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (renderer().style().resize() == RESIZE_NONE)
         return;
 
@@ -3747,7 +3747,7 @@ void RenderLayer::paintResizer(GraphicsContext& context, const LayoutPoint& pain
 }
 
 bool RenderLayer::isPointInResizeControl(const IntPoint& absolutePoint) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!canResize())
         return false;
     
@@ -3761,7 +3761,7 @@ bool RenderLayer::isPointInResizeControl(const IntPoint& absolutePoint) const
 }
 
 bool RenderLayer::hitTestOverflowControls(HitTestResult& result, const IntPoint& localPoint)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_hBar && !m_vBar && !canResize())
         return false;
 
@@ -3806,12 +3806,12 @@ bool RenderLayer::hitTestOverflowControls(HitTestResult& result, const IntPoint&
 }
 
 bool RenderLayer::scroll(ScrollDirection direction, ScrollGranularity granularity, float multiplier)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return ScrollableArea::scroll(direction, granularity, multiplier);
 }
 
 void RenderLayer::paint(GraphicsContext& context, const LayoutRect& damageRect, const LayoutSize& subpixelOffset, PaintBehavior paintBehavior, RenderObject* subtreePaintRoot, PaintLayerFlags paintFlags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     OverlapTestRequestMap overlapTestRequests;
 
     LayerPaintingInfo paintingInfo(this, enclosingIntRect(damageRect), paintBehavior, subpixelOffset, subtreePaintRoot, &overlapTestRequests);
@@ -3822,7 +3822,7 @@ void RenderLayer::paint(GraphicsContext& context, const LayoutRect& damageRect, 
 }
 
 void RenderLayer::paintOverlayScrollbars(GraphicsContext& context, const LayoutRect& damageRect, PaintBehavior paintBehavior, RenderObject* subtreePaintRoot)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_containsDirtyOverlayScrollbars)
         return;
 
@@ -3833,7 +3833,7 @@ void RenderLayer::paintOverlayScrollbars(GraphicsContext& context, const LayoutR
 }
 
 static bool inContainingBlockChain(RenderLayer* startLayer, RenderLayer* endLayer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (startLayer == endLayer)
         return true;
     for (const auto* currentBlock = startLayer->renderer().containingBlock(); currentBlock && !is<RenderView>(*currentBlock); currentBlock = currentBlock->containingBlock()) {
@@ -3845,7 +3845,7 @@ static bool inContainingBlockChain(RenderLayer* startLayer, RenderLayer* endLaye
 }
 
 void RenderLayer::clipToRect(GraphicsContext& context, const LayerPaintingInfo& paintingInfo, const ClipRect& clipRect, BorderRadiusClippingRule rule)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     float deviceScaleFactor = renderer().document().deviceScaleFactor();
     bool needsClipping = !clipRect.isInfinite() && clipRect.rect() != paintingInfo.paintDirtyRect;
     if (needsClipping || clipRect.affectedByRadius())
@@ -3879,13 +3879,13 @@ void RenderLayer::clipToRect(GraphicsContext& context, const LayerPaintingInfo& 
 }
 
 void RenderLayer::restoreClip(GraphicsContext& context, const LayerPaintingInfo& paintingInfo, const ClipRect& clipRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if ((!clipRect.isInfinite() && clipRect.rect() != paintingInfo.paintDirtyRect) || clipRect.affectedByRadius())
         context.restore();
 }
 
 static void performOverlapTests(OverlapTestRequestMap& overlapTestRequests, const RenderLayer* rootLayer, const RenderLayer* layer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<OverlapTestRequestClient*> overlappedRequestClients;
     LayoutRect boundingBox = layer->boundingBox(rootLayer, layer->offsetFromAncestor(rootLayer));
     for (auto& request : overlapTestRequests) {
@@ -3900,12 +3900,12 @@ static void performOverlapTests(OverlapTestRequestMap& overlapTestRequests, cons
 }
 
 static inline bool shouldDoSoftwarePaint(const RenderLayer* layer, bool paintingReflection)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return paintingReflection && !layer->has3DTransform();
 }
     
 static inline bool shouldSuppressPaintingLayer(RenderLayer* layer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Avoid painting descendants of the root layer when stylesheets haven't loaded. This eliminates FOUC.
     // It's ok not to draw, because later on, when all the stylesheets do load, updateStyleSelector on the Document
     // will do a full repaint().
@@ -3921,12 +3921,12 @@ static inline bool shouldSuppressPaintingLayer(RenderLayer* layer)
 }
 
 static inline bool paintForFixedRootBackground(const RenderLayer* layer, RenderLayer::PaintLayerFlags paintFlags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return layer->renderer().isDocumentElementRenderer() && (paintFlags & RenderLayer::PaintLayerPaintingRootBackgroundOnly);
 }
 
 void RenderLayer::paintLayer(GraphicsContext& context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isComposited()) {
         // The updatingControlTints() painting pass goes through compositing layers,
         // but we need to ensure that we don't cache clip rects computed with the wrong root in this case.
@@ -4015,7 +4015,7 @@ void RenderLayer::paintLayer(GraphicsContext& context, const LayerPaintingInfo& 
 }
 
 void RenderLayer::paintLayerContentsAndReflection(GraphicsContext& context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());
 
     PaintLayerFlags localPaintFlags = paintFlags & ~(PaintLayerAppliedTransform);
@@ -4033,7 +4033,7 @@ void RenderLayer::paintLayerContentsAndReflection(GraphicsContext& context, cons
 }
 
 bool RenderLayer::setupFontSubpixelQuantization(GraphicsContext& context, bool& didQuantizeFonts)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (context.paintingDisabled())
         return false;
 
@@ -4061,7 +4061,7 @@ bool RenderLayer::setupFontSubpixelQuantization(GraphicsContext& context, bool& 
 
 template <class ReferenceBoxClipPathOperation>
 static inline LayoutRect computeReferenceBox(const RenderObject& renderer, const ReferenceBoxClipPathOperation& clippingPath, const LayoutSize& offsetFromRoot, const LayoutRect& rootRelativeBounds)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: Support different reference boxes for inline content.
     // https://bugs.webkit.org/show_bug.cgi?id=129047
     if (!renderer.isBox())
@@ -4096,7 +4096,7 @@ static inline LayoutRect computeReferenceBox(const RenderObject& renderer, const
 }
 
 Path RenderLayer::computeClipPath(const LayoutSize& offsetFromRoot, LayoutRect& rootRelativeBounds, WindRule& windRule) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderStyle& style = renderer().style();
     float deviceSaleFactor = renderer().document().deviceScaleFactor();
 
@@ -4123,7 +4123,7 @@ Path RenderLayer::computeClipPath(const LayoutSize& offsetFromRoot, LayoutRect& 
 }
 
 bool RenderLayer::setupClipPath(GraphicsContext& context, const LayerPaintingInfo& paintingInfo, const LayoutSize& offsetFromRoot, LayoutRect& rootRelativeBounds, bool& rootRelativeBoundsComputed)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().hasClipPath() || context.paintingDisabled())
         return false;
 
@@ -4157,7 +4157,7 @@ bool RenderLayer::setupClipPath(GraphicsContext& context, const LayerPaintingInf
 }
 
 bool RenderLayer::hasFilterThatIsPainting(GraphicsContext& context, PaintLayerFlags paintFlags) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (context.paintingDisabled())
         return false;
 
@@ -4177,7 +4177,7 @@ bool RenderLayer::hasFilterThatIsPainting(GraphicsContext& context, PaintLayerFl
 }
 
 std::unique_ptr<FilterEffectRendererHelper> RenderLayer::setupFilters(GraphicsContext& context, LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags, const LayoutSize& offsetFromRoot, LayoutRect& rootRelativeBounds, bool& rootRelativeBoundsComputed)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasFilterThatIsPainting(context, paintFlags))
         return nullptr;
 
@@ -4214,7 +4214,7 @@ std::unique_ptr<FilterEffectRendererHelper> RenderLayer::setupFilters(GraphicsCo
 }
 
 void RenderLayer::applyFilters(FilterEffectRendererHelper* filterPainter, GraphicsContext& originalContext, const LayerPaintingInfo& paintingInfo, const LayerFragments& layerFragments)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(filterPainter->hasStartedFilterEffect());
 
     // FIXME: Handle more than one fragment.
@@ -4226,7 +4226,7 @@ void RenderLayer::applyFilters(FilterEffectRendererHelper* filterPainter, Graphi
 
 // Helper for the sorting of layers by z-index.
 static inline bool compareZIndex(RenderLayer* first, RenderLayer* second)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return first->zIndex() < second->zIndex();
 }
 
@@ -4235,7 +4235,7 @@ static inline bool compareZIndex(RenderLayer* first, RenderLayer* second)
 // named flows - regions -> named flows - since we do not want them to be clipped to the
 // regions viewport.
 void RenderLayer::paintFixedLayersInNamedFlows(GraphicsContext& context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isRootLayer())
         return;
 
@@ -4256,7 +4256,7 @@ void RenderLayer::paintFixedLayersInNamedFlows(GraphicsContext& context, const L
 }
 
 void RenderLayer::paintLayerContents(GraphicsContext& context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());
 
     PaintLayerFlags localPaintFlags = paintFlags & ~(PaintLayerAppliedTransform);
@@ -4444,7 +4444,7 @@ void RenderLayer::paintLayerContents(GraphicsContext& context, const LayerPainti
 }
 
 void RenderLayer::paintLayerByApplyingTransform(GraphicsContext& context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags, const LayoutSize& translationOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This involves subtracting out the position of the layer in our current coordinate space, but preserving
     // the accumulated error for sub-pixel layout.
     float deviceScaleFactor = renderer().document().deviceScaleFactor();
@@ -4471,7 +4471,7 @@ void RenderLayer::paintLayerByApplyingTransform(GraphicsContext& context, const 
 }
 
 void RenderLayer::paintList(Vector<RenderLayer*>* list, GraphicsContext& context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!list)
         return;
 
@@ -4490,7 +4490,7 @@ void RenderLayer::paintList(Vector<RenderLayer*>* list, GraphicsContext& context
 }
 
 RenderLayer* RenderLayer::enclosingPaginationLayerInSubtree(const RenderLayer* rootLayer, PaginationInclusionMode mode) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If we don't have an enclosing layer, or if the root layer is the same as the enclosing layer,
     // then just return the enclosing pagination layer (it will be 0 in the former case and the rootLayer in the latter case).
     RenderLayer* paginationLayer = enclosingPaginationLayer(mode);
@@ -4516,7 +4516,7 @@ RenderLayer* RenderLayer::enclosingPaginationLayerInSubtree(const RenderLayer* r
 void RenderLayer::collectFragments(LayerFragments& fragments, const RenderLayer* rootLayer, const LayoutRect& dirtyRect, PaginationInclusionMode inclusionMode,
     ClipRectsType clipRectsType, OverlayScrollbarSizeRelevancy inOverlayScrollbarSizeRelevancy, ShouldRespectOverflowClip respectOverflowClip, const LayoutSize& offsetFromRoot,
     const LayoutRect* layerBoundingBox, ShouldApplyRootOffsetToFragments applyRootOffsetToFragments)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderLayer* paginationLayer = enclosingPaginationLayerInSubtree(rootLayer, inclusionMode);
     if (!paginationLayer || hasTransform()) {
         // For unpaginated layers, there is only one fragment.
@@ -4644,7 +4644,7 @@ void RenderLayer::collectFragments(LayerFragments& fragments, const RenderLayer*
 
 void RenderLayer::updatePaintingInfoForFragments(LayerFragments& fragments, const LayerPaintingInfo& localPaintingInfo, PaintLayerFlags localPaintFlags,
     bool shouldPaintContent, const LayoutSize& offsetFromRoot)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto& fragment : fragments) {
         fragment.shouldPaintContent = shouldPaintContent;
         if (this != localPaintingInfo.rootLayer || !(localPaintFlags & PaintLayerPaintingOverflowContents)) {
@@ -4655,7 +4655,7 @@ void RenderLayer::updatePaintingInfoForFragments(LayerFragments& fragments, cons
 }
 
 void RenderLayer::paintTransformedLayerIntoFragments(GraphicsContext& context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayerFragments enclosingPaginationFragments;
     LayoutSize offsetOfPaginationLayerFromRoot;
     RenderLayer* paginatedLayer = enclosingPaginationLayer(ExcludeCompositedPaginatedLayers);
@@ -4689,7 +4689,7 @@ void RenderLayer::paintTransformedLayerIntoFragments(GraphicsContext& context, c
 void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragments, GraphicsContext& context, GraphicsContext& contextForTransparencyLayer,
     const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo, PaintBehavior paintBehavior,
     RenderObject* subtreePaintRootForRenderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const auto& fragment : layerFragments) {
         if (!fragment.shouldPaintContent)
             continue;
@@ -4717,7 +4717,7 @@ void RenderLayer::paintBackgroundForFragments(const LayerFragments& layerFragmen
 void RenderLayer::paintForegroundForFragments(const LayerFragments& layerFragments, GraphicsContext& context, GraphicsContext& contextForTransparencyLayer,
     const LayoutRect& transparencyPaintDirtyRect, bool haveTransparency, const LayerPaintingInfo& localPaintingInfo, PaintBehavior paintBehavior,
     RenderObject* subtreePaintRootForRenderer, bool selectionOnly)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Begin transparency if we have something to paint.
     if (haveTransparency) {
         for (const auto& fragment : layerFragments) {
@@ -4761,7 +4761,7 @@ void RenderLayer::paintForegroundForFragments(const LayerFragments& layerFragmen
 
 void RenderLayer::paintForegroundForFragmentsWithPhase(PaintPhase phase, const LayerFragments& layerFragments, GraphicsContext& context,
     const LayerPaintingInfo& localPaintingInfo, PaintBehavior paintBehavior, RenderObject* subtreePaintRootForRenderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool shouldClip = localPaintingInfo.clipToDirtyRect && layerFragments.size() > 1;
 
     for (const auto& fragment : layerFragments) {
@@ -4783,7 +4783,7 @@ void RenderLayer::paintForegroundForFragmentsWithPhase(PaintPhase phase, const L
 
 void RenderLayer::paintOutlineForFragments(const LayerFragments& layerFragments, GraphicsContext& context, const LayerPaintingInfo& localPaintingInfo,
     PaintBehavior paintBehavior, RenderObject* subtreePaintRootForRenderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const auto& fragment : layerFragments) {
         if (fragment.backgroundRect.isEmpty())
             continue;
@@ -4798,7 +4798,7 @@ void RenderLayer::paintOutlineForFragments(const LayerFragments& layerFragments,
 
 void RenderLayer::paintMaskForFragments(const LayerFragments& layerFragments, GraphicsContext& context, const LayerPaintingInfo& localPaintingInfo,
     RenderObject* subtreePaintRootForRenderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const auto& fragment : layerFragments) {
         if (!fragment.shouldPaintContent)
             continue;
@@ -4818,7 +4818,7 @@ void RenderLayer::paintMaskForFragments(const LayerFragments& layerFragments, Gr
 
 void RenderLayer::paintChildClippingMaskForFragments(const LayerFragments& layerFragments, GraphicsContext& context, const LayerPaintingInfo& localPaintingInfo,
     RenderObject* subtreePaintRootForRenderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const auto& fragment : layerFragments) {
         if (!fragment.shouldPaintContent)
             continue;
@@ -4836,7 +4836,7 @@ void RenderLayer::paintChildClippingMaskForFragments(const LayerFragments& layer
 }
 
 void RenderLayer::paintOverflowControlsForFragments(const LayerFragments& layerFragments, GraphicsContext& context, const LayerPaintingInfo& localPaintingInfo)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const auto& fragment : layerFragments) {
         if (fragment.backgroundRect.isEmpty())
             continue;
@@ -4848,12 +4848,12 @@ void RenderLayer::paintOverflowControlsForFragments(const LayerFragments& layerF
 }
 
 bool RenderLayer::hitTest(const HitTestRequest& request, HitTestResult& result)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hitTest(request, result.hitTestLocation(), result);
 }
 
 bool RenderLayer::hitTest(const HitTestRequest& request, const HitTestLocation& hitTestLocation, HitTestResult& result)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());
     ASSERT(!renderer().view().needsLayout());
     
@@ -4885,7 +4885,7 @@ bool RenderLayer::hitTest(const HitTestRequest& request, const HitTestLocation& 
 }
 
 Element* RenderLayer::enclosingElement() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (RenderElement* r = &renderer(); r; r = r->parent()) {
         if (Element* e = r->element())
             return e;
@@ -4894,7 +4894,7 @@ Element* RenderLayer::enclosingElement() const
 }
 
 RenderLayer* RenderLayer::enclosingFlowThreadAncestor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderLayer* curr = parent();
     for (; curr && !curr->isRenderFlowThread(); curr = curr->parent()) {
         if (curr->isStackingContainer() && curr->isComposited()) {
@@ -4906,7 +4906,7 @@ RenderLayer* RenderLayer::enclosingFlowThreadAncestor() const
 }
 
 bool RenderLayer::isFlowThreadCollectingGraphicsLayersUnderRegions() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return is<RenderFlowThread>(renderer()) && downcast<RenderFlowThread>(renderer()).collectsGraphicsLayersUnderRegions();
 }
 
@@ -4914,7 +4914,7 @@ bool RenderLayer::isFlowThreadCollectingGraphicsLayersUnderRegions() const
 // This is effectively projecting a ray normal to the plane of ancestor, finding where that
 // ray intersects target, and computing the z delta between those two points.
 static double computeZOffset(const HitTestingTransformState& transformState)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We got an affine transform, so no z-offset
     if (transformState.m_accumulatedTransform.isAffine())
         return 0;
@@ -4931,7 +4931,7 @@ PassRefPtr<HitTestingTransformState> RenderLayer::createLocalTransformState(Rend
                                         const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation,
                                         const HitTestingTransformState* containerTransformState,
                                         const LayoutSize& translationOffset) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<HitTestingTransformState> transformState;
     LayoutSize offset;
     if (containerTransformState) {
@@ -4960,7 +4960,7 @@ PassRefPtr<HitTestingTransformState> RenderLayer::createLocalTransformState(Rend
 
 
 static bool isHitCandidate(const RenderLayer* hitLayer, bool canDepthSort, double* zOffset, const HitTestingTransformState* transformState)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hitLayer)
         return false;
     
@@ -4995,7 +4995,7 @@ RenderLayer* RenderLayer::hitTestFixedLayersInNamedFlows(RenderLayer* /*rootLaye
     double* zOffsetForDescendants, double* zOffset,
     const HitTestingTransformState* unflattenedTransformState,
     bool depthSortDescendants)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isRootLayer())
         return nullptr;
 
@@ -5043,7 +5043,7 @@ RenderLayer* RenderLayer::hitTestFixedLayersInNamedFlows(RenderLayer* /*rootLaye
 RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
                                        const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation, bool appliedTransform,
                                        const HitTestingTransformState* transformState, double* zOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isSelfPaintingLayer() && !hasSelfPaintingLayerDescendant())
         return nullptr;
 
@@ -5234,7 +5234,7 @@ RenderLayer* RenderLayer::hitTestLayer(RenderLayer* rootLayer, RenderLayer* cont
 
 bool RenderLayer::hitTestContentsForFragments(const LayerFragments& layerFragments, const HitTestRequest& request, HitTestResult& result,
     const HitTestLocation& hitTestLocation, HitTestFilter hitTestFilter, bool& insideClipRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (layerFragments.isEmpty())
         return false;
 
@@ -5252,7 +5252,7 @@ bool RenderLayer::hitTestContentsForFragments(const LayerFragments& layerFragmen
 }
 
 bool RenderLayer::hitTestResizerInFragments(const LayerFragments& layerFragments, const HitTestLocation& hitTestLocation) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (layerFragments.isEmpty())
         return false;
 
@@ -5267,7 +5267,7 @@ bool RenderLayer::hitTestResizerInFragments(const LayerFragments& layerFragments
 
 RenderLayer* RenderLayer::hitTestTransformedLayerInFragments(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
     const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation, const HitTestingTransformState* transformState, double* zOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayerFragments enclosingPaginationFragments;
     LayoutSize offsetOfPaginationLayerFromRoot;
     RenderLayer* paginatedLayer = enclosingPaginationLayer(IncludeCompositedPaginatedLayers);
@@ -5307,7 +5307,7 @@ RenderLayer* RenderLayer::hitTestTransformedLayerInFragments(RenderLayer* rootLa
 RenderLayer* RenderLayer::hitTestLayerByApplyingTransform(RenderLayer* rootLayer, RenderLayer* containerLayer, const HitTestRequest& request, HitTestResult& result,
     const LayoutRect& hitTestRect, const HitTestLocation& hitTestLocation, const HitTestingTransformState* transformState, double* zOffset,
     const LayoutSize& translationOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Create a transform state to accumulate this transform.
     RefPtr<HitTestingTransformState> newTransformState = createLocalTransformState(rootLayer, containerLayer, hitTestRect, hitTestLocation, transformState, translationOffset);
 
@@ -5335,7 +5335,7 @@ RenderLayer* RenderLayer::hitTestLayerByApplyingTransform(RenderLayer* rootLayer
 }
 
 bool RenderLayer::hitTestContents(const HitTestRequest& request, HitTestResult& result, const LayoutRect& layerBounds, const HitTestLocation& hitTestLocation, HitTestFilter hitTestFilter) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(isSelfPaintingLayer() || hasSelfPaintingLayerDescendant());
 
     if (!renderer().hitTest(request, result, hitTestLocation, toLayoutPoint(layerBounds.location() - renderBoxLocation()), hitTestFilter)) {
@@ -5374,7 +5374,7 @@ RenderLayer* RenderLayer::hitTestList(Vector<RenderLayer*>* list, RenderLayer* r
                                       double* zOffsetForDescendants, double* zOffset,
                                       const HitTestingTransformState* unflattenedTransformState,
                                       bool depthSortDescendants)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!list)
         return nullptr;
 
@@ -5408,7 +5408,7 @@ RenderLayer* RenderLayer::hitTestList(Vector<RenderLayer*>* list, RenderLayer* r
 }
 
 void RenderLayer::updateClipRects(const ClipRectsContext& clipRectsContext)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ClipRectsType clipRectsType = clipRectsContext.clipRectsType;
     ASSERT(clipRectsType < NumCachedClipRectsTypes);
     if (m_clipRectsCache && m_clipRectsCache->getClipRects(clipRectsType, clipRectsContext.respectOverflowClip)) {
@@ -5450,7 +5450,7 @@ void RenderLayer::updateClipRects(const ClipRectsContext& clipRectsContext)
 }
 
 bool RenderLayer::mapLayerClipRectsToFragmentationLayer(ClipRects& clipRects) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderNamedFlowFragment* namedFlowFragment = currentRenderNamedFlowFragment();
     if (!namedFlowFragment)
         return false;
@@ -5482,13 +5482,13 @@ bool RenderLayer::mapLayerClipRectsToFragmentationLayer(ClipRects& clipRects) co
 }
 
 ClipRects* RenderLayer::clipRects(const ClipRectsContext& context) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(context.clipRectsType < NumCachedClipRectsTypes);
     return m_clipRectsCache ? m_clipRectsCache->getClipRects(context.clipRectsType, context.respectOverflowClip).get() : nullptr;
 }
 
 void RenderLayer::calculateClipRects(const ClipRectsContext& clipRectsContext, ClipRects& clipRects) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!parent()) {
         // The root layer's clip rect is always infinite.
         clipRects.reset();
@@ -5560,7 +5560,7 @@ void RenderLayer::calculateClipRects(const ClipRectsContext& clipRectsContext, C
 }
 
 void RenderLayer::parentClipRects(const ClipRectsContext& clipRectsContext, ClipRects& clipRects) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(parent());
     if (renderer().isRenderNamedFlowThread() && mapLayerClipRectsToFragmentationLayer(clipRects))
         return;
@@ -5575,7 +5575,7 @@ void RenderLayer::parentClipRects(const ClipRectsContext& clipRectsContext, Clip
 }
 
 static inline ClipRect backgroundClipRectForPosition(const ClipRects& parentRects, EPosition position)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (position == FixedPosition)
         return parentRects.fixedClipRect();
 
@@ -5586,7 +5586,7 @@ static inline ClipRect backgroundClipRectForPosition(const ClipRects& parentRect
 }
 
 ClipRect RenderLayer::backgroundClipRect(const ClipRectsContext& clipRectsContext) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(parent());
     
     ClipRects parentRects;
@@ -5612,7 +5612,7 @@ ClipRect RenderLayer::backgroundClipRect(const ClipRectsContext& clipRectsContex
 
 void RenderLayer::calculateRects(const ClipRectsContext& clipRectsContext, const LayoutRect& paintDirtyRect, LayoutRect& layerBounds,
     ClipRect& backgroundRect, ClipRect& foregroundRect, const LayoutSize& offsetFromRoot) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (clipRectsContext.rootLayer != this && parent()) {
         backgroundRect = backgroundClipRect(clipRectsContext);
         backgroundRect.intersect(paintDirtyRect);
@@ -5707,7 +5707,7 @@ void RenderLayer::calculateRects(const ClipRectsContext& clipRectsContext, const
 }
 
 LayoutRect RenderLayer::childrenClipRect() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: border-radius not accounted for.
     // FIXME: Regions not accounted for.
     RenderLayer* clippingRootLayer = clippingRootForPainting();
@@ -5721,7 +5721,7 @@ LayoutRect RenderLayer::childrenClipRect() const
 }
 
 LayoutRect RenderLayer::selfClipRect() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: border-radius not accounted for.
     // FIXME: Regions not accounted for.
     RenderLayer* clippingRootLayer = clippingRootForPainting();
@@ -5734,7 +5734,7 @@ LayoutRect RenderLayer::selfClipRect() const
 }
 
 LayoutRect RenderLayer::localClipRect(bool& clipExceedsBounds) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     clipExceedsBounds = false;
     // FIXME: border-radius not accounted for.
     // FIXME: Regions not accounted for.
@@ -5762,19 +5762,19 @@ LayoutRect RenderLayer::localClipRect(bool& clipExceedsBounds) const
 }
 
 void RenderLayer::addBlockSelectionGapsBounds(const LayoutRect& bounds)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_blockSelectionGapsBounds.unite(enclosingIntRect(bounds));
 }
 
 void RenderLayer::clearBlockSelectionGapsBounds()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_blockSelectionGapsBounds = IntRect();
     for (RenderLayer* child = firstChild(); child; child = child->nextSibling())
         child->clearBlockSelectionGapsBounds();
 }
 
 void RenderLayer::repaintBlockSelectionGaps()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (RenderLayer* child = firstChild(); child; child = child->nextSibling())
         child->repaintBlockSelectionGaps();
 
@@ -5792,7 +5792,7 @@ void RenderLayer::repaintBlockSelectionGaps()
 }
 
 bool RenderLayer::intersectsDamageRect(const LayoutRect& layerBounds, const LayoutRect& damageRect, const RenderLayer* rootLayer, const LayoutSize& offsetFromRoot, const LayoutRect* cachedBoundingBox) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Always examine the canvas and the root.
     // FIXME: Could eliminate the isDocumentElementRenderer() check if we fix background painting so that the RenderView
     // paints the root's background.
@@ -5831,7 +5831,7 @@ bool RenderLayer::intersectsDamageRect(const LayoutRect& layerBounds, const Layo
 }
 
 LayoutRect RenderLayer::localBoundingBox(CalculateLayerBoundsFlags flags) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // There are three special cases we need to consider.
     // (1) Inline Flows.  For inline flows we will create a bounding box that fully encompasses all of the lines occupied by the
     // inline.  In other words, if some <span> wraps to three lines, we'll create a bounding box that fully encloses the
@@ -5872,7 +5872,7 @@ LayoutRect RenderLayer::localBoundingBox(CalculateLayerBoundsFlags flags) const
 }
 
 LayoutRect RenderLayer::boundingBox(const RenderLayer* ancestorLayer, const LayoutSize& offsetFromRoot, CalculateLayerBoundsFlags flags) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);    
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();    
     LayoutRect result = localBoundingBox(flags);
     if (renderer().view().frameView().hasFlippedBlockRenderers()) {
         if (renderer().isBox())
@@ -5913,7 +5913,7 @@ LayoutRect RenderLayer::boundingBox(const RenderLayer* ancestorLayer, const Layo
 }
 
 bool RenderLayer::getOverlapBoundsIncludingChildrenAccountingForTransformAnimations(LayoutRect& bounds) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // The animation will override the display transform, so don't include it.
     CalculateLayerBoundsFlags boundsFlags = DefaultCalculateLayerBoundsFlags & ~IncludeSelfTransform;
     
@@ -5929,19 +5929,19 @@ bool RenderLayer::getOverlapBoundsIncludingChildrenAccountingForTransformAnimati
 }
 
 IntRect RenderLayer::absoluteBoundingBox() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderLayer* rootLayer = root();
     return snappedIntRect(boundingBox(rootLayer, offsetFromAncestor(rootLayer)));
 }
 
 FloatRect RenderLayer::absoluteBoundingBoxForPainting() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderLayer* rootLayer = root();
     return snapRectToDevicePixels(boundingBox(rootLayer, offsetFromAncestor(rootLayer)), renderer().document().deviceScaleFactor());
 }
 
 LayoutRect RenderLayer::calculateLayerBounds(const RenderLayer* ancestorLayer, const LayoutSize& offsetFromRoot, CalculateLayerBoundsFlags flags) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isSelfPaintingLayer())
         return LayoutRect();
 
@@ -6050,7 +6050,7 @@ LayoutRect RenderLayer::calculateLayerBounds(const RenderLayer* ancestorLayer, c
 }
 
 void RenderLayer::clearClipRectsIncludingDescendants(ClipRectsType typeToClear)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: it's not clear how this layer not having clip rects guarantees that no descendants have any.
     if (!m_clipRectsCache)
         return;
@@ -6062,7 +6062,7 @@ void RenderLayer::clearClipRectsIncludingDescendants(ClipRectsType typeToClear)
 }
 
 void RenderLayer::clearClipRects(ClipRectsType typeToClear)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (typeToClear == AllClipRectTypes)
         m_clipRectsCache = nullptr;
     else {
@@ -6074,7 +6074,7 @@ void RenderLayer::clearClipRects(ClipRectsType typeToClear)
 }
 
 RenderLayerBacking* RenderLayer::ensureBacking()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_backing) {
         m_backing = std::make_unique<RenderLayerBacking>(*this);
         compositor().layerBecameComposited(*this);
@@ -6085,7 +6085,7 @@ RenderLayerBacking* RenderLayer::ensureBacking()
 }
 
 void RenderLayer::clearBacking(bool layerBeingDestroyed)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_backing && !renderer().documentBeingDestroyed())
         compositor().layerBecameNonComposited(*this);
     m_backing = nullptr;
@@ -6095,38 +6095,38 @@ void RenderLayer::clearBacking(bool layerBeingDestroyed)
 }
 
 bool RenderLayer::hasCompositedMask() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_backing && m_backing->hasMaskLayer();
 }
 
 GraphicsLayer* RenderLayer::layerForScrolling() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_backing ? m_backing->scrollingContentsLayer() : nullptr;
 }
 
 GraphicsLayer* RenderLayer::layerForHorizontalScrollbar() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_backing ? m_backing->layerForHorizontalScrollbar() : nullptr;
 }
 
 GraphicsLayer* RenderLayer::layerForVerticalScrollbar() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_backing ? m_backing->layerForVerticalScrollbar() : nullptr;
 }
 
 GraphicsLayer* RenderLayer::layerForScrollCorner() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_backing ? m_backing->layerForScrollCorner() : nullptr;
 }
 
 bool RenderLayer::paintsWithTransform(PaintBehavior paintBehavior) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool paintsToWindow = !isComposited() || backing()->paintsIntoWindow();
     return transform() && ((paintBehavior & PaintBehaviorFlattenCompositingLayers) || paintsToWindow);
 }
 
 bool RenderLayer::shouldPaintMask(PaintBehavior paintBehavior, PaintLayerFlags paintFlags) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().hasMask())
         return false;
 
@@ -6138,7 +6138,7 @@ bool RenderLayer::shouldPaintMask(PaintBehavior paintBehavior, PaintLayerFlags p
 }
 
 bool RenderLayer::shouldApplyClipPath(PaintBehavior paintBehavior, PaintLayerFlags paintFlags) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().hasClipPath())
         return false;
 
@@ -6150,7 +6150,7 @@ bool RenderLayer::shouldApplyClipPath(PaintBehavior paintBehavior, PaintLayerFla
 }
 
 bool RenderLayer::backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isSelfPaintingLayer() && !hasSelfPaintingLayerDescendant())
         return false;
 
@@ -6201,7 +6201,7 @@ bool RenderLayer::backgroundIsKnownToBeOpaqueInRect(const LayoutRect& localRect)
 }
 
 bool RenderLayer::listBackgroundIsKnownToBeOpaqueInRect(const Vector<RenderLayer*>* list, const LayoutRect& localRect) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!list || list->isEmpty())
         return false;
 
@@ -6223,7 +6223,7 @@ bool RenderLayer::listBackgroundIsKnownToBeOpaqueInRect(const Vector<RenderLayer
 }
 
 void RenderLayer::setParent(RenderLayer* parent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (parent == m_parent)
         return;
 
@@ -6237,7 +6237,7 @@ void RenderLayer::setParent(RenderLayer* parent)
 }
 
 void RenderLayer::dirtyZOrderLists()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_layerListMutationAllowed);
     ASSERT(isStackingContainer());
 
@@ -6257,14 +6257,14 @@ void RenderLayer::dirtyZOrderLists()
 }
 
 void RenderLayer::dirtyStackingContainerZOrderLists()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderLayer* sc = stackingContainer();
     if (sc)
         sc->dirtyZOrderLists();
 }
 
 void RenderLayer::dirtyNormalFlowList()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_layerListMutationAllowed);
 
     if (m_normalFlowList)
@@ -6281,7 +6281,7 @@ void RenderLayer::dirtyNormalFlowList()
 }
 
 void RenderLayer::rebuildZOrderLists()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_layerListMutationAllowed);
     ASSERT(isDirtyStackingContainer());
     rebuildZOrderLists(StopAtStackingContainers, m_posZOrderList, m_negZOrderList);
@@ -6289,7 +6289,7 @@ void RenderLayer::rebuildZOrderLists()
 }
 
 void RenderLayer::rebuildZOrderLists(CollectLayersBehavior behavior, std::unique_ptr<Vector<RenderLayer*>>& posZOrderList, std::unique_ptr<Vector<RenderLayer*>>& negZOrderList)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool includeHiddenLayers = compositor().inCompositingMode();
     for (RenderLayer* child = firstChild(); child; child = child->nextSibling())
         if (!m_reflection || reflectionLayer() != child)
@@ -6304,7 +6304,7 @@ void RenderLayer::rebuildZOrderLists(CollectLayersBehavior behavior, std::unique
 }
 
 void RenderLayer::updateNormalFlowList()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_normalFlowListDirty)
         return;
 
@@ -6323,7 +6323,7 @@ void RenderLayer::updateNormalFlowList()
 }
 
 void RenderLayer::collectLayers(bool includeHiddenLayers, CollectLayersBehavior behavior, std::unique_ptr<Vector<RenderLayer*>>& posBuffer, std::unique_ptr<Vector<RenderLayer*>>& negBuffer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     updateDescendantDependentFlags();
 
     bool isStacking = behavior == StopAtStackingContexts ? isStackingContext() : isStackingContainer();
@@ -6353,7 +6353,7 @@ void RenderLayer::collectLayers(bool includeHiddenLayers, CollectLayersBehavior 
 }
 
 void RenderLayer::updateLayerListsIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool shouldUpdateDescendantsAreContiguousInStackingOrder = (m_zOrderListsDirty || m_normalFlowListDirty) && isStackingContext();
     updateZOrderLists();
     updateNormalFlowList();
@@ -6373,7 +6373,7 @@ void RenderLayer::updateLayerListsIfNeeded()
 }
 
 void RenderLayer::updateDescendantsLayerListsIfNeeded(bool recursive)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     Vector<RenderLayer*> layersToUpdate;
     
     if (isStackingContainer()) {
@@ -6403,7 +6403,7 @@ void RenderLayer::updateDescendantsLayerListsIfNeeded(bool recursive)
 }
 
 void RenderLayer::updateCompositingAndLayerListsIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (compositor().inCompositingMode()) {
         if (isDirtyStackingContainer() || m_normalFlowListDirty)
             compositor().updateCompositingLayers(CompositingUpdateOnHitTest, this);
@@ -6414,7 +6414,7 @@ void RenderLayer::updateCompositingAndLayerListsIfNeeded()
 }
 
 void RenderLayer::repaintIncludingDescendants()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     renderer().repaint();
     for (RenderLayer* current = firstChild(); current; current = current->nextSibling())
         current->repaintIncludingDescendants();
@@ -6429,7 +6429,7 @@ void RenderLayer::repaintIncludingDescendants()
 }
 
 void RenderLayer::setBackingNeedsRepaint(GraphicsLayer::ShouldClipToLayer shouldClip)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(isComposited());
     if (backing()->paintsIntoWindow()) {
         // If we're trying to repaint the placeholder document layer, propagate the
@@ -6440,7 +6440,7 @@ void RenderLayer::setBackingNeedsRepaint(GraphicsLayer::ShouldClipToLayer should
 }
 
 void RenderLayer::setBackingNeedsRepaintInRect(const LayoutRect& r, GraphicsLayer::ShouldClipToLayer shouldClip)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // https://bugs.webkit.org/show_bug.cgi?id=61159 describes an unreproducible crash here,
     // so assert but check that the layer is composited.
     ASSERT(isComposited());
@@ -6457,7 +6457,7 @@ void RenderLayer::setBackingNeedsRepaintInRect(const LayoutRect& r, GraphicsLaye
 
 // Since we're only painting non-composited layers, we know that they all share the same repaintContainer.
 void RenderLayer::repaintIncludingNonCompositingDescendants(RenderLayerModelObject* repaintContainer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     renderer().repaintUsingContainer(repaintContainer, renderer().clippedOverflowRectForRepaint(repaintContainer));
 
     for (RenderLayer* curr = firstChild(); curr; curr = curr->nextSibling()) {
@@ -6467,7 +6467,7 @@ void RenderLayer::repaintIncludingNonCompositingDescendants(RenderLayerModelObje
 }
 
 bool RenderLayer::shouldBeNormalFlowOnly() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return (renderer().hasOverflowClip()
         || renderer().hasReflection()
         || renderer().hasMask()
@@ -6494,7 +6494,7 @@ bool RenderLayer::shouldBeNormalFlowOnly() const
 }
 
 bool RenderLayer::shouldBeSelfPaintingLayer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return !isNormalFlowOnly()
         || hasOverlayScrollbars()
         || needsCompositedScrolling()
@@ -6510,7 +6510,7 @@ bool RenderLayer::shouldBeSelfPaintingLayer() const
 }
 
 void RenderLayer::updateSelfPaintingLayer()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool isSelfPaintingLayer = shouldBeSelfPaintingLayer();
     if (m_isSelfPaintingLayer == isSelfPaintingLayer)
         return;
@@ -6525,7 +6525,7 @@ void RenderLayer::updateSelfPaintingLayer()
 }
 
 static bool hasVisibleBoxDecorationsOrBackground(const RenderElement& renderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderer.hasVisibleBoxDecorations() || renderer.style().hasOutline();
 }
 
@@ -6534,7 +6534,7 @@ static const int maxDescendentDepth = 3;
 static const int maxSiblingCount = 20;
 
 static bool hasPaintingNonLayerDescendants(const RenderElement& renderer, int depth)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (depth > maxDescendentDepth)
         return true;
     
@@ -6571,17 +6571,17 @@ static bool hasPaintingNonLayerDescendants(const RenderElement& renderer, int de
 }
 
 bool RenderLayer::hasNonEmptyChildRenderers() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return hasPaintingNonLayerDescendants(renderer(), 0);
 }
 
 bool RenderLayer::hasVisibleBoxDecorationsOrBackground() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return WebCore::hasVisibleBoxDecorationsOrBackground(renderer());
 }
 
 bool RenderLayer::hasVisibleBoxDecorations() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasVisibleContent())
         return false;
 
@@ -6589,7 +6589,7 @@ bool RenderLayer::hasVisibleBoxDecorations() const
 }
 
 bool RenderLayer::isVisuallyNonEmpty() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_visibleDescendantStatusDirty);
 
     if (!hasVisibleContent() || !renderer().style().opacity())
@@ -6608,7 +6608,7 @@ bool RenderLayer::isVisuallyNonEmpty() const
 }
 
 void RenderLayer::updateStackingContextsAfterStyleChange(const RenderStyle* oldStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!oldStyle)
         return;
 
@@ -6648,7 +6648,7 @@ void RenderLayer::updateStackingContextsAfterStyleChange(const RenderStyle* oldS
 }
 
 void RenderLayer::updateScrollbarsAfterStyleChange(const RenderStyle* oldStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Overflow are a box concept.
     RenderBox* box = renderBox();
     if (!box)
@@ -6680,7 +6680,7 @@ void RenderLayer::updateScrollbarsAfterStyleChange(const RenderStyle* oldStyle)
 }
 
 void RenderLayer::setAncestorChainHasOutOfFlowPositionedDescendant(RenderBlock* containingBlock)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (RenderLayer* layer = this; layer; layer = layer->parent()) {
         if (!layer->m_hasOutOfFlowPositionedDescendantDirty && layer->hasOutOfFlowPositionedDescendant())
             break;
@@ -6695,14 +6695,14 @@ void RenderLayer::setAncestorChainHasOutOfFlowPositionedDescendant(RenderBlock* 
 }
 
 void RenderLayer::dirtyAncestorChainHasOutOfFlowPositionedDescendantStatus()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_hasOutOfFlowPositionedDescendantDirty = true;
     if (parent())
         parent()->dirtyAncestorChainHasOutOfFlowPositionedDescendantStatus();
 }
 
 void RenderLayer::updateOutOfFlowPositioned(const RenderStyle* oldStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool wasOutOfFlowPositioned = oldStyle && (oldStyle->position() == AbsolutePosition || oldStyle->position() == FixedPosition);
     if (parent() && (renderer().isOutOfFlowPositioned() != wasOutOfFlowPositioned)) {
         parent()->dirtyAncestorChainHasOutOfFlowPositionedDescendantStatus();
@@ -6712,7 +6712,7 @@ void RenderLayer::updateOutOfFlowPositioned(const RenderStyle* oldStyle)
 }
 
 void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool isNormalFlowOnly = shouldBeNormalFlowOnly();
     if (isNormalFlowOnly != m_isNormalFlowOnly) {
         m_isNormalFlowOnly = isNormalFlowOnly;
@@ -6778,7 +6778,7 @@ void RenderLayer::styleChanged(StyleDifference diff, const RenderStyle* oldStyle
 }
 
 void RenderLayer::updateScrollableAreaSet(bool hasOverflow)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     FrameView& frameView = renderer().view().frameView();
 
     bool isVisibleToHitTest = renderer().visibleToHitTesting();
@@ -6817,7 +6817,7 @@ void RenderLayer::updateScrollableAreaSet(bool hasOverflow)
 }
 
 void RenderLayer::updateScrollCornerStyle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderElement* actualRenderer = rendererForScrollbar(renderer());
     auto corner = renderer().hasOverflowClip() ? actualRenderer->getUncachedPseudoStyle(PseudoStyleRequest(SCROLLBAR_CORNER), &actualRenderer->style()) : nullptr;
 
@@ -6835,7 +6835,7 @@ void RenderLayer::updateScrollCornerStyle()
 }
 
 void RenderLayer::updateResizerStyle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderElement* actualRenderer = rendererForScrollbar(renderer());
     auto resizer = renderer().hasOverflowClip() ? actualRenderer->getUncachedPseudoStyle(PseudoStyleRequest(RESIZER), &actualRenderer->style()) : nullptr;
 
@@ -6853,12 +6853,12 @@ void RenderLayer::updateResizerStyle()
 }
 
 RenderLayer* RenderLayer::reflectionLayer() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_reflection ? m_reflection->layer() : nullptr;
 }
 
 void RenderLayer::createReflection()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!m_reflection);
     m_reflection = createRenderer<RenderReplica>(renderer().document(), createReflectionStyle());
     m_reflection->setParent(&renderer()); // We create a 1-way connection.
@@ -6866,7 +6866,7 @@ void RenderLayer::createReflection()
 }
 
 void RenderLayer::removeReflection()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_reflection->documentBeingDestroyed())
         m_reflection->removeLayers(this);
 
@@ -6875,7 +6875,7 @@ void RenderLayer::removeReflection()
 }
 
 RenderStyle RenderLayer::createReflectionStyle()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto newStyle = RenderStyle::create();
     newStyle.inheritFrom(&renderer().style());
     
@@ -6912,7 +6912,7 @@ RenderStyle RenderLayer::createReflectionStyle()
 }
 
 void RenderLayer::updateOrRemoveFilterClients()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasFilter()) {
         FilterInfo::remove(*this);
         return;
@@ -6926,7 +6926,7 @@ void RenderLayer::updateOrRemoveFilterClients()
 }
 
 void RenderLayer::updateOrRemoveFilterEffectRenderer()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FilterEffectRenderer is only used to render the filters in software mode,
     // so we always need to run updateOrRemoveFilterEffectRenderer after the composited
     // mode might have changed for this layer.
@@ -6965,7 +6965,7 @@ void RenderLayer::updateOrRemoveFilterEffectRenderer()
 }
 
 void RenderLayer::filterNeedsRepaint()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We use the enclosing element so that we recalculate style for the ancestor of an anonymous object.
     if (Element* element = enclosingElement())
         element->setNeedsStyleRecalc(SyntheticStyleChange);
@@ -6973,7 +6973,7 @@ void RenderLayer::filterNeedsRepaint()
 }
 
 void RenderLayer::paintNamedFlowThreadInsideRegion(GraphicsContext& context, RenderNamedFlowFragment* region, LayoutRect paintDirtyRect, LayoutPoint paintOffset, PaintBehavior paintBehavior, PaintLayerFlags paintFlags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutRect regionContentBox = downcast<RenderBox>(region->layerOwner()).contentBoxRect();
     CurrentRenderRegionMaintainer regionMaintainer(*region);
     region->setRegionObjectsRegionStyle();
@@ -6991,7 +6991,7 @@ void RenderLayer::paintNamedFlowThreadInsideRegion(GraphicsContext& context, Ren
 }
 
 void RenderLayer::paintFlowThreadIfRegionForFragments(const LayerFragments& fragments, GraphicsContext& context, const LayerPaintingInfo& paintingInfo, PaintLayerFlags paintFlags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().isRenderNamedFlowFragmentContainer())
         return;
     
@@ -7039,7 +7039,7 @@ RenderLayer* RenderLayer::hitTestFlowThreadIfRegionForFragments(const LayerFragm
     const HitTestingTransformState* transformState, 
     double* zOffsetForDescendants, double* zOffset,
     const HitTestingTransformState* unflattenedTransformState, bool depthSortDescendants)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer().isRenderNamedFlowFragmentContainer())
         return nullptr;
 
@@ -7098,7 +7098,7 @@ RenderLayer* RenderLayer::hitTestFlowThreadIfRegionForFragments(const LayerFragm
 }
 
 RenderNamedFlowFragment* RenderLayer::currentRenderNamedFlowFragment() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return renderer().currentRenderNamedFlowFragment();
 }
 
@@ -7107,7 +7107,7 @@ RenderNamedFlowFragment* RenderLayer::currentRenderNamedFlowFragment() const
 #if ENABLE(TREE_DEBUGGING)
 
 void showLayerTree(const WebCore::RenderLayer* layer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!layer)
         return;
 
@@ -7116,7 +7116,7 @@ void showLayerTree(const WebCore::RenderLayer* layer)
 }
 
 void showLayerTree(const WebCore::RenderObject* renderer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!renderer)
         return;
     showLayerTree(renderer->enclosingLayer());

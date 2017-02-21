@@ -155,7 +155,6 @@ WKPageConfigurationRef WKPageCopyPageConfiguration(WKPageRef pageRef)
 
 void WKPageLoadURL(WKPageRef pageRef, WKURLRef URLRef)
 {
-    WTF_AUTO_THREAD_ENABLE(); WTF_SCOPE0(__FUNCTION__);
     toImpl(pageRef)->loadRequest(URL(URL(), toWTFString(URLRef)));
 }
 

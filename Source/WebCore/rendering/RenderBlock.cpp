@@ -101,7 +101,7 @@ static TrackedDescendantsMap* percentHeightDescendantsMap;
 static TrackedContainerMap* percentHeightContainerMap;
 
 static void insertIntoTrackedRendererMaps(const RenderBlock& container, RenderBox& descendant)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!percentHeightDescendantsMap) {
         percentHeightDescendantsMap = new TrackedDescendantsMap;
         percentHeightContainerMap = new TrackedContainerMap;
@@ -127,7 +127,7 @@ static void insertIntoTrackedRendererMaps(const RenderBlock& container, RenderBo
 }
 
 static void removeFromTrackedRendererMaps(RenderBox& descendant)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!percentHeightDescendantsMap)
         return;
     
@@ -220,7 +220,7 @@ private:
 };
 
 static PositionedDescendantsMap& positionedDescendantsMap()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static NeverDestroyed<PositionedDescendantsMap> mapForPositionedDescendants;
     return mapForPositionedDescendants;
 }
@@ -241,7 +241,7 @@ struct UpdateScrollInfoAfterLayoutTransaction {
 
 typedef Vector<UpdateScrollInfoAfterLayoutTransaction> DelayedUpdateScrollInfoStack;
 static std::unique_ptr<DelayedUpdateScrollInfoStack>& updateScrollInfoAfterLayoutTransactionStack()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static NeverDestroyed<std::unique_ptr<DelayedUpdateScrollInfoStack>> delayedUpdatedScrollInfoStack;
     return delayedUpdatedScrollInfoStack;
 }
@@ -311,16 +311,16 @@ private:
 
 RenderBlock::RenderBlock(Element& element, RenderStyle&& style, BaseTypeFlags baseTypeFlags)
     : RenderBox(element, WTFMove(style), baseTypeFlags | RenderBlockFlag)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 RenderBlock::RenderBlock(Document& document, RenderStyle&& style, BaseTypeFlags baseTypeFlags)
     : RenderBox(document, WTFMove(style), baseTypeFlags | RenderBlockFlag)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 static void removeBlockFromPercentageDescendantAndContainerMaps(RenderBlock* block)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!percentHeightDescendantsMap)
         return;
     std::unique_ptr<TrackedRendererListHashSet> descendantSet = percentHeightDescendantsMap->take(block);
@@ -341,7 +341,7 @@ static void removeBlockFromPercentageDescendantAndContainerMaps(RenderBlock* blo
 }
 
 RenderBlock::~RenderBlock()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     removeFromUpdateScrollInfoAfterLayoutTransaction();
 
     if (gRareDataMap)
@@ -351,7 +351,7 @@ RenderBlock::~RenderBlock()
 }
 
 void RenderBlock::willBeDestroyed()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!documentBeingDestroyed()) {
         if (parent())
             parent()->dirtyLinesFromChangedChild(*this);
@@ -361,12 +361,12 @@ void RenderBlock::willBeDestroyed()
 }
 
 bool RenderBlock::hasRareData() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return gRareDataMap ? gRareDataMap->contains(this) : false;
 }
 
 void RenderBlock::removePositionedObjectsIfNeeded(const RenderStyle& oldStyle, const RenderStyle& newStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool hadTransform = oldStyle.hasTransformRelatedProperty();
     bool willHaveTransform = newStyle.hasTransformRelatedProperty();
     if (oldStyle.position() == newStyle.position() && hadTransform == willHaveTransform)
@@ -405,7 +405,7 @@ void RenderBlock::removePositionedObjectsIfNeeded(const RenderStyle& oldStyle, c
 }
 
 void RenderBlock::styleWillChange(StyleDifference diff, const RenderStyle& newStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderStyle* oldStyle = hasInitializedStyle() ? &style() : nullptr;
     setReplaced(newStyle.isDisplayInlineType());
     if (oldStyle)
@@ -414,7 +414,7 @@ void RenderBlock::styleWillChange(StyleDifference diff, const RenderStyle& newSt
 }
 
 static bool borderOrPaddingLogicalWidthChanged(const RenderStyle* oldStyle, const RenderStyle* newStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (newStyle->isHorizontalWritingMode())
         return oldStyle->borderLeftWidth() != newStyle->borderLeftWidth()
             || oldStyle->borderRightWidth() != newStyle->borderRightWidth()
@@ -428,7 +428,7 @@ static bool borderOrPaddingLogicalWidthChanged(const RenderStyle* oldStyle, cons
 }
 
 void RenderBlock::styleDidChange(StyleDifference diff, const RenderStyle* oldStyle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto& newStyle = style();
 
     bool hadTransform = hasTransform();
@@ -461,7 +461,7 @@ void RenderBlock::styleDidChange(StyleDifference diff, const RenderStyle* oldSty
 }
 
 RenderBlock* RenderBlock::continuationBefore(RenderObject* beforeChild)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (beforeChild && beforeChild->parent() == this)
         return this;
 
@@ -484,7 +484,7 @@ RenderBlock* RenderBlock::continuationBefore(RenderObject* beforeChild)
 }
 
 void RenderBlock::addChildToContinuation(RenderObject* newChild, RenderObject* beforeChild)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlock* flow = continuationBefore(beforeChild);
     ASSERT(!beforeChild || is<RenderBlock>(*beforeChild->parent()));
     RenderBoxModelObject* beforeChildParent = nullptr;
@@ -526,7 +526,7 @@ void RenderBlock::addChildToContinuation(RenderObject* newChild, RenderObject* b
 }
 
 RenderPtr<RenderBlock> RenderBlock::clone() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderPtr<RenderBlock> cloneBlock;
     if (isAnonymousBlock()) {
         cloneBlock = RenderPtr<RenderBlock>(createAnonymousBlock());
@@ -546,7 +546,7 @@ RenderPtr<RenderBlock> RenderBlock::clone() const
 }
 
 void RenderBlock::addChild(RenderObject* newChild, RenderObject* beforeChild)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (continuation() && !isAnonymousBlock())
         addChildToContinuation(newChild, beforeChild);
     else
@@ -554,7 +554,7 @@ void RenderBlock::addChild(RenderObject* newChild, RenderObject* beforeChild)
 }
 
 void RenderBlock::addChildIgnoringContinuation(RenderObject* newChild, RenderObject* beforeChild)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (beforeChild && beforeChild->parent() != this) {
         RenderElement* beforeChildContainer = beforeChild->parent();
         while (beforeChildContainer->parent() != this)
@@ -645,7 +645,7 @@ void RenderBlock::addChildIgnoringContinuation(RenderObject* newChild, RenderObj
 static void getInlineRun(RenderObject* start, RenderObject* boundary,
                          RenderObject*& inlineRunStart,
                          RenderObject*& inlineRunEnd)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Beginning at |start| we find the largest contiguous run of inlines that
     // we can.  We denote the run with start and end points, |inlineRunStart|
     // and |inlineRunEnd|.  Note that these two values may be the same if
@@ -683,13 +683,13 @@ static void getInlineRun(RenderObject* start, RenderObject* boundary,
 }
 
 void RenderBlock::deleteLines()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (AXObjectCache* cache = document().existingAXObjectCache())
         cache->recomputeIsIgnored(this);
 }
 
 void RenderBlock::makeChildrenNonInline(RenderObject* insertionPoint)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);    
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();    
     // makeChildrenNonInline takes a block whose children are *all* inline and it
     // makes sure that inline children are coalesced under anonymous
     // blocks.  If |insertionPoint| is defined, then it represents the insertion point for
@@ -732,7 +732,7 @@ void RenderBlock::makeChildrenNonInline(RenderObject* insertionPoint)
 }
 
 void RenderBlock::removeLeftoverAnonymousBlock(RenderBlock* child)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(child->isAnonymousBlock());
     ASSERT(!child->childrenInline());
     
@@ -784,7 +784,7 @@ void RenderBlock::removeLeftoverAnonymousBlock(RenderBlock* child)
 }
 
 static bool canDropAnonymousBlock(const RenderBlock& anonymousBlock)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (anonymousBlock.beingDestroyed() || anonymousBlock.continuation())
         return false;
     if (anonymousBlock.isRubyRun() || anonymousBlock.isRubyBase())
@@ -793,7 +793,7 @@ static bool canDropAnonymousBlock(const RenderBlock& anonymousBlock)
 }
 
 static bool canMergeContiguousAnonymousBlocks(RenderObject& oldChild, RenderObject* previous, RenderObject* next)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (oldChild.documentBeingDestroyed() || oldChild.isInline() || oldChild.virtualContinuation())
         return false;
 
@@ -815,7 +815,7 @@ static bool canMergeContiguousAnonymousBlocks(RenderObject& oldChild, RenderObje
 }
 
 void RenderBlock::dropAnonymousBoxChild(RenderBlock& parent, RenderBlock& child)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     parent.setNeedsLayoutAndPrefWidthsRecalc();
     parent.setChildrenInline(child.childrenInline());
     if (auto* childFlowThread = child.flowThreadContainingBlock())
@@ -830,7 +830,7 @@ void RenderBlock::dropAnonymousBoxChild(RenderBlock& parent, RenderBlock& child)
 }
 
 void RenderBlock::removeChild(RenderObject& oldChild)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // No need to waste time in merging or removing empty anonymous blocks.
     // We can just bail out if our document is getting destroyed.
     if (documentBeingDestroyed()) {
@@ -948,7 +948,7 @@ void RenderBlock::removeChild(RenderObject& oldChild)
 }
 
 bool RenderBlock::childrenPreventSelfCollapsing() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Whether or not we collapse is dependent on whether all our normal flow children
     // are also self-collapsing.
     for (RenderBox* child = firstChildBox(); child; child = child->nextSiblingBox()) {
@@ -961,7 +961,7 @@ bool RenderBlock::childrenPreventSelfCollapsing() const
 }
 
 bool RenderBlock::isSelfCollapsingBlock() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We are not self-collapsing if we
     // (a) have a non-zero height according to layout (an optimization to avoid wasting time)
     // (b) are a table,
@@ -993,14 +993,14 @@ bool RenderBlock::isSelfCollapsingBlock() const
 }
 
 static inline UpdateScrollInfoAfterLayoutTransaction* currentUpdateScrollInfoAfterLayoutTransaction()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!updateScrollInfoAfterLayoutTransactionStack())
         return nullptr;
     return &updateScrollInfoAfterLayoutTransactionStack()->last();
 }
 
 void RenderBlock::beginUpdateScrollInfoAfterLayoutTransaction()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!updateScrollInfoAfterLayoutTransactionStack())
         updateScrollInfoAfterLayoutTransactionStack() = std::make_unique<DelayedUpdateScrollInfoStack>();
     if (updateScrollInfoAfterLayoutTransactionStack()->isEmpty() || currentUpdateScrollInfoAfterLayoutTransaction()->view != &view())
@@ -1009,7 +1009,7 @@ void RenderBlock::beginUpdateScrollInfoAfterLayoutTransaction()
 }
 
 void RenderBlock::endAndCommitUpdateScrollInfoAfterLayoutTransaction()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     UpdateScrollInfoAfterLayoutTransaction* transaction = currentUpdateScrollInfoAfterLayoutTransaction();
     ASSERT(transaction);
     ASSERT(transaction->view == &view());
@@ -1035,7 +1035,7 @@ void RenderBlock::endAndCommitUpdateScrollInfoAfterLayoutTransaction()
 }
 
 void RenderBlock::removeFromUpdateScrollInfoAfterLayoutTransaction()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (UNLIKELY(updateScrollInfoAfterLayoutTransactionStack().get() != 0)) {
         UpdateScrollInfoAfterLayoutTransaction* transaction = currentUpdateScrollInfoAfterLayoutTransaction();
         ASSERT(transaction);
@@ -1045,7 +1045,7 @@ void RenderBlock::removeFromUpdateScrollInfoAfterLayoutTransaction()
 }
 
 void RenderBlock::updateScrollInfoAfterLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!hasOverflowClip())
         return;
     
@@ -1065,7 +1065,7 @@ void RenderBlock::updateScrollInfoAfterLayout()
 }
 
 void RenderBlock::layout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     StackStats::LayoutCheckPoint layoutCheckPoint;
     OverflowEventDispatcher dispatcher(this);
 
@@ -1087,12 +1087,12 @@ void RenderBlock::layout()
 }
 
 static RenderBlockRareData* getBlockRareData(const RenderBlock* block)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return gRareDataMap ? gRareDataMap->get(block) : nullptr;
 }
 
 static RenderBlockRareData& ensureBlockRareData(const RenderBlock* block)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!gRareDataMap)
         gRareDataMap = new RenderBlockRareDataMap;
     
@@ -1103,7 +1103,7 @@ static RenderBlockRareData& ensureBlockRareData(const RenderBlock* block)
 }
 
 void RenderBlock::preparePaginationBeforeBlockLayout(bool& relayoutChildren)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Regions changing widths can force us to relayout our children.
     RenderFlowThread* flowThread = flowThreadContainingBlock();
     if (flowThread)
@@ -1111,7 +1111,7 @@ void RenderBlock::preparePaginationBeforeBlockLayout(bool& relayoutChildren)
 }
 
 bool RenderBlock::recomputeLogicalWidth()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit oldWidth = logicalWidth();
     
     updateLogicalWidth();
@@ -1123,13 +1123,13 @@ bool RenderBlock::recomputeLogicalWidth()
 }
 
 void RenderBlock::layoutBlock(bool, LayoutUnit)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
     clearNeedsLayout();
 }
 
 void RenderBlock::addOverflowFromChildren()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (childrenInline())
         addOverflowFromInlineChildren();
     else
@@ -1145,7 +1145,7 @@ void RenderBlock::addOverflowFromChildren()
 // Overflow is always relative to the border-box of the element in question.
 // Therefore, if the element has a vertical scrollbar placed on the left, an overflow rect at x=2px would conceptually intersect the scrollbar.
 void RenderBlock::computeOverflow(LayoutUnit oldClientAfterEdge, bool)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     clearOverflow();
     addOverflowFromChildren();
 
@@ -1174,7 +1174,7 @@ void RenderBlock::computeOverflow(LayoutUnit oldClientAfterEdge, bool)
 }
 
 void RenderBlock::clearLayoutOverflow()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_overflow)
         return;
     
@@ -1188,7 +1188,7 @@ void RenderBlock::clearLayoutOverflow()
 }
 
 void RenderBlock::addOverflowFromBlockChildren()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto* child = firstChildBox(); child; child = child->nextSiblingBox()) {
         if (!child->isFloatingOrOutOfFlowPositioned())
             addOverflowFromChild(child);
@@ -1196,7 +1196,7 @@ void RenderBlock::addOverflowFromBlockChildren()
 }
 
 void RenderBlock::addOverflowFromPositionedObjects()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TrackedRendererListHashSet* positionedDescendants = positionedObjects();
     if (!positionedDescendants)
         return;
@@ -1211,7 +1211,7 @@ void RenderBlock::addOverflowFromPositionedObjects()
 }
 
 void RenderBlock::addVisualOverflowFromTheme()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!style().hasAppearance())
         return;
 
@@ -1224,7 +1224,7 @@ void RenderBlock::addVisualOverflowFromTheme()
 }
 
 LayoutUnit RenderBlock::computeStartPositionDeltaForChildAvoidingFloats(const RenderBox& child, LayoutUnit childMarginStart, RenderRegion* region)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit startPosition = startOffsetForContent(region);
 
     // Add in our start margin.
@@ -1248,7 +1248,7 @@ LayoutUnit RenderBlock::computeStartPositionDeltaForChildAvoidingFloats(const Re
 }
 
 void RenderBlock::setLogicalLeftForChild(RenderBox& child, LayoutUnit logicalLeft, ApplyLayoutDeltaMode applyDelta)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isHorizontalWritingMode()) {
         if (applyDelta == ApplyLayoutDelta)
             view().addLayoutDelta(LayoutSize(child.x() - logicalLeft, 0));
@@ -1261,7 +1261,7 @@ void RenderBlock::setLogicalLeftForChild(RenderBox& child, LayoutUnit logicalLef
 }
 
 void RenderBlock::setLogicalTopForChild(RenderBox& child, LayoutUnit logicalTop, ApplyLayoutDeltaMode applyDelta)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isHorizontalWritingMode()) {
         if (applyDelta == ApplyLayoutDelta)
             view().addLayoutDelta(LayoutSize(0, child.y() - logicalTop));
@@ -1274,7 +1274,7 @@ void RenderBlock::setLogicalTopForChild(RenderBox& child, LayoutUnit logicalTop,
 }
 
 void RenderBlock::updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, RenderBox& child)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: Technically percentage height objects only need a relayout if their percentage isn't going to be turned into
     // an auto value. Add a method to determine this, so that we can avoid the relayout.
     if (relayoutChildren || (child.hasRelativeLogicalHeight() && !isRenderView()))
@@ -1286,7 +1286,7 @@ void RenderBlock::updateBlockChildDirtyBitsBeforeLayout(bool relayoutChildren, R
 }
 
 void RenderBlock::dirtyForLayoutFromPercentageHeightDescendants()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!percentHeightDescendantsMap)
         return;
 
@@ -1316,7 +1316,7 @@ void RenderBlock::dirtyForLayoutFromPercentageHeightDescendants()
 }
 
 void RenderBlock::simplifiedNormalFlowLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (childrenInline()) {
         ListHashSet<RootInlineBox*> lineBoxes;
         for (InlineWalker walker(*this); !walker.atEnd(); walker.advance()) {
@@ -1346,7 +1346,7 @@ void RenderBlock::simplifiedNormalFlowLayout()
 }
 
 bool RenderBlock::simplifiedLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if ((!posChildNeedsLayout() && !needsSimplifiedNormalFlowLayout()) || normalChildNeedsLayout() || selfNeedsLayout())
         return false;
 
@@ -1395,7 +1395,7 @@ bool RenderBlock::simplifiedLayout()
 }
 
 void RenderBlock::markFixedPositionObjectForLayoutIfNeeded(RenderBox& positionedChild)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (positionedChild.style().position() != FixedPosition)
         return;
 
@@ -1425,7 +1425,7 @@ void RenderBlock::markFixedPositionObjectForLayoutIfNeeded(RenderBox& positioned
 }
 
 LayoutUnit RenderBlock::marginIntrinsicLogicalWidthForChild(RenderBox& child) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // A margin has three types: fixed, percentage, and auto (variable).
     // Auto and percentage margins become 0 when computing min/max width.
     // Fixed margins can be added in as is.
@@ -1440,7 +1440,7 @@ LayoutUnit RenderBlock::marginIntrinsicLogicalWidthForChild(RenderBox& child) co
 }
 
 void RenderBlock::layoutPositionedObject(RenderBox& r, bool relayoutChildren, bool fixedPositionObjectsOnly)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     estimateRegionRangeForBoxChild(r);
 
     // A fixed position element with an absolute positioned ancestor has no way of knowing if the latter has changed position. So
@@ -1497,7 +1497,7 @@ void RenderBlock::layoutPositionedObject(RenderBox& r, bool relayoutChildren, bo
 }
 
 void RenderBlock::layoutPositionedObjects(bool relayoutChildren, bool fixedPositionObjectsOnly)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TrackedRendererListHashSet* positionedDescendants = positionedObjects();
     if (!positionedDescendants)
         return;
@@ -1509,7 +1509,7 @@ void RenderBlock::layoutPositionedObjects(bool relayoutChildren, bool fixedPosit
 }
 
 void RenderBlock::markPositionedObjectsForLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TrackedRendererListHashSet* positionedDescendants = positionedObjects();
     if (!positionedDescendants)
         return;
@@ -1521,7 +1521,7 @@ void RenderBlock::markPositionedObjectsForLayout()
 }
 
 void RenderBlock::markForPaginationRelayoutIfNeeded()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (needsLayout() || !view().layoutState()->isPaginated())
         return;
 
@@ -1530,7 +1530,7 @@ void RenderBlock::markForPaginationRelayoutIfNeeded()
 }
 
 void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderNamedFlowFragment* namedFlowFragment = currentRenderNamedFlowFragment();
     // Check our region range to make sure we need to be painting in this region.
     if (namedFlowFragment && !namedFlowFragment->flowThread()->objectShouldFragmentInFlowRegion(this, namedFlowFragment))
@@ -1569,7 +1569,7 @@ void RenderBlock::paint(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
 }
 
 void RenderBlock::paintContents(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Avoid painting descendants of the root element when stylesheets haven't loaded.  This eliminates FOUC.
     // It's ok not to draw, because later on, when all the stylesheets do load, styleResolverChanged() on the Document
     // will do a full repaint.
@@ -1595,7 +1595,7 @@ void RenderBlock::paintContents(PaintInfo& paintInfo, const LayoutPoint& paintOf
 }
 
 void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOffset, PaintInfo& paintInfoForChild, bool usePrintRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (auto* child = firstChildBox(); child; child = child->nextSiblingBox()) {
         if (!paintChild(*child, paintInfo, paintOffset, paintInfoForChild, usePrintRect))
             return;
@@ -1603,7 +1603,7 @@ void RenderBlock::paintChildren(PaintInfo& paintInfo, const LayoutPoint& paintOf
 }
 
 bool RenderBlock::paintChild(RenderBox& child, PaintInfo& paintInfo, const LayoutPoint& paintOffset, PaintInfo& paintInfoForChild, bool usePrintRect, PaintBlockType paintType)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Check for page-break-before: always, and if it's set, break and bail.
     bool checkBeforeAlways = !childrenInline() && (usePrintRect && alwaysPageBreak(child.style().breakBefore()));
     LayoutUnit absoluteChildY = paintOffset.y() + child.y();
@@ -1646,7 +1646,7 @@ bool RenderBlock::paintChild(RenderBox& child, PaintInfo& paintInfo, const Layou
 }
 
 void RenderBlock::paintCaret(PaintInfo& paintInfo, const LayoutPoint& paintOffset, CaretType type)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Paint the caret if the FrameSelection says so or if caret browsing is enabled
     bool caretBrowsing = frame().settings().caretBrowsingEnabled();
     RenderBlock* caretPainter;
@@ -1668,7 +1668,7 @@ void RenderBlock::paintCaret(PaintInfo& paintInfo, const LayoutPoint& paintOffse
 }
 
 void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     PaintPhase paintPhase = paintInfo.phase;
 
     // 1. paint background, borders etc
@@ -1778,13 +1778,13 @@ void RenderBlock::paintObject(PaintInfo& paintInfo, const LayoutPoint& paintOffs
 }
 
 RenderInline* RenderBlock::inlineElementContinuation() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__); 
+{     AUTO_EASY_THREAD(); EASY_FUNCTION(); 
     RenderBoxModelObject* continuation = this->continuation();
     return is<RenderInline>(continuation) ? downcast<RenderInline>(continuation) : nullptr;
 }
 
 RenderBlock* RenderBlock::blockElementContinuation() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBoxModelObject* currentContinuation = continuation();
     if (!currentContinuation || currentContinuation->isInline())
         return nullptr;
@@ -1795,13 +1795,13 @@ RenderBlock* RenderBlock::blockElementContinuation() const
 }
     
 static ContinuationOutlineTableMap* continuationOutlineTable()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     static NeverDestroyed<ContinuationOutlineTableMap> table;
     return &table.get();
 }
 
 void RenderBlock::addContinuationWithOutline(RenderInline* flow)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We can't make this work if the inline is in a layer.  We'll just rely on the broken
     // way of painting.
     ASSERT(!flow->layer() && !flow->isInlineElementContinuation());
@@ -1817,7 +1817,7 @@ void RenderBlock::addContinuationWithOutline(RenderInline* flow)
 }
 
 bool RenderBlock::paintsContinuationOutline(RenderInline* flow)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ContinuationOutlineTableMap* table = continuationOutlineTable();
     if (table->isEmpty())
         return false;
@@ -1830,7 +1830,7 @@ bool RenderBlock::paintsContinuationOutline(RenderInline* flow)
 }
 
 void RenderBlock::paintContinuationOutlines(PaintInfo& info, const LayoutPoint& paintOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ContinuationOutlineTableMap* table = continuationOutlineTable();
     if (table->isEmpty())
         return;
@@ -1854,7 +1854,7 @@ void RenderBlock::paintContinuationOutlines(PaintInfo& info, const LayoutPoint& 
 }
 
 bool RenderBlock::shouldPaintSelectionGaps() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (frame().settings().selectionPaintingWithoutSelectionGapsEnabled())
         return false;
 
@@ -1862,7 +1862,7 @@ bool RenderBlock::shouldPaintSelectionGaps() const
 }
 
 bool RenderBlock::isSelectionRoot() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isPseudoElement())
         return false;
     ASSERT(element() || isAnonymous());
@@ -1888,7 +1888,7 @@ bool RenderBlock::isSelectionRoot() const
 }
 
 GapRects RenderBlock::selectionGapRectsForRepaint(const RenderLayerModelObject* repaintContainer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!needsLayout());
 
     if (!shouldPaintSelectionGaps())
@@ -1906,7 +1906,7 @@ GapRects RenderBlock::selectionGapRectsForRepaint(const RenderLayerModelObject* 
 }
 
 void RenderBlock::paintSelection(PaintInfo& paintInfo, const LayoutPoint& paintOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(TEXT_SELECTION)
     if (shouldPaintSelectionGaps() && paintInfo.phase == PaintPhaseForeground) {
         LogicalSelectionOffsetCaches cache(*this);
@@ -1937,7 +1937,7 @@ void RenderBlock::paintSelection(PaintInfo& paintInfo, const LayoutPoint& paintO
 }
 
 static void clipOutPositionedObjects(const PaintInfo* paintInfo, const LayoutPoint& offset, TrackedRendererListHashSet* positionedObjects)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!positionedObjects)
         return;
     
@@ -1949,17 +1949,17 @@ static void clipOutPositionedObjects(const PaintInfo* paintInfo, const LayoutPoi
 }
 
 LayoutUnit blockDirectionOffset(RenderBlock& rootBlock, const LayoutSize& offsetFromRootBlock)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return rootBlock.isHorizontalWritingMode() ? offsetFromRootBlock.height() : offsetFromRootBlock.width();
 }
 
 LayoutUnit inlineDirectionOffset(RenderBlock& rootBlock, const LayoutSize& offsetFromRootBlock)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return rootBlock.isHorizontalWritingMode() ? offsetFromRootBlock.width() : offsetFromRootBlock.height();
 }
 
 LayoutRect RenderBlock::logicalRectToPhysicalRect(const LayoutPoint& rootBlockPhysicalPosition, const LayoutRect& logicalRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutRect result;
     if (isHorizontalWritingMode())
         result = logicalRect;
@@ -1972,7 +1972,7 @@ LayoutRect RenderBlock::logicalRectToPhysicalRect(const LayoutPoint& rootBlockPh
 
 GapRects RenderBlock::selectionGaps(RenderBlock& rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
     LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const LogicalSelectionOffsetCaches& cache, const PaintInfo* paintInfo)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // IMPORTANT: Callers of this method that intend for painting to happen need to do a save/restore.
     // Clip out floating and positioned objects when painting selection gaps.
     if (paintInfo) {
@@ -2024,14 +2024,14 @@ GapRects RenderBlock::selectionGaps(RenderBlock& rootBlock, const LayoutPoint& r
 }
 
 GapRects RenderBlock::inlineSelectionGaps(RenderBlock&, const LayoutPoint&, const LayoutSize&, LayoutUnit&, LayoutUnit&, LayoutUnit&, const LogicalSelectionOffsetCaches&, const PaintInfo*)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
     return GapRects();
 }
 
 GapRects RenderBlock::blockSelectionGaps(RenderBlock& rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
     LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const LogicalSelectionOffsetCaches& cache, const PaintInfo* paintInfo)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     GapRects result;
 
     // Jump right to the first block child that contains some selected objects.
@@ -2100,7 +2100,7 @@ GapRects RenderBlock::blockSelectionGaps(RenderBlock& rootBlock, const LayoutPoi
 
 LayoutRect RenderBlock::blockSelectionGap(RenderBlock& rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
     LayoutUnit lastLogicalTop, LayoutUnit lastLogicalLeft, LayoutUnit lastLogicalRight, LayoutUnit logicalBottom, const LogicalSelectionOffsetCaches& cache, const PaintInfo* paintInfo)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit logicalTop = lastLogicalTop;
     LayoutUnit logicalHeight = blockDirectionOffset(rootBlock, offsetFromRootBlock) + logicalBottom - logicalTop;
     if (logicalHeight <= 0)
@@ -2121,7 +2121,7 @@ LayoutRect RenderBlock::blockSelectionGap(RenderBlock& rootBlock, const LayoutPo
 
 LayoutRect RenderBlock::logicalLeftSelectionGap(RenderBlock& rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
     RenderBoxModelObject* selObj, LayoutUnit logicalLeft, LayoutUnit logicalTop, LayoutUnit logicalHeight, const LogicalSelectionOffsetCaches& cache, const PaintInfo* paintInfo)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit rootBlockLogicalTop = blockDirectionOffset(rootBlock, offsetFromRootBlock) + logicalTop;
     LayoutUnit rootBlockLogicalLeft = std::max(logicalLeftSelectionOffset(rootBlock, logicalTop, cache), logicalLeftSelectionOffset(rootBlock, logicalTop + logicalHeight, cache));
     LayoutUnit rootBlockLogicalRight = std::min(inlineDirectionOffset(rootBlock, offsetFromRootBlock) + logicalLeft,
@@ -2138,7 +2138,7 @@ LayoutRect RenderBlock::logicalLeftSelectionGap(RenderBlock& rootBlock, const La
 
 LayoutRect RenderBlock::logicalRightSelectionGap(RenderBlock& rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
     RenderBoxModelObject* selObj, LayoutUnit logicalRight, LayoutUnit logicalTop, LayoutUnit logicalHeight, const LogicalSelectionOffsetCaches& cache, const PaintInfo* paintInfo)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit rootBlockLogicalTop = blockDirectionOffset(rootBlock, offsetFromRootBlock) + logicalTop;
     LayoutUnit rootBlockLogicalLeft = std::max(inlineDirectionOffset(rootBlock, offsetFromRootBlock) + logicalRight,
         std::max(logicalLeftSelectionOffset(rootBlock, logicalTop, cache), logicalLeftSelectionOffset(rootBlock, logicalTop + logicalHeight, cache)));
@@ -2154,7 +2154,7 @@ LayoutRect RenderBlock::logicalRightSelectionGap(RenderBlock& rootBlock, const L
 }
 
 void RenderBlock::getSelectionGapInfo(SelectionState state, bool& leftGap, bool& rightGap)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool ltr = style().isLeftToRightDirection();
     leftGap = (state == RenderObject::SelectionInside) ||
               (state == RenderObject::SelectionEnd && ltr) ||
@@ -2165,7 +2165,7 @@ void RenderBlock::getSelectionGapInfo(SelectionState state, bool& leftGap, bool&
 }
 
 LayoutUnit RenderBlock::logicalLeftSelectionOffset(RenderBlock& rootBlock, LayoutUnit position, const LogicalSelectionOffsetCaches& cache)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit logicalLeft = logicalLeftOffsetForLine(position, DoNotIndentText);
     if (logicalLeft == logicalLeftOffsetForContent()) {
         if (&rootBlock != this) // The border can potentially be further extended by our containingBlock().
@@ -2189,7 +2189,7 @@ LayoutUnit RenderBlock::logicalLeftSelectionOffset(RenderBlock& rootBlock, Layou
 }
 
 LayoutUnit RenderBlock::logicalRightSelectionOffset(RenderBlock& rootBlock, LayoutUnit position, const LogicalSelectionOffsetCaches& cache)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit logicalRight = logicalRightOffsetForLine(position, DoNotIndentText);
     if (logicalRight == logicalRightOffsetForContent()) {
         if (&rootBlock != this) // The border can potentially be further extended by our containingBlock().
@@ -2213,7 +2213,7 @@ LayoutUnit RenderBlock::logicalRightSelectionOffset(RenderBlock& rootBlock, Layo
 }
 
 RenderBlock* RenderBlock::blockBeforeWithinSelectionRoot(LayoutSize& offset) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isSelectionRoot())
         return nullptr;
 
@@ -2245,12 +2245,12 @@ RenderBlock* RenderBlock::blockBeforeWithinSelectionRoot(LayoutSize& offset) con
 }
 
 TrackedRendererListHashSet* RenderBlock::positionedObjects() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return positionedDescendantsMap().positionedRenderers(*this);
 }
 
 void RenderBlock::insertPositionedObject(RenderBox& positioned)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!isAnonymousBlock());
 
     if (positioned.isRenderFlowThread())
@@ -2261,12 +2261,12 @@ void RenderBlock::insertPositionedObject(RenderBox& positioned)
 }
 
 void RenderBlock::removePositionedObject(const RenderBox& rendererToRemove)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     positionedDescendantsMap().removeDescendant(rendererToRemove);
 }
 
 void RenderBlock::removePositionedObjects(const RenderBlock* newContainingBlockCandidate, ContainingBlockState containingBlockState)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* positionedDescendants = positionedObjects();
     if (!positionedDescendants)
         return;
@@ -2291,27 +2291,27 @@ void RenderBlock::removePositionedObjects(const RenderBlock* newContainingBlockC
 }
 
 void RenderBlock::addPercentHeightDescendant(RenderBox& descendant)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     insertIntoTrackedRendererMaps(*this, descendant);
 }
 
 void RenderBlock::removePercentHeightDescendant(RenderBox& descendant)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     removeFromTrackedRendererMaps(descendant);
 }
 
 TrackedRendererListHashSet* RenderBlock::percentHeightDescendants() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return percentHeightDescendantsMap ? percentHeightDescendantsMap->get(this) : nullptr;
 }
 
 bool RenderBlock::hasPercentHeightContainerMap()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return percentHeightContainerMap;
 }
 
 bool RenderBlock::hasPercentHeightDescendant(RenderBox& descendant)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We don't null check percentHeightContainerMap since the caller
     // already ensures this and we need to call this function on every
     // descendant in clearPercentHeightDescendantsFrom().
@@ -2320,7 +2320,7 @@ bool RenderBlock::hasPercentHeightDescendant(RenderBox& descendant)
 }
 
 void RenderBlock::removePercentHeightDescendantIfNeeded(RenderBox& descendant)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We query the map directly, rather than looking at style's
     // logicalHeight()/logicalMinHeight()/logicalMaxHeight() since those
     // can change with writing mode/directional changes.
@@ -2334,7 +2334,7 @@ void RenderBlock::removePercentHeightDescendantIfNeeded(RenderBox& descendant)
 }
 
 void RenderBlock::clearPercentHeightDescendantsFrom(RenderBox& parent)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(percentHeightContainerMap);
     for (RenderObject* child = parent.firstChild(); child; child = child->nextInPreOrder(&parent)) {
         if (!is<RenderBox>(*child))
@@ -2349,7 +2349,7 @@ void RenderBlock::clearPercentHeightDescendantsFrom(RenderBox& parent)
 }
 
 LayoutUnit RenderBlock::textIndentOffset() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit cw = 0;
     if (style().textIndent().isPercentOrCalculated())
         cw = containingBlock()->availableLogicalWidth();
@@ -2357,7 +2357,7 @@ LayoutUnit RenderBlock::textIndentOffset() const
 }
 
 LayoutUnit RenderBlock::logicalLeftOffsetForContent(RenderRegion* region) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit logicalLeftOffset = style().isHorizontalWritingMode() ? borderLeft() + paddingLeft() : borderTop() + paddingTop();
     if (shouldPlaceBlockDirectionScrollbarOnLeft())
         logicalLeftOffset += verticalScrollbarWidth();
@@ -2368,7 +2368,7 @@ LayoutUnit RenderBlock::logicalLeftOffsetForContent(RenderRegion* region) const
 }
 
 LayoutUnit RenderBlock::logicalRightOffsetForContent(RenderRegion* region) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit logicalRightOffset = style().isHorizontalWritingMode() ? borderLeft() + paddingLeft() : borderTop() + paddingTop();
     if (shouldPlaceBlockDirectionScrollbarOnLeft())
         logicalRightOffset += verticalScrollbarWidth();
@@ -2380,7 +2380,7 @@ LayoutUnit RenderBlock::logicalRightOffsetForContent(RenderRegion* region) const
 }
 
 LayoutUnit RenderBlock::adjustLogicalLeftOffsetForLine(LayoutUnit offsetFromFloats, bool applyTextIndent) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit left = offsetFromFloats;
 
     if (applyTextIndent && style().isLeftToRightDirection())
@@ -2420,7 +2420,7 @@ LayoutUnit RenderBlock::adjustLogicalLeftOffsetForLine(LayoutUnit offsetFromFloa
 }
 
 LayoutUnit RenderBlock::adjustLogicalRightOffsetForLine(LayoutUnit offsetFromFloats, bool applyTextIndent) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutUnit right = offsetFromFloats;
     
     if (applyTextIndent && !style().isLeftToRightDirection())
@@ -2460,13 +2460,13 @@ LayoutUnit RenderBlock::adjustLogicalRightOffsetForLine(LayoutUnit offsetFromFlo
 }
 
 bool RenderBlock::avoidsFloats() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Floats can't intrude into our box if we have a non-auto column count or width.
     return RenderBox::avoidsFloats() || style().hasFlowFrom();
 }
 
 bool RenderBlock::isPointInOverflowControl(HitTestResult& result, const LayoutPoint& locationInContainer, const LayoutPoint& accumulatedOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!scrollsOverflow())
         return false;
 
@@ -2474,7 +2474,7 @@ bool RenderBlock::isPointInOverflowControl(HitTestResult& result, const LayoutPo
 }
 
 Node* RenderBlock::nodeForHitTest() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If we are in the margins of block elements that are part of a
     // continuation we're actually still inside the enclosing element
     // that was split. Use the appropriate inner node.
@@ -2484,7 +2484,7 @@ Node* RenderBlock::nodeForHitTest() const
 }
 
 bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutPoint adjustedLocation(accumulatedOffset + location());
     LayoutSize localOffset = toLayoutSize(adjustedLocation);
 
@@ -2596,7 +2596,7 @@ bool RenderBlock::nodeAtPoint(const HitTestRequest& request, HitTestResult& resu
 }
 
 bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& result, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, HitTestAction hitTestAction)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (childrenInline() && !isTable())
         return hitTestInlineChildren(request, result, locationInContainer, accumulatedOffset, hitTestAction);
 
@@ -2614,7 +2614,7 @@ bool RenderBlock::hitTestContents(const HitTestRequest& request, HitTestResult& 
 }
 
 static inline bool isEditingBoundary(RenderElement* ancestor, RenderObject& child)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!ancestor || ancestor->nonPseudoElement());
     ASSERT(child.nonPseudoNode());
     return !ancestor || !ancestor->parent() || (ancestor->hasLayer() && ancestor->parent()->isRenderView())
@@ -2625,7 +2625,7 @@ static inline bool isEditingBoundary(RenderElement* ancestor, RenderObject& chil
 // all cases in which positionForPoint recurs could call this instead to
 // prevent crossing editable boundaries. This would require many tests.
 VisiblePosition positionForPointRespectingEditingBoundaries(RenderBlock& parent, RenderBox& child, const LayoutPoint& pointInParentCoordinates)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutPoint childLocation = child.location();
     if (child.isInFlowPositioned())
         childLocation += child.offsetForInFlowPosition();
@@ -2657,19 +2657,19 @@ VisiblePosition positionForPointRespectingEditingBoundaries(RenderBlock& parent,
 }
 
 VisiblePosition RenderBlock::positionForPointWithInlineChildren(const LayoutPoint&, const RenderRegion*)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
     return VisiblePosition();
 }
 
 static inline bool isChildHitTestCandidate(const RenderBox& box)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return box.height() && box.style().visibility() == VISIBLE && !box.isFloatingOrOutOfFlowPositioned() && !box.isInFlowRenderFlowThread();
 }
 
 // Valid candidates in a FlowThread must be rendered by the region.
 static inline bool isChildHitTestCandidate(const RenderBox& box, const RenderRegion* region, const LayoutPoint& point)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isChildHitTestCandidate(box))
         return false;
     if (!region)
@@ -2679,7 +2679,7 @@ static inline bool isChildHitTestCandidate(const RenderBox& box, const RenderReg
 }
 
 VisiblePosition RenderBlock::positionForPoint(const LayoutPoint& point, const RenderRegion* region)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isTable())
         return RenderBox::positionForPoint(point, region);
 
@@ -2733,14 +2733,14 @@ VisiblePosition RenderBlock::positionForPoint(const LayoutPoint& point, const Re
 }
 
 void RenderBlock::offsetForContents(LayoutPoint& offset) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     offset = flipForWritingMode(offset);
     offset += toLayoutSize(scrollPosition());
     offset = flipForWritingMode(offset);
 }
 
 void RenderBlock::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(!childrenInline());
     
     computeBlockPreferredLogicalWidths(minLogicalWidth, maxLogicalWidth);
@@ -2753,7 +2753,7 @@ void RenderBlock::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, Lay
 }
 
 void RenderBlock::computePreferredLogicalWidths()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(preferredLogicalWidthsDirty());
 
     updateFirstLetter();
@@ -2786,7 +2786,7 @@ void RenderBlock::computePreferredLogicalWidths()
 }
 
 void RenderBlock::computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     const RenderStyle& styleToUse = style();
     bool nowrap = styleToUse.whiteSpace() == NOWRAP;
 
@@ -2892,7 +2892,7 @@ void RenderBlock::computeBlockPreferredLogicalWidths(LayoutUnit& minLogicalWidth
 }
 
 bool RenderBlock::hasLineIfEmpty() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!element())
         return false;
     
@@ -2903,7 +2903,7 @@ bool RenderBlock::hasLineIfEmpty() const
 }
 
 LayoutUnit RenderBlock::lineHeight(bool firstLine, LineDirectionMode direction, LinePositionMode linePositionMode) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Anonymous inline blocks don't include margins or any real line height.
     if (isAnonymousInlineBlock() && linePositionMode == PositionOnContainingLine)
         return direction == HorizontalLine ? height() : width();
@@ -2925,7 +2925,7 @@ LayoutUnit RenderBlock::lineHeight(bool firstLine, LineDirectionMode direction, 
 }
 
 int RenderBlock::baselinePosition(FontBaseline baselineType, bool firstLine, LineDirectionMode direction, LinePositionMode linePositionMode) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Inline blocks are replaced elements. Otherwise, just pass off to
     // the base class.  If we're being queried as though we're the root line
     // box, then the fact that we're an inline-block is irrelevant, and we behave
@@ -2973,7 +2973,7 @@ int RenderBlock::baselinePosition(FontBaseline baselineType, bool firstLine, Lin
 }
 
 LayoutUnit RenderBlock::minLineHeightForReplacedRenderer(bool isFirstLine, LayoutUnit replacedHeight) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!document().inNoQuirksMode() && replacedHeight)
         return replacedHeight;
 
@@ -2985,7 +2985,7 @@ LayoutUnit RenderBlock::minLineHeightForReplacedRenderer(bool isFirstLine, Layou
 }
 
 Optional<int> RenderBlock::firstLineBaseline() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isWritingModeRoot() && !isRubyRun())
         return Optional<int>();
 
@@ -3000,7 +3000,7 @@ Optional<int> RenderBlock::firstLineBaseline() const
 }
 
 Optional<int> RenderBlock::inlineBlockBaseline(LineDirectionMode lineDirection) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isWritingModeRoot() && !isRubyRun())
         return Optional<int>();
 
@@ -3024,7 +3024,7 @@ Optional<int> RenderBlock::inlineBlockBaseline(LineDirectionMode lineDirection) 
 }
 
 static inline bool isRenderBlockFlowOrRenderButton(RenderElement& renderElement)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We include isRenderButton in this check because buttons are implemented
     // using flex box but should still support first-line|first-letter.
     // The flex box and specs require that flex box and grid do not support
@@ -3035,7 +3035,7 @@ static inline bool isRenderBlockFlowOrRenderButton(RenderElement& renderElement)
 }
 
 RenderBlock* RenderBlock::firstLineBlock() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlock* firstLineBlock = const_cast<RenderBlock*>(this);
     bool hasPseudo = false;
     while (true) {
@@ -3056,7 +3056,7 @@ RenderBlock* RenderBlock::firstLineBlock() const
 }
 
 static const RenderStyle& styleForFirstLetter(RenderElement* firstLetterBlock, RenderObject* firstLetterContainer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* pseudoStyle = firstLetterBlock->getMutableCachedPseudoStyle(FIRST_LETTER, &firstLetterContainer->firstLineStyle());
     
     // If we have an initial letter drop that is >= 1, then we need to force floating to be on.
@@ -3107,17 +3107,17 @@ static const RenderStyle& styleForFirstLetter(RenderElement* firstLetterBlock, R
 // "Punctuation (i.e, characters defined in Unicode [UNICODE] in the "open" (Ps), "close" (Pe),
 // "initial" (Pi). "final" (Pf) and "other" (Po) punctuation classes), that precedes or follows the first letter should be included"
 static inline bool isPunctuationForFirstLetter(UChar c)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return U_GET_GC_MASK(c) & (U_GC_PS_MASK | U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK | U_GC_PO_MASK);
 }
 
 static inline bool shouldSkipForFirstLetter(UChar c)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return isSpaceOrNewline(c) || c == noBreakSpace || isPunctuationForFirstLetter(c);
 }
 
 static inline RenderBlock* findFirstLetterBlock(RenderBlock* start)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlock* firstLetterBlock = start;
     while (true) {
         bool canHaveFirstLetterRenderer = firstLetterBlock->style().hasPseudoStyle(FIRST_LETTER)
@@ -3137,7 +3137,7 @@ static inline RenderBlock* findFirstLetterBlock(RenderBlock* start)
 }
 
 void RenderBlock::updateFirstLetterStyle(RenderElement* firstLetterBlock, RenderObject* currentChild)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderElement* firstLetter = currentChild->parent();
     RenderElement* firstLetterContainer = firstLetter->parent();
     auto& pseudoStyle = styleForFirstLetter(firstLetterBlock, firstLetterContainer);
@@ -3179,7 +3179,7 @@ void RenderBlock::updateFirstLetterStyle(RenderElement* firstLetterBlock, Render
 }
 
 void RenderBlock::createFirstLetterRenderer(RenderElement* firstLetterBlock, RenderText* currentTextChild)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderElement* firstLetterContainer = currentTextChild->parent();
     auto& pseudoStyle = styleForFirstLetter(firstLetterBlock, firstLetterContainer);
     RenderBoxModelObject* firstLetter = nullptr;
@@ -3248,7 +3248,7 @@ void RenderBlock::createFirstLetterRenderer(RenderElement* firstLetterBlock, Ren
 }
     
 void RenderBlock::getFirstLetter(RenderObject*& firstLetter, RenderElement*& firstLetterContainer, RenderObject* skipObject)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     firstLetter = nullptr;
     firstLetterContainer = nullptr;
 
@@ -3307,7 +3307,7 @@ void RenderBlock::getFirstLetter(RenderObject*& firstLetter, RenderElement*& fir
 }
 
 void RenderBlock::updateFirstLetter()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderObject* firstLetterObj;
     RenderElement* firstLetterContainer;
     // FIXME: The first letter might be composed of a variety of code units, and therefore might
@@ -3335,7 +3335,7 @@ void RenderBlock::updateFirstLetter()
 }
 
 RenderFlowThread* RenderBlock::cachedFlowThreadContainingBlock() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlockRareData* rareData = getBlockRareData(this);
 
     if (!rareData || !rareData->m_flowThreadContainingBlock)
@@ -3345,7 +3345,7 @@ RenderFlowThread* RenderBlock::cachedFlowThreadContainingBlock() const
 }
 
 bool RenderBlock::cachedFlowThreadContainingBlockNeedsUpdate() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlockRareData* rareData = getBlockRareData(this);
 
     if (!rareData || !rareData->m_flowThreadContainingBlock)
@@ -3355,13 +3355,13 @@ bool RenderBlock::cachedFlowThreadContainingBlockNeedsUpdate() const
 }
 
 void RenderBlock::setCachedFlowThreadContainingBlockNeedsUpdate()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlockRareData& rareData = ensureBlockRareData(this);
     rareData.m_flowThreadContainingBlock = Nullopt;
 }
 
 RenderFlowThread* RenderBlock::updateCachedFlowThreadContainingBlock(RenderFlowThread* flowThread) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlockRareData& rareData = ensureBlockRareData(this);
     rareData.m_flowThreadContainingBlock = flowThread;
 
@@ -3369,7 +3369,7 @@ RenderFlowThread* RenderBlock::updateCachedFlowThreadContainingBlock(RenderFlowT
 }
 
 RenderFlowThread* RenderBlock::locateFlowThreadContainingBlock() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlockRareData* rareData = getBlockRareData(this);
     if (!rareData || !rareData->m_flowThreadContainingBlock)
         return updateCachedFlowThreadContainingBlock(RenderBox::locateFlowThreadContainingBlock());
@@ -3379,19 +3379,19 @@ RenderFlowThread* RenderBlock::locateFlowThreadContainingBlock() const
 }
 
 LayoutUnit RenderBlock::paginationStrut() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlockRareData* rareData = getBlockRareData(this);
     return rareData ? rareData->m_paginationStrut : LayoutUnit();
 }
 
 LayoutUnit RenderBlock::pageLogicalOffset() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlockRareData* rareData = getBlockRareData(this);
     return rareData ? rareData->m_pageLogicalOffset : LayoutUnit();
 }
 
 void RenderBlock::setPaginationStrut(LayoutUnit strut)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlockRareData* rareData = getBlockRareData(this);
     if (!rareData) {
         if (!strut)
@@ -3402,7 +3402,7 @@ void RenderBlock::setPaginationStrut(LayoutUnit strut)
 }
 
 void RenderBlock::setPageLogicalOffset(LayoutUnit logicalOffset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBlockRareData* rareData = getBlockRareData(this);
     if (!rareData) {
         if (!logicalOffset)
@@ -3413,7 +3413,7 @@ void RenderBlock::setPageLogicalOffset(LayoutUnit logicalOffset)
 }
 
 void RenderBlock::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accumulatedOffset) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // For blocks inside inlines, we include margins so that we run right up to the inline boxes
     // above and below us (thus getting merged with them to form a single irregular shape).
     if (isAnonymousBlockContinuation()) {
@@ -3428,7 +3428,7 @@ void RenderBlock::absoluteRects(Vector<IntRect>& rects, const LayoutPoint& accum
 }
 
 void RenderBlock::absoluteQuads(Vector<FloatQuad>& quads, bool* wasFixed) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // For blocks inside inlines, we include margins so that we run right up to the inline boxes
     // above and below us (thus getting merged with them to form a single irregular shape).
     FloatRect localRect = isAnonymousBlockContinuation() 
@@ -3446,7 +3446,7 @@ void RenderBlock::absoluteQuads(Vector<FloatQuad>& quads, bool* wasFixed) const
 }
 
 LayoutRect RenderBlock::rectWithOutlineForRepaint(const RenderLayerModelObject* repaintContainer, LayoutUnit outlineWidth) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutRect r(RenderBox::rectWithOutlineForRepaint(repaintContainer, outlineWidth));
     if (isAnonymousBlockContinuation())
         r.inflateY(collapsedMarginBefore()); // FIXME: This is wrong for block-flows that are horizontal.
@@ -3454,24 +3454,24 @@ LayoutRect RenderBlock::rectWithOutlineForRepaint(const RenderLayerModelObject* 
 }
 
 RenderElement* RenderBlock::hoverAncestor() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return isAnonymousBlockContinuation() ? continuation() : RenderBox::hoverAncestor();
 }
 
 void RenderBlock::updateDragState(bool dragOn)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderBox::updateDragState(dragOn);
     if (RenderBoxModelObject* continuation = this->continuation())
         continuation->updateDragState(dragOn);
 }
 
 const RenderStyle& RenderBlock::outlineStyleForRepaint() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return isAnonymousBlockContinuation() ? continuation()->style() : RenderElement::outlineStyleForRepaint();
 }
 
 void RenderBlock::childBecameNonInline(RenderElement&)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     makeChildrenNonInline();
     if (isAnonymousBlock() && is<RenderBlock>(parent()))
         downcast<RenderBlock>(*parent()).removeLeftoverAnonymousBlock(this);
@@ -3479,7 +3479,7 @@ void RenderBlock::childBecameNonInline(RenderElement&)
 }
 
 void RenderBlock::updateHitTestResult(HitTestResult& result, const LayoutPoint& point)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (result.innerNode())
         return;
 
@@ -3492,7 +3492,7 @@ void RenderBlock::updateHitTestResult(HitTestResult& result, const LayoutPoint& 
 }
 
 LayoutRect RenderBlock::localCaretRect(InlineBox* inlineBox, unsigned caretOffset, LayoutUnit* extraWidthToEndOfLine)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Do the normal calculation in most cases.
     if (firstChild())
         return RenderBox::localCaretRect(inlineBox, caretOffset, extraWidthToEndOfLine);
@@ -3507,12 +3507,12 @@ LayoutRect RenderBlock::localCaretRect(InlineBox* inlineBox, unsigned caretOffse
 }
 
 void RenderBlock::addFocusRingRectsForInlineChildren(Vector<LayoutRect>&, const LayoutPoint&, const RenderLayerModelObject*)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT_NOT_REACHED();
 }
 
 void RenderBlock::addFocusRingRects(Vector<LayoutRect>& rects, const LayoutPoint& additionalOffset, const RenderLayerModelObject* paintContainer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // For blocks inside inlines, we include margins so that we run right up to the inline boxes
     // above and below us (thus getting merged with them to form a single irregular shape).
     if (inlineElementContinuation()) {
@@ -3553,7 +3553,7 @@ void RenderBlock::addFocusRingRects(Vector<LayoutRect>& rects, const LayoutPoint
 }
 
 std::unique_ptr<RenderBlock> RenderBlock::createAnonymousBlockWithStyleAndDisplay(Document& document, const RenderStyle& style, EDisplay display)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: Do we need to convert all our inline displays to block-type in the anonymous logic ?
     std::unique_ptr<RenderBlock> newBox;
     if (display == FLEX || display == INLINE_FLEX)
@@ -3566,7 +3566,7 @@ std::unique_ptr<RenderBlock> RenderBlock::createAnonymousBlockWithStyleAndDispla
 }
 
 LayoutUnit RenderBlock::offsetFromLogicalTopOfFirstPage() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayoutState* layoutState = view().layoutState();
     if (layoutState && !layoutState->isPaginated())
         return 0;
@@ -3587,7 +3587,7 @@ LayoutUnit RenderBlock::offsetFromLogicalTopOfFirstPage() const
 }
 
 RenderRegion* RenderBlock::regionAtBlockOffset(LayoutUnit blockOffset) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderFlowThread* flowThread = flowThreadContainingBlock();
     if (!flowThread || !flowThread->hasValidRegionInfo())
         return 0;
@@ -3596,7 +3596,7 @@ RenderRegion* RenderBlock::regionAtBlockOffset(LayoutUnit blockOffset) const
 }
 
 static bool canComputeRegionRangeForBox(const RenderBlock* parentBlock, const RenderBox& childBox, const RenderFlowThread* flowThreadContainingBlock)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(parentBlock);
     ASSERT(!childBox.isRenderNamedFlowThread());
 
@@ -3613,7 +3613,7 @@ static bool canComputeRegionRangeForBox(const RenderBlock* parentBlock, const Re
 }
 
 bool RenderBlock::childBoxIsUnsplittableForFragmentation(const RenderBox& child) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderFlowThread* flowThread = flowThreadContainingBlock();
     bool checkColumnBreaks = flowThread && flowThread->shouldCheckColumnBreaks();
     bool checkPageBreaks = !checkColumnBreaks && view().layoutState()->m_pageLogicalHeight;
@@ -3625,7 +3625,7 @@ bool RenderBlock::childBoxIsUnsplittableForFragmentation(const RenderBox& child)
 }
 
 void RenderBlock::computeRegionRangeForBoxChild(const RenderBox& box) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderFlowThread* flowThread = flowThreadContainingBlock();
     ASSERT(canComputeRegionRangeForBox(this, box, flowThread));
 
@@ -3643,7 +3643,7 @@ void RenderBlock::computeRegionRangeForBoxChild(const RenderBox& box) const
 }
 
 void RenderBlock::estimateRegionRangeForBoxChild(const RenderBox& box) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderFlowThread* flowThread = flowThreadContainingBlock();
     if (!canComputeRegionRangeForBox(this, box, flowThread))
         return;
@@ -3664,7 +3664,7 @@ void RenderBlock::estimateRegionRangeForBoxChild(const RenderBox& box) const
 }
 
 bool RenderBlock::updateRegionRangeForBoxChild(const RenderBox& box) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     RenderFlowThread* flowThread = flowThreadContainingBlock();
     if (!canComputeRegionRangeForBox(this, box, flowThread))
         return false;
@@ -3693,7 +3693,7 @@ bool RenderBlock::updateRegionRangeForBoxChild(const RenderBox& box) const
 }
 
 LayoutUnit RenderBlock::collapsedMarginBeforeForChild(const RenderBox& child) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If the child has the same directionality as we do, then we can just return its
     // collapsed margin.
     if (!child.isWritingModeRoot())
@@ -3710,7 +3710,7 @@ LayoutUnit RenderBlock::collapsedMarginBeforeForChild(const RenderBox& child) co
 }
 
 LayoutUnit RenderBlock::collapsedMarginAfterForChild(const RenderBox& child) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If the child has the same directionality as we do, then we can just return its
     // collapsed margin.
     if (!child.isWritingModeRoot())
@@ -3727,7 +3727,7 @@ LayoutUnit RenderBlock::collapsedMarginAfterForChild(const RenderBox& child) con
 }
 
 bool RenderBlock::hasMarginBeforeQuirk(const RenderBox& child) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If the child has the same directionality as we do, then we can just return its
     // margin quirk.
     if (!child.isWritingModeRoot())
@@ -3744,7 +3744,7 @@ bool RenderBlock::hasMarginBeforeQuirk(const RenderBox& child) const
 }
 
 bool RenderBlock::hasMarginAfterQuirk(const RenderBox& child) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // If the child has the same directionality as we do, then we can just return its
     // margin quirk.
     if (!child.isWritingModeRoot())
@@ -3761,7 +3761,7 @@ bool RenderBlock::hasMarginAfterQuirk(const RenderBox& child) const
 }
 
 const char* RenderBlock::renderName() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (isBody())
         return "RenderBody"; // FIXME: Temporary hack until we know that the regression tests pass.
 
@@ -3786,7 +3786,7 @@ const char* RenderBlock::renderName() const
 }
 
 TextRun RenderBlock::constructTextRun(StringView stringView, const RenderStyle& style, ExpansionBehavior expansion, TextRunFlags flags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     TextDirection textDirection = LTR;
     bool directionalOverride = style.rtlOrdering() == VisualOrder;
     if (flags != DefaultTextRunFlags) {
@@ -3799,35 +3799,35 @@ TextRun RenderBlock::constructTextRun(StringView stringView, const RenderStyle& 
 }
 
 TextRun RenderBlock::constructTextRun(const String& string, const RenderStyle& style, ExpansionBehavior expansion, TextRunFlags flags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return constructTextRun(StringView(string), style, expansion, flags);
 }
 
 TextRun RenderBlock::constructTextRun(const RenderText* text, const RenderStyle& style, ExpansionBehavior expansion)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return constructTextRun(text->stringView(), style, expansion);
 }
 
 TextRun RenderBlock::constructTextRun(const RenderText* text, unsigned offset, unsigned length, const RenderStyle& style, ExpansionBehavior expansion)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     unsigned stop = offset + length;
     ASSERT(stop <= text->textLength());
     return constructTextRun(text->stringView(offset, stop), style, expansion);
 }
 
 TextRun RenderBlock::constructTextRun(const LChar* characters, int length, const RenderStyle& style, ExpansionBehavior expansion)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return constructTextRun(StringView(characters, length), style, expansion);
 }
 
 TextRun RenderBlock::constructTextRun(const UChar* characters, int length, const RenderStyle& style, ExpansionBehavior expansion)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return constructTextRun(StringView(characters, length), style, expansion);
 }
 
 #ifndef NDEBUG
 void RenderBlock::checkPositionedObjectsNeedLayout()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto* positionedDescendants = positionedObjects();
     if (!positionedDescendants)
         return;

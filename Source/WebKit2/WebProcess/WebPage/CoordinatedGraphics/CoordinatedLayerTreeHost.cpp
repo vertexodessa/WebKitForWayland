@@ -53,19 +53,19 @@ using namespace WebCore;
 namespace WebKit {
 
 Ref<CoordinatedLayerTreeHost> CoordinatedLayerTreeHost::create(WebPage& webPage)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return adoptRef(*new CoordinatedLayerTreeHost(webPage));
 }
 
 CoordinatedLayerTreeHost::~CoordinatedLayerTreeHost()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 CoordinatedLayerTreeHost::CoordinatedLayerTreeHost(WebPage& webPage)
     : LayerTreeHost(webPage)
     , m_coordinator(webPage.corePage(), *this)
     , m_layerFlushTimer(RunLoop::main(), this, &CoordinatedLayerTreeHost::layerFlushTimerFired)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(WPE)
     m_layerFlushTimer.setPriority(G_PRIORITY_HIGH + 30);
 #endif
@@ -80,7 +80,7 @@ CoordinatedLayerTreeHost::CoordinatedLayerTreeHost(WebPage& webPage)
 }
 
 void CoordinatedLayerTreeHost::scheduleLayerFlush()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_layerFlushSchedulingEnabled)
         return;
 
@@ -94,23 +94,23 @@ void CoordinatedLayerTreeHost::scheduleLayerFlush()
 }
 
 void CoordinatedLayerTreeHost::cancelPendingLayerFlush()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_layerFlushTimer.stop();
 }
 
 void CoordinatedLayerTreeHost::setViewOverlayRootLayer(GraphicsLayer* viewOverlayRootLayer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     LayerTreeHost::setViewOverlayRootLayer(viewOverlayRootLayer);
     m_coordinator.setViewOverlayRootLayer(viewOverlayRootLayer);
 }
 
 void CoordinatedLayerTreeHost::setRootCompositingLayer(GraphicsLayer* graphicsLayer)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_coordinator.setRootCompositingLayer(graphicsLayer);
 }
 
 void CoordinatedLayerTreeHost::invalidate()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     cancelPendingLayerFlush();
 
     m_coordinator.invalidate();
@@ -118,7 +118,7 @@ void CoordinatedLayerTreeHost::invalidate()
 }
 
 void CoordinatedLayerTreeHost::forceRepaint()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This is necessary for running layout tests. Since in this case we are not waiting for a UIProcess to reply nicely.
     // Instead we are just triggering forceRepaint. But we still want to have the scripted animation callbacks being executed.
     m_coordinator.syncDisplayState();
@@ -134,7 +134,7 @@ void CoordinatedLayerTreeHost::forceRepaint()
 }
 
 bool CoordinatedLayerTreeHost::forceRepaintAsync(uint64_t callbackID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // We expect the UI process to not require a new repaint until the previous one has finished.
     ASSERT(!m_forceRepaintAsyncCallbackID);
     m_forceRepaintAsyncCallbackID = callbackID;
@@ -143,19 +143,19 @@ bool CoordinatedLayerTreeHost::forceRepaintAsync(uint64_t callbackID)
 }
 
 void CoordinatedLayerTreeHost::sizeDidChange(const IntSize& newSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_coordinator.sizeDidChange(newSize);
     scheduleLayerFlush();
 }
 
 void CoordinatedLayerTreeHost::setVisibleContentsRect(const FloatRect& rect, const FloatPoint& trajectoryVector)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_coordinator.setVisibleContentsRect(rect, trajectoryVector);
     scheduleLayerFlush();
 }
 
 void CoordinatedLayerTreeHost::renderNextFrame()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_isWaitingForRenderer = false;
     bool scheduledWhileWaitingForRenderer = std::exchange(m_scheduledWhileWaitingForRenderer, false);
     m_coordinator.renderNextFrame();
@@ -167,14 +167,14 @@ void CoordinatedLayerTreeHost::renderNextFrame()
 }
 
 void CoordinatedLayerTreeHost::didFlushRootLayer(const FloatRect& visibleContentRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Because our view-relative overlay root layer is not attached to the FrameView's GraphicsLayer tree, we need to flush it manually.
     if (m_viewOverlayRootLayer)
         m_viewOverlayRootLayer->flushCompositingState(visibleContentRect,  m_webPage.mainFrame()->view()->viewportIsStable());
 }
 
 void CoordinatedLayerTreeHost::layerFlushTimerFired()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_isSuspended || m_isWaitingForRenderer)
         return;
 
@@ -197,11 +197,11 @@ void CoordinatedLayerTreeHost::layerFlushTimerFired()
 }
 
 void CoordinatedLayerTreeHost::paintLayerContents(const GraphicsLayer*, GraphicsContext&, const IntRect&)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 void CoordinatedLayerTreeHost::commitSceneState(const CoordinatedGraphicsState& state)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if USE(COORDINATED_GRAPHICS_MULTIPROCESS)
     m_webPage.send(Messages::CoordinatedLayerTreeHostProxy::CommitCoordinatedGraphicsState(state));
 #endif
@@ -209,7 +209,7 @@ void CoordinatedLayerTreeHost::commitSceneState(const CoordinatedGraphicsState& 
 }
 
 RefPtr<CoordinatedSurface> CoordinatedLayerTreeHost::createCoordinatedSurface(const IntSize& size, CoordinatedSurface::Flags flags)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if USE(COORDINATED_GRAPHICS_THREADED)
     return ThreadSafeCoordinatedSurface::create(size, flags);
 #elif USE(COORDINATED_GRAPHICS_MULTIPROCESS)
@@ -222,23 +222,23 @@ RefPtr<CoordinatedSurface> CoordinatedLayerTreeHost::createCoordinatedSurface(co
 }
 
 void CoordinatedLayerTreeHost::deviceOrPageScaleFactorChanged()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_coordinator.deviceOrPageScaleFactorChanged();
     m_webPage.mainFrame()->pageOverlayController().didChangeDeviceScaleFactor();
 }
 
 void CoordinatedLayerTreeHost::pageBackgroundTransparencyChanged()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 GraphicsLayerFactory* CoordinatedLayerTreeHost::graphicsLayerFactory()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return &m_coordinator;
 }
 
 #if ENABLE(REQUEST_ANIMATION_FRAME)
 void CoordinatedLayerTreeHost::scheduleAnimation()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_isWaitingForRenderer)
         return;
 
@@ -251,7 +251,7 @@ void CoordinatedLayerTreeHost::scheduleAnimation()
 #endif
 
 void CoordinatedLayerTreeHost::commitScrollOffset(uint32_t layerID, const WebCore::IntSize& offset)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_coordinator.commitScrollOffset(layerID, offset);
 }
 

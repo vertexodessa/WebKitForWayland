@@ -35,13 +35,13 @@
 namespace WebCore {
 
 void ResourceResponse::updateSoupMessageHeaders(SoupMessageHeaders* soupHeaders) const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const auto& header : httpHeaderFields())
         soup_message_headers_append(soupHeaders, header.key.utf8().data(), header.value.utf8().data());
 }
 
 SoupMessage* ResourceResponse::toSoupMessage() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     // This GET here is just because SoupMessage wants it, we dn't really know.
     SoupMessage* soupMessage = soup_message_new("GET", url().string().utf8().data());
     if (!soupMessage)
@@ -60,7 +60,7 @@ SoupMessage* ResourceResponse::toSoupMessage() const
 }
 
 void ResourceResponse::updateFromSoupMessage(SoupMessage* soupMessage)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_url = URL(soup_message_get_uri(soupMessage));
 
     switch (soup_message_get_http_version(soupMessage)) {
@@ -84,7 +84,7 @@ void ResourceResponse::updateFromSoupMessage(SoupMessage* soupMessage)
 }
 
 void ResourceResponse::updateFromSoupMessageHeaders(const SoupMessageHeaders* messageHeaders)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SoupMessageHeaders* headers = const_cast<SoupMessageHeaders*>(messageHeaders);
     SoupMessageHeadersIter headersIter;
     const char* headerName;
@@ -111,12 +111,12 @@ void ResourceResponse::updateFromSoupMessageHeaders(const SoupMessageHeaders* me
 }
 
 CertificateInfo ResourceResponse::platformCertificateInfo() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return CertificateInfo(m_certificate.get(), m_tlsErrors);
 }
 
 String ResourceResponse::platformSuggestedFilename() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     String contentDisposition(httpHeaderField(HTTPHeaderName::ContentDisposition));
     return filenameFromHTTPContentDisposition(String::fromUTF8WithLatin1Fallback(contentDisposition.characters8(), contentDisposition.length()));
 }

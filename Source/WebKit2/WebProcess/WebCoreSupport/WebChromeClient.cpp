@@ -102,14 +102,14 @@ using namespace HTMLNames;
 namespace WebKit {
 
 static double area(WebFrame* frame)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntSize size = frame->visibleContentBoundsExcludingScrollbars().size();
     return static_cast<double>(size.height()) * size.width();
 }
 
 
 static WebFrame* findLargestFrameInFrameSet(WebPage* page)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Approximate what a user could consider a default target frame for application menu operations.
 
     WebFrame* mainFrame = page->mainWebFrame();
@@ -130,17 +130,17 @@ static WebFrame* findLargestFrameInFrameSet(WebPage* page)
 }
 
 void WebChromeClient::chromeDestroyed()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     delete this;
 }
 
 void WebChromeClient::setWindowRect(const FloatRect& windowFrame)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->sendSetWindowFrame(windowFrame);
 }
 
 FloatRect WebChromeClient::windowRect()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(IOS)
     return FloatRect();
 #else
@@ -159,50 +159,50 @@ FloatRect WebChromeClient::windowRect()
 }
 
 FloatRect WebChromeClient::pageRect()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return FloatRect(FloatPoint(), m_page->size());
 }
 
 void WebChromeClient::focus()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::SetFocus(true));
 }
 
 void WebChromeClient::unfocus()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::SetFocus(false));
 }
 
 #if PLATFORM(COCOA)
 void WebChromeClient::elementDidFocus(const WebCore::Node* node)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->elementDidFocus(const_cast<WebCore::Node*>(node));
 }
 
 void WebChromeClient::elementDidBlur(const WebCore::Node* node)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->elementDidBlur(const_cast<WebCore::Node*>(node));
 }
 
 void WebChromeClient::makeFirstResponder()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::MakeFirstResponder());
 }    
 #endif    
 
 bool WebChromeClient::canTakeFocus(FocusDirection)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     notImplemented();
     return true;
 }
 
 void WebChromeClient::takeFocus(FocusDirection direction)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::TakeFocus(direction));
 }
 
 void WebChromeClient::focusedElementChanged(Element* element)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!is<HTMLInputElement>(element))
         return;
 
@@ -216,14 +216,14 @@ void WebChromeClient::focusedElementChanged(Element* element)
 }
 
 void WebChromeClient::focusedFrameChanged(Frame* frame)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* webFrame = frame ? WebFrame::fromCoreFrame(*frame) : nullptr;
 
     WebProcess::singleton().parentProcessConnection()->send(Messages::WebPageProxy::FocusedFrameChanged(webFrame ? webFrame->frameID() : 0), m_page->pageID());
 }
 
 Page* WebChromeClient::createWindow(Frame* frame, const FrameLoadRequest& request, const WindowFeatures& windowFeatures, const NavigationAction& navigationAction)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(FULLSCREEN_API)
     if (frame->document() && frame->document()->webkitCurrentFullScreenElement())
         frame->document()->webkitCancelFullScreen();
@@ -256,27 +256,27 @@ Page* WebChromeClient::createWindow(Frame* frame, const FrameLoadRequest& reques
 }
 
 void WebChromeClient::show()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->show();
 }
 
 bool WebChromeClient::canRunModal()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->canRunModal();
 }
 
 void WebChromeClient::runModal()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->runModal();
 }
 
 void WebChromeClient::setToolbarsVisible(bool toolbarsAreVisible)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::SetToolbarsAreVisible(toolbarsAreVisible));
 }
 
 bool WebChromeClient::toolbarsVisible()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     API::InjectedBundle::PageUIClient::UIElementVisibility toolbarsVisibility = m_page->injectedBundleUIClient().toolbarsAreVisible(m_page);
     if (toolbarsVisibility != API::InjectedBundle::PageUIClient::UIElementVisibility::Unknown)
         return toolbarsVisibility == API::InjectedBundle::PageUIClient::UIElementVisibility::Visible;
@@ -289,12 +289,12 @@ bool WebChromeClient::toolbarsVisible()
 }
 
 void WebChromeClient::setStatusbarVisible(bool statusBarIsVisible)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::SetStatusBarIsVisible(statusBarIsVisible));
 }
 
 bool WebChromeClient::statusbarVisible()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     API::InjectedBundle::PageUIClient::UIElementVisibility statusbarVisibility = m_page->injectedBundleUIClient().statusBarIsVisible(m_page);
     if (statusbarVisibility != API::InjectedBundle::PageUIClient::UIElementVisibility::Unknown)
         return statusbarVisibility == API::InjectedBundle::PageUIClient::UIElementVisibility::Visible;
@@ -307,23 +307,23 @@ bool WebChromeClient::statusbarVisible()
 }
 
 void WebChromeClient::setScrollbarsVisible(bool)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     notImplemented();
 }
 
 bool WebChromeClient::scrollbarsVisible()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     notImplemented();
     return true;
 }
 
 void WebChromeClient::setMenubarVisible(bool menuBarVisible)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::SetMenuBarIsVisible(menuBarVisible));
 }
 
 bool WebChromeClient::menubarVisible()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     API::InjectedBundle::PageUIClient::UIElementVisibility menubarVisibility = m_page->injectedBundleUIClient().menuBarIsVisible(m_page);
     if (menubarVisibility != API::InjectedBundle::PageUIClient::UIElementVisibility::Unknown)
         return menubarVisibility == API::InjectedBundle::PageUIClient::UIElementVisibility::Visible;
@@ -336,12 +336,12 @@ bool WebChromeClient::menubarVisible()
 }
 
 void WebChromeClient::setResizable(bool resizable)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::SetIsResizable(resizable));
 }
 
 void WebChromeClient::addMessageToConsole(MessageSource source, MessageLevel level, const String& message, unsigned lineNumber, unsigned columnNumber, const String& sourceID)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Notify the bundle client.
     m_page->injectedBundleUIClient().willAddMessageToConsole(m_page, source, level, message, lineNumber, columnNumber, sourceID);
 
@@ -389,12 +389,12 @@ void WebChromeClient::addMessageToConsole(MessageSource source, MessageLevel lev
 }
 
 bool WebChromeClient::canRunBeforeUnloadConfirmPanel()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->canRunBeforeUnloadConfirmPanel();
 }
 
 bool WebChromeClient::runBeforeUnloadConfirmPanel(const String& message, Frame* frame)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* webFrame = WebFrame::fromCoreFrame(*frame);
 
     bool shouldClose = false;
@@ -408,7 +408,7 @@ bool WebChromeClient::runBeforeUnloadConfirmPanel(const String& message, Frame* 
 }
 
 void WebChromeClient::closeWindowSoon()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // FIXME: This code assumes that the client will respond to a close page
     // message by actually closing the page. Safari does this, but there is
     // no guarantee that other applications will, which will leave this page
@@ -427,7 +427,7 @@ void WebChromeClient::closeWindowSoon()
 }
 
 void WebChromeClient::runJavaScriptAlert(Frame* frame, const String& alertText)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* webFrame = WebFrame::fromCoreFrame(*frame);
     ASSERT(webFrame);
 
@@ -440,7 +440,7 @@ void WebChromeClient::runJavaScriptAlert(Frame* frame, const String& alertText)
 }
 
 bool WebChromeClient::runJavaScriptConfirm(Frame* frame, const String& message)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* webFrame = WebFrame::fromCoreFrame(*frame);
     ASSERT(webFrame);
 
@@ -457,7 +457,7 @@ bool WebChromeClient::runJavaScriptConfirm(Frame* frame, const String& message)
 }
 
 bool WebChromeClient::runJavaScriptPrompt(Frame* frame, const String& message, const String& defaultValue, String& result)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* webFrame = WebFrame::fromCoreFrame(*frame);
     ASSERT(webFrame);
 
@@ -473,7 +473,7 @@ bool WebChromeClient::runJavaScriptPrompt(Frame* frame, const String& message, c
 }
 
 void WebChromeClient::setStatusbarText(const String& statusbarText)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Notify the bundle client.
     m_page->injectedBundleUIClient().willSetStatusbarText(m_page, statusbarText);
 
@@ -481,17 +481,17 @@ void WebChromeClient::setStatusbarText(const String& statusbarText)
 }
 
 KeyboardUIMode WebChromeClient::keyboardUIMode()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->keyboardUIMode();
 }
 
 void WebChromeClient::invalidateRootView(const IntRect&)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Do nothing here, there's no concept of invalidating the window in the web process.
 }
 
 void WebChromeClient::invalidateContentsAndRootView(const IntRect& rect)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Document* document = m_page->corePage()->mainFrame().document()) {
         if (document->printing())
             return;
@@ -501,7 +501,7 @@ void WebChromeClient::invalidateContentsAndRootView(const IntRect& rect)
 }
 
 void WebChromeClient::invalidateContentsForSlowScroll(const IntRect& rect)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (Document* document = m_page->corePage()->mainFrame().document()) {
         if (document->printing())
             return;
@@ -516,48 +516,48 @@ void WebChromeClient::invalidateContentsForSlowScroll(const IntRect& rect)
 }
 
 void WebChromeClient::scroll(const IntSize& scrollDelta, const IntRect& scrollRect, const IntRect& clipRect)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->pageDidScroll();
     m_page->drawingArea()->scroll(intersection(scrollRect, clipRect), scrollDelta);
 }
 
 #if USE(COORDINATED_GRAPHICS)
 void WebChromeClient::delegatedScrollRequested(const IntPoint& scrollOffset)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->pageDidRequestScroll(scrollOffset);
 }
 #endif
 
 IntPoint WebChromeClient::screenToRootView(const IntPoint& point) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->screenToRootView(point);
 }
 
 IntRect WebChromeClient::rootViewToScreen(const IntRect& rect) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->rootViewToScreen(rect);
 }
     
 #if PLATFORM(IOS)
 IntPoint WebChromeClient::accessibilityScreenToRootView(const IntPoint& point) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->accessibilityScreenToRootView(point);
 }
 
 IntRect WebChromeClient::rootViewToAccessibilityScreen(const IntRect& rect) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->rootViewToAccessibilityScreen(rect);
 }
 #endif
 
 PlatformPageClient WebChromeClient::platformPageClient() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     notImplemented();
     return 0;
 }
 
 void WebChromeClient::contentsSizeChanged(Frame* frame, const IntSize& size) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!m_page->corePage()->settings().frameFlatteningEnabled()) {
         WebFrame* largestFrame = findLargestFrameInFrameSet(m_page);
         if (largestFrame != m_cachedFrameSetLargestFrame.get()) {
@@ -588,12 +588,12 @@ void WebChromeClient::contentsSizeChanged(Frame* frame, const IntSize& size) con
 }
 
 void WebChromeClient::scrollRectIntoView(const IntRect&) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     notImplemented();
 }
 
 bool WebChromeClient::shouldUnavailablePluginMessageBeButton(RenderEmbeddedObject::PluginUnavailabilityReason pluginUnavailabilityReason) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     switch (pluginUnavailabilityReason) {
     case RenderEmbeddedObject::PluginMissing:
         // FIXME: <rdar://problem/8794397> We should only return true when there is a
@@ -612,7 +612,7 @@ bool WebChromeClient::shouldUnavailablePluginMessageBeButton(RenderEmbeddedObjec
 }
     
 void WebChromeClient::unavailablePluginButtonClicked(Element* element, RenderEmbeddedObject::PluginUnavailabilityReason pluginUnavailabilityReason) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(NETSCAPE_PLUGIN_API)
     ASSERT(element->hasTagName(objectTag) || element->hasTagName(embedTag) || element->hasTagName(appletTag));
     ASSERT(pluginUnavailabilityReason == RenderEmbeddedObject::PluginMissing || pluginUnavailabilityReason == RenderEmbeddedObject::InsecurePluginVersion || pluginUnavailabilityReason);
@@ -633,12 +633,12 @@ void WebChromeClient::unavailablePluginButtonClicked(Element* element, RenderEmb
 }
 
 void WebChromeClient::scrollbarsModeDidChange() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     notImplemented();
 }
 
 void WebChromeClient::mouseDidMoveOverElement(const HitTestResult& hitTestResult, unsigned modifierFlags)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<API::Object> userData;
 
     // Notify the bundle client.
@@ -650,7 +650,7 @@ void WebChromeClient::mouseDidMoveOverElement(const HitTestResult& hitTestResult
 }
 
 void WebChromeClient::setToolTip(const String& toolTip, TextDirection)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Only send a tool tip to the WebProcess if it has changed since the last time this function was called.
 
     if (toolTip == m_cachedToolTip)
@@ -661,7 +661,7 @@ void WebChromeClient::setToolTip(const String& toolTip, TextDirection)
 }
 
 void WebChromeClient::print(Frame* frame)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* webFrame = WebFrame::fromCoreFrame(*frame);
     ASSERT(webFrame);
 
@@ -689,7 +689,7 @@ void WebChromeClient::print(Frame* frame)
 }
 
 void WebChromeClient::exceededDatabaseQuota(Frame* frame, const String& databaseName, DatabaseDetails details)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     WebFrame* webFrame = WebFrame::fromCoreFrame(*frame);
     ASSERT(webFrame);
     
@@ -712,12 +712,12 @@ void WebChromeClient::exceededDatabaseQuota(Frame* frame, const String& database
 }
 
 void WebChromeClient::reachedMaxAppCacheSize(int64_t)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     notImplemented();
 }
 
 void WebChromeClient::reachedApplicationCacheOriginQuota(SecurityOrigin* origin, int64_t totalBytesNeeded)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<API::SecurityOrigin> securityOrigin = API::SecurityOrigin::createFromString(origin->toString());
     if (m_page->injectedBundleUIClient().didReachApplicationCacheOriginQuota(m_page, securityOrigin.get(), totalBytesNeeded))
         return;
@@ -737,31 +737,31 @@ void WebChromeClient::reachedApplicationCacheOriginQuota(SecurityOrigin* origin,
 
 #if ENABLE(DASHBOARD_SUPPORT)
 void WebChromeClient::annotatedRegionsChanged()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     notImplemented();
 }
 #endif
 
 bool WebChromeClient::shouldReplaceWithGeneratedFileForUpload(const String& path, String& generatedFilename)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     generatedFilename = m_page->injectedBundleUIClient().shouldGenerateFileForUpload(m_page, path);
     return !generatedFilename.isNull();
 }
 
 String WebChromeClient::generateReplacementFile(const String& path)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->injectedBundleUIClient().generateFileForUpload(m_page, path);
 }
 
 #if ENABLE(INPUT_TYPE_COLOR)
 std::unique_ptr<ColorChooser> WebChromeClient::createColorChooser(ColorChooserClient* client, const Color& initialColor)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return std::make_unique<WebColorChooser>(m_page, client, initialColor);
 }
 #endif
 
 void WebChromeClient::runOpenPanel(Frame* frame, PassRefPtr<FileChooser> prpFileChooser)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_page->activeOpenPanelResultListener())
         return;
 
@@ -776,25 +776,25 @@ void WebChromeClient::runOpenPanel(Frame* frame, PassRefPtr<FileChooser> prpFile
 }
 
 void WebChromeClient::loadIconForFiles(const Vector<String>& filenames, FileIconLoader* loader)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     loader->notifyFinished(Icon::createIconForFiles(filenames));
 }
 
 #if !PLATFORM(IOS)
 void WebChromeClient::setCursor(const WebCore::Cursor& cursor)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::SetCursor(cursor));
 }
 
 void WebChromeClient::setCursorHiddenUntilMouseMoves(bool hiddenUntilMouseMoves)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::SetCursorHiddenUntilMouseMoves(hiddenUntilMouseMoves));
 }
 #endif
 
 #if ENABLE(REQUEST_ANIMATION_FRAME) && !USE(REQUEST_ANIMATION_FRAME_TIMER)
 void WebChromeClient::scheduleAnimation()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if USE(COORDINATED_GRAPHICS)
     m_page->drawingArea()->layerTreeHost()->scheduleAnimation();
 #endif
@@ -802,17 +802,17 @@ void WebChromeClient::scheduleAnimation()
 #endif
 
 void WebChromeClient::didAssociateFormControls(const Vector<RefPtr<WebCore::Element>>& elements)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->injectedBundleFormClient().didAssociateFormControls(m_page, elements);
 }
 
 bool WebChromeClient::shouldNotifyOnFormChanges()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->injectedBundleFormClient().shouldNotifyOnFormChanges(m_page);
 }
 
 bool WebChromeClient::selectItemWritingDirectionIsNatural()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(EFL)
     return true;
 #else
@@ -821,28 +821,28 @@ bool WebChromeClient::selectItemWritingDirectionIsNatural()
 }
 
 bool WebChromeClient::selectItemAlignmentFollowsMenuWritingDirection()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return true;
 }
 
 bool WebChromeClient::hasOpenedPopup() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     notImplemented();
     return false;
 }
 
 RefPtr<WebCore::PopupMenu> WebChromeClient::createPopupMenu(WebCore::PopupMenuClient* client) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return WebPopupMenu::create(m_page, client);
 }
 
 RefPtr<WebCore::SearchPopupMenu> WebChromeClient::createSearchPopupMenu(WebCore::PopupMenuClient* client) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return WebSearchPopupMenu::create(m_page, client);
 }
 
 GraphicsLayerFactory* WebChromeClient::graphicsLayerFactory() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (auto drawingArea = m_page->drawingArea())
         return drawingArea->graphicsLayerFactory();
     return nullptr;
@@ -850,13 +850,13 @@ GraphicsLayerFactory* WebChromeClient::graphicsLayerFactory() const
 
 #if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
 RefPtr<WebCore::DisplayRefreshMonitor> WebChromeClient::createDisplayRefreshMonitor(PlatformDisplayID displayID) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->drawingArea()->createDisplayRefreshMonitor(displayID);
 }
 #endif
 
 void WebChromeClient::attachRootGraphicsLayer(Frame*, GraphicsLayer* layer)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (layer)
         m_page->enterAcceleratedCompositingMode(layer);
     else
@@ -864,29 +864,29 @@ void WebChromeClient::attachRootGraphicsLayer(Frame*, GraphicsLayer* layer)
 }
 
 void WebChromeClient::attachViewOverlayGraphicsLayer(Frame* frame, GraphicsLayer* graphicsLayer)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (auto drawingArea = m_page->drawingArea())
         drawingArea->attachViewOverlayGraphicsLayer(frame, graphicsLayer);
 }
 
 void WebChromeClient::setNeedsOneShotDrawingSynchronization()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     notImplemented();
 }
 
 void WebChromeClient::scheduleCompositingLayerFlush()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_page->drawingArea())
         m_page->drawingArea()->scheduleCompositingLayerFlush();
 }
 
 bool WebChromeClient::adjustLayerFlushThrottling(WebCore::LayerFlushThrottleState::Flags flags)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->drawingArea() && m_page->drawingArea()->adjustLayerFlushThrottling(flags);
 }
 
 bool WebChromeClient::layerTreeStateIsFrozen() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_page->drawingArea())
         return m_page->drawingArea()->layerTreeStateIsFrozen();
 
@@ -895,7 +895,7 @@ bool WebChromeClient::layerTreeStateIsFrozen() const
 
 #if ENABLE(ASYNC_SCROLLING)
 PassRefPtr<ScrollingCoordinator> WebChromeClient::createScrollingCoordinator(Page* page) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(m_page->corePage() == page);
     if (m_page->drawingArea()->type() == DrawingAreaTypeRemoteLayerTree)
         return RemoteScrollingCoordinator::create(m_page);
@@ -906,34 +906,34 @@ PassRefPtr<ScrollingCoordinator> WebChromeClient::createScrollingCoordinator(Pag
 
 #if (PLATFORM(IOS) && HAVE(AVKIT)) || (PLATFORM(MAC) && ENABLE(VIDEO_PRESENTATION_MODE))
 bool WebChromeClient::supportsVideoFullscreen(WebCore::HTMLMediaElementEnums::VideoFullscreenMode mode)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->videoFullscreenManager().supportsVideoFullscreen(mode);
 }
 
 void WebChromeClient::setUpPlaybackControlsManager(WebCore::HTMLMediaElement& mediaElement)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->playbackSessionManager().setUpPlaybackControlsManager(mediaElement);
 }
 
 void WebChromeClient::clearPlaybackControlsManager()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->playbackSessionManager().clearPlaybackControlsManager();
 }
 
 void WebChromeClient::enterVideoFullscreenForVideoElement(WebCore::HTMLVideoElement& videoElement, WebCore::HTMLMediaElementEnums::VideoFullscreenMode mode)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     ASSERT(mode != HTMLMediaElementEnums::VideoFullscreenModeNone);
     m_page->videoFullscreenManager().enterVideoFullscreenForVideoElement(videoElement, mode);
 }
 
 void WebChromeClient::exitVideoFullscreenForVideoElement(WebCore::HTMLVideoElement& videoElement)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->videoFullscreenManager().exitVideoFullscreenForVideoElement(videoElement);
 }
 
 #if PLATFORM(MAC) && ENABLE(VIDEO_PRESENTATION_MODE)
 void WebChromeClient::exitVideoFullscreenToModeWithoutAnimation(WebCore::HTMLVideoElement& videoElement, HTMLMediaElementEnums::VideoFullscreenMode targetMode)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->videoFullscreenManager().exitVideoFullscreenToModeWithoutAnimation(videoElement, targetMode);
 }
 #endif
@@ -942,35 +942,35 @@ void WebChromeClient::exitVideoFullscreenToModeWithoutAnimation(WebCore::HTMLVid
     
 #if ENABLE(FULLSCREEN_API)
 bool WebChromeClient::supportsFullScreenForElement(const WebCore::Element*, bool withKeyboard)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->fullScreenManager()->supportsFullScreen(withKeyboard);
 }
 
 void WebChromeClient::enterFullScreenForElement(WebCore::Element* element)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->fullScreenManager()->enterFullScreenForElement(element);
 }
 
 void WebChromeClient::exitFullScreenForElement(WebCore::Element* element)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->fullScreenManager()->exitFullScreenForElement(element);
 }
 #endif
 
 #if PLATFORM(IOS)
 FloatSize WebChromeClient::screenSize() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->screenSize();
 }
 
 FloatSize WebChromeClient::availableScreenSize() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->availableScreenSize();
 }
 #endif
 
 void WebChromeClient::dispatchViewportPropertiesDidChange(const ViewportArguments& viewportArguments) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     UNUSED_PARAM(viewportArguments);
 #if PLATFORM(IOS)
     m_page->viewportPropertiesDidChange(viewportArguments);
@@ -984,27 +984,27 @@ void WebChromeClient::dispatchViewportPropertiesDidChange(const ViewportArgument
 }
 
 void WebChromeClient::notifyScrollerThumbIsVisibleInRect(const IntRect& scrollerThumb)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::NotifyScrollerThumbIsVisibleInRect(scrollerThumb));
 }
 
 void WebChromeClient::recommendedScrollbarStyleDidChange(ScrollbarStyle newStyle)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::RecommendedScrollbarStyleDidChange(static_cast<int32_t>(newStyle)));
 }
 
 WTF::Optional<ScrollbarOverlayStyle> WebChromeClient::preferredScrollbarOverlayStyle()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->scrollbarOverlayStyle(); 
 }
 
 Color WebChromeClient::underlayColor() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->underlayColor();
 }
 
 void WebChromeClient::pageExtendedBackgroundColorDidChange(Color backgroundColor) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if PLATFORM(MAC) || PLATFORM(EFL)
     m_page->send(Messages::WebPageProxy::PageExtendedBackgroundColorDidChange(backgroundColor));
 #else
@@ -1013,42 +1013,42 @@ void WebChromeClient::pageExtendedBackgroundColorDidChange(Color backgroundColor
 }
 
 void WebChromeClient::wheelEventHandlersChanged(bool hasHandlers)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->wheelEventHandlersChanged(hasHandlers);
 }
 
 String WebChromeClient::plugInStartLabelTitle(const String& mimeType) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->injectedBundleUIClient().plugInStartLabelTitle(mimeType);
 }
 
 String WebChromeClient::plugInStartLabelSubtitle(const String& mimeType) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->injectedBundleUIClient().plugInStartLabelSubtitle(mimeType);
 }
 
 String WebChromeClient::plugInExtraStyleSheet() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->injectedBundleUIClient().plugInExtraStyleSheet();
 }
 
 String WebChromeClient::plugInExtraScript() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->injectedBundleUIClient().plugInExtraScript();
 }
 
 void WebChromeClient::enableSuddenTermination()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebProcessProxy::EnableSuddenTermination());
 }
 
 void WebChromeClient::disableSuddenTermination()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebProcessProxy::DisableSuddenTermination());
 }
 
 void WebChromeClient::didAddHeaderLayer(GraphicsLayer* headerParent)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(RUBBER_BANDING)
     if (PageBanner* banner = m_page->headerPageBanner())
         banner->didAddParentLayer(headerParent);
@@ -1058,7 +1058,7 @@ void WebChromeClient::didAddHeaderLayer(GraphicsLayer* headerParent)
 }
 
 void WebChromeClient::didAddFooterLayer(GraphicsLayer* footerParent)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(RUBBER_BANDING)
     if (PageBanner* banner = m_page->footerPageBanner())
         banner->didAddParentLayer(footerParent);
@@ -1068,40 +1068,40 @@ void WebChromeClient::didAddFooterLayer(GraphicsLayer* footerParent)
 }
 
 bool WebChromeClient::shouldUseTiledBackingForFrameView(const FrameView* frameView) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->drawingArea()->shouldUseTiledBackingForFrameView(frameView);
 }
 
 void WebChromeClient::isPlayingMediaDidChange(WebCore::MediaProducer::MediaStateFlags state, uint64_t sourceElementID)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::IsPlayingMediaDidChange(state, sourceElementID));
 }
 
 #if ENABLE(MEDIA_SESSION)
 void WebChromeClient::hasMediaSessionWithActiveMediaElementsDidChange(bool state)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::HasMediaSessionWithActiveMediaElementsDidChange(state));
 }
 
 void WebChromeClient::mediaSessionMetadataDidChange(const WebCore::MediaSessionMetadata& metadata)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::MediaSessionMetadataDidChange(metadata));
 }
 
 void WebChromeClient::focusedContentMediaElementDidChange(uint64_t elementID)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::FocusedContentMediaElementDidChange(elementID));
 }
 #endif
 
 void WebChromeClient::setPageActivityState(PageActivityState::Flags activityState)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->setPageActivityState(activityState);
 }
 
 #if ENABLE(SUBTLE_CRYPTO)
 bool WebChromeClient::wrapCryptoKey(const Vector<uint8_t>& key, Vector<uint8_t>& wrappedKey) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool succeeded;
     if (!WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPageProxy::WrapCryptoKey(key), Messages::WebPageProxy::WrapCryptoKey::Reply(succeeded, wrappedKey), m_page->pageID()))
         return false;
@@ -1109,7 +1109,7 @@ bool WebChromeClient::wrapCryptoKey(const Vector<uint8_t>& key, Vector<uint8_t>&
 }
 
 bool WebChromeClient::unwrapCryptoKey(const Vector<uint8_t>& wrappedKey, Vector<uint8_t>& key) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     bool succeeded;
     if (!WebProcess::singleton().parentProcessConnection()->sendSync(Messages::WebPageProxy::UnwrapCryptoKey(wrappedKey), Messages::WebPageProxy::UnwrapCryptoKey::Reply(succeeded, key), m_page->pageID()))
         return false;
@@ -1119,30 +1119,30 @@ bool WebChromeClient::unwrapCryptoKey(const Vector<uint8_t>& wrappedKey, Vector<
 
 #if ENABLE(TELEPHONE_NUMBER_DETECTION) && PLATFORM(MAC)
 void WebChromeClient::handleTelephoneNumberClick(const String& number, const WebCore::IntPoint& point)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->handleTelephoneNumberClick(number, point);
 }
 #endif
 
 #if ENABLE(SERVICE_CONTROLS)
 void WebChromeClient::handleSelectionServiceClick(WebCore::FrameSelection& selection, const Vector<String>& telephoneNumbers, const WebCore::IntPoint& point)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->handleSelectionServiceClick(selection, telephoneNumbers, point);
 }
 
 bool WebChromeClient::hasRelevantSelectionServices(bool isTextOnly) const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return (isTextOnly && WebProcess::singleton().hasSelectionServices()) || WebProcess::singleton().hasRichContentServices();
 }
 #endif
 
 bool WebChromeClient::shouldDispatchFakeMouseMoveEvents() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_page->shouldDispatchFakeMouseMoveEvents();
 }
 
 void WebChromeClient::handleAutoFillButtonClick(HTMLInputElement& inputElement)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     RefPtr<API::Object> userData;
 
     // Notify the bundle client.
@@ -1155,55 +1155,55 @@ void WebChromeClient::handleAutoFillButtonClick(HTMLInputElement& inputElement)
 
 #if ENABLE(WIRELESS_PLAYBACK_TARGET) && !PLATFORM(IOS)
 void WebChromeClient::addPlaybackTargetPickerClient(uint64_t contextId)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::AddPlaybackTargetPickerClient(contextId));
 }
 
 void WebChromeClient::removePlaybackTargetPickerClient(uint64_t contextId)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::RemovePlaybackTargetPickerClient(contextId));
 }
 
 
 void WebChromeClient::showPlaybackTargetPicker(uint64_t contextId, const WebCore::IntPoint& position, bool isVideo)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     FrameView* frameView = m_page->mainFrame()->view();
     FloatRect rect(frameView->contentsToRootView(frameView->windowToContents(position)), FloatSize());
     m_page->send(Messages::WebPageProxy::ShowPlaybackTargetPicker(contextId, rect, isVideo));
 }
 
 void WebChromeClient::playbackTargetPickerClientStateDidChange(uint64_t contextId, WebCore::MediaProducer::MediaStateFlags state)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::PlaybackTargetPickerClientStateDidChange(contextId, state));
 }
 
 void WebChromeClient::setMockMediaPlaybackTargetPickerEnabled(bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::SetMockMediaPlaybackTargetPickerEnabled(enabled));
 }
 
 void WebChromeClient::setMockMediaPlaybackTargetPickerState(const String& name, WebCore::MediaPlaybackTargetContext::State state)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->send(Messages::WebPageProxy::SetMockMediaPlaybackTargetPickerState(name, state));
 }
 #endif
 
 void WebChromeClient::imageOrMediaDocumentSizeChanged(const WebCore::IntSize& newSize)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->imageOrMediaDocumentSizeChanged(newSize);
 }
 
 #if ENABLE(VIDEO)
 #if USE(GSTREAMER)
 void WebChromeClient::requestInstallMissingMediaPlugins(const String& details, const String& description, WebCore::MediaPlayerRequestInstallMissingPluginsCallback& callback)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->requestInstallMissingMediaPlugins(details, description, callback);
 }
 #endif
 #endif // ENABLE(VIDEO)
 
 void WebChromeClient::didInvalidateDocumentMarkerRects()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_page->findController().didInvalidateDocumentMarkerRects();
 }
 

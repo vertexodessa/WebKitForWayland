@@ -88,7 +88,7 @@ using namespace JSC;
 namespace WebKit {
 
 PassRefPtr<InjectedBundle> InjectedBundle::create(const WebProcessCreationParameters& parameters, API::Object* initializationUserData)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto bundle = adoptRef(*new InjectedBundle(parameters));
 
     bundle->m_sandboxExtension = SandboxExtension::create(parameters.injectedBundlePathExtensionHandle);
@@ -101,26 +101,26 @@ PassRefPtr<InjectedBundle> InjectedBundle::create(const WebProcessCreationParame
 InjectedBundle::InjectedBundle(const WebProcessCreationParameters& parameters)
     : m_path(parameters.injectedBundlePath)
     , m_platformBundle(0)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 InjectedBundle::~InjectedBundle()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 void InjectedBundle::initializeClient(const WKBundleClientBase* client)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_client.initialize(client);
 }
 
 void InjectedBundle::postMessage(const String& messageName, API::Object* messageBody)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     auto& webProcess = WebProcess::singleton();
     webProcess.parentProcessConnection()->send(Messages::WebProcessPool::HandleMessage(messageName, UserData(webProcess.transformObjectsToHandles(messageBody))), 0);
 }
 
 void InjectedBundle::postSynchronousMessage(const String& messageName, API::Object* messageBody, RefPtr<API::Object>& returnData)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     UserData returnUserData;
 
     auto& webProcess = WebProcess::singleton();
@@ -131,12 +131,12 @@ void InjectedBundle::postSynchronousMessage(const String& messageName, API::Obje
 }
 
 WebConnection* InjectedBundle::webConnectionToUIProcess() const
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return WebProcess::singleton().webConnectionToUIProcess();
 }
 
 void InjectedBundle::overrideBoolPreferenceForTestRunner(WebPageGroupProxy* pageGroup, const String& preference, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
 
     if (preference == "WebKitTabToLinksPreferenceKey") {
@@ -252,7 +252,7 @@ void InjectedBundle::overrideBoolPreferenceForTestRunner(WebPageGroupProxy* page
 }
 
 void InjectedBundle::overrideXSSAuditorEnabledForTestRunner(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // Override the preference for all future pages.
     WebPreferencesStore::overrideBoolValueForKey(WebPreferencesKey::xssAuditorEnabledKey(), enabled);
 
@@ -263,49 +263,49 @@ void InjectedBundle::overrideXSSAuditorEnabledForTestRunner(WebPageGroupProxy* p
 }
 
 void InjectedBundle::setAllowUniversalAccessFromFileURLs(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     for (HashSet<Page*>::iterator iter = pages.begin(); iter != pages.end(); ++iter)
         (*iter)->settings().setAllowUniversalAccessFromFileURLs(enabled);
 }
 
 void InjectedBundle::setAllowFileAccessFromFileURLs(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     for (HashSet<Page*>::iterator iter = pages.begin(); iter != pages.end(); ++iter)
         (*iter)->settings().setAllowFileAccessFromFileURLs(enabled);
 }
 
 void InjectedBundle::setMinimumLogicalFontSize(WebPageGroupProxy* pageGroup, int size)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     for (HashSet<Page*>::iterator iter = pages.begin(); iter != pages.end(); ++iter)
         (*iter)->settings().setMinimumLogicalFontSize(size);
 }
 
 void InjectedBundle::setFrameFlatteningEnabled(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     for (HashSet<Page*>::iterator iter = pages.begin(); iter != pages.end(); ++iter)
         (*iter)->settings().setFrameFlatteningEnabled(enabled);
 }
 
 void InjectedBundle::setPluginsEnabled(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     for (HashSet<Page*>::iterator iter = pages.begin(); iter != pages.end(); ++iter)
         (*iter)->settings().setPluginsEnabled(enabled);
 }
 
 void InjectedBundle::setJavaScriptCanAccessClipboard(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     for (HashSet<Page*>::iterator iter = pages.begin(); iter != pages.end(); ++iter)
         (*iter)->settings().setJavaScriptCanAccessClipboard(enabled);
 }
 
 void InjectedBundle::setPrivateBrowsingEnabled(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (enabled) {
         WebProcess::singleton().ensureLegacyPrivateBrowsingSessionInNetworkProcess();
         WebFrameNetworkingContext::ensurePrivateBrowsingSession(SessionID::legacyPrivateSessionID());
@@ -318,7 +318,7 @@ void InjectedBundle::setPrivateBrowsingEnabled(WebPageGroupProxy* pageGroup, boo
 }
 
 void InjectedBundle::setPopupBlockingEnabled(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     HashSet<Page*>::const_iterator end = pages.end();
     for (HashSet<Page*>::const_iterator iter = pages.begin(); iter != end; ++iter)
@@ -326,43 +326,43 @@ void InjectedBundle::setPopupBlockingEnabled(WebPageGroupProxy* pageGroup, bool 
 }
 
 void InjectedBundle::setAuthorAndUserStylesEnabled(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     for (HashSet<Page*>::iterator iter = pages.begin(); iter != pages.end(); ++iter)
         (*iter)->settings().setAuthorAndUserStylesEnabled(enabled);
 }
 
 void InjectedBundle::setSpatialNavigationEnabled(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     for (HashSet<Page*>::iterator iter = pages.begin(); iter != pages.end(); ++iter)
         (*iter)->settings().setSpatialNavigationEnabled(enabled);
 }
 
 void InjectedBundle::addOriginAccessWhitelistEntry(const String& sourceOrigin, const String& destinationProtocol, const String& destinationHost, bool allowDestinationSubdomains)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     SecurityPolicy::addOriginAccessWhitelistEntry(SecurityOrigin::createFromString(sourceOrigin).get(), destinationProtocol, destinationHost, allowDestinationSubdomains);
 }
 
 void InjectedBundle::removeOriginAccessWhitelistEntry(const String& sourceOrigin, const String& destinationProtocol, const String& destinationHost, bool allowDestinationSubdomains)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     SecurityPolicy::removeOriginAccessWhitelistEntry(SecurityOrigin::createFromString(sourceOrigin).get(), destinationProtocol, destinationHost, allowDestinationSubdomains);
 }
 
 void InjectedBundle::resetOriginAccessWhitelists()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     SecurityPolicy::resetOriginAccessWhitelists();
 }
 
 void InjectedBundle::setAsynchronousSpellCheckingEnabled(WebPageGroupProxy* pageGroup, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     for (HashSet<Page*>::iterator iter = pages.begin(); iter != pages.end(); ++iter)
         (*iter)->settings().setAsynchronousSpellCheckingEnabled(enabled);
 }
 
 int InjectedBundle::numberOfPages(WebFrame* frame, double pageWidthInPixels, double pageHeightInPixels)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame* coreFrame = frame ? frame->coreFrame() : 0;
     if (!coreFrame)
         return -1;
@@ -375,7 +375,7 @@ int InjectedBundle::numberOfPages(WebFrame* frame, double pageWidthInPixels, dou
 }
 
 int InjectedBundle::pageNumberForElementById(WebFrame* frame, const String& id, double pageWidthInPixels, double pageHeightInPixels)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame* coreFrame = frame ? frame->coreFrame() : 0;
     if (!coreFrame)
         return -1;
@@ -393,7 +393,7 @@ int InjectedBundle::pageNumberForElementById(WebFrame* frame, const String& id, 
 }
 
 String InjectedBundle::pageSizeAndMarginsInPixels(WebFrame* frame, int pageIndex, int width, int height, int marginTop, int marginRight, int marginBottom, int marginLeft)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame* coreFrame = frame ? frame->coreFrame() : 0;
     if (!coreFrame)
         return String();
@@ -402,7 +402,7 @@ String InjectedBundle::pageSizeAndMarginsInPixels(WebFrame* frame, int pageIndex
 }
 
 bool InjectedBundle::isPageBoxVisible(WebFrame* frame, int pageIndex)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     Frame* coreFrame = frame ? frame->coreFrame() : 0;
     if (!coreFrame)
         return false;
@@ -411,12 +411,12 @@ bool InjectedBundle::isPageBoxVisible(WebFrame* frame, int pageIndex)
 }
 
 bool InjectedBundle::isProcessingUserGesture()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     return ScriptController::processingUserGesture();
 }
 
 void InjectedBundle::addUserScript(WebPageGroupProxy* pageGroup, InjectedBundleScriptWorld* scriptWorld, const String& source, const String& url, API::Array* whitelist, API::Array* blacklist, WebCore::UserScriptInjectionTime injectionTime, WebCore::UserContentInjectedFrames injectedFrames)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // url is not from URL::string(), i.e. it has not already been parsed by URL, so we have to use the relative URL constructor for URL instead of the ParsedURLStringTag version.
     UserScript userScript{ source, URL(URL(), url), whitelist ? whitelist->toStringVector() : Vector<String>(), blacklist ? blacklist->toStringVector() : Vector<String>(), injectionTime, injectedFrames };
 
@@ -424,7 +424,7 @@ void InjectedBundle::addUserScript(WebPageGroupProxy* pageGroup, InjectedBundleS
 }
 
 void InjectedBundle::addUserStyleSheet(WebPageGroupProxy* pageGroup, InjectedBundleScriptWorld* scriptWorld, const String& source, const String& url, API::Array* whitelist, API::Array* blacklist, WebCore::UserContentInjectedFrames injectedFrames)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // url is not from URL::string(), i.e. it has not already been parsed by URL, so we have to use the relative URL constructor for URL instead of the ParsedURLStringTag version.
     UserStyleSheet userStyleSheet{ source, URL(URL(), url), whitelist ? whitelist->toStringVector() : Vector<String>(), blacklist ? blacklist->toStringVector() : Vector<String>(), injectedFrames, UserStyleUserLevel };
 
@@ -432,50 +432,50 @@ void InjectedBundle::addUserStyleSheet(WebPageGroupProxy* pageGroup, InjectedBun
 }
 
 void InjectedBundle::removeUserScript(WebPageGroupProxy* pageGroup, InjectedBundleScriptWorld* scriptWorld, const String& url)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // url is not from URL::string(), i.e. it has not already been parsed by URL, so we have to use the relative URL constructor for URL instead of the ParsedURLStringTag version.
     pageGroup->userContentController().removeUserScriptWithURL(*scriptWorld, URL(URL(), url));
 }
 
 void InjectedBundle::removeUserStyleSheet(WebPageGroupProxy* pageGroup, InjectedBundleScriptWorld* scriptWorld, const String& url)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     // url is not from URL::string(), i.e. it has not already been parsed by URL, so we have to use the relative URL constructor for URL instead of the ParsedURLStringTag version.
     pageGroup->userContentController().removeUserStyleSheetWithURL(*scriptWorld, URL(URL(), url));
 }
 
 void InjectedBundle::removeUserScripts(WebPageGroupProxy* pageGroup, InjectedBundleScriptWorld* scriptWorld)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     pageGroup->userContentController().removeUserScripts(*scriptWorld);
 }
 
 void InjectedBundle::removeUserStyleSheets(WebPageGroupProxy* pageGroup, InjectedBundleScriptWorld* scriptWorld)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     pageGroup->userContentController().removeUserStyleSheets(*scriptWorld);
 }
 
 void InjectedBundle::removeAllUserContent(WebPageGroupProxy* pageGroup)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     pageGroup->userContentController().removeAllUserContent();
 }
 
 void InjectedBundle::garbageCollectJavaScriptObjects()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     GCController::singleton().garbageCollectNow();
 }
 
 void InjectedBundle::garbageCollectJavaScriptObjectsOnAlternateThreadForDebugging(bool waitUntilDone)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     GCController::singleton().garbageCollectOnAlternateThreadForDebugging(waitUntilDone);
 }
 
 size_t InjectedBundle::javaScriptObjectsCount()
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     JSLockHolder lock(JSDOMWindow::commonVM());
     return JSDOMWindow::commonVM().heap.objectCount();
 }
 
 void InjectedBundle::reportException(JSContextRef context, JSValueRef exception)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!context || !exception)
         return;
 
@@ -490,39 +490,39 @@ void InjectedBundle::reportException(JSContextRef context, JSValueRef exception)
 }
 
 void InjectedBundle::didCreatePage(WebPage* page)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_client.didCreatePage(this, page);
 }
 
 void InjectedBundle::willDestroyPage(WebPage* page)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_client.willDestroyPage(this, page);
 }
 
 void InjectedBundle::didInitializePageGroup(WebPageGroupProxy* pageGroup)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_client.didInitializePageGroup(this, pageGroup);
 }
 
 void InjectedBundle::didReceiveMessage(const String& messageName, API::Object* messageBody)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_client.didReceiveMessage(this, messageName, messageBody);
 }
 
 void InjectedBundle::didReceiveMessageToPage(WebPage* page, const String& messageName, API::Object* messageBody)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_client.didReceiveMessageToPage(this, page, messageName, messageBody);
 }
 
 void InjectedBundle::setUserStyleSheetLocation(WebPageGroupProxy* pageGroup, const String& location)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     const HashSet<Page*>& pages = PageGroup::pageGroup(pageGroup->identifier())->pages();
     for (HashSet<Page*>::iterator iter = pages.begin(); iter != pages.end(); ++iter)
         (*iter)->settings().setUserStyleSheetLocation(URL(URL(), location));
 }
 
 void InjectedBundle::setWebNotificationPermission(WebPage* page, const String& originString, bool allowed)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
     page->notificationPermissionRequestManager()->setPermissionLevelForTesting(originString, allowed);
 #else
@@ -533,7 +533,7 @@ void InjectedBundle::setWebNotificationPermission(WebPage* page, const String& o
 }
 
 void InjectedBundle::removeAllWebNotificationPermissions(WebPage* page)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
     page->notificationPermissionRequestManager()->removeAllPermissionsForTesting();
 #else
@@ -542,7 +542,7 @@ void InjectedBundle::removeAllWebNotificationPermissions(WebPage* page)
 }
 
 uint64_t InjectedBundle::webNotificationID(JSContextRef jsContext, JSValueRef jsNotification)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
     WebCore::Notification* notification = JSNotification::toWrapped(toJS(toJS(jsContext), jsNotification));
     if (!notification)
@@ -557,19 +557,19 @@ uint64_t InjectedBundle::webNotificationID(JSContextRef jsContext, JSValueRef js
 
 // FIXME Get rid of this function and move it into WKBundle.cpp.
 PassRefPtr<API::Data> InjectedBundle::createWebDataFromUint8Array(JSContextRef context, JSValueRef data)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     JSC::ExecState* execState = toJS(context);
     RefPtr<Uint8Array> arrayData = WebCore::toUint8Array(toJS(execState, data));
     return API::Data::create(static_cast<unsigned char*>(arrayData->baseAddress()), arrayData->byteLength());
 }
 
 void InjectedBundle::setTabKeyCyclesThroughElements(WebPage* page, bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
     page->corePage()->setTabKeyCyclesThroughElements(enabled);
 }
 
 void InjectedBundle::setCSSAnimationTriggersEnabled(bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(CSS_ANIMATIONS_LEVEL_2)
     RuntimeEnabledFeatures::sharedFeatures().setAnimationTriggersEnabled(enabled);
 #else
@@ -578,7 +578,7 @@ void InjectedBundle::setCSSAnimationTriggersEnabled(bool enabled)
 }
 
 void InjectedBundle::setWebAnimationsEnabled(bool enabled)
-{    WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{       AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if ENABLE(WEB_ANIMATIONS)
     RuntimeEnabledFeatures::sharedFeatures().setWebAnimationsEnabled(enabled);
 #else

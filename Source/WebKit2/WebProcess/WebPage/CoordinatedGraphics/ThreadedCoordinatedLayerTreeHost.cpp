@@ -49,12 +49,12 @@ using namespace WebCore;
 namespace WebKit {
 
 Ref<ThreadedCoordinatedLayerTreeHost> ThreadedCoordinatedLayerTreeHost::create(WebPage& webPage)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return adoptRef(*new ThreadedCoordinatedLayerTreeHost(webPage));
 }
 
 ThreadedCoordinatedLayerTreeHost::~ThreadedCoordinatedLayerTreeHost()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 ThreadedCoordinatedLayerTreeHost::ThreadedCoordinatedLayerTreeHost(WebPage& webPage)
@@ -66,7 +66,7 @@ ThreadedCoordinatedLayerTreeHost::ThreadedCoordinatedLayerTreeHost(WebPage& webP
 #else
     , m_compositor(ThreadedCompositor::create(&m_compositorClient, webPage))
 #endif
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if USE(REDIRECTED_XCOMPOSITE_WINDOW)
     if (m_redirectedWindow)
         m_layerTreeContext.contextID = m_redirectedWindow->pixmap();
@@ -74,7 +74,7 @@ ThreadedCoordinatedLayerTreeHost::ThreadedCoordinatedLayerTreeHost(WebPage& webP
 }
 
 void ThreadedCoordinatedLayerTreeHost::invalidate()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_compositor->invalidate();
     CoordinatedLayerTreeHost::invalidate();
 #if USE(REDIRECTED_XCOMPOSITE_WINDOW)
@@ -83,24 +83,24 @@ void ThreadedCoordinatedLayerTreeHost::invalidate()
 }
 
 void ThreadedCoordinatedLayerTreeHost::forceRepaint()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     CoordinatedLayerTreeHost::forceRepaint();
     m_compositor->forceRepaint();
 }
 
 void ThreadedCoordinatedLayerTreeHost::scrollNonCompositedContents(const WebCore::IntRect& rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_compositor->scrollTo(rect.location());
     scheduleLayerFlush();
 }
 
 void ThreadedCoordinatedLayerTreeHost::contentsSizeChanged(const WebCore::IntSize& newSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_compositor->didChangeContentsSize(newSize);
 }
 
 void ThreadedCoordinatedLayerTreeHost::deviceOrPageScaleFactorChanged()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if USE(REDIRECTED_XCOMPOSITE_WINDOW)
     if (m_redirectedWindow) {
         m_redirectedWindow->resize(m_webPage.size());
@@ -113,13 +113,13 @@ void ThreadedCoordinatedLayerTreeHost::deviceOrPageScaleFactorChanged()
 }
 
 void ThreadedCoordinatedLayerTreeHost::pageBackgroundTransparencyChanged()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     CoordinatedLayerTreeHost::pageBackgroundTransparencyChanged();
     m_compositor->setDrawsBackground(m_webPage.drawsBackground());
 }
 
 void ThreadedCoordinatedLayerTreeHost::sizeDidChange(const IntSize& size)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 #if USE(REDIRECTED_XCOMPOSITE_WINDOW)
     if (m_redirectedWindow) {
         m_redirectedWindow->resize(size);
@@ -131,18 +131,18 @@ void ThreadedCoordinatedLayerTreeHost::sizeDidChange(const IntSize& size)
 }
 
 void ThreadedCoordinatedLayerTreeHost::didChangeViewportProperties(const WebCore::ViewportAttributes& attr)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_compositor->didChangeViewportAttribute(attr);
 }
 
 void ThreadedCoordinatedLayerTreeHost::didScaleFactorChanged(float scale, const IntPoint& origin)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_webPage.scalePage(scale, origin);
 }
 
 #if PLATFORM(GTK) && !USE(REDIRECTED_XCOMPOSITE_WINDOW)
 void ThreadedCoordinatedLayerTreeHost::setNativeSurfaceHandleForCompositing(uint64_t handle)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_layerTreeContext.contextID = handle;
     m_compositor->setNativeSurfaceHandleForCompositing(handle);
     scheduleLayerFlush();
@@ -150,7 +150,7 @@ void ThreadedCoordinatedLayerTreeHost::setNativeSurfaceHandleForCompositing(uint
 #endif
 
 void ThreadedCoordinatedLayerTreeHost::setVisibleContentsRect(const FloatRect& rect, const FloatPoint& trajectoryVector, float scale)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     CoordinatedLayerTreeHost::setVisibleContentsRect(rect, trajectoryVector);
     if (m_lastScrollPosition != roundedIntPoint(rect.location())) {
         m_lastScrollPosition = roundedIntPoint(rect.location());
@@ -166,14 +166,14 @@ void ThreadedCoordinatedLayerTreeHost::setVisibleContentsRect(const FloatRect& r
 }
 
 void ThreadedCoordinatedLayerTreeHost::commitSceneState(const CoordinatedGraphicsState& state)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     CoordinatedLayerTreeHost::commitSceneState(state);
     m_compositor->updateSceneState(state);
 }
 
 #if USE(REQUEST_ANIMATION_FRAME_DISPLAY_MONITOR)
 RefPtr<WebCore::DisplayRefreshMonitor> ThreadedCoordinatedLayerTreeHost::createDisplayRefreshMonitor(PlatformDisplayID displayID)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_compositor->createDisplayRefreshMonitor(displayID);
 }
 #endif

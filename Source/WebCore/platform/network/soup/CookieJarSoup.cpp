@@ -40,18 +40,18 @@
 namespace WebCore {
 
 static SoupCookieJar* cookieJarForSession(const NetworkStorageSession& session)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return session.soupNetworkSession().cookieJar();
 }
 
 static GRefPtr<SoupCookieJar>& defaultCookieJar()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     DEPRECATED_DEFINE_STATIC_LOCAL(GRefPtr<SoupCookieJar>, cookieJar, ());
     return cookieJar;
 }
 
 SoupCookieJar* soupCookieJar()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (GRefPtr<SoupCookieJar>& jar = defaultCookieJar())
         return jar.get();
 
@@ -62,7 +62,7 @@ SoupCookieJar* soupCookieJar()
 }
 
 SoupCookieJar* createPrivateBrowsingCookieJar()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SoupCookieJar* jar = soup_cookie_jar_new();
 
     soup_cookie_jar_set_accept_policy(jar, SOUP_COOKIE_JAR_ACCEPT_NO_THIRD_PARTY);
@@ -71,12 +71,12 @@ SoupCookieJar* createPrivateBrowsingCookieJar()
 }
 
 void setSoupCookieJar(SoupCookieJar* jar)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     defaultCookieJar() = jar;
 }
 
 static Cookie toWebCoreCookie(const SoupCookie* cookie)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return Cookie(String::fromUTF8(cookie->name),
                   String::fromUTF8(cookie->value),
                   String::fromUTF8(cookie->domain),
@@ -88,7 +88,7 @@ static Cookie toWebCoreCookie(const SoupCookie* cookie)
 }
 
 static inline bool httpOnlyCookieExists(const GSList* cookies, const gchar* name, const gchar* path)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const GSList* iter = cookies; iter; iter = g_slist_next(iter)) {
         SoupCookie* cookie = static_cast<SoupCookie*>(iter->data);
         if (!strcmp(soup_cookie_get_name(cookie), name)
@@ -102,7 +102,7 @@ static inline bool httpOnlyCookieExists(const GSList* cookies, const gchar* name
 }
 
 void setCookiesFromDOM(const NetworkStorageSession& session, const URL& firstParty, const URL& url, const String& value)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SoupCookieJar* jar = cookieJarForSession(session);
     if (!jar)
         return;
@@ -136,7 +136,7 @@ void setCookiesFromDOM(const NetworkStorageSession& session, const URL& firstPar
 }
 
 static String cookiesForSession(const NetworkStorageSession& session, const URL& url, bool forHTTPHeader)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SoupCookieJar* jar = cookieJarForSession(session);
     if (!jar)
         return String();
@@ -147,22 +147,22 @@ static String cookiesForSession(const NetworkStorageSession& session, const URL&
 }
 
 String cookiesForDOM(const NetworkStorageSession& session, const URL&, const URL& url)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return cookiesForSession(session, url, false);
 }
 
 String cookieRequestHeaderFieldValue(const NetworkStorageSession& session, const URL& /*firstParty*/, const URL& url)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return cookiesForSession(session, url, true);
 }
 
 bool cookiesEnabled(const NetworkStorageSession& session, const URL& /*firstParty*/, const URL& /*url*/)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return !!cookieJarForSession(session);
 }
 
 bool getRawCookies(const NetworkStorageSession& session, const URL& /*firstParty*/, const URL& url, Vector<Cookie>& rawCookies)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     rawCookies.clear();
     SoupCookieJar* jar = cookieJarForSession(session);
     if (!jar)
@@ -183,7 +183,7 @@ bool getRawCookies(const NetworkStorageSession& session, const URL& /*firstParty
 }
 
 void deleteCookie(const NetworkStorageSession& session, const URL& url, const String& name)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SoupCookieJar* jar = cookieJarForSession(session);
     if (!jar)
         return;
@@ -206,7 +206,7 @@ void deleteCookie(const NetworkStorageSession& session, const URL& url, const St
 }
 
 static SoupDate* msToSoupDate(double ms)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     int year = msToYear(ms);
     int dayOfYear = dayInYear(ms, year);
     bool leapYear = isLeapYear(year);
@@ -214,7 +214,7 @@ static SoupDate* msToSoupDate(double ms)
 }
 
 static SoupCookie* toSoupCookie(const Cookie& cookie)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SoupCookie* soupCookie = soup_cookie_new(cookie.name.utf8().data(), cookie.value.utf8().data(),
         cookie.domain.utf8().data(), cookie.path.utf8().data(), -1);
     soup_cookie_set_http_only(soupCookie, cookie.httpOnly);
@@ -228,12 +228,12 @@ static SoupCookie* toSoupCookie(const Cookie& cookie)
 }
 
 void addCookie(const NetworkStorageSession& session, const URL&, const Cookie& cookie)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     soup_cookie_jar_add_cookie(cookieJarForSession(session), toSoupCookie(cookie));
 }
 
 void getHostnamesWithCookies(const NetworkStorageSession& session, HashSet<String>& hostnames)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SoupCookieJar* cookieJar = cookieJarForSession(session);
     GUniquePtr<GSList> cookies(soup_cookie_jar_all_cookies(cookieJar));
     for (GSList* item = cookies.get(); item; item = g_slist_next(item)) {
@@ -245,7 +245,7 @@ void getHostnamesWithCookies(const NetworkStorageSession& session, HashSet<Strin
 }
 
 void deleteCookiesForHostnames(const NetworkStorageSession& session, const Vector<String>& hostnames)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     for (const auto& hostname : hostnames) {
         CString hostNameString = hostname.utf8();
         SoupCookieJar* cookieJar = cookieJarForSession(session);
@@ -260,7 +260,7 @@ void deleteCookiesForHostnames(const NetworkStorageSession& session, const Vecto
 }
 
 void deleteAllCookies(const NetworkStorageSession& session)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SoupCookieJar* cookieJar = cookieJarForSession(session);
     GUniquePtr<GSList> cookies(soup_cookie_jar_all_cookies(cookieJar));
     for (GSList* item = cookies.get(); item; item = g_slist_next(item)) {
@@ -271,11 +271,11 @@ void deleteAllCookies(const NetworkStorageSession& session)
 }
 
 void deleteAllCookiesModifiedSince(const NetworkStorageSession&, std::chrono::system_clock::time_point)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 void setCookies(const NetworkStorageSession& session, const Vector<Cookie>& cookies)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SoupCookieJar* jar = cookieJarForSession(session);
 
     // in order to preserve cookie change callback existing cookies are deleted
@@ -302,7 +302,7 @@ void setCookies(const NetworkStorageSession& session, const Vector<Cookie>& cook
 }
 
 bool getCookies(const NetworkStorageSession& session, Vector<Cookie>& returnCookies)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     SoupCookieJar* jar = cookieJarForSession(session);
     if (!jar)
         return false;

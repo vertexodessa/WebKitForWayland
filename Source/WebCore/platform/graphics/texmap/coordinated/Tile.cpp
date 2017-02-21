@@ -44,22 +44,22 @@ Tile::Tile(TiledBackingStore& tiledBackingStore, const Coordinate& tileCoordinat
     , m_rect(tiledBackingStore.tileRectForCoordinate(tileCoordinate))
     , m_ID(InvalidTileID)
     , m_dirtyRect(m_rect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
 }
 
 Tile::~Tile()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (m_ID != InvalidTileID)
         m_tiledBackingStore.client()->removeTile(m_ID);
 }
 
 bool Tile::isDirty() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return !m_dirtyRect.isEmpty();
 }
 
 void Tile::invalidate(const IntRect& dirtyRect)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     IntRect tileDirtyRect = intersection(dirtyRect, m_rect);
     if (tileDirtyRect.isEmpty())
         return;
@@ -68,7 +68,7 @@ void Tile::invalidate(const IntRect& dirtyRect)
 }
 
 bool Tile::updateBackBuffer()
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     if (!isDirty())
         return false;
 
@@ -96,19 +96,19 @@ bool Tile::updateBackBuffer()
 }
 
 void Tile::paintToSurfaceContext(GraphicsContext& context)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     context.translate(-m_dirtyRect.x(), -m_dirtyRect.y());
     context.scale(FloatSize(m_tiledBackingStore.contentsScale(), m_tiledBackingStore.contentsScale()));
     m_tiledBackingStore.client()->tiledBackingStorePaint(context, m_tiledBackingStore.mapToContents(m_dirtyRect));
 }
 
 bool Tile::isReadyToPaint() const
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     return m_ID != InvalidTileID;
 }
 
 void Tile::resize(const IntSize& newSize)
-{  WTF_AUTO_SCOPE0(__PRETTY_FUNCTION__);
+{     AUTO_EASY_THREAD(); EASY_FUNCTION();
     m_rect = IntRect(m_rect.location(), newSize);
     m_dirtyRect = m_rect;
 }
