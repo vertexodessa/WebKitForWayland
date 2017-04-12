@@ -574,6 +574,7 @@ void MediaPlayerPrivateGStreamerMSE::updateStates()
             break;
         }
 
+        bool buffering = !isTimeBuffered(currentMediaTime());
         // Sync states where needed.
         if (state == GST_STATE_PAUSED) {
             if (!m_volumeAndMuteInitialized) {
@@ -582,14 +583,14 @@ void MediaPlayerPrivateGStreamerMSE::updateStates()
                 m_volumeAndMuteInitialized = true;
             }
 
-            if (!seeking() && !m_buffering && !m_paused && m_playbackRate) {
+            if (!seeking() && !buffering && !m_paused && m_playbackRate) {
                 GST_DEBUG("[Buffering] Restarting playback.");
                 changePipelineState(GST_STATE_PLAYING);
             }
         } else if (state == GST_STATE_PLAYING) {
             m_paused = false;
 
-            if ((m_buffering && !isLiveStream()) || !m_playbackRate) {
+            if ((buffering && !isLiveStream()) || !m_playbackRate) {
                 GST_DEBUG("[Buffering] Pausing stream for buffering.");
                 changePipelineState(GST_STATE_PAUSED);
             }
