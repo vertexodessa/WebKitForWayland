@@ -20,6 +20,19 @@ set(WPELauncher_LIBRARIES
     ${GLIB_LIBRARIES}
 )
 
+if (ENABLE_HANGDETECTOR)
+    if (HANGDETECTOR_FOUND)
+        list(APPEND WPELauncher_INCLUDE_DIRECTORIES
+            ${HANGDETECTOR_INCLUDE_DIRS}
+        )
+
+        list(APPEND WPELauncher_LIBRARIES
+            ${HANGDETECTOR_LIBRARIES}
+        )
+    endif()
+endif ()
+
+
 include_directories(SYSTEM ${WPELauncher_SYSTEM_INCLUDE_DIRECTORIES})
 add_executable(WPELauncher ${WPELauncher_SOURCES})
 target_include_directories(WPELauncher PUBLIC ${WPELauncher_INCLUDE_DIRECTORIES})

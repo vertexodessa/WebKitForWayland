@@ -30,6 +30,11 @@
 #include "WebKit2Initialize.h"
 #include <wtf/RunLoop.h>
 
+#if defined(USE_HANGDETECTOR)
+#include <hang_detector_glib.h>
+#include <hang_detector_utils.h>
+#endif
+
 namespace WebKit {
 
 class ChildProcessMainBase {
@@ -58,6 +63,10 @@ int ChildProcessMain(int argc, char** argv)
         return EXIT_FAILURE;
 
     ChildProcessType::singleton().initialize(childMain.initializationParameters());
+#if defined(USE_HANGDETECTOR)
+    HangDetector::DetectorGlib hd;
+    HangDetector::initFromEnvironment(hd, "WPE");
+#endif
     RunLoop::run();
     childMain.platformFinalize();
 

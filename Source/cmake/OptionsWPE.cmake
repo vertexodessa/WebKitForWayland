@@ -173,6 +173,13 @@ if (ENABLE_BREAKPAD)
     add_definitions(-DUSE_BREAKPAD=1)
 endif ()
 
+if (ENABLE_HANGDETECTOR)
+  find_package(HangDetector QUIET MODULE)
+  if (HANGDETECTOR_FOUND)
+    add_definitions(-DUSE_HANGDETECTOR=1)
+  endif()
+endif ()
+
 add_definitions(-DBUILDING_WPE__=1)
 add_definitions(-DDATA_DIR="${CMAKE_INSTALL_DATADIR}")
 

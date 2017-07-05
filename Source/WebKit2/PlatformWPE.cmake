@@ -301,6 +301,26 @@ if (ENABLE_BREAKPAD)
     )
 endif ()
 
+if (ENABLE_HANGDETECTOR)
+    if (HANGDETECTOR_FOUND)
+        list(APPEND WebProcess_INCLUDE_DIRECTORIES
+            ${HANGDETECTOR_INCLUDE_DIRS}
+        )
+
+        list(APPEND WebProcess_LIBRARIES
+            ${HANGDETECTOR_LIBRARIES}
+        )
+
+        list(APPEND NetworkProcess_INCLUDE_DIRECTORIES
+            ${HANGDETECTOR_INCLUDE_DIRS}
+        )
+
+        list(APPEND NetworkProcess_LIBRARIES
+            ${HANGDETECTOR_LIBRARIES}
+        )
+    endif()
+endif ()
+
 set(InspectorFiles
     ${CMAKE_SOURCE_DIR}/Source/WebInspectorUI/Localizations/en.lproj/localizedStrings.js
     ${CMAKE_SOURCE_DIR}/Source/WebInspectorUI/UserInterface/*.html
