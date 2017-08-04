@@ -873,6 +873,9 @@ void Connection::didFailToSendSyncMessage()
     if (!m_shouldExitOnSyncMessageSendFailure)
         return;
 
+    invalidate();
+    m_client.didClose(*this);
+
     exit(0);
 }
 

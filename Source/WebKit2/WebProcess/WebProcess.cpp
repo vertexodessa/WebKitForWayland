@@ -656,7 +656,6 @@ void WebProcess::didReceiveMessage(IPC::Connection& connection, IPC::Decoder& de
 
 void WebProcess::didClose(IPC::Connection&)
 {
-#ifndef NDEBUG
     m_inDidClose = true;
 
     // Close all the live pages.
@@ -665,6 +664,8 @@ void WebProcess::didClose(IPC::Connection&)
     for (auto& page : pages)
         page->close();
     pages.clear();
+
+#ifndef NDEBUG
 
     GCController::singleton().garbageCollectSoon();
     FontCache::singleton().invalidate();
