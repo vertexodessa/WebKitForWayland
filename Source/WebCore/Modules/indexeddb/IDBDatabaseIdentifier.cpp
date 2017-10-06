@@ -30,10 +30,41 @@
 
 #include "FileSystem.h"
 #include "SecurityOrigin.h"
+#include <wtf/HashSet.h>
+#include <wtf/Lock.h>
+#include <wtf/MainThread.h>
 #include <wtf/Ref.h>
 #include <wtf/text/WTFString.h>
 
 namespace WebCore {
+
+namespace {
+    WTF::HashSet<IDBDatabaseIdentifier> s_deleteRequests;
+    WTF::Lock s_deleteRequestsLock;
+}
+
+bool IDBDatabaseDeleteRequestManager::isDeletePending(const IDBDatabaseIdentifier& id)
+{
+    ASSERT(isMainThread());
+    WTF::LockHolder locker(s_deleteRequestsLock);
+    return s_deleteRequests.contains(id);
+}
+
+void IDBDatabaseDeleteRequestManager::startDeletion(const IDBDatabaseIdentifier& id)
+{
+    ASSERT(isMainThread());
+    WTF::LockHolder locker(s_deleteRequestsLock);
+    bool newEntry = s_deleteRequests.add(id).isNewEntry;
+    ASSERT(newEntry);
+}
+
+void IDBDatabaseDeleteRequestManager::notifyDeletionFinished(const IDBDatabaseIdentifier& id)
+{
+    // ??? ASSERT(!isMainThread());
+    WTF::LockHolder locker(s_deleteRequestsLock);
+    bool removed = s_deleteRequests.remove(id);
+    ASSERT(removed);
+}
 
 IDBDatabaseIdentifier::IDBDatabaseIdentifier(const String& databaseName, SecurityOriginData&& openingOrigin, SecurityOriginData&& mainFrameOrigin)
     : m_databaseName(databaseName)

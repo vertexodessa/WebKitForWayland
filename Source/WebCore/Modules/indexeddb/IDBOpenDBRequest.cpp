@@ -174,6 +174,7 @@ void IDBOpenDBRequest::onDeleteDatabaseSuccess(const IDBResultData& resultData)
 
     m_readyState = ReadyState::Done;
     setResultToUndefined();
+    IDBDatabaseDeleteRequestManager::notifyDeletionFinished(m_databaseIdentifier);
 
     enqueueEvent(IDBVersionChangeEvent::create(oldVersion, 0, eventNames().successEvent));
 }

@@ -35,6 +35,17 @@ namespace WebCore {
 
 class SecurityOrigin;
 
+class IDBDatabaseIdentifier;
+
+class IDBDatabaseDeleteRequestManager {
+public:
+    static void startDeletion(const IDBDatabaseIdentifier& id);
+    static bool isDeletePending(const IDBDatabaseIdentifier& id);
+    static void notifyDeletionFinished(const IDBDatabaseIdentifier& id);
+private:
+    IDBDatabaseDeleteRequestManager() = default;
+};
+
 class IDBDatabaseIdentifier {
 public:
     IDBDatabaseIdentifier() { }
